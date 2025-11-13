@@ -7,10 +7,10 @@ A media player for Android based on [mpv-android](https://github.com/mpv-android
 
 ---
 ## Features
-* Nicer player UI
+* Nice player UI
 * Customize player control layout
 * Single tap play/pause (optional)
-* Better playback history implementation
+* Playback history
 * Frame by frame navigation
 * Easier customization
 * Sleep timer, Speed presets

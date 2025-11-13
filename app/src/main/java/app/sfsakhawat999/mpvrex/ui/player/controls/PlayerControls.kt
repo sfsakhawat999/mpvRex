@@ -1,5 +1,6 @@
 package app.sfsakhawat999.mpvrex.ui.player.controls
 
+import android.content.res.Configuration
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -24,9 +25,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -72,6 +78,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -235,13 +242,16 @@ fun PlayerControls(
             .fillMaxSize()
             .background(
               Brush.verticalGradient(
-                Pair(0f, Color.Black),
+                Pair(0f, Color.Black.copy(alpha = 0.5f)),
                 Pair(.2f, Color.Transparent),
                 Pair(.7f, Color.Transparent),
-                Pair(1f, Color.Black),
+                Pair(1f, Color.Black.copy(alpha = 0.5f)),
               ),
               alpha = transparentOverlay,
-            ).padding(horizontal = MaterialTheme.spacing.medium),
+            ).padding(horizontal = MaterialTheme.spacing.medium)
+            .windowInsetsPadding(
+              WindowInsets.safeDrawing
+            ),
       ) {
         val (topLeftControls, topRightControls) = createRefs()
         val (volumeSlider, brightnessSlider) = createRefs()
@@ -700,6 +710,8 @@ fun PlayerControls(
             }
           }
         }
+
+        val topBarrier = createTopBarrier(bottomLeftControls, bottomRightControls)
         AnimatedVisibility(
           visible = (controlsShown || seekBarShown) && !areControlsLocked,
           enter =
@@ -718,7 +730,7 @@ fun PlayerControls(
             },
           modifier =
             Modifier.constrainAs(seekbar) {
-              bottom.linkTo(bottomLeftControls.top)
+              bottom.linkTo(topBarrier)
             },
         ) {
           val invertDuration by playerPreferences.invertDuration.collectAsState()
@@ -743,6 +755,7 @@ fun PlayerControls(
         val mediaTitle by MPVLib.propString["media-title"].collectAsState()
 
         // --- TOP LEFT CONTROLS (DYNAMIC) ---
+        val configuration = LocalConfiguration.current
         AnimatedVisibility(
           visible = controlsShown && !areControlsLocked,
           enter =
@@ -764,7 +777,7 @@ fun PlayerControls(
               top.linkTo(parent.top, spacing.medium)
               start.linkTo(parent.start)
               width = Dimension.fillToConstraints
-              end.linkTo(topRightControls.start, spacing.medium)
+              end.linkTo(if(configuration.orientation != Configuration.ORIENTATION_LANDSCAPE && (topLeftButtons.contains(PlayerButton.VIDEO_TITLE) || topRightButtons.contains(PlayerButton.VIDEO_TITLE))) parent.end else topRightControls.start, spacing.medium)
             },
         ) {
           Row(
@@ -985,7 +998,7 @@ fun PlayerControls(
             },
           modifier =
             Modifier.constrainAs(topRightControls) {
-              top.linkTo(parent.top, spacing.medium)
+              top.linkTo(if(configuration.orientation != Configuration.ORIENTATION_LANDSCAPE && (topLeftButtons.contains(PlayerButton.VIDEO_TITLE) || topRightButtons.contains(PlayerButton.VIDEO_TITLE))) topLeftControls.bottom else parent.top, spacing.medium)
               end.linkTo(parent.end)
             },
         ) {
@@ -1187,6 +1200,7 @@ fun PlayerControls(
             }
           }
         }
+
         // Bottom right controls - DYNAMIC
         AnimatedVisibility(
           visible = controlsShown && !areControlsLocked,
@@ -1405,6 +1419,7 @@ fun PlayerControls(
             }
           }
         }
+
         // Bottom left controls - DYNAMIC
         AnimatedVisibility(
           visible = controlsShown && !areControlsLocked,
@@ -1424,10 +1439,10 @@ fun PlayerControls(
             },
           modifier =
             Modifier.constrainAs(bottomLeftControls) {
-              bottom.linkTo(parent.bottom, spacing.medium)
+              bottom.linkTo(if(configuration.orientation != Configuration.ORIENTATION_LANDSCAPE && (bottomLeftButtons.contains(PlayerButton.VIDEO_TITLE) || bottomRightButtons.contains(PlayerButton.VIDEO_TITLE))) bottomRightControls.top else parent.bottom, spacing.medium)
               start.linkTo(parent.start)
               width = Dimension.fillToConstraints
-              end.linkTo(bottomRightControls.start)
+              end.linkTo(if(configuration.orientation != Configuration.ORIENTATION_LANDSCAPE && (bottomLeftButtons.contains(PlayerButton.VIDEO_TITLE) || bottomRightButtons.contains(PlayerButton.VIDEO_TITLE))) parent.end else bottomRightControls.start)
             },
         ) {
           Row(

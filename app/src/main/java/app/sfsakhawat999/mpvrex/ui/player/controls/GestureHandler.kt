@@ -119,7 +119,7 @@ fun GestureHandler(
                 return@detectTapGestures
               }
 
-              if (it.x > size.width * 1 / 4 && it.x < size.width * 3 / 4 && useSingleTapForCenter) {
+              if (it.x > size.width * 1 / 3 && it.x < size.width * 2 / 3 && useSingleTapForCenter) {
                 viewModel.handleCenterSingleTap()
               } else {
                 if (controlsShown) viewModel.hideControls() else viewModel.showControls()
@@ -128,11 +128,11 @@ fun GestureHandler(
             onDoubleTap = {
               tapHandledInPress = false
               if (areControlsLocked || isDoubleTapSeeking) return@detectTapGestures
-              if (it.x > size.width * 3 / 4) {
+              if (it.x > size.width * 2 / 3) {
                 if (!isSeekingForwards) viewModel.updateSeekAmount(0)
                 viewModel.handleRightDoubleTap()
                 isDoubleTapSeeking = true
-              } else if (it.x < size.width * 1 / 4) {
+              } else if (it.x < size.width * 1 / 3) {
                 if (isSeekingForwards) viewModel.updateSeekAmount(0)
                 viewModel.handleLeftDoubleTap()
                 isDoubleTapSeeking = true
@@ -151,10 +151,10 @@ fun GestureHandler(
                 viewModel.panelShown.update { Panels.None }
               }
               if (!areControlsLocked && isDoubleTapSeeking && seekAmount != 0) {
-                if (it.x > size.width * 3 / 4) {
+                if (it.x > size.width * 2 / 3) {
                   if (!isSeekingForwards) viewModel.updateSeekAmount(0)
                   viewModel.handleRightDoubleTap()
-                } else if (it.x < size.width * 1 / 4) {
+                } else if (it.x < size.width * 1 / 3) {
                   if (isSeekingForwards) viewModel.updateSeekAmount(0)
                   viewModel.handleLeftDoubleTap()
                 } else {
@@ -165,14 +165,14 @@ fun GestureHandler(
               }
               val press =
                 PressInteraction.Press(
-                  it.copy(x = if (it.x > size.width * 3 / 4) it.x - size.width * 0.6f else it.x),
+                  it.copy(x = if (it.x > size.width * 2 / 3) it.x - size.width * 0.6f else it.x),
                 )
               interactionSource.emit(press)
 
               val released = tryAwaitRelease()
 
               if (released && !isLongPress) {
-                if (it.x > size.width * 1 / 4 && it.x < size.width * 3 / 4 && useSingleTapForCenter) {
+                if (it.x > size.width * 1 / 3 && it.x < size.width * 2 / 3 && useSingleTapForCenter) {
                   viewModel.handleCenterSingleTap()
                   tapHandledInPress = true
                 }

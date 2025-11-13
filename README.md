@@ -3,7 +3,7 @@
 
 ---
 
-A media player for Android based on [mpv-android](https://github.com/mpv-android/mpv-android) and [mpvEx](https://github.com/marlboro-advance/mpvEx/) aiming to provide a **nicer** user interface and additional features over the original
+A media player for Android based on [mpv-android](https://github.com/mpv-android/mpv-android) and [mpvEx](https://github.com/marlboro-advance/mpvEx/) aiming to provide additional features over the original
 
 ---
 ## Features

@@ -3,7 +3,7 @@
 
 ---
 
-A media player for Android based on [mpv-android](https://github.com/mpv-android/mpv-android) and [mpvKt](https://github.com/abdallahmehiz/mpvKt) aiming to provide a **nicer** user interface and additional features over the original
+A media player for Android based on [mpv-android](https://github.com/mpv-android/mpv-android) and [mpvEx](https://github.com/marlboro-advance/mpvEx/) aiming to provide a **nicer** user interface and additional features over the original
 
 ---
 ## Features
@@ -25,9 +25,9 @@ A media player for Android based on [mpv-android](https://github.com/mpv-android
 ## Installation
 
 ### Stable Release
-Download the latest stable version from the [GitHub releases page](https://github.com/sfsakhawat999/mpvRex/releases).
+Download the latest stable version from the [GitHub releases page](https://github.com/sfsfsakhawat999/mpvRex/releases).
 
-[![Download Release](https://img.shields.io/badge/Download-Release-blue?style=for-the-badge)](https://github.com/sakhawat999/mpvRex/releases)
+[![Download Release](https://img.shields.io/badge/Download-Release-blue?style=for-the-badge)](https://github.com/sfsakhawat999/mpvRex/releases)
 
 
 ---

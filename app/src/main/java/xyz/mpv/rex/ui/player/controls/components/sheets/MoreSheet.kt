@@ -43,6 +43,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -56,9 +57,15 @@ import xyz.mpv.rex.preferences.preference.collectAsState
 import xyz.mpv.rex.presentation.components.PlayerSheet
 import xyz.mpv.rex.ui.theme.spacing
 import `is`.xyz.mpv.MPVLib
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import me.zhanghai.compose.preference.PreferenceCategory
 import org.koin.compose.koinInject
+import xyz.mpv.rex.preferences.AppearancePreferences
+import xyz.mpv.rex.preferences.MultiChoiceSegmentedButton
+import xyz.mpv.rex.ui.theme.DarkMode
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -74,6 +81,9 @@ fun MoreSheet(
   koinInject<PlayerPreferences>()
   val statisticsPage by advancedPreferences.enabledStatisticsPage.collectAsState()
   val scope = rememberCoroutineScope()
+
+  val appearancePreferences = koinInject<AppearancePreferences>()
+  val context = LocalContext.current
 
   PlayerSheet(
     onDismissRequest,
@@ -195,6 +205,12 @@ fun MoreSheet(
           )
         }
       }
+      val darkMode by appearancePreferences.darkMode.collectAsState()
+      MultiChoiceSegmentedButton(
+        choices = DarkMode.entries.map { context.getString(it.titleRes) }.toImmutableList(),
+        selectedIndices = persistentListOf(DarkMode.entries.indexOf(darkMode)),
+        onClick = { appearancePreferences.darkMode.set(DarkMode.entries[it]) },
+      )
     }
   }
 }

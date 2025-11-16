@@ -72,6 +72,13 @@ object GesturePreferencesScreen : Screen {
           PreferenceCategory(
             title = { Text(text = stringResource(R.string.pref_gesture_double_tap_title)) },
           )
+          val unlimitedNameLines by preferences.preciseSeeking.collectAsState()
+          SwitchPreference(
+            value = unlimitedNameLines,
+            onValueChange = { preferences.preciseSeeking.set(it) },
+            title = { Text(text = stringResource(id = R.string.pref_gesture_precise_seeking_title)) },
+            summary = { Text(text = stringResource(id = R.string.pref_gesture_precise_seeking_summary)) },
+          )
           val doubleTapSeekDuration by preferences.doubleTapToSeekDuration.collectAsState()
           ListPreference(
             value = doubleTapSeekDuration,

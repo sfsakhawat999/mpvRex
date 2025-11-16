@@ -7,6 +7,7 @@ import app.sfsakhawat999.mpvrex.ui.player.SingleActionGesture
 class GesturePreferences(
   preferenceStore: PreferenceStore,
 ) {
+  val preciseSeeking = preferenceStore.getBoolean("precise_seeking", true)
   val doubleTapToSeekDuration = preferenceStore.getInt("double_tap_to_seek_duration", 10)
   val leftSingleActionGesture = preferenceStore.getEnum("left_double_tap_gesture", SingleActionGesture.Seek)
   val centerSingleActionGesture = preferenceStore.getEnum("center_drag_gesture", SingleActionGesture.PlayPause)

@@ -169,6 +169,7 @@ class PlayerViewModel(
   // Seek coalescing for smooth performance
   private var pendingSeekOffset: Int = 0
   private var seekCoalesceJob: Job? = null
+  private val preciseSeeking = gesturePreferences.preciseSeeking.get();
 
   private companion object {
     const val SEEK_COALESCE_DELAY_MS = 60L
@@ -410,7 +411,10 @@ class PlayerViewModel(
         val toApply = pendingSeekOffset
         pendingSeekOffset = 0
         if (toApply != 0) {
-          MPVLib.command("seek", toApply.toString(), "relative+exact")
+          if (preciseSeeking)
+            MPVLib.command("seek", toApply.toString(), "relative+exact")
+          else
+            MPVLib.command("seek", toApply.toString(), "relative")
         }
       }
   }

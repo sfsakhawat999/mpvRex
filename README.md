@@ -3,12 +3,14 @@
 
 ---
 
-A media player for Android based on [mpv-android](https://github.com/mpv-android/mpv-android) and [mpvKt](https://github.com/abdallahmehiz/mpvKt) aiming to provide a **nicer** user interface and additional features over the original
+A media player for Android based on [mpv-android](https://github.com/mpv-android/mpv-android) and [mpvEx](https://github.com/marlboro-advance/mpvEx/) aiming to provide additional features over the original
 
 ---
 ## Features
-* Nicer player UI
-* Better playback history implementation
+* Nice player UI
+* Customize player control layout
+* Single tap play/pause (optional)
+* Playback history
 * Frame by frame navigation
 * Easier customization
 * Sleep timer, Speed presets
@@ -23,14 +25,10 @@ A media player for Android based on [mpv-android](https://github.com/mpv-android
 ## Installation
 
 ### Stable Release
-Download the latest stable version from the [GitHub releases page](https://github.com/marlboro-advance/mpvEx/releases).
+Download the latest stable version from the [GitHub releases page](https://github.com/sfsfsakhawat999/mpvRex/releases).
 
-[![Download Release](https://img.shields.io/badge/Download-Release-blue?style=for-the-badge)](https://github.com/marlboro-advance/mpvEx/releases)
+[![Download Release](https://img.shields.io/badge/Download-Release-blue?style=for-the-badge)](https://github.com/sfsakhawat999/mpvRex/releases)
 
-### Preview Builds
-Try the latest preview builds:
-
-[![Download Preview Builds](https://img.shields.io/badge/Download-Preview%20Builds-green?style=for-the-badge)](https://marlboro-advance.github.io/mpvEx/)
 
 ---
 
@@ -42,4 +40,4 @@ Try the latest preview builds:
 
 ## Acknowledgments
 - [mpv-android](https://github.com/mpv-android) for the base mpv library to use for this project.
-- [mpvKt](https://github.com/abdallahmehiz/mpvKt) for the modified version of mpv-android.
+- [mpvEx](https://github.com/marlboro-advance/mpvEx/) for the most features

@@ -40,4 +40,4 @@ Download the latest stable version from the [GitHub releases page](https://githu
 
 ## Acknowledgments
 - [mpv-android](https://github.com/mpv-android) for the base mpv library to use for this project.
-- [mpvEx](https://github.com/marlboro-advance/mpvEx/) for the most features
+- [mpvEx](https://github.com/marlboro-advance/mpvEx/) for the base and most features

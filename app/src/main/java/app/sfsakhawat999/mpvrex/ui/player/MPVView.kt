@@ -109,10 +109,10 @@ class MPVView(
     // Improve seek responsiveness/smoothness on mobile
     MPVLib.setOptionString("hr-seek", "no")
     MPVLib.setOptionString("hr-seek-framedrop", "no")
-    MPVLib.setOptionString("demuxer-readahead-secs", "8")
+    MPVLib.setOptionString("demuxer-readahead-secs", "120")
     MPVLib.setOptionString("demuxer-seekable-cache", "yes")
     MPVLib.setOptionString("cache", "yes")
-    MPVLib.setOptionString("cache-secs", "8")
+    MPVLib.setOptionString("cache-secs", "120")
 
     setupSubtitlesOptions()
     setupAudioOptions()

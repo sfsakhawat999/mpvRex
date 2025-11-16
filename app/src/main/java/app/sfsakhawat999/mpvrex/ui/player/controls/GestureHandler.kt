@@ -119,7 +119,7 @@ fun GestureHandler(
                 return@detectTapGestures
               }
 
-              if (it.x > size.width * 1 / 3 && it.x < size.width * 2 / 3 && useSingleTapForCenter) {
+              if (!areControlsLocked && it.x > size.width * 1 / 3 && it.x < size.width * 2 / 3 && useSingleTapForCenter) {
                 viewModel.handleCenterSingleTap()
               } else {
                 if (controlsShown) viewModel.hideControls() else viewModel.showControls()
@@ -172,7 +172,7 @@ fun GestureHandler(
               val released = tryAwaitRelease()
 
               if (released && !isLongPress) {
-                if (it.x > size.width * 1 / 3 && it.x < size.width * 2 / 3 && useSingleTapForCenter) {
+                if (!areControlsLocked && it.x > size.width * 1 / 3 && it.x < size.width * 2 / 3 && useSingleTapForCenter) {
                   viewModel.handleCenterSingleTap()
                   tapHandledInPress = true
                 }

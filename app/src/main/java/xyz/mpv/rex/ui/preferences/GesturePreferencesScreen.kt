@@ -47,6 +47,7 @@ object GesturePreferencesScreen : Screen {
     val context = LocalContext.current
     val backstack = LocalBackStack.current
     val useSingleTapForCenter by preferences.useSingleTapForCenter.collectAsState()
+    val useSingleTapForLeftRight by preferences.useSingleTapForLeftRight.collectAsState()
     Scaffold(
       topBar = {
         TopAppBar(
@@ -95,7 +96,7 @@ object GesturePreferencesScreen : Screen {
             onValueChange = { preferences.leftSingleActionGesture.set(it) },
             values = SingleActionGesture.entries,
             valueToText = { AnnotatedString(context.getString(it.titleRes)) },
-            title = { Text(text = stringResource(R.string.pref_gesture_double_tap_left_title)) },
+            title = { Text(text = stringResource(if (useSingleTapForLeftRight) R.string.pref_gesture_single_tap_left_title else R.string.pref_gesture_double_tap_left_title)) },
             summary = { Text(text = stringResource(leftDoubleTap.titleRes)) },
           )
 
@@ -120,7 +121,7 @@ object GesturePreferencesScreen : Screen {
             onValueChange = { preferences.rightSingleActionGesture.set(it) },
             values = SingleActionGesture.entries,
             valueToText = { AnnotatedString(context.getString(it.titleRes)) },
-            title = { Text(text = stringResource(R.string.pref_gesture_double_tap_right_title)) },
+            title = { Text(text = stringResource(if (useSingleTapForLeftRight) R.string.pref_gesture_single_tap_right_title else R.string.pref_gesture_double_tap_right_title)) },
             summary = { Text(text = stringResource(rightDoubleTap.titleRes)) },
           )
 
@@ -136,6 +137,22 @@ object GesturePreferencesScreen : Screen {
             summary = {
               Text(
                 text = stringResource(id = R.string.pref_gesture_use_single_tap_for_center_summary),
+              )
+            },
+          )
+
+          val useSingleTapForLeftRight by preferences.useSingleTapForLeftRight.collectAsState()
+          SwitchPreference(
+            value = useSingleTapForLeftRight,
+            onValueChange = { preferences.useSingleTapForLeftRight.set(it) },
+            title = {
+              Text(
+                text = stringResource(id = R.string.pref_gesture_use_single_tap_for_left_right_title),
+              )
+            },
+            summary = {
+              Text(
+                text = stringResource(id = R.string.pref_gesture_use_single_tap_for_left_right_summary),
               )
             },
           )

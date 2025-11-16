@@ -216,6 +216,7 @@
     <string name="player_sheets_audio_delay_card_title">Audio delay</string>
     <string name="player_sheets_sub_delay_audio_sound_heard">Sound heard</string>
     <string name="player_sheets_sub_delay_sound_sound_spotted">Sound spotted</string>
+    <string name="player_sheets_frame_navigation_include_subtitles">Include subtitles in snapshot</string>
 
     <string name="player_sheets_video_settings_title">Video settings</string>
     <string name="player_sheets_deband_title">Deband</string>

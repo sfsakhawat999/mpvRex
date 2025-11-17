@@ -752,7 +752,15 @@ fun PlayerControls(
             paused = paused ?: false,
           )
         }
-        val mediaTitle by MPVLib.propString["media-title"].collectAsState()
+
+        val rawMediaTitle by MPVLib.propString["media-title"].collectAsState()
+        val mediaTitle by remember(rawMediaTitle, activity) {
+          derivedStateOf {
+            rawMediaTitle?.takeIf { it.isNotBlank() }
+              ?: activity.getTitleForControls()
+              ?: ""
+          }
+        }
 
         // --- TOP LEFT CONTROLS (DYNAMIC) ---
         val configuration = LocalConfiguration.current
@@ -1692,7 +1700,6 @@ fun PlayerControls(
     )
     val panel by viewModel.panelShown.collectAsState()
     PlayerPanels(
-      viewModel = viewModel,
       panelShown = panel,
       onDismissRequest = { onOpenPanel(Panels.None) },
     )

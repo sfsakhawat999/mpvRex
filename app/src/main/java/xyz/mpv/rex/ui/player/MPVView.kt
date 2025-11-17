@@ -90,9 +90,9 @@ class MPVView(
     MPVLib.setOptionString("tls-ca-file", "${context.filesDir.path}/cacert.pem")
 
     // Limit demuxer cache since the defaults are too high for mobile devices
-    val cacheMegs = 64
-    MPVLib.setOptionString("demuxer-max-bytes", "${cacheMegs * 1024 * 1024}")
-    MPVLib.setOptionString("demuxer-max-back-bytes", "${cacheMegs * 1024 * 1024}")
+//    val cacheMegs = 64
+//    MPVLib.setOptionString("demuxer-max-bytes", "${cacheMegs * 1024 * 1024}")
+//    MPVLib.setOptionString("demuxer-max-back-bytes", "${cacheMegs * 1024 * 1024}")
     //
     val screenshotDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
     screenshotDir.mkdirs()
@@ -106,13 +106,14 @@ class MPVView(
     // workaround for <https://github.com/mpv-player/mpv/issues/14651>
     MPVLib.setOptionString("vd-lavc-film-grain", "cpu")
 
+    val videoCacheSize = advancedPreferences.videoCacheSize.get()
     // Improve seek responsiveness/smoothness on mobile
     MPVLib.setOptionString("hr-seek", "no")
     MPVLib.setOptionString("hr-seek-framedrop", "no")
-    MPVLib.setOptionString("demuxer-readahead-secs", "120")
+    MPVLib.setOptionString("demuxer-readahead-secs", videoCacheSize.toString())
     MPVLib.setOptionString("demuxer-seekable-cache", "yes")
     MPVLib.setOptionString("cache", "yes")
-    MPVLib.setOptionString("cache-secs", "120")
+    MPVLib.setOptionString("cache-secs", videoCacheSize.toString())
 
     setupSubtitlesOptions()
     setupAudioOptions()

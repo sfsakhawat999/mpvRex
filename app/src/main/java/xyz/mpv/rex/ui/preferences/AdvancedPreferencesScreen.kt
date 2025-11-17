@@ -51,6 +51,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
@@ -384,6 +385,15 @@ object AdvancedPreferencesScreen : Screen {
                 }
               }
             },
+          )
+          val doubleTapSeekDuration by preferences.videoCacheSize.collectAsState()
+          ListPreference(
+            value = doubleTapSeekDuration,
+            onValueChange = preferences.videoCacheSize::set,
+            values = listOf(10, 30, 45, 60, 120, 180, 300, 420, 600),
+            valueToText = { AnnotatedString("${it}s") },
+            title = { Text(text = stringResource(id = R.string.pref_advanced_video_cache_size_title)) },
+            summary = { Text(text = "${doubleTapSeekDuration}s") },
           )
         }
       }

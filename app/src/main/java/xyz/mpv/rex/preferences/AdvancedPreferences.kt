@@ -13,4 +13,6 @@ class AdvancedPreferences(
   val verboseLogging = preferenceStore.getBoolean("verbose_logging", BuildConfig.BUILD_TYPE != "release")
 
   val enabledStatisticsPage = preferenceStore.getInt("enabled_stats_page", 0)
+
+  val videoCacheSize = preferenceStore.getInt("video_cache_size", 120)
 }

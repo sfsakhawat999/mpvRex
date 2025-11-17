@@ -680,6 +680,7 @@ class PlayerViewModel(
   fun handleLeftDoubleTap() {
     when (gesturePreferences.leftSingleActionGesture.get()) {
       SingleActionGesture.Seek -> leftSeek()
+      SingleActionGesture.SubSeek -> MPVLib.command("sub-seek", "-1")
       SingleActionGesture.PlayPause -> pauseUnpause()
       SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
       SingleActionGesture.None -> {}
@@ -689,6 +690,7 @@ class PlayerViewModel(
   fun handleLeftSingleTap() {
     when (gesturePreferences.leftSingleActionGesture.get()) {
       SingleActionGesture.Seek -> leftSeek()
+      SingleActionGesture.SubSeek -> MPVLib.command("sub-seek", "-1")
       SingleActionGesture.PlayPause -> pauseUnpause()
       SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
       SingleActionGesture.None -> {}
@@ -699,7 +701,7 @@ class PlayerViewModel(
     when (gesturePreferences.centerSingleActionGesture.get()) {
       SingleActionGesture.PlayPause -> pauseUnpause()
       SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
-      SingleActionGesture.Seek, SingleActionGesture.None -> {}
+      SingleActionGesture.Seek, SingleActionGesture.SubSeek, SingleActionGesture.None -> {}
     }
   }
 
@@ -707,13 +709,14 @@ class PlayerViewModel(
     when (gesturePreferences.centerSingleActionGesture.get()) {
       SingleActionGesture.PlayPause -> pauseUnpause()
       SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
-      SingleActionGesture.Seek, SingleActionGesture.None -> {}
+      SingleActionGesture.Seek, SingleActionGesture.SubSeek, SingleActionGesture.None -> {}
     }
   }
 
   fun handleRightDoubleTap() {
     when (gesturePreferences.rightSingleActionGesture.get()) {
       SingleActionGesture.Seek -> rightSeek()
+      SingleActionGesture.SubSeek -> MPVLib.command("sub-seek", "1")
       SingleActionGesture.PlayPause -> pauseUnpause()
       SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
       SingleActionGesture.None -> {}
@@ -723,6 +726,7 @@ class PlayerViewModel(
   fun handleRightSingleTap() {
     when (gesturePreferences.rightSingleActionGesture.get()) {
       SingleActionGesture.Seek -> rightSeek()
+      SingleActionGesture.SubSeek -> MPVLib.command("sub-seek", "1")
       SingleActionGesture.PlayPause -> pauseUnpause()
       SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
       SingleActionGesture.None -> {}

@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import `is`.xyz.mpv.MPVLib
 import xyz.mpv.rex.R
 import xyz.mpv.rex.preferences.SubtitlesPreferences
 import xyz.mpv.rex.preferences.preference.collectAsState
@@ -76,6 +77,7 @@ fun SubtitlesSheet(
         isExternal = track.external == true,
         onClick = { onSelect(track.id) },
         onRemove = { onRemoveSubtitle(track.id) },
+        id = track.id,
       )
     },
     modifier = modifier,
@@ -90,6 +92,7 @@ fun SubtitleTrackRow(
   onClick: () -> Unit,
   onRemove: () -> Unit,
   modifier: Modifier = Modifier,
+  id: Int = -1,
 ) {
   Row(
     modifier =
@@ -99,12 +102,13 @@ fun SubtitleTrackRow(
         .padding(horizontal = MaterialTheme.spacing.medium, vertical = MaterialTheme.spacing.extraSmall),
     verticalAlignment = Alignment.CenterVertically,
   ) {
+    val psid = MPVLib.getPropertyInt("sid")
     Checkbox(
       selected > -1,
       onCheckedChange = { _ -> onClick() },
     )
     Text(
-      title,
+      title + if (id == psid) " [primary]" else "",
       fontStyle = if (selected > -1) FontStyle.Italic else FontStyle.Normal,
       fontWeight = if (selected > -1) FontWeight.ExtraBold else FontWeight.Normal,
       modifier =

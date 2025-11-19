@@ -123,11 +123,11 @@ fun GestureHandler(
               val single_tap_area = (it.y > size.height * 1 / 4 && it.y < size.height * 3 / 4);
 
               if (!areControlsLocked && it.x < size.width * 1 / 3 && useSingleTapForLeftRight && single_tap_area) {
-                viewModel.handleLeftSingleTap()
+                viewModel.handleLeftDoubleTap()
               } else if (!areControlsLocked && it.x > size.width * 1 / 3 && it.x < size.width * 2 / 3 && useSingleTapForCenter && single_tap_area) {
-                viewModel.handleCenterSingleTap()
+                viewModel.handleCenterDoubleTap()
               } else if (!areControlsLocked && it.x > size.width * 2 / 3 && useSingleTapForLeftRight && single_tap_area) {
-                viewModel.handleRightSingleTap()
+                viewModel.handleRightDoubleTap()
               } else {
                 if (controlsShown) viewModel.hideControls() else viewModel.showControls()
               }
@@ -181,13 +181,13 @@ fun GestureHandler(
               if (released && !isLongPress) {
                 val single_tap_area = (it.y > size.height * 1 / 4 && it.y < size.height * 3 / 4);
                 if (!areControlsLocked && it.x < size.width * 1 / 3 && useSingleTapForLeftRight && single_tap_area) {
-                  viewModel.handleLeftSingleTap()
+                  viewModel.handleLeftDoubleTap()
                   tapHandledInPress = true
                 } else if (!areControlsLocked && it.x > size.width * 1 / 3 && it.x < size.width * 2 / 3 && useSingleTapForCenter && single_tap_area) {
-                  viewModel.handleCenterSingleTap()
+                  viewModel.handleCenterDoubleTap()
                   tapHandledInPress = true
                 } else if (!areControlsLocked && it.x > size.width * 2 / 3 && useSingleTapForLeftRight && single_tap_area) {
-                  viewModel.handleRightSingleTap()
+                  viewModel.handleRightDoubleTap()
                   tapHandledInPress = true
                 }/* else {
                   if (controlsShown) viewModel.hideControls() else viewModel.showControls()
@@ -440,7 +440,7 @@ fun DoubleTapToSeekOvals(
           modifier =
             Modifier
               .fillMaxHeight()
-              .fillMaxWidth(0.4f),
+              .fillMaxWidth(0.33f),
           // 2 fifths
           contentAlignment = Alignment.Center,
         ) {

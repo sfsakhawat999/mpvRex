@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.media.AudioManager
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.provider.OpenableColumns
 import android.provider.Settings
 import android.util.DisplayMetrics
@@ -473,6 +475,36 @@ class PlayerViewModel(
     if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
   }
 
+  fun leftSubSeek() {
+    if (MPVLib.getPropertyInt("sid") != null) {
+      val pos1 = MPVLib.getPropertyDouble("time-pos") ?: 0.0
+      MPVLib.command("sub-seek", "-1")
+
+      Handler(Looper.getMainLooper()).postDelayed({
+        val pos2 = MPVLib.getPropertyDouble("time-pos") ?: 0.0
+        val diff = pos2 - pos1
+        _isSeekingForwards.value = false
+        _doubleTapSeekAmount.value += diff.toInt()
+      }, 10) // Giving some time to exexute the command
+      if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+    } else leftSeek()
+  }
+
+  fun rightSubSeek() {
+    if (MPVLib.getPropertyInt("sid") != null) {
+      val pos1 = MPVLib.getPropertyDouble("time-pos") ?: 0.0
+      MPVLib.command("sub-seek", "1")
+
+      Handler(Looper.getMainLooper()).postDelayed({
+        val pos2 = MPVLib.getPropertyDouble("time-pos") ?: 0.0
+        val diff = pos2 - pos1
+        _isSeekingForwards.value = true
+        _doubleTapSeekAmount.value += diff.toInt()
+      }, 10) // Giving some time to execute the command
+      if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+    } else rightSeek()
+  }
+
   // ==================== Brightness & Volume ====================
 
   fun changeBrightnessTo(brightness: Float) {
@@ -680,17 +712,7 @@ class PlayerViewModel(
   fun handleLeftDoubleTap() {
     when (gesturePreferences.leftSingleActionGesture.get()) {
       SingleActionGesture.Seek -> leftSeek()
-      SingleActionGesture.SubSeek -> MPVLib.command("sub-seek", "-1")
-      SingleActionGesture.PlayPause -> pauseUnpause()
-      SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
-      SingleActionGesture.None -> {}
-    }
-  }
-
-  fun handleLeftSingleTap() {
-    when (gesturePreferences.leftSingleActionGesture.get()) {
-      SingleActionGesture.Seek -> leftSeek()
-      SingleActionGesture.SubSeek -> MPVLib.command("sub-seek", "-1")
+      SingleActionGesture.SubSeek -> leftSubSeek()
       SingleActionGesture.PlayPause -> pauseUnpause()
       SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
       SingleActionGesture.None -> {}
@@ -705,28 +727,10 @@ class PlayerViewModel(
     }
   }
 
-  fun handleCenterSingleTap() {
-    when (gesturePreferences.centerSingleActionGesture.get()) {
-      SingleActionGesture.PlayPause -> pauseUnpause()
-      SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
-      SingleActionGesture.Seek, SingleActionGesture.SubSeek, SingleActionGesture.None -> {}
-    }
-  }
-
   fun handleRightDoubleTap() {
     when (gesturePreferences.rightSingleActionGesture.get()) {
       SingleActionGesture.Seek -> rightSeek()
-      SingleActionGesture.SubSeek -> MPVLib.command("sub-seek", "1")
-      SingleActionGesture.PlayPause -> pauseUnpause()
-      SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
-      SingleActionGesture.None -> {}
-    }
-  }
-
-  fun handleRightSingleTap() {
-    when (gesturePreferences.rightSingleActionGesture.get()) {
-      SingleActionGesture.Seek -> rightSeek()
-      SingleActionGesture.SubSeek -> MPVLib.command("sub-seek", "1")
+      SingleActionGesture.SubSeek -> rightSubSeek()
       SingleActionGesture.PlayPause -> pauseUnpause()
       SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
       SingleActionGesture.None -> {}
@@ -734,7 +738,6 @@ class PlayerViewModel(
   }
 
   // ==================== Video Zoom ====================
-
   fun setVideoZoom(zoom: Float) {
     _videoZoom.value = zoom
     MPVLib.setPropertyDouble("video-zoom", zoom.toDouble())

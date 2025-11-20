@@ -734,10 +734,12 @@ fun PlayerControls(
             },
         ) {
           val invertDuration by playerPreferences.invertDuration.collectAsState()
+          val bufferedPosition by MPVLib.propFloat["demuxer-cache-time"].collectAsState()
 
           SeekbarWithTimers(
             position = position?.toFloat() ?: 0f,
             duration = duration?.toFloat() ?: 0f,
+            bufferedPosition = bufferedPosition ?: position?.toFloat() ?: 0f,
             onValueChange = {
               isSeeking = true
               viewModel.seekTo(it.toInt())

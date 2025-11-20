@@ -56,6 +56,7 @@ import xyz.mpv.rex.preferences.preference.collectAsState
 fun SeekbarWithTimers(
   position: Float,
   duration: Float,
+  bufferedPosition: Float,
   onValueChange: (Float) -> Unit,
   onValueChangeFinished: () -> Unit,
   timersInverted: Pair<Boolean, Boolean>,
@@ -114,6 +115,7 @@ fun SeekbarWithTimers(
       SquigglySeekbar(
         position = if (isUserInteracting) userPosition else animatedPosition.value,
         duration = duration,
+        bufferedPosition = bufferedPosition,
         chapters = chapters,
         isPaused = paused,
         isScrubbing = isUserInteracting,
@@ -149,6 +151,7 @@ fun SeekbarWithTimers(
 private fun SquigglySeekbar(
   position: Float,
   duration: Float,
+  bufferedPosition: Float,
   chapters: ImmutableList<Segment>,
   isPaused: Boolean,
   isScrubbing: Boolean,
@@ -242,8 +245,10 @@ private fun SquigglySeekbar(
   ) {
     val strokeWidth = 5.dp.toPx()
     val progress = if (duration > 0f) (position / duration).coerceIn(0f, 1f) else 0f
+    val bufferedProgress = if (duration > 0f) (bufferedPosition / duration).coerceIn(0f, 1f) else 0f
     val totalWidth = size.width
     val totalProgressPx = totalWidth * progress
+    val bufferedProgressPx = totalWidth * bufferedProgress
     val centerY = size.height / 2f
 
     // Calculate wave progress with matched endpoint logic (from Gramophone)
@@ -375,8 +380,16 @@ private fun SquigglySeekbar(
 
     if (transitionEnabled) {
       val disabledAlpha = 77f / 255f
+      val bufferedAlpha = 160f / 255f
+
+      // Buffered segment
+      if (bufferedProgressPx > totalProgressPx) {
+        drawPathWithGaps(totalProgressPx, bufferedProgressPx, primaryColor.copy(alpha = bufferedAlpha))
+      }
+
       // Unplayed segment (dimmed) with the same gaps
-      drawPathWithGaps(totalProgressPx, totalWidth, primaryColor.copy(alpha = disabledAlpha))
+      val startUnbuffered = if (bufferedProgressPx > totalProgressPx) bufferedProgressPx else totalProgressPx
+      drawPathWithGaps(startUnbuffered, totalWidth, primaryColor.copy(alpha = disabledAlpha))
     } else {
       // No transition: draw a flat line to the end (hidden under thumb in original)
       drawLine(
@@ -442,6 +455,7 @@ private fun PreviewSeekBar() {
   SeekbarWithTimers(
     5f,
     20f,
+    10f,
     {},
     {},
     Pair(false, true),

@@ -95,6 +95,8 @@
     <string name="pref_gesture_double_tap_subseek">Seek Subtitle</string>
     <string name="pref_gesture_double_tap_play">Play/Pause</string>
     <string name="pref_gesture_double_tap_custom">Custom</string>
+    <string name="pref_gesture_reverse_double_tap_title">Reverse double tap</string>
+    <string name="pref_gesture_reverse_double_tap_summary">Swap the left and right double tap gestures</string>
     <string name="pref_gesture_precise_seeking_title">Precise Seeking</string>
     <string name="pref_gesture_precise_seeking_summary">Double-tap seeking will be precise, but may feel slightly delayed or laggy.</string>
     <string name="pref_gesture_double_tap_left_title">Double tap (left)</string>

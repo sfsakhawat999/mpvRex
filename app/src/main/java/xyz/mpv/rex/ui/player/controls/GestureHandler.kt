@@ -78,6 +78,7 @@ fun GestureHandler(
   val isSeekingForwards by viewModel.isSeekingForwards.collectAsState()
   val useSingleTapForCenter by gesturePreferences.useSingleTapForCenter.collectAsState()
   val useSingleTapForLeftRight by gesturePreferences.useSingleTapForLeftRight.collectAsState()
+  val reverseDoubleTap by gesturePreferences.reverseDoubleTap.collectAsState()
   var isDoubleTapSeeking by remember { mutableStateOf(false) }
   LaunchedEffect(seekAmount) {
     delay(800)
@@ -123,11 +124,11 @@ fun GestureHandler(
               val single_tap_area = (it.y > size.height * 1 / 4 && it.y < size.height * 3 / 4);
 
               if (!areControlsLocked && it.x < size.width * 1 / 3 && useSingleTapForLeftRight && single_tap_area) {
-                viewModel.handleLeftDoubleTap()
+                if (reverseDoubleTap) viewModel.handleRightDoubleTap() else viewModel.handleLeftDoubleTap()
               } else if (!areControlsLocked && it.x > size.width * 1 / 3 && it.x < size.width * 2 / 3 && useSingleTapForCenter && single_tap_area) {
                 viewModel.handleCenterDoubleTap()
               } else if (!areControlsLocked && it.x > size.width * 2 / 3 && useSingleTapForLeftRight && single_tap_area) {
-                viewModel.handleRightDoubleTap()
+                if (reverseDoubleTap) viewModel.handleLeftDoubleTap() else viewModel.handleRightDoubleTap()
               } else {
                 if (controlsShown) viewModel.hideControls() else viewModel.showControls()
               }
@@ -136,12 +137,14 @@ fun GestureHandler(
               tapHandledInPress = false
               if (areControlsLocked || isDoubleTapSeeking) return@detectTapGestures
               if (it.x > size.width * 2 / 3 && !useSingleTapForLeftRight) {
-                if (!isSeekingForwards) viewModel.updateSeekAmount(0)
-                viewModel.handleRightDoubleTap()
+                val isForwardAction = !reverseDoubleTap
+                if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+                if (isForwardAction) viewModel.handleRightDoubleTap() else viewModel.handleLeftDoubleTap()
                 isDoubleTapSeeking = true
               } else if (it.x < size.width * 1 / 3 && !useSingleTapForLeftRight) {
-                if (isSeekingForwards) viewModel.updateSeekAmount(0)
-                viewModel.handleLeftDoubleTap()
+                val isForwardAction = reverseDoubleTap
+                if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+                if (isForwardAction) viewModel.handleRightDoubleTap() else viewModel.handleLeftDoubleTap()
                 isDoubleTapSeeking = true
               } else if (!useSingleTapForCenter){
                 viewModel.handleCenterDoubleTap()
@@ -159,11 +162,13 @@ fun GestureHandler(
               }
               if (!areControlsLocked && isDoubleTapSeeking && seekAmount != 0) {
                 if (it.x > size.width * 2 / 3) {
-                  if (!isSeekingForwards) viewModel.updateSeekAmount(0)
-                  viewModel.handleRightDoubleTap()
+                  val isForwardAction = !reverseDoubleTap
+                  if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+                  if (isForwardAction) viewModel.handleRightDoubleTap() else viewModel.handleLeftDoubleTap()
                 } else if (it.x < size.width * 1 / 3) {
-                  if (isSeekingForwards) viewModel.updateSeekAmount(0)
-                  viewModel.handleLeftDoubleTap()
+                  val isForwardAction = reverseDoubleTap
+                  if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+                  if (isForwardAction) viewModel.handleRightDoubleTap() else viewModel.handleLeftDoubleTap()
                 } else {
                   viewModel.handleCenterDoubleTap()
                 }
@@ -181,13 +186,13 @@ fun GestureHandler(
               if (released && !isLongPress) {
                 val single_tap_area = (it.y > size.height * 1 / 4 && it.y < size.height * 3 / 4);
                 if (!areControlsLocked && it.x < size.width * 1 / 3 && useSingleTapForLeftRight && single_tap_area) {
-                  viewModel.handleLeftDoubleTap()
+                  if (reverseDoubleTap) viewModel.handleRightDoubleTap() else viewModel.handleLeftDoubleTap()
                   tapHandledInPress = true
                 } else if (!areControlsLocked && it.x > size.width * 1 / 3 && it.x < size.width * 2 / 3 && useSingleTapForCenter && single_tap_area) {
                   viewModel.handleCenterDoubleTap()
                   tapHandledInPress = true
                 } else if (!areControlsLocked && it.x > size.width * 2 / 3 && useSingleTapForLeftRight && single_tap_area) {
-                  viewModel.handleRightDoubleTap()
+                  if (reverseDoubleTap) viewModel.handleLeftDoubleTap() else viewModel.handleRightDoubleTap()
                   tapHandledInPress = true
                 }/* else {
                   if (controlsShown) viewModel.hideControls() else viewModel.showControls()

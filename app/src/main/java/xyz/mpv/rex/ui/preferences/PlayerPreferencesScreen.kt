@@ -84,6 +84,13 @@ object PlayerPreferencesScreen : Screen {
             onValueChange = preferences.closeAfterReachingEndOfVideo::set,
             title = { Text(stringResource(id = R.string.pref_player_close_after_eof)) },
           )
+          val autoPlaylist by preferences.autoPlaylist.collectAsState()
+          SwitchPreference(
+            value = autoPlaylist,
+            onValueChange = preferences.autoPlaylist::set,
+            title = { Text(stringResource(R.string.pref_player_auto_playlist)) },
+            summary = { Text(stringResource(R.string.pref_player_auto_playlist_summary)) },
+          )
           val rememberBrightness by preferences.rememberBrightness.collectAsState()
           SwitchPreference(
             value = rememberBrightness,

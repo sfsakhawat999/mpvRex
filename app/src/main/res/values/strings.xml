@@ -66,6 +66,8 @@
     <string name="pref_player_automatically_enter_pip">Automatically switch to PiP</string>
     <string name="pref_player_close_after_eof">Close after the end of playback</string>
     <string name="pref_player_remember_brightness">Remember display brightness</string>
+    <string name="pref_player_auto_playlist">Auto playlist</string>
+    <string name="pref_player_auto_playlist_summary">Automatically play all videos in the folder</string>
 
     <string name="pref_player_gestures">Gestures</string>
     <string name="pref_player_gestures_seek">Horizontal seek gestures</string>
@@ -95,7 +97,8 @@
     <string name="pref_gesture_double_tap_subseek">Seek Subtitle</string>
     <string name="pref_gesture_double_tap_play">Play/Pause</string>
     <string name="pref_gesture_double_tap_custom">Custom</string>
-    <string name="pref_gesture_reverse_double_tap_title">Reverse double tap</string>
+    <string name="pref_gesture_reverse_double_tap_title">Reverse left and right double tap gesture</string>
+    <string name="pref_gesture_reverse_single_tap_title">Reverse left and right single tap gesture</string>
     <string name="pref_gesture_reverse_double_tap_summary">Swap the left and right double tap gestures</string>
     <string name="pref_gesture_precise_seeking_title">Precise Seeking</string>
     <string name="pref_gesture_precise_seeking_summary">Double-tap seeking will be precise, but may feel slightly delayed or laggy.</string>

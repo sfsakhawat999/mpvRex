@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import xyz.mpv.rex.domain.media.model.Video
 import xyz.mpv.rex.domain.thumbnail.ThumbnailRepository
 import xyz.mpv.rex.preferences.BrowserPreferences
+import xyz.mpv.rex.preferences.PlayerPreferences
 import xyz.mpv.rex.preferences.SortOrder
 import xyz.mpv.rex.preferences.VideoSortType
 import xyz.mpv.rex.preferences.preference.collectAsState
@@ -80,6 +81,7 @@ data class VideoListScreen(
     val coroutineScope = rememberCoroutineScope()
     val backstack = LocalBackStack.current
     val browserPreferences = koinInject<BrowserPreferences>()
+    val playerPreferences = koinInject<PlayerPreferences>()
     val lifecycleOwner = LocalLifecycleOwner.current
 
     // ViewModel
@@ -233,7 +235,23 @@ data class VideoListScreen(
           if (selectionManager.isInSelectionMode) {
             selectionManager.toggle(video)
           } else {
-            MediaUtils.playFile(video, context)
+            if (playerPreferences.autoPlaylist.get()) {
+              val videos = sortedVideosWithInfo.map { it.video }
+              val index = videos.indexOfFirst { it.id == video.id }
+              if (index != -1) {
+                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, video.uri)
+                intent.setClass(context, xyz.mpv.rex.ui.player.PlayerActivity::class.java)
+                intent.putExtra("internal_launch", true)
+                intent.putParcelableArrayListExtra("playlist", java.util.ArrayList(videos.map { it.uri }))
+                intent.putExtra("playlist_index", index)
+                intent.putExtra("launch_source", "auto_playlist")
+                context.startActivity(intent)
+              } else {
+                MediaUtils.playFile(video, context)
+              }
+            } else {
+              MediaUtils.playFile(video, context)
+            }
           }
         },
         onVideoLongClick = { video -> selectionManager.toggle(video) },

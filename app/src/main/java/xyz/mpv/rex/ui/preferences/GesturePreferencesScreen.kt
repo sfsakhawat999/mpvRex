@@ -94,7 +94,19 @@ object GesturePreferencesScreen : Screen {
           SwitchPreference(
             value = reverseDoubleTap,
             onValueChange = { preferences.reverseDoubleTap.set(it) },
-            title = { Text(text = stringResource(id = R.string.pref_gesture_reverse_double_tap_title)) },
+            title = {
+              Text(
+                text =
+                  stringResource(
+                    id =
+                      if (useSingleTapForLeftRight) {
+                        R.string.pref_gesture_reverse_single_tap_title
+                      } else {
+                        R.string.pref_gesture_reverse_double_tap_title
+                      },
+                  ),
+              )
+            },
             summary = { Text(text = stringResource(id = R.string.pref_gesture_reverse_double_tap_summary)) },
           )
 

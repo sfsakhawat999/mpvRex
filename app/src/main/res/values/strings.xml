@@ -100,6 +100,7 @@
     <string name="pref_gesture_reverse_double_tap_title">Reverse left and right double tap gesture</string>
     <string name="pref_gesture_reverse_single_tap_title">Reverse left and right single tap gesture</string>
     <string name="pref_gesture_reverse_double_tap_summary">Swap the left and right double tap gestures</string>
+    <string name="pref_gesture_reverse_single_tap_summary">Swap the left and right single tap gestures</string>
     <string name="pref_gesture_precise_seeking_title">Precise Seeking</string>
     <string name="pref_gesture_precise_seeking_summary">Double-tap seeking will be precise, but may feel slightly delayed or laggy.</string>
     <string name="pref_gesture_double_tap_left_title">Double tap (left)</string>

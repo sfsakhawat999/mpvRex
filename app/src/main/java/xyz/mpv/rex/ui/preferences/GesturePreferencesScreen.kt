@@ -107,7 +107,19 @@ object GesturePreferencesScreen : Screen {
                   ),
               )
             },
-            summary = { Text(text = stringResource(id = R.string.pref_gesture_reverse_double_tap_summary)) },
+            summary = {
+              Text(
+                text =
+                  stringResource(
+                    id =
+                      if (useSingleTapForLeftRight) {
+                        R.string.pref_gesture_reverse_single_tap_summary
+                      } else {
+                        R.string.pref_gesture_reverse_double_tap_summary
+                      },
+                  ),
+              )
+            },
           )
 
           val leftDoubleTap by preferences.leftSingleActionGesture.collectAsState()

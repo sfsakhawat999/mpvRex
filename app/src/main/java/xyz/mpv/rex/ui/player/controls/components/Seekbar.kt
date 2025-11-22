@@ -129,6 +129,7 @@ fun SeekbarWithTimers(
         chapters = chapters,
         isPaused = paused,
         isScrubbing = isUserInteracting,
+        clickEvent = clickEvent,
         onSeek = { newPosition ->
           if (!isUserInteracting) {
             isUserInteracting = true
@@ -166,6 +167,7 @@ private fun SquigglySeekbar(
   chapters: ImmutableList<Segment>,
   isPaused: Boolean,
   isScrubbing: Boolean,
+  clickEvent: () -> Unit,
   onSeek: (Float) -> Unit,
   onSeekFinished: () -> Unit,
   modifier: Modifier = Modifier,
@@ -241,6 +243,7 @@ private fun SquigglySeekbar(
         .pointerInput(Unit) {
           detectTapGestures { offset ->
             if (preventSeekbarTap) return@detectTapGestures
+            clickEvent()
             val newPosition = (offset.x / size.width) * currentDuration
             onSeek(newPosition.coerceIn(0f, currentDuration))
             onSeekFinished()
@@ -251,6 +254,7 @@ private fun SquigglySeekbar(
 
           detectDragGestures(
             onDragStart = {
+              clickEvent()
               dragStartValue = currentPosition
               accumulatedDragPx = 0f
             },

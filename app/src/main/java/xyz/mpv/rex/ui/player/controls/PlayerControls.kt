@@ -269,9 +269,10 @@ fun PlayerControls(
         val swapVolumeAndBrightness by playerPreferences.swapVolumeAndBrightness.collectAsState()
         val reduceMotion by playerPreferences.reduceMotion.collectAsState()
 
-        val activity = LocalActivity.current as PlayerActivity
+        val mactivity = LocalActivity.current as PlayerActivity
         val aspect by playerPreferences.videoAspect.collectAsState()
         val currentZoom by viewModel.videoZoom.collectAsState()
+        val clickEvent = LocalPlayerButtonsClickEvent.current
 
         LaunchedEffect(volume, mpvVolume, isVolumeSliderShown) {
           delay(2000)
@@ -478,7 +479,12 @@ fun PlayerControls(
                         .clip(CircleShape)
                         .clickable(
                           enabled = viewModel.hasPrevious(),
-                          onClick = { if (viewModel.hasPrevious()) viewModel.playPrevious() },
+                          onClick = {
+                            if (viewModel.hasPrevious()) {
+                              clickEvent()
+                              viewModel.playPrevious()
+                            }
+                          },
                         )
                         .then(
                           if (hideBackground) {
@@ -543,7 +549,10 @@ fun PlayerControls(
                         .clickable(
                           interaction,
                           ripple(),
-                          onClick = viewModel::pauseUnpause,
+                          onClick = {
+                            clickEvent()
+                            viewModel.pauseUnpause()
+                          },
                         )
                         .then(
                           if (hideBackground) {
@@ -596,7 +605,12 @@ fun PlayerControls(
                         .clip(CircleShape)
                         .clickable(
                           enabled = viewModel.hasNext(),
-                          onClick = { if (viewModel.hasNext()) viewModel.playNext() },
+                          onClick = {
+                            if (viewModel.hasNext()) {
+                              clickEvent()
+                              viewModel.playNext()
+                            }
+                          },
                         )
                         .then(
                           if (hideBackground) {
@@ -662,7 +676,10 @@ fun PlayerControls(
                       .clickable(
                         interaction,
                         ripple(),
-                        onClick = viewModel::pauseUnpause,
+                        onClick = {
+                          clickEvent()
+                          viewModel.pauseUnpause()
+                        },
                       )
                       .then(
                         if (hideBackground) {
@@ -977,7 +994,10 @@ fun PlayerControls(
                       chapters.getOrNull(currentChapter ?: 0)?.let { chapter ->
                         CurrentChapter(
                           chapter = chapter,
-                          onClick = { onOpenSheet(Sheets.Chapters) },
+                          onClick = {
+                            clickEvent()
+                            onOpenSheet(Sheets.Chapters)
+                          },
                         )
                       }
                     }
@@ -1199,7 +1219,10 @@ fun PlayerControls(
                       chapters.getOrNull(currentChapter ?: 0)?.let { chapter ->
                         CurrentChapter(
                           chapter = chapter,
-                          onClick = { onOpenSheet(Sheets.Chapters) },
+                          onClick = {
+                            clickEvent()
+                            onOpenSheet(Sheets.Chapters)
+                          },
                         )
                       }
                     }

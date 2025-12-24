@@ -102,6 +102,13 @@ class MPVView(
     MPVLib.setOptionString("hr-seek", if (preciseSeek) "yes" else "no")
     MPVLib.setOptionString("hr-seek-framedrop", if (preciseSeek) "no" else "yes")
 
+    // Configurable cache settings
+    val videoCacheSize = advancedPreferences.videoCacheSize.get()
+    MPVLib.setOptionString("demuxer-readahead-secs", videoCacheSize.toString())
+    MPVLib.setOptionString("demuxer-seekable-cache", "yes")
+    MPVLib.setOptionString("cache", "yes")
+    MPVLib.setOptionString("cache-secs", videoCacheSize.toString())
+
     setupSubtitlesOptions()
     setupAudioOptions()
   }

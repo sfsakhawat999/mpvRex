@@ -18,4 +18,6 @@ class AdvancedPreferences(
 
   val enableLuaScripts = preferenceStore.getBoolean("enable_lua_scripts", false)
   val selectedLuaScripts = preferenceStore.getStringSet("selected_lua_scripts", emptySet())
+
+  val videoCacheSize = preferenceStore.getInt("video_cache_size", 120)
 }

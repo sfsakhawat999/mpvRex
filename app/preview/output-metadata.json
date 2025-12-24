@@ -1,0 +1,97 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "xyz.mpv.rex.preview",
+  "variantName": "preview",
+  "elements": [
+    {
+      "type": "UNIVERSAL",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 110,
+      "versionName": "1.0.1-39",
+      "outputFile": "app-universal-preview.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "armeabi-v7a"
+        }
+      ],
+      "attributes": [],
+      "versionCode": 111,
+      "versionName": "1.0.1-39",
+      "outputFile": "app-armeabi-v7a-preview.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "arm64-v8a"
+        }
+      ],
+      "attributes": [],
+      "versionCode": 112,
+      "versionName": "1.0.1-39",
+      "outputFile": "app-arm64-v8a-preview.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "x86"
+        }
+      ],
+      "attributes": [],
+      "versionCode": 113,
+      "versionName": "1.0.1-39",
+      "outputFile": "app-x86-preview.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "x86_64"
+        }
+      ],
+      "attributes": [],
+      "versionCode": 114,
+      "versionName": "1.0.1-39",
+      "outputFile": "app-x86_64-preview.apk"
+    }
+  ],
+  "elementType": "File",
+  "baselineProfiles": [
+    {
+      "minApi": 28,
+      "maxApi": 30,
+      "baselineProfiles": [
+        "baselineProfiles/1/app-universal-preview.dm",
+        "baselineProfiles/1/app-armeabi-v7a-preview.dm",
+        "baselineProfiles/1/app-arm64-v8a-preview.dm",
+        "baselineProfiles/1/app-x86-preview.dm",
+        "baselineProfiles/1/app-x86_64-preview.dm"
+      ]
+    },
+    {
+      "minApi": 31,
+      "maxApi": 2147483647,
+      "baselineProfiles": [
+        "baselineProfiles/0/app-universal-preview.dm",
+        "baselineProfiles/0/app-armeabi-v7a-preview.dm",
+        "baselineProfiles/0/app-arm64-v8a-preview.dm",
+        "baselineProfiles/0/app-x86-preview.dm",
+        "baselineProfiles/0/app-x86_64-preview.dm"
+      ]
+    }
+  ],
+  "minSdkVersionForDexing": 26
+}

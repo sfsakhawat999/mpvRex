@@ -86,6 +86,7 @@
     <string name="pref_gesture_double_tap_title">Double tap</string>
     <string name="pref_gesture_double_tap_none">None</string>
     <string name="pref_gesture_double_tap_seek">Seek</string>
+    <string name="pref_gesture_double_tap_subseek">Seek Subtitle</string>
     <string name="pref_gesture_reverse_double_tap_title">Reverse left/right gestures</string>
     <string name="pref_gesture_reverse_double_tap_summary">Swap the left and right double/single tap gestures</string>
     <string name="pref_gesture_double_tap_play">Play/Pause</string>

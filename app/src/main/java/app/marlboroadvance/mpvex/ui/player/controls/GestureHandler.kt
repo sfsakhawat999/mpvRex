@@ -27,7 +27,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +42,6 @@ import androidx.compose.ui.unit.sp
 import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import app.marlboroadvance.mpvex.R
 import app.marlboroadvance.mpvex.preferences.AudioPreferences
 import app.marlboroadvance.mpvex.preferences.PlayerPreferences
@@ -80,9 +78,14 @@ fun GestureHandler(
   val seekAmount by viewModel.doubleTapSeekAmount.collectAsState()
   val isSeekingForwards by viewModel.isSeekingForwards.collectAsState()
   val useSingleTapForCenter by gesturePreferences.useSingleTapForCenter.collectAsState()
+  val useSingleTapForLeftRight by gesturePreferences.useSingleTapForLeftRight.collectAsState()
+  val reverseDoubleTap by gesturePreferences.reverseDoubleTap.collectAsState()
   val doubleTapSeekAreaWidth by gesturePreferences.doubleTapSeekAreaWidth.collectAsState()
   var isDoubleTapSeeking by remember { mutableStateOf(false) }
-  LaunchedEffect(seekAmount) {
+  val seekTrigger by viewModel.seekTrigger.collectAsState()
+  
+  // Use seekTrigger as key to ensure this fires on every seek action, not just when seekAmount changes
+  LaunchedEffect(seekAmount, seekTrigger) {
     delay(800)
     isDoubleTapSeeking = false
     viewModel.updateSeekAmount(0)
@@ -97,7 +100,6 @@ fun GestureHandler(
   val swapVolumeAndBrightness by playerPreferences.swapVolumeAndBrightness.collectAsState()
   val seekGesture by playerPreferences.horizontalSeekGesture.collectAsState()
   val showSeekbarWhenSeeking by playerPreferences.showSeekBarWhenSeeking.collectAsState()
-  val seekSensitivity by playerPreferences.seekSensitivity.collectAsState()
   val pinchToZoomGesture by playerPreferences.pinchToZoomGesture.collectAsState()
   var isLongPressing by remember { mutableStateOf(false) }
   var isDynamicSpeedControlActive by remember { mutableStateOf(false) }
@@ -110,225 +112,204 @@ fun GestureHandler(
   val currentBrightness by viewModel.currentBrightness.collectAsState()
   val volumeBoostingCap = audioPreferences.volumeBoostCap.get()
   val haptics = LocalHapticFeedback.current
-  val coroutineScope = rememberCoroutineScope()
 
-  // Isolated double-tap state tracking
-  var tapCount by remember { mutableStateOf(0) }
-  var lastTapTime by remember { mutableStateOf(0L) }
-  var lastTapPosition by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
-  var lastTapRegion by remember { mutableStateOf<String?>(null) }
-  var pendingSingleTapRegion by remember { mutableStateOf<String?>(null) }
-  var pendingSingleTapPosition by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
-  val doubleTapTimeout = 300L
-  val multiTapContinueWindow = 650L
-
-  // Multi-tap seeking state
   var lastSeekRegion by remember { mutableStateOf<String?>(null) }
   var lastSeekTime by remember { mutableStateOf<Long?>(null) }
-
-  // Auto-reset tap count on timeout and execute single tap if no double tap detected
-  LaunchedEffect(tapCount) {
-    if (tapCount == 1 && pendingSingleTapRegion != null) {
-      delay(doubleTapTimeout)
-      // Timeout occurred, execute single tap action only if not double-tap seeking
-      if (tapCount == 1 && pendingSingleTapRegion != null && !isDoubleTapSeeking) {
-        val region = pendingSingleTapRegion!!
-        val isCenterTap = region == "center"
-        if (useSingleTapForCenter && isCenterTap) {
-          viewModel.handleCenterSingleTap()
-        } else {
-          if (panelShown != Panels.None && !allowGesturesInPanels) {
-            viewModel.panelShown.update { Panels.None }
-          }
-          if (controlsShown) {
-            viewModel.hideControls()
-          } else {
-            viewModel.showControls()
-          }
-        }
-        pendingSingleTapRegion = null
-        pendingSingleTapPosition = null
-      }
-      tapCount = 0
-      lastTapRegion = null
-      if (!isDoubleTapSeeking) {
-        isDoubleTapSeeking = false
-        viewModel.updateSeekAmount(0)
-      }
-    }
-  }
-
-  // Reset double-tap seek state when seeking stops
-  LaunchedEffect(seekAmount) {
-    if (seekAmount == 0) {
-      delay(100)
-      isDoubleTapSeeking = false
-    }
-  }
-
-  LaunchedEffect(seekAmount) {
-    if (seekAmount != 0) {
-      delay(800)
-      isDoubleTapSeeking = false
-      viewModel.updateSeekAmount(0)
-      viewModel.updateSeekText(null)
-      delay(100)
-      viewModel.hideSeekBar()
-    }
-  }
+  val multiTapContinueWindow = 650L
 
   Box(
     modifier = modifier
       .fillMaxSize()
       .padding(horizontal = 16.dp, vertical = 16.dp)
-      .pointerInput(areControlsLocked, doubleTapSeekAreaWidth, gesturePreferences) {
-        // Isolated double-tap detection that doesn't interfere with other gestures
-        awaitEachGesture {
-          val down = awaitFirstDown(requireUnconsumed = false)
-          val downPosition = down.position
-          val downTime = System.currentTimeMillis()
+      .pointerInput(doubleTapSeekAreaWidth, useSingleTapForCenter, useSingleTapForLeftRight, multipleSpeedGesture) {
+        var originalSpeed = MPVLib.getPropertyFloat("speed") ?: 1f
+        var tapHandledInPress = false
+        var isLongPress = false
 
-          // Calculate regions
-          val seekAreaFraction = doubleTapSeekAreaWidth / 100f
-          val leftBoundary = size.width * seekAreaFraction
-          val rightBoundary = size.width * (1f - seekAreaFraction)
-          val region = when {
-            downPosition.x > rightBoundary -> "right"
-            downPosition.x < leftBoundary -> "left"
-            else -> "center"
-          }
-
-          // Track for potential drag
-          var isDrag = false
-          var wasConsumedByTapGesture = false
-
-          do {
-            val event = awaitPointerEvent()
-            val pointer = event.changes.firstOrNull { it.id == down.id } ?: break
-
-            // Check if this is a drag (not a tap)
-            val distance = kotlin.math.sqrt(
-              (pointer.position.x - downPosition.x) * (pointer.position.x - downPosition.x) +
-              (pointer.position.y - downPosition.y) * (pointer.position.y - downPosition.y)
-            )
-
-            if (distance > 10f) {
-              isDrag = true
-              // Don't consume - let other pointer inputs handle drag gestures
+        detectTapGestures(
+          onTap = {
+            // Skip if already handled in onPress for instantaneous single tap
+            if (tapHandledInPress) {
+              tapHandledInPress = false
+              return@detectTapGestures
             }
 
-            if (!pointer.pressed) {
-              // Pointer lifted - this is a tap if it wasn't a drag
-              if (!isDrag && !wasConsumedByTapGesture) {
-                val timeSinceLastTap = downTime - lastTapTime
-                val positionChange = kotlin.math.sqrt(
-                  (downPosition.x - lastTapPosition.x) * (downPosition.x - lastTapPosition.x) +
-                  (downPosition.y - lastTapPosition.y) * (downPosition.y - lastTapPosition.y)
-                )
-
-                // Check if this is a continuation of multi-tap sequence
-                val isMultiTapContinuation =
-                  lastTapRegion == region &&
-                  timeSinceLastTap < multiTapContinueWindow &&
-                  positionChange < 100f &&
-                  tapCount >= 2
-
-                // Check if this is a valid double-tap
-                val isDoubleTap =
-                  timeSinceLastTap < doubleTapTimeout &&
-                  lastTapRegion == region &&
-                  positionChange < 100f &&
-                  tapCount == 1
-
-                if (isDoubleTap && !areControlsLocked) {
-                  // Valid double-tap detected
-                  tapCount = 2
-                  pendingSingleTapRegion = null // Cancel pending single tap
-                  pendingSingleTapPosition = null
-                  wasConsumedByTapGesture = true
-                  pointer.consume()
-
-                  when (region) {
-                    "right" -> {
-                      val rightGesture = gesturePreferences.rightSingleActionGesture.get()
-                      if (rightGesture == SingleActionGesture.Seek) {
-                        isDoubleTapSeeking = true
-                        lastSeekRegion = "right"
-                        lastSeekTime = System.currentTimeMillis()
-                        if (!isSeekingForwards) viewModel.updateSeekAmount(0)
-                      }
-                      viewModel.handleRightDoubleTap()
-                    }
-                    "left" -> {
-                      val leftGesture = gesturePreferences.leftSingleActionGesture.get()
-                      if (leftGesture == SingleActionGesture.Seek) {
-                        isDoubleTapSeeking = true
-                        lastSeekRegion = "left"
-                        lastSeekTime = System.currentTimeMillis()
-                        if (isSeekingForwards) viewModel.updateSeekAmount(0)
-                      }
-                      viewModel.handleLeftDoubleTap()
-                    }
-                    "center" -> {
-                      viewModel.handleCenterDoubleTap()
-                    }
-                  }
-                } else if (isMultiTapContinuation && isDoubleTapSeeking) {
-                  // Continue multi-tap seeking
-                  tapCount++
-                  wasConsumedByTapGesture = true
-                  pointer.consume()
-                  lastSeekTime = System.currentTimeMillis()
-
-                  when (region) {
-                    "right" -> {
-                      val rightGesture = gesturePreferences.rightSingleActionGesture.get()
-                      if (rightGesture == SingleActionGesture.Seek) {
-                        if (!isSeekingForwards) viewModel.updateSeekAmount(0)
-                      }
-                      viewModel.handleRightDoubleTap()
-                    }
-                    "left" -> {
-                      val leftGesture = gesturePreferences.leftSingleActionGesture.get()
-                      if (leftGesture == SingleActionGesture.Seek) {
-                        if (isSeekingForwards) viewModel.updateSeekAmount(0)
-                      }
-                      viewModel.handleLeftDoubleTap()
-                    }
-                    "center" -> {
-                      viewModel.handleCenterDoubleTap()
-                    }
-                  }
-                } else if (tapCount == 0 || timeSinceLastTap >= doubleTapTimeout) {
-                  // Single tap or timed out - start new tap sequence
-                  tapCount = 1
-                  lastTapTime = downTime
-                  lastTapPosition = downPosition
-                  lastTapRegion = region
-                  pendingSingleTapRegion = region
-                  pendingSingleTapPosition = downPosition
-                  wasConsumedByTapGesture = true
-                  pointer.consume()
-                  // Don't execute single tap action yet - wait to see if second tap comes
-                }
+            // Calculate boundaries based on doubleTapSeekAreaWidth (percentage)
+            val seekAreaFraction = doubleTapSeekAreaWidth / 100f
+            val leftBoundary = size.width * seekAreaFraction
+            val rightBoundary = size.width * (1f - seekAreaFraction)
+            val isCenterTap = it.x > leftBoundary && it.x < rightBoundary
+            val singleTapArea = it.y > size.height * 1 / 4 && it.y < size.height * 3 / 4
+            
+            if (!areControlsLocked && it.x < leftBoundary && useSingleTapForLeftRight && singleTapArea) {
+              if (reverseDoubleTap) viewModel.handleRightSingleTap() else viewModel.handleLeftSingleTap()
+            } else if (useSingleTapForCenter && isCenterTap && singleTapArea) {
+              viewModel.handleCenterSingleTap()
+            } else if (!areControlsLocked && it.x > rightBoundary && useSingleTapForLeftRight && singleTapArea) {
+              if (reverseDoubleTap) viewModel.handleLeftSingleTap() else viewModel.handleRightSingleTap()
+            } else {
+              if (controlsShown) viewModel.hideControls() else viewModel.showControls()
+            }
+          },
+          onDoubleTap = {
+            if (areControlsLocked || isDoubleTapSeeking) return@detectTapGestures
+            // Calculate boundaries based on doubleTapSeekAreaWidth (percentage)
+            val seekAreaFraction = doubleTapSeekAreaWidth / 100f
+            val leftBoundary = size.width * seekAreaFraction
+            val rightBoundary = size.width * (1f - seekAreaFraction)
+            
+            if (it.x > rightBoundary && !useSingleTapForLeftRight) {
+              val gesture = if (reverseDoubleTap) gesturePreferences.leftSingleActionGesture.get() 
+                           else gesturePreferences.rightSingleActionGesture.get()
+              // Only block subsequent taps for Seek/SubSeek (they update seekTrigger)
+              if (gesture == SingleActionGesture.Seek || gesture == SingleActionGesture.SubSeek) {
+                isDoubleTapSeeking = true
               }
-              break
+              lastSeekRegion = "right"
+              lastSeekTime = System.currentTimeMillis()
+              val isForwardAction = !reverseDoubleTap
+              if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+              if (reverseDoubleTap) viewModel.handleLeftDoubleTap() else viewModel.handleRightDoubleTap()
+            } else if (it.x < leftBoundary && !useSingleTapForLeftRight) {
+              val gesture = if (reverseDoubleTap) gesturePreferences.rightSingleActionGesture.get() 
+                           else gesturePreferences.leftSingleActionGesture.get()
+              // Only block subsequent taps for Seek/SubSeek (they update seekTrigger)
+              if (gesture == SingleActionGesture.Seek || gesture == SingleActionGesture.SubSeek) {
+                isDoubleTapSeeking = true
+              }
+              lastSeekRegion = "left"
+              lastSeekTime = System.currentTimeMillis()
+              val isForwardAction = reverseDoubleTap
+              if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+              if (reverseDoubleTap) viewModel.handleRightDoubleTap() else viewModel.handleLeftDoubleTap()
+            } else {
+              viewModel.handleCenterDoubleTap()
             }
-          } while (event.changes.any { it.pressed })
-        }
+          },
+          onPress = {
+            tapHandledInPress = false
+            isLongPress = false
+
+            if (panelShown != Panels.None && !allowGesturesInPanels) {
+              viewModel.panelShown.update { Panels.None }
+            }
+
+            val now = System.currentTimeMillis()
+            // Calculate boundaries based on doubleTapSeekAreaWidth (percentage)
+            val seekAreaFraction = doubleTapSeekAreaWidth / 100f
+            val leftBoundary = size.width * seekAreaFraction
+            val rightBoundary = size.width * (1f - seekAreaFraction)
+            val region = when {
+              it.x > rightBoundary -> "right"
+              it.x < leftBoundary -> "left"
+              else -> "center"
+            }
+            val shouldContinueSeek =
+              !areControlsLocked &&
+                isDoubleTapSeeking &&
+                seekAmount != 0 &&
+                lastSeekRegion == region &&
+                lastSeekTime != null &&
+                now - lastSeekTime!! < multiTapContinueWindow
+
+            if (shouldContinueSeek) {
+              lastSeekTime = now
+              when (region) {
+                "right" -> {
+                  val isForwardAction = !reverseDoubleTap
+                  if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+                  if (reverseDoubleTap) viewModel.handleLeftDoubleTap() else viewModel.handleRightDoubleTap()
+                }
+
+                "left" -> {
+                  val isForwardAction = reverseDoubleTap
+                  if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+                  if (reverseDoubleTap) viewModel.handleRightDoubleTap() else viewModel.handleLeftDoubleTap()
+                }
+
+                else -> viewModel.handleCenterDoubleTap()
+              }
+            }
+
+            // Capture the original speed at the start of press gesture
+            playbackSpeed?.let { speed ->
+              originalSpeed = speed
+            }
+            
+            // Adjust ripple position for right region (reuse the already calculated values)
+            val press = PressInteraction.Press(
+              it.copy(x = if (it.x > rightBoundary) it.x - size.width * (1f - seekAreaFraction) else it.x),
+            )
+            interactionSource.emit(press)
+            val released = tryAwaitRelease()
+
+            // Handle instantaneous single tap in onPress for faster response
+            if (released && !isLongPress) {
+              val singleTapArea = it.y > size.height * 1 / 4 && it.y < size.height * 3 / 4
+              if (!areControlsLocked && it.x < leftBoundary && useSingleTapForLeftRight && singleTapArea) {
+                if (reverseDoubleTap) viewModel.handleRightSingleTap() else viewModel.handleLeftSingleTap()
+                tapHandledInPress = true
+              } else if (!areControlsLocked && it.x > leftBoundary && it.x < rightBoundary && useSingleTapForCenter && singleTapArea) {
+                viewModel.handleCenterSingleTap()
+                tapHandledInPress = true
+              } else if (!areControlsLocked && it.x > rightBoundary && useSingleTapForLeftRight && singleTapArea) {
+                if (reverseDoubleTap) viewModel.handleLeftSingleTap() else viewModel.handleRightSingleTap()
+                tapHandledInPress = true
+              }
+            }
+
+            if (isLongPressing) {
+              isLongPressing = false
+              isDynamicSpeedControlActive = false
+              hasSwipedEnough = false
+              
+              // Always restore the original speed after releasing the hold gesture
+              MPVLib.setPropertyFloat("speed", originalSpeed)
+              
+              viewModel.playerUpdate.update { PlayerUpdates.None }
+            }
+            interactionSource.emit(PressInteraction.Release(press))
+          },
+          onLongPress = { offset ->
+            isLongPress = true
+            tapHandledInPress = true
+
+            if (multipleSpeedGesture == 0f || areControlsLocked) return@detectTapGestures
+            if (!isLongPressing && paused == false) {
+              haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+              isLongPressing = true
+              originalSpeed = playbackSpeed ?: 1f
+              MPVLib.setPropertyFloat("speed", multipleSpeedGesture)
+              
+              if (showDynamicSpeedOverlay) {
+                // Show dynamic overlay only if enabled
+                isDynamicSpeedControlActive = true
+                hasSwipedEnough = false
+                dynamicSpeedStartX = offset.x
+                dynamicSpeedStartValue = multipleSpeedGesture
+                lastAppliedSpeed = multipleSpeedGesture
+                viewModel.playerUpdate.update { PlayerUpdates.DynamicSpeedControl(multipleSpeedGesture, false) }
+              } else {
+                // Show simple speed indicator
+                viewModel.playerUpdate.update { PlayerUpdates.MultipleSpeed }
+              }
+            }
+          },
+        )
       }
       .pointerInput(areControlsLocked, multipleSpeedGesture, seekGesture, brightnessGesture, volumeGesture) {
         if ((!seekGesture && !brightnessGesture && !volumeGesture) || areControlsLocked) return@pointerInput
-
+        
         awaitEachGesture {
           val down = awaitFirstDown(requireUnconsumed = false)
+          var gestureType: String? = null // "horizontal", "vertical", "speed_control", or null
           val startPosition = down.position
-
+          
           // State for horizontal seeking
           var startingPosition = position ?: 0
           var startingX = startPosition.x
           var wasPlayerAlreadyPause = false
-
+          
           // State for vertical gestures (volume/brightness)
           var startingY = 0f
           var mpvVolumeStartingY = 0f
@@ -339,66 +320,36 @@ fun GestureHandler(
           var lastMPVVolumeValue = currentMPVVolume ?: 100
           var lastBrightnessValue = currentBrightness
           val brightnessGestureSens = 0.001f
-          val volumeGestureSens = 0.017f
-          val mpvVolumeGestureSens = 0.017f
-
-          // Original speed for long press
-          var originalSpeed = playbackSpeed ?: 1f
-
-          // Track long press separately
-          var longPressTriggered = false
-          val longPressDelay = 500L
-          var longPressJob = coroutineScope.launch {
-            delay(longPressDelay)
-            if (!longPressTriggered && !wasPlayerAlreadyPause && paused == false) {
-              val distance = kotlin.math.sqrt(
-                (down.position.x - startPosition.x) * (down.position.x - startPosition.x) +
-                (down.position.y - startPosition.y) * (down.position.y - startPosition.y)
-              )
-              // Only trigger if still within tap threshold
-              if (distance < 10f && multipleSpeedGesture > 0f) {
-                longPressTriggered = true
-                isLongPressing = true
-                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                originalSpeed = playbackSpeed ?: 1f
-                MPVLib.setPropertyFloat("speed", multipleSpeedGesture)
-
-                if (showDynamicSpeedOverlay) {
-                  isDynamicSpeedControlActive = true
-                  hasSwipedEnough = false
-                  dynamicSpeedStartX = startPosition.x
-                  dynamicSpeedStartValue = multipleSpeedGesture
-                  lastAppliedSpeed = multipleSpeedGesture
-                  viewModel.playerUpdate.update { PlayerUpdates.DynamicSpeedControl(multipleSpeedGesture, false) }
-                } else {
-                  viewModel.playerUpdate.update { PlayerUpdates.MultipleSpeed }
-                }
-              }
-            }
+          val volumeGestureSens = 0.03f
+          val mpvVolumeGestureSens = 0.02f
+          val isIncreasingVolumeBoost: (Float) -> Boolean = {
+            volumeBoostingCap > 0 && currentVolume == viewModel.maxVolume &&
+              (currentMPVVolume ?: 100) - 100 < volumeBoostingCap && it < 0
           }
-
-          var gestureType: String? = null
-
+          val isDecreasingVolumeBoost: (Float) -> Boolean = {
+            volumeBoostingCap > 0 && currentVolume == viewModel.maxVolume &&
+              (currentMPVVolume ?: 100) - 100 in 1..volumeBoostingCap && it > 0
+          }
+          
           do {
             val event = awaitPointerEvent()
             val pointerCount = event.changes.count { it.pressed }
-
+            
+            // Only handle single-finger gestures (ignore multi-finger gestures like pinch-to-zoom)
             if (pointerCount == 1) {
               event.changes.forEach { change ->
                 if (change.pressed) {
                   val currentPosition = change.position
                   val deltaX = currentPosition.x - startPosition.x
                   val deltaY = currentPosition.y - startPosition.y
-
+                  
                   // Determine gesture type based on initial drag direction
-                  if (gestureType == null && (abs(deltaX) > 20f || abs(deltaY) > 20f)) {
-                    // Cancel long press if drag started
-                    longPressJob.cancel()
-
-                    // Check if we're in long press mode with dynamic speed control
+                  if (gestureType == null && (abs(deltaX) > 10f || abs(deltaY) > 10f)) {
+                    // Check if we're in long press mode with dynamic speed control (only if overlay is enabled)
                     if (isLongPressing && isDynamicSpeedControlActive && showDynamicSpeedOverlay && abs(deltaX) > 10f) {
                       gestureType = "speed_control"
                     } else {
+                      // Use a higher threshold ratio to strongly prefer the dominant direction
                       gestureType = if (abs(deltaX) > abs(deltaY) * 1.5f) {
                         "horizontal"
                       } else if (abs(deltaY) > abs(deltaX) * 1.5f) {
@@ -407,11 +358,14 @@ fun GestureHandler(
                         null
                       }
                     }
-
+                    
                     // Initialize gesture-specific state
                     when (gestureType) {
                       "speed_control" -> {
+                        // Capture the starting X position for delta-based speed control
+                        // Use the current position (where drag started) not the initial press position
                         dynamicSpeedStartX = currentPosition.x
+                        // Keep the speed that was set during long press
                         dynamicSpeedStartValue = MPVLib.getPropertyFloat("speed") ?: multipleSpeedGesture
                       }
                       "horizontal" -> {
@@ -423,7 +377,7 @@ fun GestureHandler(
                         }
                       }
                       "vertical" -> {
-                        if ((brightnessGesture || volumeGesture) && !isLongPressing) {
+                        if (brightnessGesture || volumeGesture) {
                           startingY = 0f
                           mpvVolumeStartingY = 0f
                           originalVolume = currentVolume
@@ -436,37 +390,48 @@ fun GestureHandler(
                       }
                     }
                   }
-
+                  
                   // Handle the appropriate gesture
                   when (gestureType) {
                     "speed_control" -> {
                       if (!showDynamicSpeedOverlay) return@forEach
                       if (isLongPressing && isDynamicSpeedControlActive && paused == false) {
                         change.consume()
-
+                        
+                        // Define available speed presets
                         val speedPresets = listOf(0.25f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 4.0f)
                         val screenWidth = size.width.toFloat()
-
+                        
+                        // Calculate delta from starting position
                         val deltaX = currentPosition.x - dynamicSpeedStartX
+                        
+                        // Check if user has started swiping (small threshold to detect movement)
                         val swipeDetectionThreshold = 10.dp.toPx()
-
                         if (!hasSwipedEnough && kotlin.math.abs(deltaX) >= swipeDetectionThreshold) {
                           hasSwipedEnough = true
+                          // Show full overlay immediately when swipe is detected
                           viewModel.playerUpdate.update { PlayerUpdates.DynamicSpeedControl(lastAppliedSpeed, true) }
                         }
-
+                        
+                        // Only update speed if overlay is showing
                         if (hasSwipedEnough) {
+                          // Map screen width to preset indices with moderate sensitivity
+                          // Slightly less sensitive for more precise control
                           val presetsRange = speedPresets.size - 1
-                          val indexDelta = (deltaX / screenWidth) * presetsRange * 3.5f
-
-                          val startIndex = speedPresets.indexOfFirst {
-                            kotlin.math.abs(it - dynamicSpeedStartValue) < 0.01f
-                          }.takeIf { it >= 0 } ?: 4
-
+                          val indexDelta = (deltaX / screenWidth) * presetsRange * 3.5f // Multiply by 3.5 for moderate sensitivity
+                          
+                          // Find starting index
+                          val startIndex = speedPresets.indexOfFirst { 
+                            kotlin.math.abs(it - dynamicSpeedStartValue) < 0.01f 
+                          }.takeIf { it >= 0 } ?: 4 // Default to 2.0x if not found
+                          
+                          // Calculate new index based on delta
                           val newIndex = (startIndex + indexDelta.toInt()).coerceIn(0, speedPresets.size - 1)
                           val newSpeed = speedPresets[newIndex]
-
+                          
+                          // Update speed only if it changed from the last applied speed
                           if (kotlin.math.abs(lastAppliedSpeed - newSpeed) > 0.01f) {
+                            // Haptic feedback for each speed change
                             haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             lastAppliedSpeed = newSpeed
                             MPVLib.setPropertyFloat("speed", newSpeed)
@@ -478,14 +443,14 @@ fun GestureHandler(
                     "horizontal" -> {
                       if (seekGesture && !isLongPressing) {
                         val dragAmount = currentPosition.x - startPosition.x
-                        if ((position ?: 0) <= 0f && dragAmount < 0) return@forEach
-                        if ((position ?: 0) >= (duration ?: 0) && dragAmount > 0) return@forEach
-
+                        if ((position ?: 0) <= 0f && dragAmount < 0) continue
+                        if ((position ?: 0) >= (duration ?: 0) && dragAmount > 0) continue
+                        
                         calculateNewHorizontalGestureValue(
                           startingPosition,
                           startingX,
                           currentPosition.x,
-                          seekSensitivity,
+                          0.15f,
                         ).let {
                           viewModel.gestureSeekAmount.update { _ ->
                             Pair(
@@ -496,25 +461,16 @@ fun GestureHandler(
                           }
                           viewModel.seekTo(it)
                         }
-
+                        
                         if (showSeekbarWhenSeeking) viewModel.showSeekBar()
                         change.consume()
                       }
                     }
                     "vertical" -> {
-                      if ((brightnessGesture || volumeGesture) && !isLongPressing) {
+                      if (brightnessGesture || volumeGesture) {
                         val amount = currentPosition.y - startPosition.y
-
+                        
                         val changeVolume: () -> Unit = {
-                          val isIncreasingVolumeBoost: (Float) -> Boolean = {
-                            volumeBoostingCap > 0 && currentVolume == viewModel.maxVolume &&
-                              (currentMPVVolume ?: 100) - 100 < volumeBoostingCap && amount < 0
-                          }
-                          val isDecreasingVolumeBoost: (Float) -> Boolean = {
-                            volumeBoostingCap > 0 && currentVolume == viewModel.maxVolume &&
-                              (currentMPVVolume ?: 100) - 100 in 1..volumeBoostingCap && amount > 0
-                          }
-
                           if (isIncreasingVolumeBoost(amount) || isDecreasingVolumeBoost(amount)) {
                             if (mpvVolumeStartingY == 0f) {
                               startingY = 0f
@@ -551,6 +507,7 @@ fun GestureHandler(
                             }
                           }
 
+                          // Always display slider during gesture (even at max/min)
                           viewModel.displayVolumeSlider()
                         }
                         val changeBrightness: () -> Unit = {
@@ -562,14 +519,16 @@ fun GestureHandler(
                             brightnessGestureSens,
                           )
 
+                          // Only update if brightness changed (avoid floating-point noise)
                           if (abs(newBrightness - lastBrightnessValue) > 0.001f) {
                             viewModel.changeBrightnessTo(newBrightness)
                             lastBrightnessValue = newBrightness
                           }
 
+                          // Always display slider during gesture (even at max/min)
                           viewModel.displayBrightnessSlider()
                         }
-
+                        
                         when {
                           volumeGesture && brightnessGesture -> {
                             if (swapVolumeAndBrightness) {
@@ -582,7 +541,7 @@ fun GestureHandler(
                           volumeGesture -> changeVolume()
                           else -> {}
                         }
-
+                        
                         change.consume()
                       }
                     }
@@ -590,10 +549,13 @@ fun GestureHandler(
                 }
               }
             } else if (pointerCount > 1) {
-              // Multi-finger gesture detected
-              longPressJob.cancel()
+              // Multi-finger gesture detected - cancel current single-finger gesture if any
               if (gestureType != null) {
+                // Clean up ongoing gesture
                 when (gestureType) {
+                  "speed_control" -> {
+                    // Speed control cleanup is handled in press release
+                  }
                   "horizontal" -> {
                     if (seekGesture) {
                       viewModel.gestureSeekAmount.update { null }
@@ -612,22 +574,16 @@ fun GestureHandler(
                 }
                 gestureType = null
               }
+              // Don't consume the event, let pinch-to-zoom handle it
               break
             }
           } while (event.changes.any { it.pressed })
-
-          // Handle gesture end
-          longPressJob.cancel()
-
-          if (isLongPressing) {
-            isLongPressing = false
-            isDynamicSpeedControlActive = false
-            hasSwipedEnough = false
-            MPVLib.setPropertyFloat("speed", originalSpeed)
-            viewModel.playerUpdate.update { PlayerUpdates.None }
-          }
-
+          
+          // Handle drag end
           when (gestureType) {
+            "speed_control" -> {
+              // Speed control cleanup is handled in press release
+            }
             "horizontal" -> {
               if (seekGesture) {
                 viewModel.gestureSeekAmount.update { null }

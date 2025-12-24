@@ -178,6 +178,14 @@ object GesturePreferencesScreen : Screen {
             },
           )
 
+          val reverseDoubleTap by preferences.reverseDoubleTap.collectAsState()
+          SwitchPreference(
+            value = reverseDoubleTap,
+            onValueChange = { preferences.reverseDoubleTap.set(it) },
+            title = { Text(text = stringResource(id = R.string.pref_gesture_reverse_double_tap_title)) },
+            summary = { Text(text = stringResource(id = R.string.pref_gesture_reverse_double_tap_summary)) },
+          )
+
           val leftDoubleTap by preferences.leftSingleActionGesture.collectAsState()
           ListPreference(
             value = leftDoubleTap,

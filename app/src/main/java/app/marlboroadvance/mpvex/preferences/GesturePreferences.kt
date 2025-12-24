@@ -14,6 +14,7 @@ class GesturePreferences(
   val rightSingleActionGesture = preferenceStore.getEnum("right_drag_gesture", SingleActionGesture.Seek)
   val useSingleTapForCenter = preferenceStore.getBoolean("use_single_tap_for_center", false)
   val useSingleTapForLeftRight = preferenceStore.getBoolean("use_single_tap_for_left_right", false)
+  val reverseDoubleTap = preferenceStore.getBoolean("reverse_double_tap", false)
   val mediaPreviousGesture = preferenceStore.getEnum("meda_previous_gesture", SingleActionGesture.Seek)
   val mediaPlayGesture = preferenceStore.getEnum("media_play_gesture", SingleActionGesture.PlayPause)
   val mediaNextGesture = preferenceStore.getEnum("media_next_gesture", SingleActionGesture.Seek)

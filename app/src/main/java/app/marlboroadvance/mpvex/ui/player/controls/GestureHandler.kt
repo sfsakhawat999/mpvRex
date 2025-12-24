@@ -78,6 +78,7 @@ fun GestureHandler(
   val isSeekingForwards by viewModel.isSeekingForwards.collectAsState()
   val useSingleTapForCenter by gesturePreferences.useSingleTapForCenter.collectAsState()
   val useSingleTapForLeftRight by gesturePreferences.useSingleTapForLeftRight.collectAsState()
+  val reverseDoubleTap by gesturePreferences.reverseDoubleTap.collectAsState()
   val doubleTapSeekAreaWidth by gesturePreferences.doubleTapSeekAreaWidth.collectAsState()
   var isDoubleTapSeeking by remember { mutableStateOf(false) }
   LaunchedEffect(seekAmount) {
@@ -128,11 +129,11 @@ fun GestureHandler(
             val singleTapArea = it.y > size.height * 1 / 4 && it.y < size.height * 3 / 4
             
             if (!areControlsLocked && it.x < leftBoundary && useSingleTapForLeftRight && singleTapArea) {
-              viewModel.handleLeftSingleTap()
+              if (reverseDoubleTap) viewModel.handleRightSingleTap() else viewModel.handleLeftSingleTap()
             } else if (useSingleTapForCenter && isCenterTap && singleTapArea) {
               viewModel.handleCenterSingleTap()
             } else if (!areControlsLocked && it.x > rightBoundary && useSingleTapForLeftRight && singleTapArea) {
-              viewModel.handleRightSingleTap()
+              if (reverseDoubleTap) viewModel.handleLeftSingleTap() else viewModel.handleRightSingleTap()
             } else {
               if (controlsShown) viewModel.hideControls() else viewModel.showControls()
             }
@@ -148,14 +149,16 @@ fun GestureHandler(
               isDoubleTapSeeking = true
               lastSeekRegion = "right"
               lastSeekTime = System.currentTimeMillis()
-              if (!isSeekingForwards) viewModel.updateSeekAmount(0)
-              viewModel.handleRightDoubleTap()
+              val isForwardAction = !reverseDoubleTap
+              if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+              if (reverseDoubleTap) viewModel.handleLeftDoubleTap() else viewModel.handleRightDoubleTap()
             } else if (it.x < leftBoundary && !useSingleTapForLeftRight) {
               isDoubleTapSeeking = true
               lastSeekRegion = "left"
               lastSeekTime = System.currentTimeMillis()
-              if (isSeekingForwards) viewModel.updateSeekAmount(0)
-              viewModel.handleLeftDoubleTap()
+              val isForwardAction = reverseDoubleTap
+              if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+              if (reverseDoubleTap) viewModel.handleRightDoubleTap() else viewModel.handleLeftDoubleTap()
             } else {
               viewModel.handleCenterDoubleTap()
             }
@@ -187,13 +190,15 @@ fun GestureHandler(
               lastSeekTime = now
               when (region) {
                 "right" -> {
-                  if (!isSeekingForwards) viewModel.updateSeekAmount(0)
-                  viewModel.handleRightDoubleTap()
+                  val isForwardAction = !reverseDoubleTap
+                  if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+                  if (reverseDoubleTap) viewModel.handleLeftDoubleTap() else viewModel.handleRightDoubleTap()
                 }
 
                 "left" -> {
-                  if (isSeekingForwards) viewModel.updateSeekAmount(0)
-                  viewModel.handleLeftDoubleTap()
+                  val isForwardAction = reverseDoubleTap
+                  if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+                  if (reverseDoubleTap) viewModel.handleRightDoubleTap() else viewModel.handleLeftDoubleTap()
                 }
 
                 else -> viewModel.handleCenterDoubleTap()

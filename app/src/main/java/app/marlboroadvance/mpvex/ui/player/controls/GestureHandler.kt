@@ -119,8 +119,17 @@ fun GestureHandler(
       .padding(horizontal = 16.dp, vertical = 16.dp)
       .pointerInput(doubleTapSeekAreaWidth, useSingleTapForCenter, useSingleTapForLeftRight, multipleSpeedGesture) {
         var originalSpeed = MPVLib.getPropertyFloat("speed") ?: 1f
+        var tapHandledInPress = false
+        var isLongPress = false
+
         detectTapGestures(
           onTap = {
+            // Skip if already handled in onPress for instantaneous single tap
+            if (tapHandledInPress) {
+              tapHandledInPress = false
+              return@detectTapGestures
+            }
+
             // Calculate boundaries based on doubleTapSeekAreaWidth (percentage)
             val seekAreaFraction = doubleTapSeekAreaWidth / 100f
             val leftBoundary = size.width * seekAreaFraction
@@ -164,6 +173,9 @@ fun GestureHandler(
             }
           },
           onPress = {
+            tapHandledInPress = false
+            isLongPress = false
+
             if (panelShown != Panels.None && !allowGesturesInPanels) {
               viewModel.panelShown.update { Panels.None }
             }
@@ -215,7 +227,23 @@ fun GestureHandler(
               it.copy(x = if (it.x > rightBoundary) it.x - size.width * (1f - seekAreaFraction) else it.x),
             )
             interactionSource.emit(press)
-            tryAwaitRelease()
+            val released = tryAwaitRelease()
+
+            // Handle instantaneous single tap in onPress for faster response
+            if (released && !isLongPress) {
+              val singleTapArea = it.y > size.height * 1 / 4 && it.y < size.height * 3 / 4
+              if (!areControlsLocked && it.x < leftBoundary && useSingleTapForLeftRight && singleTapArea) {
+                if (reverseDoubleTap) viewModel.handleRightSingleTap() else viewModel.handleLeftSingleTap()
+                tapHandledInPress = true
+              } else if (!areControlsLocked && it.x > leftBoundary && it.x < rightBoundary && useSingleTapForCenter && singleTapArea) {
+                viewModel.handleCenterSingleTap()
+                tapHandledInPress = true
+              } else if (!areControlsLocked && it.x > rightBoundary && useSingleTapForLeftRight && singleTapArea) {
+                if (reverseDoubleTap) viewModel.handleLeftSingleTap() else viewModel.handleRightSingleTap()
+                tapHandledInPress = true
+              }
+            }
+
             if (isLongPressing) {
               isLongPressing = false
               isDynamicSpeedControlActive = false
@@ -229,6 +257,9 @@ fun GestureHandler(
             interactionSource.emit(PressInteraction.Release(press))
           },
           onLongPress = { offset ->
+            isLongPress = true
+            tapHandledInPress = true
+
             if (multipleSpeedGesture == 0f || areControlsLocked) return@detectTapGestures
             if (!isLongPressing && paused == false) {
               haptics.performHapticFeedback(HapticFeedbackType.LongPress)

@@ -23,9 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
@@ -74,10 +76,18 @@ fun SeekbarWithTimers(
   // Animated position for smooth transitions
   val animatedPosition = remember { Animatable(position) }
   val scope = rememberCoroutineScope()
+  var lastInteractionTime by remember { mutableLongStateOf(0L) }
 
   // Only animate position updates when user is not interacting
-  LaunchedEffect(position, isUserInteracting) {
+  LaunchedEffect(position) {
     if (!isUserInteracting && position != animatedPosition.value) {
+      // If we recently interacted (within 2s) and the position is significantly different (>1s),
+      // assume it's the old position and ignore it to prevent "back and forth" glitches.
+      val timeSinceInteraction = System.currentTimeMillis() - lastInteractionTime
+      if (timeSinceInteraction < 2000 && kotlin.math.abs(position - animatedPosition.value) > 1f) {
+        return@LaunchedEffect
+      }
+
       scope.launch {
         animatedPosition.animateTo(
           targetValue = position,
@@ -131,6 +141,7 @@ fun SeekbarWithTimers(
         onSeekFinished = {
           // Snap visual position to the last user position to avoid a brief jump
           scope.launch { animatedPosition.snapTo(userPosition) }
+          lastInteractionTime = System.currentTimeMillis()
           isUserInteracting = false
           onValueChangeFinished()
         },
@@ -227,6 +238,9 @@ private fun SquigglySeekbar(
     }
   }
 
+  val currentPosition by rememberUpdatedState(position)
+  val currentDuration by rememberUpdatedState(duration)
+
   Canvas(
     modifier =
       modifier
@@ -235,20 +249,29 @@ private fun SquigglySeekbar(
         .pointerInput(Unit) {
           detectTapGestures { offset ->
             if (preventSeekbarTap) return@detectTapGestures
-            val newPosition = (offset.x / size.width) * duration
-            onSeek(newPosition.coerceIn(0f, duration))
+            val newPosition = (offset.x / size.width) * currentDuration
+            onSeek(newPosition.coerceIn(0f, currentDuration))
             onSeekFinished()
           }
         }
         .pointerInput(Unit) {
+          var dragStartValue = 0f
+          var accumulatedDragPx = 0f
+
           detectDragGestures(
-            onDragStart = { },
+            onDragStart = {
+              dragStartValue = currentPosition
+              accumulatedDragPx = 0f
+            },
             onDragEnd = { onSeekFinished() },
             onDragCancel = { onSeekFinished() },
-          ) { change, _ ->
+          ) { change, dragAmount ->
             change.consume()
-            val newPosition = (change.position.x / size.width) * duration
-            onSeek(newPosition.coerceIn(0f, duration))
+            accumulatedDragPx += dragAmount.x
+            if (currentDuration > 0f) {
+              val newPosition = dragStartValue + (accumulatedDragPx / size.width) * currentDuration
+              onSeek(newPosition.coerceIn(0f, currentDuration))
+            }
           }
         },
   ) {

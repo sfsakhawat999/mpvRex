@@ -48,6 +48,9 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import app.marlboroadvance.mpvex.preferences.GesturePreferences
+import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 
 @Composable
 fun SeekbarWithTimers(
@@ -177,6 +180,9 @@ private fun SquigglySeekbar(
   val matchedWaveEndpoint = 1f
   val transitionEnabled = true
 
+  val gesturePreferences = koinInject<GesturePreferences>()
+  val preventSeekbarTap by gesturePreferences.preventSeekbarTap.collectAsState()
+
   // Animate height fraction based on paused state and scrubbing state
   LaunchedEffect(isPaused, isScrubbing, useWavySeekbar) {
     if (!useWavySeekbar) {
@@ -228,6 +234,7 @@ private fun SquigglySeekbar(
         .height(48.dp)
         .pointerInput(Unit) {
           detectTapGestures { offset ->
+            if (preventSeekbarTap) return@detectTapGestures
             val newPosition = (offset.x / size.width) * duration
             onSeek(newPosition.coerceIn(0f, duration))
             onSeekFinished()

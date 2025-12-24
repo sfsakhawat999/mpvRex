@@ -258,6 +258,22 @@ object GesturePreferencesScreen : Screen {
             },
           )
 
+          val preventSeekbarTap by preferences.preventSeekbarTap.collectAsState()
+          SwitchPreference(
+            value = preventSeekbarTap,
+            onValueChange = { preferences.preventSeekbarTap.set(it) },
+            title = {
+              Text(
+                text = stringResource(id = R.string.pref_gesture_prevent_seekbar_tap_title),
+              )
+            },
+            summary = {
+              Text(
+                text = stringResource(id = R.string.pref_gesture_prevent_seekbar_tap_summary),
+              )
+            },
+          )
+
           val doubleTapKeyCodes =
             listOf(
               CustomKeyCodes.DoubleTapLeft,

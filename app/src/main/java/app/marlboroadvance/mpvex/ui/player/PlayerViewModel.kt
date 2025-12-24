@@ -485,6 +485,36 @@ class PlayerViewModel(
     if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
   }
 
+  fun leftSubSeek() {
+    if (MPVLib.getPropertyInt("sid") != null) {
+      val pos1 = MPVLib.getPropertyDouble("time-pos") ?: 0.0
+      MPVLib.command("sub-seek", "-1")
+
+      android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+        val pos2 = MPVLib.getPropertyDouble("time-pos") ?: 0.0
+        val diff = pos2 - pos1
+        _isSeekingForwards.value = false
+        _doubleTapSeekAmount.value += diff.toInt()
+      }, 10)
+      if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+    } else leftSeek()
+  }
+
+  fun rightSubSeek() {
+    if (MPVLib.getPropertyInt("sid") != null) {
+      val pos1 = MPVLib.getPropertyDouble("time-pos") ?: 0.0
+      MPVLib.command("sub-seek", "1")
+
+      android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+        val pos2 = MPVLib.getPropertyDouble("time-pos") ?: 0.0
+        val diff = pos2 - pos1
+        _isSeekingForwards.value = true
+        _doubleTapSeekAmount.value += diff.toInt()
+      }, 10)
+      if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+    } else rightSeek()
+  }
+
   fun updateSeekAmount(amount: Int) {
     _doubleTapSeekAmount.value = amount
   }
@@ -730,6 +760,7 @@ class PlayerViewModel(
   fun handleLeftDoubleTap() {
     when (gesturePreferences.leftSingleActionGesture.get()) {
       SingleActionGesture.Seek -> leftSeek()
+      SingleActionGesture.SubSeek -> leftSubSeek()
       SingleActionGesture.PlayPause -> pauseUnpause()
       SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
         MPVLib.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
@@ -744,7 +775,7 @@ class PlayerViewModel(
       SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
         MPVLib.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
       }
-      SingleActionGesture.Seek, SingleActionGesture.None -> {}
+      SingleActionGesture.Seek, SingleActionGesture.SubSeek, SingleActionGesture.None -> {}
     }
   }
 
@@ -754,13 +785,14 @@ class PlayerViewModel(
       SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
         MPVLib.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
       }
-      SingleActionGesture.Seek, SingleActionGesture.None -> {}
+      SingleActionGesture.Seek, SingleActionGesture.SubSeek, SingleActionGesture.None -> {}
     }
   }
 
   fun handleLeftSingleTap() {
     when (gesturePreferences.leftSingleActionGesture.get()) {
       SingleActionGesture.Seek -> leftSeek()
+      SingleActionGesture.SubSeek -> leftSubSeek()
       SingleActionGesture.PlayPause -> pauseUnpause()
       SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
       SingleActionGesture.None -> {}
@@ -770,6 +802,7 @@ class PlayerViewModel(
   fun handleRightSingleTap() {
     when (gesturePreferences.rightSingleActionGesture.get()) {
       SingleActionGesture.Seek -> rightSeek()
+      SingleActionGesture.SubSeek -> rightSubSeek()
       SingleActionGesture.PlayPause -> pauseUnpause()
       SingleActionGesture.Custom -> MPVLib.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
       SingleActionGesture.None -> {}
@@ -779,6 +812,7 @@ class PlayerViewModel(
   fun handleRightDoubleTap() {
     when (gesturePreferences.rightSingleActionGesture.get()) {
       SingleActionGesture.Seek -> rightSeek()
+      SingleActionGesture.SubSeek -> rightSubSeek()
       SingleActionGesture.PlayPause -> pauseUnpause()
       SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
         MPVLib.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)

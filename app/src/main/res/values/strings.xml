@@ -94,6 +94,10 @@
     <string name="pref_gesture_double_tap_right_title">Double tap (right)</string>
     <string name="pref_gesture_use_single_tap_for_center_title">Use single tap for center gesture</string>
     <string name="pref_gesture_use_single_tap_for_center_summary">Use a single tap in the center for gestures (like play/pause) instead of a double tap.</string>
+    <string name="pref_gesture_use_single_tap_for_left_right_title">Use single tap for left and right gesture</string>
+    <string name="pref_gesture_use_single_tap_for_left_right_summary">Use a single tap in left and right for gestures instead of a double tap.</string>
+    <string name="pref_gesture_single_tap_left_title">Single tap (left)</string>
+    <string name="pref_gesture_single_tap_right_title">Single tap (right)</string>
 
     <string name="pref_gesture_double_tap_custom_info">You can bind custom actions to these gestures in input.conf using the following key codes:\n\nLeft: MBTN_LEFT_DBL\nCenter: MBTN_MID_DBL\nRight: MBTN_RIGHT_DBL</string>
 

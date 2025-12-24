@@ -77,6 +77,7 @@ fun GestureHandler(
   val seekAmount by viewModel.doubleTapSeekAmount.collectAsState()
   val isSeekingForwards by viewModel.isSeekingForwards.collectAsState()
   val useSingleTapForCenter by gesturePreferences.useSingleTapForCenter.collectAsState()
+  val useSingleTapForLeftRight by gesturePreferences.useSingleTapForLeftRight.collectAsState()
   val doubleTapSeekAreaWidth by gesturePreferences.doubleTapSeekAreaWidth.collectAsState()
   var isDoubleTapSeeking by remember { mutableStateOf(false) }
   LaunchedEffect(seekAmount) {
@@ -115,7 +116,7 @@ fun GestureHandler(
     modifier = modifier
       .fillMaxSize()
       .padding(horizontal = 16.dp, vertical = 16.dp)
-      .pointerInput(doubleTapSeekAreaWidth, useSingleTapForCenter, multipleSpeedGesture) {
+      .pointerInput(doubleTapSeekAreaWidth, useSingleTapForCenter, useSingleTapForLeftRight, multipleSpeedGesture) {
         var originalSpeed = MPVLib.getPropertyFloat("speed") ?: 1f
         detectTapGestures(
           onTap = {
@@ -124,9 +125,14 @@ fun GestureHandler(
             val leftBoundary = size.width * seekAreaFraction
             val rightBoundary = size.width * (1f - seekAreaFraction)
             val isCenterTap = it.x > leftBoundary && it.x < rightBoundary
+            val singleTapArea = it.y > size.height * 1 / 4 && it.y < size.height * 3 / 4
             
-            if (useSingleTapForCenter && isCenterTap) {
+            if (!areControlsLocked && it.x < leftBoundary && useSingleTapForLeftRight && singleTapArea) {
+              viewModel.handleLeftSingleTap()
+            } else if (useSingleTapForCenter && isCenterTap && singleTapArea) {
               viewModel.handleCenterSingleTap()
+            } else if (!areControlsLocked && it.x > rightBoundary && useSingleTapForLeftRight && singleTapArea) {
+              viewModel.handleRightSingleTap()
             } else {
               if (controlsShown) viewModel.hideControls() else viewModel.showControls()
             }
@@ -138,13 +144,13 @@ fun GestureHandler(
             val leftBoundary = size.width * seekAreaFraction
             val rightBoundary = size.width * (1f - seekAreaFraction)
             
-            if (it.x > rightBoundary) {
+            if (it.x > rightBoundary && !useSingleTapForLeftRight) {
               isDoubleTapSeeking = true
               lastSeekRegion = "right"
               lastSeekTime = System.currentTimeMillis()
               if (!isSeekingForwards) viewModel.updateSeekAmount(0)
               viewModel.handleRightDoubleTap()
-            } else if (it.x < leftBoundary) {
+            } else if (it.x < leftBoundary && !useSingleTapForLeftRight) {
               isDoubleTapSeeking = true
               lastSeekRegion = "left"
               lastSeekTime = System.currentTimeMillis()

@@ -237,7 +237,7 @@ fun PlayerControls(
 
   CompositionLocalProvider(
     LocalRippleConfiguration provides playerRippleConfiguration,
-    LocalPlayerButtonsClickEvent provides { },
+    LocalPlayerButtonsClickEvent provides { resetControls = !resetControls },
     LocalContentColor provides Color.White,
   ) {
     CompositionLocalProvider(

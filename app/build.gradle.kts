@@ -54,6 +54,7 @@ android {
       ndk {
         debugSymbolLevel = "none" // or 'minimal' if needed for crash reports
       }
+      resValue("string", "app_name", "mpvRex")
     }
     create("preview") {
       initWith(getByName("release"))
@@ -61,10 +62,12 @@ android {
       signingConfig = signingConfigs["debug"]
       applicationIdSuffix = ".preview"
       versionNameSuffix = "-${getCommitCount()}"
+      resValue("string", "app_name", "mpvRex Preview")
     }
     named("debug") {
       applicationIdSuffix = ".debug"
       versionNameSuffix = "-${getCommitCount()}"
+      resValue("string", "app_name", "mpvRex Debug")
     }
   }
   compileOptions {

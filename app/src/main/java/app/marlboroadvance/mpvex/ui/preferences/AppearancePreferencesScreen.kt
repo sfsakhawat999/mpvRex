@@ -134,6 +134,32 @@ object AppearancePreferencesScreen : Screen {
                 },
                 enabled = isMaterialYouAvailable
               )
+              val hidePlayerButtonsBackground by preferences.hidePlayerButtonsBackground.collectAsState()
+              SwitchPreference(
+                value = hidePlayerButtonsBackground,
+                onValueChange = { preferences.hidePlayerButtonsBackground.set(it) },
+                title = {
+                  Text(
+                    text = stringResource(id = R.string.pref_appearance_hide_player_buttons_background_title),
+                  )
+                },
+                summary = {
+                  Text(
+                    text = stringResource(id = R.string.pref_appearance_hide_player_buttons_background_summary),
+                  )
+                },
+              )
+              val playerAlwaysDarkMode by preferences.playerAlwaysDarkMode.collectAsState()
+              SwitchPreference(
+                value = playerAlwaysDarkMode,
+                onValueChange = { preferences.playerAlwaysDarkMode.set(it) },
+                title = {
+                  Text(text = "Player always dark mode")
+                },
+                summary = {
+                  Text(text = "Keep player controls in dark theme regardless of app theme")
+                },
+              )
               
               // Removed full names preference - moved to File Browser section
             }

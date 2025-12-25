@@ -143,6 +143,13 @@ object PlayerPreferencesScreen : Screen {
             title = { Text("Use wavy seekbar") },
             summary = { Text("Disable to show a normal seekbar instead of the animated wavy seekbar") },
           )
+          val bottomControlsBelowSeekbar by preferences.bottomControlsBelowSeekbar.collectAsState()
+          SwitchPreference(
+            value = bottomControlsBelowSeekbar,
+            onValueChange = preferences.bottomControlsBelowSeekbar::set,
+            title = { Text("Bottom controls below seekbar") },
+            summary = { Text(if (bottomControlsBelowSeekbar) "Control buttons appear below the seekbar" else "Control buttons appear above the seekbar") },
+          )
           PreferenceCategory(
             title = { Text(stringResource(R.string.pref_player_gestures)) },
           )

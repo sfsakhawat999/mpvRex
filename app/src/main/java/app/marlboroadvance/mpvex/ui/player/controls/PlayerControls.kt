@@ -776,6 +776,8 @@ fun PlayerControls(
           }
         }
 
+        val bottomControlsBelowSeekbar by playerPreferences.bottomControlsBelowSeekbar.collectAsState()
+
         AnimatedVisibility(
           visible = (controlsShown || seekBarShown) && !areControlsLocked,
           enter =
@@ -806,7 +808,11 @@ fun PlayerControls(
                 }
               )
               .constrainAs(seekbar) {
-                bottom.linkTo(parent.bottom, if (isPortrait) 64.dp else spacing.small)
+                if (bottomControlsBelowSeekbar) {
+                  bottom.linkTo(bottomRightControls.top, spacing.extraSmall)
+                } else {
+                  bottom.linkTo(parent.bottom, if (isPortrait) 64.dp else spacing.small)
+                }
                 start.linkTo(parent.start, spacing.medium)
                 end.linkTo(parent.end, spacing.medium)
               },
@@ -1016,7 +1022,11 @@ fun PlayerControls(
                 }
               )
               .constrainAs(bottomRightControls) {
-                bottom.linkTo(seekbar.top, spacing.small)
+                if (bottomControlsBelowSeekbar) {
+                   bottom.linkTo(parent.bottom, if (isPortrait) spacing.extraLarge else spacing.medium)
+                } else {
+                   bottom.linkTo(seekbar.top, spacing.small)
+                }
                 if (isPortrait) {
                   start.linkTo(parent.start, spacing.medium)
                   end.linkTo(parent.end, spacing.medium)
@@ -1082,24 +1092,18 @@ fun PlayerControls(
               fadeOut(playerControlsExitAnimationSpec())
             },
           modifier =
-            Modifier
-              .then(
-                if (showSystemNavigationBar) {
-                  val navBarPadding = WindowInsets.navigationBars.asPaddingValues()
-                  Modifier.padding(
-                    start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr)
-                  )
-                } else {
-                  Modifier
-                }
-              )
-              .constrainAs(bottomLeftControls) {
+            Modifier.constrainAs(bottomLeftControls) {
+              if (bottomControlsBelowSeekbar) {
+                // Bottom controls at very bottom - more margin for navigation bar
+                bottom.linkTo(parent.bottom, spacing.medium)
+              } else {
+                // Bottom controls above seekbar
                 bottom.linkTo(seekbar.top, spacing.small)
-                start.linkTo(parent.start, spacing.medium)
-                width = Dimension.fillToConstraints
-                end.linkTo(bottomRightControls.start, spacing.small)
-              },
+              }
+              start.linkTo(parent.start, spacing.medium)
+              width = Dimension.fillToConstraints
+              end.linkTo(bottomRightControls.start, spacing.small)
+            },
         ) {
           BottomLeftPlayerControlsLandscape(
             buttons = bottomLeftButtons,

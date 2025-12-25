@@ -51,6 +51,7 @@ import app.marlboroadvance.mpvex.presentation.components.RightSideOvalShape
 import app.marlboroadvance.mpvex.ui.player.Panels
 import app.marlboroadvance.mpvex.ui.player.PlayerUpdates
 import app.marlboroadvance.mpvex.ui.player.PlayerViewModel
+import app.marlboroadvance.mpvex.ui.player.SingleActionGesture
 import app.marlboroadvance.mpvex.ui.player.controls.components.DoubleTapSeekTriangles
 import app.marlboroadvance.mpvex.ui.theme.playerRippleConfiguration
 import org.koin.compose.koinInject
@@ -81,7 +82,10 @@ fun GestureHandler(
   val reverseDoubleTap by gesturePreferences.reverseDoubleTap.collectAsState()
   val doubleTapSeekAreaWidth by gesturePreferences.doubleTapSeekAreaWidth.collectAsState()
   var isDoubleTapSeeking by remember { mutableStateOf(false) }
-  LaunchedEffect(seekAmount) {
+  val seekTrigger by viewModel.seekTrigger.collectAsState()
+  
+  // Use seekTrigger as key to ensure this fires on every seek action, not just when seekAmount changes
+  LaunchedEffect(seekAmount, seekTrigger) {
     delay(800)
     isDoubleTapSeeking = false
     viewModel.updateSeekAmount(0)
@@ -155,14 +159,24 @@ fun GestureHandler(
             val rightBoundary = size.width * (1f - seekAreaFraction)
             
             if (it.x > rightBoundary && !useSingleTapForLeftRight) {
-              isDoubleTapSeeking = true
+              val gesture = if (reverseDoubleTap) gesturePreferences.leftSingleActionGesture.get() 
+                           else gesturePreferences.rightSingleActionGesture.get()
+              // Only block subsequent taps for Seek/SubSeek (they update seekTrigger)
+              if (gesture == SingleActionGesture.Seek || gesture == SingleActionGesture.SubSeek) {
+                isDoubleTapSeeking = true
+              }
               lastSeekRegion = "right"
               lastSeekTime = System.currentTimeMillis()
               val isForwardAction = !reverseDoubleTap
               if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
               if (reverseDoubleTap) viewModel.handleLeftDoubleTap() else viewModel.handleRightDoubleTap()
             } else if (it.x < leftBoundary && !useSingleTapForLeftRight) {
-              isDoubleTapSeeking = true
+              val gesture = if (reverseDoubleTap) gesturePreferences.rightSingleActionGesture.get() 
+                           else gesturePreferences.leftSingleActionGesture.get()
+              // Only block subsequent taps for Seek/SubSeek (they update seekTrigger)
+              if (gesture == SingleActionGesture.Seek || gesture == SingleActionGesture.SubSeek) {
+                isDoubleTapSeeking = true
+              }
               lastSeekRegion = "left"
               lastSeekTime = System.currentTimeMillis()
               val isForwardAction = reverseDoubleTap

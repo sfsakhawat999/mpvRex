@@ -40,6 +40,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.io.File
+import kotlin.math.roundToInt
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -141,8 +142,16 @@ class PlayerViewModel(
   private val _doubleTapSeekAmount = MutableStateFlow(0)
   val doubleTapSeekAmount: StateFlow<Int> = _doubleTapSeekAmount.asStateFlow()
 
+  // Trigger to ensure LaunchedEffect fires on every seek action
+  private val _seekTrigger = MutableStateFlow(0)
+  val seekTrigger: StateFlow<Int> = _seekTrigger.asStateFlow()
+
   private val _isSeekingForwards = MutableStateFlow(false)
   val isSeekingForwards: StateFlow<Boolean> = _isSeekingForwards.asStateFlow()
+
+  // SubSeek continuous tracking
+  private var subSeekStartPosition: Double? = null
+  private var subSeekLastTime: Long = 0L
 
   // Frame navigation
   private val _currentFrame = MutableStateFlow(0)
@@ -280,16 +289,20 @@ class PlayerViewModel(
   }
 
   fun toggleSubtitle(id: Int) {
-    val primarySid = MPVLib.getPropertyInt("sid") ?: 0
-    val secondarySid = MPVLib.getPropertyInt("secondary-sid") ?: 0
+    val primarySid = MPVLib.getPropertyInt("sid")
+    val secondarySid = MPVLib.getPropertyInt("secondary-sid")
 
-    when {
-      id == primarySid -> MPVLib.setPropertyString("sid", "no")
-      id == secondarySid -> MPVLib.setPropertyString("secondary-sid", "no")
-      primarySid <= 0 -> MPVLib.setPropertyInt("sid", id)
-      secondarySid <= 0 -> MPVLib.setPropertyInt("secondary-sid", id)
-      else -> MPVLib.setPropertyInt("sid", id)
+    val (newPrimary, newSecondary) = when (id) {
+      primarySid -> Pair(secondarySid, null)  // Unselecting primary: secondary becomes primary
+      secondarySid -> Pair(primarySid, null)  // Unselecting secondary: just remove it
+      else -> if (primarySid != null) Pair(primarySid, id) else Pair(id, null)  // New selection
     }
+
+    // Set secondary-sid first, then sid (order matters for MPV)
+    newSecondary?.let { MPVLib.setPropertyInt("secondary-sid", it) }
+      ?: MPVLib.setPropertyBoolean("secondary-sid", false)
+    newPrimary?.let { MPVLib.setPropertyInt("sid", it) }
+      ?: MPVLib.setPropertyBoolean("sid", false)
   }
 
   fun isSubtitleSelected(id: Int): Boolean {
@@ -406,31 +419,57 @@ class PlayerViewModel(
   }
 
   fun leftSubSeek() {
-    if (MPVLib.getPropertyInt("sid") != null) {
-      val pos1 = MPVLib.getPropertyDouble("time-pos") ?: 0.0
+    // sid > 0 means a subtitle track is selected (0 or null = no subtitle)
+    val sid = MPVLib.getPropertyInt("sid") ?: 0
+    if (sid > 0) {
+      val currentPos = MPVLib.getPropertyDouble("time-pos") ?: 0.0
+      val now = System.currentTimeMillis()
+      
+      // Reset start position if this is a new seek sequence (> 1 second gap)
+      if (subSeekStartPosition == null || now - subSeekLastTime > 1000) {
+        subSeekStartPosition = currentPos
+      }
+      subSeekLastTime = now
+      
       MPVLib.command("sub-seek", "-1")
 
       android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
         val pos2 = MPVLib.getPropertyDouble("time-pos") ?: 0.0
-        val diff = pos2 - pos1
+        // Calculate total diff from start of seek sequence for accurate display
+        val totalDiff = pos2 - (subSeekStartPosition ?: pos2)
+        val seekAmount = totalDiff.roundToInt()
         _isSeekingForwards.value = false
-        _doubleTapSeekAmount.value += diff.toInt()
-      }, 10)
+        _doubleTapSeekAmount.value = seekAmount
+        _seekTrigger.value++  // Trigger LaunchedEffect
+      }, 50)
       if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
     } else leftSeek()
   }
 
   fun rightSubSeek() {
-    if (MPVLib.getPropertyInt("sid") != null) {
-      val pos1 = MPVLib.getPropertyDouble("time-pos") ?: 0.0
+    // sid > 0 means a subtitle track is selected (0 or null = no subtitle)
+    val sid = MPVLib.getPropertyInt("sid") ?: 0
+    if (sid > 0) {
+      val currentPos = MPVLib.getPropertyDouble("time-pos") ?: 0.0
+      val now = System.currentTimeMillis()
+      
+      // Reset start position if this is a new seek sequence (> 1 second gap)
+      if (subSeekStartPosition == null || now - subSeekLastTime > 1000) {
+        subSeekStartPosition = currentPos
+      }
+      subSeekLastTime = now
+      
       MPVLib.command("sub-seek", "1")
 
       android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
         val pos2 = MPVLib.getPropertyDouble("time-pos") ?: 0.0
-        val diff = pos2 - pos1
+        // Calculate total diff from start of seek sequence for accurate display
+        val totalDiff = pos2 - (subSeekStartPosition ?: pos2)
+        val seekAmount = totalDiff.roundToInt()
         _isSeekingForwards.value = true
-        _doubleTapSeekAmount.value += diff.toInt()
-      }, 10)
+        _doubleTapSeekAmount.value = seekAmount
+        _seekTrigger.value++  // Trigger LaunchedEffect
+      }, 50)
       if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
     } else rightSeek()
   }

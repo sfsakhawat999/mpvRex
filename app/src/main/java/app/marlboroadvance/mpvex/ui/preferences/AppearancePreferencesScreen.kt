@@ -133,6 +133,17 @@ object AppearancePreferencesScreen : Screen {
               )
             },
           )
+          val playerAlwaysDarkMode by preferences.playerAlwaysDarkMode.collectAsState()
+          SwitchPreference(
+            value = playerAlwaysDarkMode,
+            onValueChange = { preferences.playerAlwaysDarkMode.set(it) },
+            title = {
+              Text(text = "Player always dark mode")
+            },
+            summary = {
+              Text(text = "Keep player controls in dark theme regardless of app theme")
+            },
+          )
 
           PreferenceCategory(
             title = { Text(text = stringResource(id = R.string.pref_appearance_category_file_browser)) },

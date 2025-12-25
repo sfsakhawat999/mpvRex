@@ -26,6 +26,7 @@ class AppearancePreferences(
   val showHiddenFiles = preferenceStore.getBoolean("show_hidden_files", false)
   val showUnplayedOldVideoLabel = preferenceStore.getBoolean("show_unplayed_old_video_label", true)
   val unplayedOldVideoDays = preferenceStore.getInt("unplayed_old_video_days", 7)
+  val playerAlwaysDarkMode = preferenceStore.getBoolean("player_always_dark_mode", true)
 
   val topLeftControls =
     preferenceStore.getString(

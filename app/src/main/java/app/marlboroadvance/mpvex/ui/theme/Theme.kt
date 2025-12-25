@@ -246,6 +246,117 @@ fun MpvexTheme(content: @Composable () -> Unit) {
   }
 }
 
+/**
+ * Theme specifically for the player that can force dark mode.
+ * When playerAlwaysDarkMode is enabled, the player controls will always use dark theme.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun MpvexPlayerTheme(content: @Composable () -> Unit) {
+  val preferences = koinInject<AppearancePreferences>()
+  val playerAlwaysDarkMode by preferences.playerAlwaysDarkMode.collectAsState()
+  val amoledMode by preferences.amoledMode.collectAsState()
+  val dynamicColor by preferences.materialYou.collectAsState()
+  val context = LocalContext.current
+
+  val colorScheme = if (playerAlwaysDarkMode) {
+    // Force dark theme for player
+    when {
+      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        if (amoledMode) {
+          dynamicDarkColorScheme(context).copy(
+            background = backgroundPureBlack,
+            surface = surfacePureBlack,
+            surfaceDim = surfaceDimPureBlack,
+            surfaceBright = surfaceBrightPureBlack,
+            surfaceContainerLowest = surfaceContainerLowestPureBlack,
+            surfaceContainerLow = surfaceContainerLowPureBlack,
+            surfaceContainer = surfaceContainerPureBlack,
+            surfaceContainerHigh = surfaceContainerHighPureBlack,
+            surfaceContainerHighest = surfaceContainerHighestPureBlack,
+          )
+        } else {
+          dynamicDarkColorScheme(context)
+        }
+      }
+      else -> {
+        if (amoledMode) pureBlackColorScheme else darkScheme
+      }
+    }
+  } else {
+    // Use normal theme logic (delegate to MpvexTheme behavior)
+    val darkMode by preferences.darkMode.collectAsState()
+    val darkTheme = isSystemInDarkTheme()
+    when {
+      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        when (darkMode) {
+          DarkMode.Dark -> {
+            if (amoledMode) {
+              dynamicDarkColorScheme(context).copy(
+                background = backgroundPureBlack,
+                surface = surfacePureBlack,
+                surfaceDim = surfaceDimPureBlack,
+                surfaceBright = surfaceBrightPureBlack,
+                surfaceContainerLowest = surfaceContainerLowestPureBlack,
+                surfaceContainerLow = surfaceContainerLowPureBlack,
+                surfaceContainer = surfaceContainerPureBlack,
+                surfaceContainerHigh = surfaceContainerHighPureBlack,
+                surfaceContainerHighest = surfaceContainerHighestPureBlack,
+              )
+            } else {
+              dynamicDarkColorScheme(context)
+            }
+          }
+          DarkMode.Light -> dynamicLightColorScheme(context)
+          DarkMode.System -> {
+            if (darkTheme) {
+              if (amoledMode) {
+                dynamicDarkColorScheme(context).copy(
+                  background = backgroundPureBlack,
+                  surface = surfacePureBlack,
+                  surfaceDim = surfaceDimPureBlack,
+                  surfaceBright = surfaceBrightPureBlack,
+                  surfaceContainerLowest = surfaceContainerLowestPureBlack,
+                  surfaceContainerLow = surfaceContainerLowPureBlack,
+                  surfaceContainer = surfaceContainerPureBlack,
+                  surfaceContainerHigh = surfaceContainerHighPureBlack,
+                  surfaceContainerHighest = surfaceContainerHighestPureBlack,
+                )
+              } else {
+                dynamicDarkColorScheme(context)
+              }
+            } else {
+              dynamicLightColorScheme(context)
+            }
+          }
+        }
+      }
+      darkMode == DarkMode.Dark -> {
+        if (amoledMode) pureBlackColorScheme else darkScheme
+      }
+      darkMode == DarkMode.Light -> lightScheme
+      else -> {
+        if (darkTheme) {
+          if (amoledMode) pureBlackColorScheme else darkScheme
+        } else {
+          lightScheme
+        }
+      }
+    }
+  }
+
+  CompositionLocalProvider(
+    LocalSpacing provides Spacing(),
+  ) {
+    MaterialTheme(
+      colorScheme = colorScheme,
+      typography = AppTypography,
+      content = content,
+      motionScheme = MotionScheme.expressive(),
+    )
+  }
+}
+
 enum class DarkMode(
   @StringRes val titleRes: Int,
 ) {

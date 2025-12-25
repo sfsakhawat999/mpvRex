@@ -173,7 +173,13 @@ fun RenderPlayerButton(
     }
 
     PlayerButton.PLAYBACK_SPEED -> {
+      val cycleSpeed = {
+        val newSpeed = if (playbackSpeed >= 2f) 0.25f else playbackSpeed + 0.25f
+        `is`.xyz.mpv.MPVLib.setPropertyFloat("speed", newSpeed)
+      }
+      
       if (isSpeedNonOne) {
+        @OptIn(ExperimentalFoundationApi::class)
         Surface(
           shape = CircleShape,
           color = if (hideBackground) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.55f),
@@ -187,10 +193,14 @@ fun RenderPlayerButton(
           modifier = Modifier
             .height(buttonSize)
             .clip(CircleShape)
-            .clickable(
+            .combinedClickable(
               interactionSource = remember { MutableInteractionSource() },
               indication = ripple(bounded = true),
               onClick = {
+                clickEvent()
+                cycleSpeed()
+              },
+              onLongClick = {
                 clickEvent()
                 onOpenSheet(Sheets.PlaybackSpeed)
               },
@@ -220,7 +230,8 @@ fun RenderPlayerButton(
       } else {
         ControlsButton(
           icon = Icons.Default.Speed,
-          onClick = { onOpenSheet(Sheets.PlaybackSpeed) },
+          onClick = { cycleSpeed() },
+          onLongClick = { onOpenSheet(Sheets.PlaybackSpeed) },
           color = if (hideBackground) controlColor else MaterialTheme.colorScheme.onSurface,
           modifier = Modifier.size(buttonSize),
         )

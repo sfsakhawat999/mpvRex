@@ -708,6 +708,14 @@ fun FileSystemBrowserScreen(path: String? = null) {
     FileSystemSortDialog(
       isOpen = sortDialogOpen.value,
       onDismiss = { sortDialogOpen.value = false },
+      onViewModeChanged = {
+        // Navigate back to root when view mode changes
+        sortDialogOpen.value = false
+        // Clear backstack to go home
+        while (backstack.size > 1) {
+          backstack.removeLastOrNull()
+        }
+      },
     )
 
     DeleteConfirmationDialog(
@@ -1037,6 +1045,7 @@ private fun FileSystemBrowserContent(
 private fun FileSystemSortDialog(
     isOpen: Boolean,
     onDismiss: () -> Unit,
+    onViewModeChanged: () -> Unit = {},
   ) {
     val browserPreferences = koinInject<BrowserPreferences>()
     val appearancePreferences = koinInject<app.marlboroadvance.mpvex.preferences.AppearancePreferences>()
@@ -1104,6 +1113,7 @@ private fun FileSystemSortDialog(
                 app.marlboroadvance.mpvex.preferences.FolderViewMode.FileManager
               },
             )
+            onViewModeChanged()
           },
         ),
       visibilityToggles =

@@ -25,10 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.CurrencyRupee
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -100,7 +97,7 @@ object AboutScreen : Screen {
     ) { paddingValues ->
       val cs = MaterialTheme.colorScheme
       val colorPrimary = cs.primaryContainer
-      val colorTertiary = cs.tertiaryContainer
+      val colorSecondary = cs.secondaryContainer
       val transition = rememberInfiniteTransition()
       val fraction by transition.animateFloat(
         initialValue = 0f,
@@ -129,7 +126,7 @@ object AboutScreen : Screen {
 
                   val gradient =
                     Brush.radialGradient(
-                      colors = listOf(colorPrimary, colorTertiary),
+                      colors = listOf(colorPrimary, colorSecondary),
                       center = Offset(cx, cy),
                       radius = 800f,
                     )
@@ -164,7 +161,7 @@ object AboutScreen : Screen {
 
                 Column(modifier = Modifier.weight(1f)) {
                   Text(
-                    text = "mpvExtended",
+                    text = "mpvRex",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = cs.onPrimaryContainer,
@@ -272,125 +269,7 @@ object AboutScreen : Screen {
           }
         }
 
-        Spacer(Modifier.height(8.dp))
-
-        // Donate Section
-        PreferenceSectionHeader(
-          title = stringResource(id = R.string.pref_about_donate_title)
-        )
-
-        PreferenceCard {
-          // Ko-fi
-          Row(
-            modifier = Modifier
-              .fillMaxWidth()
-              .clickable {
-                context.startActivity(
-                  Intent(
-                    Intent.ACTION_VIEW,
-                    context.getString(R.string.pref_about_donate_kofi_url).toUri(),
-                  ),
-                )
-              }
-              .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Icon(
-              imageVector = Icons.Filled.MonetizationOn,
-              contentDescription = null,
-              modifier = Modifier.size(24.dp),
-              tint = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-              Text(
-                text = stringResource(id = R.string.pref_about_donate_kofi),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-              )
-              Text(
-                text = stringResource(id = R.string.pref_about_donate_kofi_summary),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
-              )
-            }
-          }
-
-          PreferenceDivider()
-
-          // PayPal
-          Row(
-            modifier = Modifier
-              .fillMaxWidth()
-              .clickable {
-                context.startActivity(
-                  Intent(
-                    Intent.ACTION_VIEW,
-                    context.getString(R.string.pref_about_donate_paypal_url).toUri(),
-                  ),
-                )
-              }
-              .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Icon(
-              imageVector = Icons.Filled.AccountBalance,
-              contentDescription = null,
-              modifier = Modifier.size(24.dp),
-              tint = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-              Text(
-                text = stringResource(id = R.string.pref_about_donate_paypal),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-              )
-              Text(
-                text = stringResource(id = R.string.pref_about_donate_paypal_summary),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
-              )
-            }
-          }
-
-          PreferenceDivider()
-
-          // UPI
-          Row(
-            modifier = Modifier
-              .fillMaxWidth()
-              .clickable {
-                clipboardManager.setText(
-                  AnnotatedString(context.getString(R.string.pref_about_donate_upi_id)),
-                )
-              }
-              .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Icon(
-              imageVector = Icons.Filled.CurrencyRupee,
-              contentDescription = null,
-              modifier = Modifier.size(24.dp),
-              tint = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-              Text(
-                text = stringResource(id = R.string.pref_about_donate_upi),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-              )
-              Text(
-                text = stringResource(id = R.string.pref_about_donate_upi_id),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
-              )
-            }
-          }
-        }
-
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
       }
     }
   }

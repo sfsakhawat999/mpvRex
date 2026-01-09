@@ -137,7 +137,6 @@ fun SeekbarWithTimers(
           .height(48.dp),
       contentAlignment = Alignment.Center,
     ) {
-<<<<<<< HEAD
       when (seekbarStyle) {
         SeekbarStyle.Standard -> {
           StandardSeekbar(
@@ -224,31 +223,6 @@ fun SeekbarWithTimers(
           )
         }
       }
-=======
-      SquigglySeekbar(
-        position = if (isUserInteracting) userPosition else animatedPosition.value,
-        duration = duration,
-        readAheadValue = readAheadValue,
-        chapters = chapters,
-        isPaused = paused,
-        isScrubbing = isUserInteracting,
-        useWavySeekbar = useWavySeekbar,
-        onSeek = { newPosition ->
-          if (!isUserInteracting) {
-            isUserInteracting = true
-          }
-          userPosition = newPosition
-          onValueChange(newPosition)
-        },
-        onSeekFinished = {
-          // Snap visual position to the last user position to avoid a brief jump
-          scope.launch { animatedPosition.snapTo(userPosition) }
-          lastInteractionTime = System.currentTimeMillis()
-          isUserInteracting = false
-          onValueChangeFinished()
-        },
-      )
->>>>>>> 5e0ab06 (Relative seeking by dragging on seekbar)
     }
 
     VideoTimer(

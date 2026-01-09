@@ -1,0 +1,64 @@
+
+> Configure project :app
+WARNING: BuildType(preview): resValue 'string/app_name' value is being replaced.
+
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsDebug UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:prepareLibraryDefinitionsDebug UP-TO-DATE
+> Task :app:extractDebugSupportedLocales UP-TO-DATE
+> Task :app:generateDebugLocaleConfig UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesDebug UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:kspDebugKotlin UP-TO-DATE
+> Task :app:copyRoomSchemas NO-SOURCE
+
+> Task :app:compileDebugKotlin FAILED
+e: file:///home/sakhawat/StudioProjects/mpvRex/app/src/main/java/app/marlboroadvance/mpvex/ui/preferences/PlayerPreferencesScreen.kt:197:11 None of the following candidates is applicable:
+fun SliderPreference(state: MutableState<Float>, title: ComposableFunction0<Unit>, modifier: Modifier = ..., valueRange: ClosedFloatingPointRange<Float> = ..., valueSteps: Int = ..., sliderState: MutableFloatState = ..., enabled: Boolean = ..., icon: ComposableFunction0<Unit>? = ..., summary: ComposableFunction0<Unit>? = ..., valueText: ComposableFunction0<Unit>? = ...): Unit
+fun SliderPreference(value: Float, onValueChange: (Float) -> Unit, sliderValue: Float, onSliderValueChange: (Float) -> Unit, title: ComposableFunction0<Unit>, modifier: Modifier = ..., valueRange: ClosedFloatingPointRange<Float> = ..., valueSteps: Int = ..., enabled: Boolean = ..., icon: ComposableFunction0<Unit>? = ..., summary: ComposableFunction0<Unit>? = ..., valueText: ComposableFunction0<Unit>? = ...): Unit
+e: file:///home/sakhawat/StudioProjects/mpvRex/app/src/main/java/app/marlboroadvance/mpvex/ui/preferences/PlayerPreferencesScreen.kt:199:68 Unresolved reference 'it'.
+e: file:///home/sakhawat/StudioProjects/mpvRex/app/src/main/java/app/marlboroadvance/mpvex/ui/preferences/PlayerPreferencesScreen.kt:200:23 @Composable invocations can only happen from the context of a @Composable function
+e: file:///home/sakhawat/StudioProjects/mpvRex/app/src/main/java/app/marlboroadvance/mpvex/ui/preferences/PlayerPreferencesScreen.kt:200:28 @Composable invocations can only happen from the context of a @Composable function
+e: file:///home/sakhawat/StudioProjects/mpvRex/app/src/main/java/app/marlboroadvance/mpvex/ui/preferences/PlayerPreferencesScreen.kt:203:15 @Composable invocations can only happen from the context of a @Composable function
+e: file:///home/sakhawat/StudioProjects/mpvRex/app/src/main/java/app/marlboroadvance/mpvex/ui/preferences/PlayerPreferencesScreen.kt:205:19 @Composable invocations can only happen from the context of a @Composable function
+
+[Incubating] Problems report is available at: file:///home/sakhawat/StudioProjects/mpvRex/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 10s
+23 actionable tasks: 1 executed, 22 up-to-date

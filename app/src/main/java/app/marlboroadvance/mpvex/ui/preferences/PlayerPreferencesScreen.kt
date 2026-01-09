@@ -27,6 +27,7 @@ import app.marlboroadvance.mpvex.ui.player.PlayerOrientation
 import app.marlboroadvance.mpvex.ui.player.controls.components.sheets.toFixed
 import app.marlboroadvance.mpvex.ui.utils.LocalBackStack
 import kotlinx.serialization.Serializable
+import me.zhanghai.compose.preference.PreferenceCategory
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SliderPreference
@@ -196,6 +197,8 @@ object PlayerPreferencesScreen : Screen {
           SliderPreference(
             value = holdForMultipleSpeed,
             onValueChange = { preferences.holdForMultipleSpeed.set(it.toFixed(2)) },
+            sliderValue = holdForMultipleSpeed,
+            onSliderValueChange = { },
             title = { Text(stringResource(R.string.pref_player_gestures_hold_for_multiple_speed)) },
             valueRange = 0f..6f,
             summary = {
@@ -204,56 +207,12 @@ object PlayerPreferencesScreen : Screen {
                   stringResource(R.string.generic_disabled)
                 } else {
                   "%.2fx".format(holdForMultipleSpeed)
->>>>>>> d2144d8 (Add toggle for bottom controls below/above seekbar)
                 },
               )
-              
-              PreferenceDivider()
-              
-              val savePositionOnQuit by preferences.savePositionOnQuit.collectAsState()
-              SwitchPreference(
-                value = savePositionOnQuit,
-                onValueChange = preferences.savePositionOnQuit::set,
-                title = { Text(stringResource(R.string.pref_player_save_position_on_quit)) },
-              )
-              
-              PreferenceDivider()
-              
-              val closeAfterEndOfVideo by preferences.closeAfterReachingEndOfVideo.collectAsState()
-              SwitchPreference(
-                value = closeAfterEndOfVideo,
-                onValueChange = preferences.closeAfterReachingEndOfVideo::set,
-                title = { Text(stringResource(id = R.string.pref_player_close_after_eof)) },
-              )
-              
-              PreferenceDivider()
-              
-              val playlistMode by preferences.playlistMode.collectAsState()
-              SwitchPreference(
-                value = playlistMode,
-                onValueChange = preferences.playlistMode::set,
-                title = { Text(text = "Playlist Mode") },
-                summary = { 
-                  Text(
-                    text = if (playlistMode)
-                      "Automatically enable next/previous navigation for all videos in folder"
-                    else
-                      "Play videos individually (select multiple for playlist)",
-                    color = MaterialTheme.colorScheme.outline,
-                  )
-                },
-              )
-              
-              PreferenceDivider()
-              
-              val rememberBrightness by preferences.rememberBrightness.collectAsState()
-              SwitchPreference(
-                value = rememberBrightness,
-                onValueChange = preferences.rememberBrightness::set,
-                title = { Text(text = stringResource(R.string.pref_player_remember_brightness)) },
-              )
-            }
-          }
+            },
+          )
+        }
+      }
           // Seeking Section
           item {
             PreferenceSectionHeader(title = stringResource(R.string.pref_player_seeking_title))

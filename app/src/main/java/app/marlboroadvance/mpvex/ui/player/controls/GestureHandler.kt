@@ -157,33 +157,39 @@ fun GestureHandler(
             val seekAreaFraction = doubleTapSeekAreaWidth / 100f
             val leftBoundary = size.width * seekAreaFraction
             val rightBoundary = size.width * (1f - seekAreaFraction)
-            
-            if (it.x > rightBoundary && !useSingleTapForLeftRight) {
-              val gesture = if (reverseDoubleTap) gesturePreferences.leftSingleActionGesture.get() 
-                           else gesturePreferences.rightSingleActionGesture.get()
-              // Only block subsequent taps for Seek/SubSeek (they update seekTrigger)
-              if (gesture == SingleActionGesture.Seek || gesture == SingleActionGesture.SubSeek) {
-                isDoubleTapSeeking = true
+
+            if (it.x > rightBoundary) {
+              if (!useSingleTapForLeftRight) {
+                val gesture = if (reverseDoubleTap) gesturePreferences.leftSingleActionGesture.get() 
+                             else gesturePreferences.rightSingleActionGesture.get()
+                // Only block subsequent taps for Seek/SubSeek (they update seekTrigger)
+                if (gesture == SingleActionGesture.Seek || gesture == SingleActionGesture.SubSeek) {
+                  isDoubleTapSeeking = true
+                }
+                lastSeekRegion = "right"
+                lastSeekTime = System.currentTimeMillis()
+                val isForwardAction = !reverseDoubleTap
+                if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+                if (reverseDoubleTap) viewModel.handleLeftDoubleTap() else viewModel.handleRightDoubleTap()
               }
-              lastSeekRegion = "right"
-              lastSeekTime = System.currentTimeMillis()
-              val isForwardAction = !reverseDoubleTap
-              if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
-              if (reverseDoubleTap) viewModel.handleLeftDoubleTap() else viewModel.handleRightDoubleTap()
-            } else if (it.x < leftBoundary && !useSingleTapForLeftRight) {
-              val gesture = if (reverseDoubleTap) gesturePreferences.rightSingleActionGesture.get() 
-                           else gesturePreferences.leftSingleActionGesture.get()
-              // Only block subsequent taps for Seek/SubSeek (they update seekTrigger)
-              if (gesture == SingleActionGesture.Seek || gesture == SingleActionGesture.SubSeek) {
-                isDoubleTapSeeking = true
+            } else if (it.x < leftBoundary) {
+              if (!useSingleTapForLeftRight) {
+                val gesture = if (reverseDoubleTap) gesturePreferences.rightSingleActionGesture.get() 
+                             else gesturePreferences.leftSingleActionGesture.get()
+                // Only block subsequent taps for Seek/SubSeek (they update seekTrigger)
+                if (gesture == SingleActionGesture.Seek || gesture == SingleActionGesture.SubSeek) {
+                  isDoubleTapSeeking = true
+                }
+                lastSeekRegion = "left"
+                lastSeekTime = System.currentTimeMillis()
+                val isForwardAction = reverseDoubleTap
+                if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
+                if (reverseDoubleTap) viewModel.handleRightDoubleTap() else viewModel.handleLeftDoubleTap()
               }
-              lastSeekRegion = "left"
-              lastSeekTime = System.currentTimeMillis()
-              val isForwardAction = reverseDoubleTap
-              if (isForwardAction != isSeekingForwards) viewModel.updateSeekAmount(0)
-              if (reverseDoubleTap) viewModel.handleRightDoubleTap() else viewModel.handleLeftDoubleTap()
             } else {
-              viewModel.handleCenterDoubleTap()
+              if (!useSingleTapForCenter) {
+                viewModel.handleCenterDoubleTap()
+              }
             }
           },
           onPress = {

@@ -258,6 +258,7 @@ object PlayerControlsPreferencesScreen : Screen {
           
           item {
             val hidePlayerButtonsBackground by appearancePrefs.hidePlayerButtonsBackground.collectAsState()
+            val playerAlwaysDarkMode by appearancePrefs.playerAlwaysDarkMode.collectAsState()
             val playerTimeToDisappear by playerPrefs.playerTimeToDisappear.collectAsState()
             val predefinedTimeValues = listOf(500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000)
             val isCustomTimeValue = !predefinedTimeValues.contains(playerTimeToDisappear)
@@ -278,6 +279,19 @@ object PlayerControlsPreferencesScreen : Screen {
                   Text(
                     text = stringResource(id = R.string.pref_appearance_hide_player_buttons_background_summary),
                   )
+                },
+              )
+              
+              PreferenceDivider()
+
+              SwitchPreference(
+                value = playerAlwaysDarkMode,
+                onValueChange = { appearancePrefs.playerAlwaysDarkMode.set(it) },
+                title = {
+                  Text(text = "Player controls always dark mode")
+                },
+                summary = {
+                  Text(text = "Keep player controls in dark theme regardless of app theme")
                 },
               )
               

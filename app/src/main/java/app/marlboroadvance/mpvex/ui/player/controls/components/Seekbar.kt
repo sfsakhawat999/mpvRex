@@ -247,6 +247,25 @@ fun SeekbarWithTimers(
             },
           )
         }
+        SeekbarStyle.Thick -> {
+          StandardSeekbar(
+            position = if (isUserInteracting) userPosition else animatedPosition.value,
+            duration = duration,
+            readAheadValue = readAheadValue,
+            chapters = chapters,
+            seekbarStyle = SeekbarStyle.Thick,
+            onSeek = { newPosition ->
+              if (!isUserInteracting) isUserInteracting = true
+              userPosition = newPosition
+              onValueChange(newPosition)
+            },
+            onSeekFinished = {
+              scope.launch { animatedPosition.snapTo(userPosition) }
+              isUserInteracting = false
+              onValueChangeFinished()
+            },
+          )
+        }
       }
     }
 

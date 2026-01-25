@@ -29,7 +29,10 @@ android {
 
     buildConfigField("String", "GIT_SHA", "\"${getCommitSha()}\"")
     buildConfigField("int", "GIT_COUNT", getCommitCount())
+    // Disable update feature by default
+    buildConfigField("boolean", "ENABLE_UPDATE_FEATURE", "false")
   }
+
   dependenciesInfo {
     includeInApk = false
     includeInBundle = false

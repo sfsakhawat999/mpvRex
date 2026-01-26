@@ -93,6 +93,7 @@ fun GestureHandler(
   val seekAmount by viewModel.doubleTapSeekAmount.collectAsState()
   val isSeekingForwards by viewModel.isSeekingForwards.collectAsState()
   val useSingleTapForCenter by gesturePreferences.useSingleTapForCenter.collectAsState()
+  val reverseDoubleTap by gesturePreferences.reverseDoubleTap.collectAsState()
   val doubleTapSeekAreaWidth by gesturePreferences.doubleTapSeekAreaWidth.collectAsState()
   var isDoubleTapSeeking by remember { mutableStateOf(false) }
   LaunchedEffect(seekAmount) {
@@ -185,7 +186,7 @@ fun GestureHandler(
     modifier = modifier
       .fillMaxSize()
       .padding(horizontal = 16.dp, vertical = 16.dp)
-      .pointerInput(areControlsLocked, doubleTapSeekAreaWidth, gesturePreferences) {
+      .pointerInput(areControlsLocked, doubleTapSeekAreaWidth, reverseDoubleTap) {
         // Isolated double-tap detection that doesn't interfere with other gestures
         awaitEachGesture {
           val down = awaitFirstDown(requireUnconsumed = false)
@@ -197,8 +198,8 @@ fun GestureHandler(
           val leftBoundary = size.width * seekAreaFraction
           val rightBoundary = size.width * (1f - seekAreaFraction)
           val region = when {
-            downPosition.x > rightBoundary -> "right"
-            downPosition.x < leftBoundary -> "left"
+            downPosition.x > rightBoundary -> if (reverseDoubleTap) "left" else "right"
+            downPosition.x < leftBoundary -> if (reverseDoubleTap) "right" else "left"
             else -> "center"
           }
 

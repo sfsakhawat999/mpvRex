@@ -179,24 +179,6 @@ object PlayerPreferencesScreen : Screen {
           
           item {
             PreferenceCard {
-              val horizontalSeekGesture by preferences.horizontalSeekGesture.collectAsState()
-              SwitchPreference(
-                value = horizontalSeekGesture,
-                onValueChange = preferences.horizontalSeekGesture::set,
-                title = { Text(stringResource(R.string.pref_player_gestures_seek)) },
-              )
-              
-              PreferenceDivider()
-              
-              val showSeekbarWhenSeeking by preferences.showSeekBarWhenSeeking.collectAsState()
-              SwitchPreference(
-                value = showSeekbarWhenSeeking,
-                onValueChange = preferences.showSeekBarWhenSeeking::set,
-                title = { Text(stringResource(R.string.pref_player_show_seekbar_when_seeking)) },
-              )
-              
-              PreferenceDivider()
-              
               val showDoubleTapOvals by preferences.showDoubleTapOvals.collectAsState()
               SwitchPreference(
                 value = showDoubleTapOvals,
@@ -220,24 +202,6 @@ object PlayerPreferencesScreen : Screen {
                 value = usePreciseSeeking,
                 onValueChange = preferences.usePreciseSeeking::set,
                 title = { Text(stringResource(R.string.pref_player_use_precise_seeking)) },
-              )
-
-              PreferenceDivider()
-
-              val seekSensitivity by preferences.seekSensitivity.collectAsState()
-              SliderPreference(
-                value = seekSensitivity,
-                onValueChange = { preferences.seekSensitivity.set(it.toFixed(2)) },
-                title = { Text(stringResource(R.string.pref_player_seek_sensitivity)) },
-                valueRange = 0.01f..0.3f,
-                summary = {
-                  Text(
-                    "%.2f".format(seekSensitivity),
-                    color = MaterialTheme.colorScheme.outline,
-                  )
-                },
-                onSliderValueChange = { preferences.seekSensitivity.set(it.toFixed(2)) },
-                sliderValue = seekSensitivity,
               )
             }
           }
@@ -271,6 +235,34 @@ object PlayerPreferencesScreen : Screen {
                 value = pinchToZoomGesture,
                 onValueChange = preferences.pinchToZoomGesture::set,
                 title = { Text(stringResource(R.string.pref_player_gestures_pinch_to_zoom)) },
+              )
+              
+              PreferenceDivider()
+              
+              val horizontalSwipeToSeek by preferences.horizontalSwipeToSeek.collectAsState()
+              SwitchPreference(
+                value = horizontalSwipeToSeek,
+                onValueChange = preferences.horizontalSwipeToSeek::set,
+                title = { Text(stringResource(R.string.pref_player_gestures_horizontal_swipe_to_seek)) },
+              )
+              
+              PreferenceDivider()
+              
+              val horizontalSwipeSensitivity by preferences.horizontalSwipeSensitivity.collectAsState()
+              SliderPreference(
+                value = horizontalSwipeSensitivity,
+                onValueChange = { preferences.horizontalSwipeSensitivity.set(it.toFixed(3)) },
+                title = { Text(stringResource(R.string.pref_player_gestures_horizontal_swipe_sensitivity)) },
+                valueRange = 0.020f..0.1f,
+                summary = {
+                  val sensitivityPercent = (horizontalSwipeSensitivity * 1000).toInt()
+                  Text(
+                    "Current: ${sensitivityPercent}/100 (${if (sensitivityPercent < 30) "Low" else if (sensitivityPercent < 55) "Medium" else "High"})",
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                onSliderValueChange = { preferences.horizontalSwipeSensitivity.set(it.toFixed(3)) },
+                sliderValue = horizontalSwipeSensitivity,
               )
               
               PreferenceDivider()

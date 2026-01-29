@@ -156,7 +156,6 @@ class PlayerViewModel(
   val panelShown = MutableStateFlow(Panels.None)
 
   // Seek state
-  val gestureSeekAmount = MutableStateFlow<Pair<Int, Int>?>(null)
   private val _seekText = MutableStateFlow<String?>(null)
   val seekText: StateFlow<String?> = _seekText.asStateFlow()
 
@@ -221,6 +220,19 @@ class PlayerViewModel(
         if (currentMpvVol > maxVol) {
           MPVLib.setPropertyInt("volume", maxVol)
         }
+      }
+    }
+
+    // Monitor duration changes to automatically enable precise seeking for short videos
+    viewModelScope.launch {
+      MPVLib.propInt["duration"].collect { duration ->
+        val videoDuration = duration ?: 0
+        // Use precise seeking for videos shorter than 2 minutes (120 seconds) or if preference is enabled
+        val shouldUsePreciseSeeking = playerPreferences.usePreciseSeeking.get() || videoDuration < 120
+        
+        // Update hr-seek settings dynamically
+        MPVLib.setPropertyString("hr-seek", if (shouldUsePreciseSeeking) "yes" else "no")
+        MPVLib.setPropertyString("hr-seek-framedrop", if (shouldUsePreciseSeeking) "no" else "yes")
       }
     }
   }
@@ -518,7 +530,10 @@ class PlayerViewModel(
       // Cancel pending relative seek before absolute seek
       seekCoalesceJob?.cancel()
       pendingSeekOffset = 0
-      val seekMode = if (playerPreferences.usePreciseSeeking.get()) "absolute+exact" else "absolute+keyframes"
+      
+      // Use precise seeking for videos shorter than 2 minutes (120 seconds) or if preference is enabled
+      val shouldUsePreciseSeeking = playerPreferences.usePreciseSeeking.get() || maxDuration < 120
+      val seekMode = if (shouldUsePreciseSeeking) "absolute+exact" else "absolute+keyframes"
       MPVLib.command("seek", position.toString(), seekMode)
     }
   }
@@ -532,7 +547,10 @@ class PlayerViewModel(
         val toApply = pendingSeekOffset
         pendingSeekOffset = 0
         if (toApply != 0) {
-          val seekMode = if (playerPreferences.usePreciseSeeking.get()) "relative+exact" else "relative+keyframes"
+          // Use precise seeking for videos shorter than 2 minutes (120 seconds) or if preference is enabled
+          val maxDuration = MPVLib.getPropertyInt("duration") ?: 0
+          val shouldUsePreciseSeeking = playerPreferences.usePreciseSeeking.get() || maxDuration < 120
+          val seekMode = if (shouldUsePreciseSeeking) "relative+exact" else "relative+keyframes"
           MPVLib.command("seek", toApply.toString(), seekMode)
         }
       }
@@ -544,7 +562,6 @@ class PlayerViewModel(
     }
     _isSeekingForwards.value = false
     seekBy(-doubleTapToSeekDuration)
-    if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
   }
 
   fun rightSeek() {
@@ -553,7 +570,6 @@ class PlayerViewModel(
     }
     _isSeekingForwards.value = true
     seekBy(doubleTapToSeekDuration)
-    if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
   }
 
   fun leftSubSeek() {
@@ -594,6 +610,10 @@ class PlayerViewModel(
     _seekText.value = text
   }
 
+  fun updateIsSeekingForwards(isForwards: Boolean) {
+    _isSeekingForwards.value = isForwards
+  }
+
   private fun seekToWithText(
     seekValue: Int,
     text: String?,
@@ -603,7 +623,6 @@ class PlayerViewModel(
     _doubleTapSeekAmount.value = seekValue - currentPos
     _seekText.value = text
     seekTo(seekValue)
-    if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
   }
 
   private fun seekByWithText(
@@ -619,7 +638,6 @@ class PlayerViewModel(
     _seekText.value = text
     _isSeekingForwards.value = value > 0
     seekBy(value)
-    if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
   }
 
   // ==================== Brightness & Volume ====================

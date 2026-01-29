@@ -158,7 +158,7 @@ fun PlayerControls(
   val demuxerCacheDuration by MPVLib.propFloat["demuxer-cache-duration"].collectAsState()
   val cacheBufferingState by MPVLib.propInt["cache-buffering-state"].collectAsState()
   val playbackSpeed by MPVLib.propFloat["speed"].collectAsState()
-  val gestureSeekAmount by viewModel.gestureSeekAmount.collectAsState()
+
   val doubleTapSeekAmount by viewModel.doubleTapSeekAmount.collectAsState()
   val showDoubleTapOvals by playerPreferences.showDoubleTapOvals.collectAsState()
   val showSeekTime by playerPreferences.showSeekTimeWhileSeeking.collectAsState()
@@ -539,7 +539,7 @@ fun PlayerControls(
 
         AnimatedVisibility(
           visible =
-            (controlsShown && !areControlsLocked || gestureSeekAmount != null) || pausedForCache == true,
+            (controlsShown && !areControlsLocked || doubleTapSeekAmount != 0) || pausedForCache == true,
           enter = fadeIn(playerControlsEnterAnimationSpec()),
           exit = fadeOut(playerControlsExitAnimationSpec()),
           modifier =
@@ -555,14 +555,15 @@ fun PlayerControls(
           val interaction = remember { MutableInteractionSource() }
 
           when {
-            gestureSeekAmount != null -> {
-              val gs = gestureSeekAmount ?: Pair(0, 0)
+            doubleTapSeekAmount != 0 -> {
+              val seekAmount = doubleTapSeekAmount
+              val currentPos = position ?: 0
               Text(
                 stringResource(
                   R.string.player_gesture_seek_indicator,
-                  if (gs.second >= 0) '+' else '-',
-                  Utils.prettyTime(abs(gs.second)),
-                  Utils.prettyTime(gs.first + gs.second),
+                  if (seekAmount >= 0) '+' else '-',
+                  Utils.prettyTime(abs(seekAmount)),
+                  Utils.prettyTime(currentPos + seekAmount),
                 ),
                 style =
                   MaterialTheme.typography.headlineMedium.copy(

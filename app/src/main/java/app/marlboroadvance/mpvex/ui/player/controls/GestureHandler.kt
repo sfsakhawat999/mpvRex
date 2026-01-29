@@ -93,6 +93,7 @@ fun GestureHandler(
   val seekAmount by viewModel.doubleTapSeekAmount.collectAsState()
   val isSeekingForwards by viewModel.isSeekingForwards.collectAsState()
   val useSingleTapForCenter by gesturePreferences.useSingleTapForCenter.collectAsState()
+  val reverseDoubleTap by gesturePreferences.reverseDoubleTap.collectAsState()
   val doubleTapSeekAreaWidth by gesturePreferences.doubleTapSeekAreaWidth.collectAsState()
   var isDoubleTapSeeking by remember { mutableStateOf(false) }
   LaunchedEffect(seekAmount) {
@@ -108,10 +109,9 @@ fun GestureHandler(
   val brightnessGesture = playerPreferences.brightnessGesture.get()
   val volumeGesture by playerPreferences.volumeGesture.collectAsState()
   val swapVolumeAndBrightness by playerPreferences.swapVolumeAndBrightness.collectAsState()
-  val seekGesture by playerPreferences.horizontalSeekGesture.collectAsState()
-  val showSeekbarWhenSeeking by playerPreferences.showSeekBarWhenSeeking.collectAsState()
-  val seekSensitivity by playerPreferences.seekSensitivity.collectAsState()
   val pinchToZoomGesture by playerPreferences.pinchToZoomGesture.collectAsState()
+  val horizontalSwipeToSeek by playerPreferences.horizontalSwipeToSeek.collectAsState()
+  val horizontalSwipeSensitivity by playerPreferences.horizontalSwipeSensitivity.collectAsState()
   var isLongPressing by remember { mutableStateOf(false) }
   var isDynamicSpeedControlActive by remember { mutableStateOf(false) }
   var dynamicSpeedStartX by remember { mutableStateOf(0f) }
@@ -133,6 +133,7 @@ fun GestureHandler(
   var lastTapRegion by remember { mutableStateOf<String?>(null) }
   var pendingSingleTapRegion by remember { mutableStateOf<String?>(null) }
   var pendingSingleTapPosition by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+  var pendingTapInExclusionZone by remember { mutableStateOf(false) }
   val doubleTapTimeout = 250L
   val multiTapContinueWindow = 650L
 
@@ -142,13 +143,13 @@ fun GestureHandler(
 
   // Auto-reset tap count on timeout and execute single tap if no double tap detected
   LaunchedEffect(tapCount, longPressTriggeredDuringTouch) {
-    if (tapCount == 1 && pendingSingleTapRegion != null) {
+    if (tapCount == 1) {
       delay(doubleTapTimeout)
       // Timeout occurred, execute single tap action only if not double-tap seeking and not triggered by long press
       if (tapCount == 1 && pendingSingleTapRegion != null && !isDoubleTapSeeking && !longPressTriggeredDuringTouch) {
         val region = pendingSingleTapRegion!!
         val isCenterTap = region == "center"
-        if (useSingleTapForCenter && isCenterTap) {
+        if (useSingleTapForCenter && isCenterTap && !pendingTapInExclusionZone) {
           viewModel.handleCenterSingleTap()
         } else {
           if (panelShown != Panels.None && !allowGesturesInPanels) {
@@ -184,7 +185,7 @@ fun GestureHandler(
     modifier = modifier
       .fillMaxSize()
       .padding(horizontal = 16.dp, vertical = 16.dp)
-      .pointerInput(areControlsLocked, doubleTapSeekAreaWidth, gesturePreferences) {
+      .pointerInput(areControlsLocked, doubleTapSeekAreaWidth, reverseDoubleTap) {
         // Isolated double-tap detection that doesn't interfere with other gestures
         awaitEachGesture {
           val down = awaitFirstDown(requireUnconsumed = false)
@@ -196,8 +197,8 @@ fun GestureHandler(
           val leftBoundary = size.width * seekAreaFraction
           val rightBoundary = size.width * (1f - seekAreaFraction)
           val region = when {
-            downPosition.x > rightBoundary -> "right"
-            downPosition.x < leftBoundary -> "left"
+            downPosition.x > rightBoundary -> if (reverseDoubleTap) "left" else "right"
+            downPosition.x < leftBoundary -> if (reverseDoubleTap) "right" else "left"
             else -> "center"
           }
 
@@ -317,7 +318,23 @@ fun GestureHandler(
                   pendingSingleTapPosition = downPosition
                   wasConsumedByTapGesture = true
                   pointer.consume()
-                  // Don't execute single tap action yet - wait to see if second tap comes
+                  
+                  // Instant single tap for center if enabled and not in exclusion zones
+                  if (region == "center" && useSingleTapForCenter) {
+                    val exclusionZoneHeight = size.height * 0.25f // 25% from top and bottom
+                    val inExclusionZone = downPosition.y < exclusionZoneHeight || 
+                                          downPosition.y > size.height - exclusionZoneHeight
+                    
+                    pendingTapInExclusionZone = inExclusionZone // Store for delayed execution check
+
+                    if (!inExclusionZone) {
+                       viewModel.handleCenterSingleTap()
+                       // Prevent delayed execution
+                       pendingSingleTapRegion = null 
+                    }
+                  } else {
+                    pendingTapInExclusionZone = false
+                  }
                 }
               }
               break
@@ -325,8 +342,8 @@ fun GestureHandler(
           } while (event.changes.any { it.pressed })
         }
       }
-      .pointerInput(areControlsLocked, multipleSpeedGesture, seekGesture, brightnessGesture, volumeGesture) {
-        if ((!seekGesture && !brightnessGesture && !volumeGesture) || areControlsLocked) return@pointerInput
+      .pointerInput(areControlsLocked, multipleSpeedGesture, brightnessGesture, volumeGesture) {
+        if ((!brightnessGesture && !volumeGesture) || areControlsLocked) return@pointerInput
 
         awaitEachGesture {
           val down = awaitFirstDown(requireUnconsumed = false)
@@ -334,11 +351,6 @@ fun GestureHandler(
 
           // Reset long press tracking at the start of each gesture
           longPressTriggeredDuringTouch = false
-
-          // State for horizontal seeking
-          var startingPosition = position ?: 0
-          var startingX = startPosition.x
-          var wasPlayerAlreadyPause = false
 
           // State for vertical gestures (volume/brightness)
           var startingY = 0f
@@ -361,7 +373,7 @@ fun GestureHandler(
           val longPressDelay = 500L
           var longPressJob = coroutineScope.launch {
             delay(longPressDelay)
-            if (!longPressTriggered && !wasPlayerAlreadyPause && paused == false) {
+            if (!longPressTriggered && paused == false) {
               val distance = sqrt(
                 (down.position.x - startPosition.x) * (down.position.x - startPosition.x) +
                 (down.position.y - startPosition.y) * (down.position.y - startPosition.y)
@@ -426,14 +438,6 @@ fun GestureHandler(
                         dynamicSpeedStartX = currentPosition.x
                         dynamicSpeedStartValue = MPVLib.getPropertyFloat("speed") ?: multipleSpeedGesture
                       }
-                      "horizontal" -> {
-                        if (seekGesture && !isLongPressing) {
-                          startingPosition = position ?: 0
-                          startingX = startPosition.x
-                          wasPlayerAlreadyPause = paused ?: false
-                          viewModel.pause()
-                        }
-                      }
                       "vertical" -> {
                         if ((brightnessGesture || volumeGesture) && !isLongPressing) {
                           startingY = 0f
@@ -485,32 +489,6 @@ fun GestureHandler(
                             viewModel.playerUpdate.update { PlayerUpdates.DynamicSpeedControl(newSpeed, true) }
                           }
                         }
-                      }
-                    }
-                    "horizontal" -> {
-                      if (seekGesture && !isLongPressing) {
-                        val dragAmount = currentPosition.x - startPosition.x
-                        if ((position ?: 0) <= 0f && dragAmount < 0) return@forEach
-                        if ((position ?: 0) >= (duration ?: 0) && dragAmount > 0) return@forEach
-
-                        calculateNewHorizontalGestureValue(
-                          startingPosition,
-                          startingX,
-                          currentPosition.x,
-                          seekSensitivity,
-                        ).let {
-                          viewModel.gestureSeekAmount.update { _ ->
-                            Pair(
-                              startingPosition,
-                              (it - startingPosition)
-                                .coerceIn(0 - startingPosition, ((duration ?: 0) - startingPosition)),
-                            )
-                          }
-                          viewModel.seekTo(it)
-                        }
-
-                        if (showSeekbarWhenSeeking) viewModel.showSeekBar()
-                        change.consume()
                       }
                     }
                     "vertical" -> {
@@ -606,13 +584,6 @@ fun GestureHandler(
               longPressJob.cancel()
               if (gestureType != null) {
                 when (gestureType) {
-                  "horizontal" -> {
-                    if (seekGesture) {
-                      viewModel.gestureSeekAmount.update { null }
-                      viewModel.hideSeekBar()
-                      if (!wasPlayerAlreadyPause) viewModel.unpause()
-                    }
-                  }
                   "vertical" -> {
                     if (brightnessGesture || volumeGesture) {
                       startingY = 0f
@@ -640,13 +611,6 @@ fun GestureHandler(
           }
 
           when (gestureType) {
-            "horizontal" -> {
-              if (seekGesture) {
-                viewModel.gestureSeekAmount.update { null }
-                viewModel.hideSeekBar()
-                if (!wasPlayerAlreadyPause) viewModel.unpause()
-              }
-            }
             "vertical" -> {
               if (brightnessGesture || volumeGesture) {
                 startingY = 0f
@@ -720,6 +684,122 @@ fun GestureHandler(
               break
             }
           } while (event.changes.any { it.pressed })
+        }
+      }
+      .pointerInput(horizontalSwipeToSeek, areControlsLocked, gesturePreferences) {
+        if (!horizontalSwipeToSeek || areControlsLocked) return@pointerInput
+
+        awaitEachGesture {
+          val down = awaitFirstDown(requireUnconsumed = false)
+          val startPosition = down.position
+          val startTime = System.currentTimeMillis()
+          
+          var gestureType: String? = null
+          var hasStartedSeeking = false
+          var initialVideoPosition = 0f
+          // Use the sensitivity preference instead of hardcoded value
+          val seekSensitivity = horizontalSwipeSensitivity
+          
+          do {
+            val event = awaitPointerEvent()
+            val pointerCount = event.changes.count { it.pressed }
+
+            if (pointerCount == 1) {
+              event.changes.forEach { change ->
+                if (change.pressed) {
+                  val currentPosition = change.position
+                  val deltaX = currentPosition.x - startPosition.x
+                  val deltaY = currentPosition.y - startPosition.y
+                  val timeSinceStart = System.currentTimeMillis() - startTime
+
+                  // Only activate if this is clearly a horizontal gesture
+                  // and not conflicting with other gestures
+                  if (gestureType == null && 
+                      abs(deltaX) > 30f && 
+                      abs(deltaX) > abs(deltaY) * 2f && // Must be strongly horizontal
+                      timeSinceStart > 100L && // Avoid conflicts with double-tap
+                      !isLongPressing && // Don't conflict with long press
+                      !isDynamicSpeedControlActive && // Don't conflict with speed control
+                      panelShown == Panels.None) { // Only when no panels are shown
+                    
+                    gestureType = "horizontal_seek"
+                    hasStartedSeeking = true
+                    initialVideoPosition = position?.toFloat() ?: 0f
+                    
+                    // Show seekbar and start seeking mode (same as seekbar scrubbing)
+                    viewModel.showSeekBar()
+                    change.consume()
+                  }
+
+                  if (gestureType == "horizontal_seek" && hasStartedSeeking) {
+                    // Calculate seek amount based on horizontal movement
+                    val seekAmount = deltaX * seekSensitivity
+                    val targetPosition = (initialVideoPosition + seekAmount).coerceAtLeast(0f)
+                    val maxDuration = duration?.toFloat() ?: 0f
+                    val clampedPosition = targetPosition.coerceAtMost(maxDuration)
+                    
+                    // Use the same seeking mechanism as seekbar scrubbing
+                    // This will update the seekbar position and provide live preview
+                    viewModel.seekTo(clampedPosition.toInt())
+                    
+                    // Format and display time position updates
+                    val currentPos = clampedPosition.toInt()
+                    val seekDelta = (clampedPosition - initialVideoPosition).toInt()
+                    
+                    // Smart time formatting function - no hour if 0, always 00 format
+                    fun formatTime(seconds: Int): String {
+                      val absSeconds = kotlin.math.abs(seconds)
+                      val hours = absSeconds / 3600
+                      val minutes = (absSeconds % 3600) / 60
+                      val secs = absSeconds % 60
+                      
+                      return if (hours > 0) {
+                        String.format("%d:%02d:%02d", hours, minutes, secs)
+                      } else {
+                        String.format("%02d:%02d", minutes, secs)
+                      }
+                    }
+                    
+                    // Format current position
+                    val currentTimeStr = formatTime(currentPos)
+                    
+                    // Format seek delta with +/- prefix
+                    val deltaStr = if (seekDelta >= 0) {
+                      "+${formatTime(seekDelta)}"
+                    } else {
+                      "-${formatTime(-seekDelta)}"
+                    }
+                    
+                    // Use PlayerUpdates system like zoom updates
+                    viewModel.playerUpdate.update { 
+                      PlayerUpdates.HorizontalSeek(currentTimeStr, deltaStr)
+                    }
+                    
+                    change.consume()
+                  }
+                }
+              }
+            } else if (pointerCount > 1) {
+              // Multi-finger detected, cancel horizontal seek
+              if (hasStartedSeeking) {
+                hasStartedSeeking = false
+                // Clean up seeking state without showing controls
+                viewModel.playerUpdate.update { PlayerUpdates.None }
+                viewModel.hideSeekBar()
+              }
+              break
+            }
+          } while (event.changes.any { it.pressed })
+
+          // Apply the final seek when gesture ends
+          if (hasStartedSeeking) {
+            // Clear the horizontal seek update and hide seekbar after a short delay
+            coroutineScope.launch {
+              delay(300)
+              viewModel.playerUpdate.update { PlayerUpdates.None }
+              viewModel.hideSeekBar()
+            }
+          }
         }
       },
   )
@@ -825,14 +905,6 @@ fun calculateNewVerticalGestureValue(originalValue: Int, startingY: Float, newY:
 
 fun calculateNewVerticalGestureValue(originalValue: Float, startingY: Float, newY: Float, sensitivity: Float): Float {
   return originalValue + ((startingY - newY) * sensitivity)
-}
-
-fun calculateNewHorizontalGestureValue(originalValue: Int, startingX: Float, newX: Float, sensitivity: Float): Int {
-  return originalValue + ((newX - startingX) * sensitivity).toInt()
-}
-
-fun calculateNewHorizontalGestureValue(originalValue: Float, startingX: Float, newX: Float, sensitivity: Float): Float {
-  return originalValue + ((newX - startingX) * sensitivity)
 }
 
 @Composable

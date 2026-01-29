@@ -10,3 +10,6 @@
 local.properties
 app/release
 MERGE_RULES.md
+KeyStore.jks
+install_debug.sh
+compile_release.sh

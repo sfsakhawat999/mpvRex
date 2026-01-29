@@ -181,18 +181,6 @@ object SearchablePreferences {
                 screen = PlayerPreferencesScreen,
             ))
             add(SearchablePreference(
-                titleRes = R.string.pref_player_gestures_seek,
-                keywords = listOf("seek", "horizontal", "swipe", "gesture", "time"),
-                category = "Player",
-                screen = PlayerPreferencesScreen,
-            ))
-            add(SearchablePreference(
-                titleRes = R.string.pref_player_show_seekbar_when_seeking,
-                keywords = listOf("seekbar", "seek", "progress", "timeline", "show"),
-                category = "Player",
-                screen = PlayerPreferencesScreen,
-            ))
-            add(SearchablePreference(
                 titleRes = R.string.show_splash_ovals_on_double_tap_to_seek,
                 keywords = listOf("oval", "circle", "double tap", "seek", "visual", "feedback"),
                 category = "Player",
@@ -211,12 +199,6 @@ object SearchablePreferences {
                 screen = PlayerPreferencesScreen,
             ))
             add(SearchablePreference(
-                titleRes = R.string.pref_player_seek_sensitivity,
-                keywords = listOf("sensitivity", "seek", "swipe", "speed", "amount"),
-                category = "Player",
-                screen = PlayerPreferencesScreen,
-            ))
-            add(SearchablePreference(
                 titleRes = R.string.pref_player_gestures_brightness,
                 keywords = listOf("brightness", "gesture", "swipe", "display", "control"),
                 category = "Player",
@@ -231,6 +213,19 @@ object SearchablePreferences {
             add(SearchablePreference(
                 titleRes = R.string.pref_player_gestures_pinch_to_zoom,
                 keywords = listOf("zoom", "pinch", "gesture", "scale", "crop", "video"),
+                category = "Player",
+                screen = PlayerPreferencesScreen,
+            ))
+            add(SearchablePreference(
+                titleRes = R.string.pref_player_gestures_horizontal_swipe_to_seek,
+                keywords = listOf("horizontal", "swipe", "seek", "gesture", "left", "right"),
+                category = "Player",
+                screen = PlayerPreferencesScreen,
+            ))
+            add(SearchablePreference(
+                titleRes = R.string.pref_player_gestures_horizontal_swipe_sensitivity,
+                summaryRes = R.string.pref_player_gestures_horizontal_swipe_sensitivity_summary,
+                keywords = listOf("horizontal", "swipe", "sensitivity", "seek", "distance", "speed"),
                 category = "Player",
                 screen = PlayerPreferencesScreen,
             ))

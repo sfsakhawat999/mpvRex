@@ -133,16 +133,18 @@
     <string name="pref_player_orientation_sensor_landscape">Sensor landscape</string>
     <string name="pref_player_save_position_on_quit">Save position on quit</string>
     <string name="pref_player_double_tap_seek_duration">Double tap seek duration</string>
-    <string name="pref_player_show_seekbar_when_seeking">Show seekbar when seeking</string>
     <string name="pref_player_seeking_title">Seeking</string>
     <string name="pref_player_close_after_eof">Close after the end of playback</string>
     <string name="pref_player_remember_brightness">Remember display brightness</string>
 
     <string name="pref_player_gestures">Gestures</string>
-    <string name="pref_player_gestures_seek">Horizontal seek gestures</string>
     <string name="pref_player_gestures_brightness">Brightness gestures</string>
     <string name="pref_player_gestures_volume">Volume gestures</string>
     <string name="pref_player_gestures_pinch_to_zoom">Pinch to zoom</string>
+    <string name="pref_player_gestures_horizontal_swipe_to_seek">Horizontal swipe to seek</string>
+    <string name="pref_player_gestures_horizontal_swipe_to_seek_summary">Swipe left/right to seek backward/forward</string>
+    <string name="pref_player_gestures_horizontal_swipe_sensitivity">Horizontal swipe sensitivity</string>
+    <string name="pref_player_gestures_horizontal_swipe_sensitivity_summary">Adjust how much distance is covered per swipe</string>
     <string name="pref_player_gestures_hold_for_multiple_speed">Hold for multi - x speed</string>
 
     <string name="pref_player_controls">Controls</string>
@@ -161,6 +163,8 @@
     <string name="pref_gesture_double_tap_none">None</string>
     <string name="pref_gesture_double_tap_seek">Seek</string>
     <string name="pref_gesture_double_tap_subseek">Seek Subtitle</string>
+    <string name="pref_gesture_reverse_double_tap_title">Reverse left/right gestures</string>
+    <string name="pref_gesture_reverse_double_tap_summary">Swap the left and right double/single tap gestures</string>
     <string name="pref_gesture_double_tap_play">Play/Pause</string>
     <string name="pref_gesture_double_tap_custom">Custom</string>
     <string name="pref_gesture_double_tap_left_title">Double tap (left)</string>
@@ -358,7 +362,6 @@
     <string name="player_sheets_stats_page_4_desc">Active Key Bindings. List of mapped keyboard shortcuts.</string>
     <string name="player_sheets_stats_page_5_desc">Track List. Detailed info on Video, Audio, and Subtitle tracks.</string>
     <string name="player_speed" translatable="false">%.2fx</string>
-    <string name="player_gesture_seek_indicator" translatable="false">%c%s\n[%s]</string>
 
     <string name="player_aspect_fit">Fit Screen</string>
     <string name="player_aspect_crop">Crop</string>
@@ -390,6 +393,7 @@
     <string name="pref_player_display_hide_player_control_time">Hide player control time</string>
     <string name="show_splash_ovals_on_double_tap_to_seek">Show ripple when double tap seeking</string>
     <string name="show_time_on_double_tap_to_seek">Show seek time</string>
+    <string name="player_gesture_seek_indicator" translatable="false">[%1$s%2$s] (%3$s)</string>
 
     <string name="pref_audio_channels_auto_safe_desc">Default. Safe automatic selection.</string>
     <string name="pref_audio_channels_auto_desc">Automatic selection.</string>
@@ -441,7 +445,6 @@
     <!-- Media Info Activity -->
 
     <string name="pref_player_use_precise_seeking">Use precise seeking</string>
-    <string name="pref_player_seek_sensitivity">Seek sensitivity</string>
 
     <!-- Folders Preferences -->
     <string name="pref_folders_title">Folders</string>

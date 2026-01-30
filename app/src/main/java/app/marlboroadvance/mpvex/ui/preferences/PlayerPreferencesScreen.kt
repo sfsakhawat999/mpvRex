@@ -374,17 +374,21 @@ object PlayerPreferencesScreen : Screen {
               
               PreferenceDivider()
 
-              val disablePlayerGradient by preferences.disablePlayerGradient.collectAsState()
-              SwitchPreference(
-                value = disablePlayerGradient,
-                onValueChange = preferences.disablePlayerGradient::set,
-                title = { Text("Disable player gradient") },
+              val playerGradientOpacity by preferences.playerGradientOpacity.collectAsState()
+              SliderPreference(
+                value = playerGradientOpacity,
+                onValueChange = { preferences.playerGradientOpacity.set(it.toFixed(2)) },
+                title = { Text("Player gradient opacity") },
+                valueRange = 0f..1f,
                 summary = {
-                   Text(
-                      text = "Removes the top and bottom dark shadow when controls are shown",
-                      color = MaterialTheme.colorScheme.outline,
-                   )
-                }
+                  val opacityPercent = (playerGradientOpacity * 100).toInt()
+                  Text(
+                    text = "Current: $opacityPercent%",
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                onSliderValueChange = { preferences.playerGradientOpacity.set(it.toFixed(2)) },
+                sliderValue = playerGradientOpacity,
               )
             }
           }

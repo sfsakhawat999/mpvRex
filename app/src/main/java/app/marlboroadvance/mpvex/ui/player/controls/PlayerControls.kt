@@ -147,7 +147,7 @@ fun PlayerControls(
   val audioPreferences = koinInject<AudioPreferences>()
   val showSystemStatusBar by playerPreferences.showSystemStatusBar.collectAsState()
   val showSystemNavigationBar by playerPreferences.showSystemNavigationBar.collectAsState()
-  val disablePlayerGradient by playerPreferences.disablePlayerGradient.collectAsState()
+  val playerGradientOpacity by playerPreferences.playerGradientOpacity.collectAsState()
   val interactionSource = remember { MutableInteractionSource() }
   val controlsShown by viewModel.controlsShown.collectAsState()
   val areControlsLocked by viewModel.areControlsLocked.collectAsState()
@@ -267,7 +267,7 @@ fun PlayerControls(
                 Pair(.7f, Color.Transparent),
                 Pair(1f, Color.Black),
               ),
-              alpha = if (disablePlayerGradient) 0f else transparentOverlay,
+              alpha = transparentOverlay * playerGradientOpacity,
             ),
       ) {
         val (topLeftControls, topRightControls) = createRefs()

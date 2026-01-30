@@ -371,6 +371,21 @@ object PlayerPreferencesScreen : Screen {
                 onValueChange = preferences.reduceMotion::set,
                 title = { Text(stringResource(R.string.pref_player_display_reduce_player_animation)) },
               )
+              
+              PreferenceDivider()
+
+              val disablePlayerGradient by preferences.disablePlayerGradient.collectAsState()
+              SwitchPreference(
+                value = disablePlayerGradient,
+                onValueChange = preferences.disablePlayerGradient::set,
+                title = { Text("Disable player gradient") },
+                summary = {
+                   Text(
+                      text = "Removes the top and bottom dark shadow when controls are shown",
+                      color = MaterialTheme.colorScheme.outline,
+                   )
+                }
+              )
             }
           }
         }

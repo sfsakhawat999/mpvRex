@@ -341,7 +341,7 @@ fun GestureHandler(
                   val isLeftImmediate = region == "left" && useSingleTapForLeftRight
                   val isRightImmediate = region == "right" && useSingleTapForLeftRight
 
-                  if (isCenterImmediate || isLeftImmediate || isRightImmediate) {
+                  if ((isCenterImmediate || isLeftImmediate || isRightImmediate) && !longPressTriggeredDuringTouch) {
                     val exclusionZoneHeight = size.height * 0.25f // 25% from top and bottom
                     val inExclusionZone = downPosition.y < exclusionZoneHeight || 
                                           downPosition.y > size.height - exclusionZoneHeight

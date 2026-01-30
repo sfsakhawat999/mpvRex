@@ -261,7 +261,7 @@ fun GestureHandler(
                   positionChange < 100f &&
                   tapCount == 1
 
-                if (isDoubleTap && !areControlsLocked) {
+                if (isDoubleTap && !areControlsLocked && !pendingTapInExclusionZone) {
                   // Valid double-tap detected
                   tapCount = 2
                   lastTapTime = downTime

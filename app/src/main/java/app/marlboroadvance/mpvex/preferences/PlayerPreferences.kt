@@ -47,6 +47,7 @@ class PlayerPreferences(
   val showSystemStatusBar = preferenceStore.getBoolean("show_system_status_bar")
   val showSystemNavigationBar = preferenceStore.getBoolean("show_system_navigation_bar")
   val reduceMotion = preferenceStore.getBoolean("reduce_motion", true)
+  val playerGradientOpacity = preferenceStore.getFloat("player_gradient_opacity", 1.0f)
   val playerTimeToDisappear = preferenceStore.getInt("player_time_to_disappear", 4000)
 
   val defaultVideoZoom = preferenceStore.getFloat("default_video_zoom", 0f)

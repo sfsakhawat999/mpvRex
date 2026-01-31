@@ -56,6 +56,8 @@ import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
+import me.zhanghai.compose.preference.SliderPreference
+import app.marlboroadvance.mpvex.ui.player.controls.components.sheets.toFixed
 import app.marlboroadvance.mpvex.ui.preferences.components.PlayerButtonChip
 import org.koin.compose.koinInject
 
@@ -293,6 +295,25 @@ object PlayerControlsPreferencesScreen : Screen {
                 summary = {
                   Text(text = "Keep player controls in dark theme regardless of app theme")
                 },
+              )
+              
+              PreferenceDivider()
+
+              val playerGradientOpacity by playerPrefs.playerGradientOpacity.collectAsState()
+              SliderPreference(
+                value = playerGradientOpacity,
+                onValueChange = { playerPrefs.playerGradientOpacity.set(it.toFixed(2)) },
+                title = { Text("Player gradient opacity") },
+                valueRange = 0f..1f,
+                summary = {
+                  val opacityPercent = (playerGradientOpacity * 100).toInt()
+                  Text(
+                    text = "Current: $opacityPercent%",
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                onSliderValueChange = { playerPrefs.playerGradientOpacity.set(it.toFixed(2)) },
+                sliderValue = playerGradientOpacity,
               )
               
               PreferenceDivider()

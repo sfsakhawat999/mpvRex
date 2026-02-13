@@ -125,6 +125,8 @@
     <string name="pref_player_orientation">Orientation</string>
     <string name="pref_player_orientation_free">Free</string>
     <string name="pref_player_orientation_video">Video</string>
+    <string name="pref_player_orientation_smart">Smart</string>
+    <string name="pref_player_orientation_smart_summary">Follow video orientation unless manually changed</string>
     <string name="pref_player_orientation_portrait">Portrait</string>
     <string name="pref_player_orientation_reverse_portrait">Reverse portrait</string>
     <string name="pref_player_orientation_sensor_portrait">Sensor portrait</string>

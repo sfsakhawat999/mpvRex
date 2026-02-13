@@ -59,7 +59,7 @@
             android:documentLaunchMode="never"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
-            android:theme="@style/Theme.mpvex">
+            android:theme="@style/Theme.mpvex.Player">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

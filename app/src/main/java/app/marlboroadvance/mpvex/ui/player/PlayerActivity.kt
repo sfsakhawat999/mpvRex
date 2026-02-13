@@ -653,11 +653,6 @@ class PlayerActivity :
         viewModel.pause()
       }
 
-      // Restore UI immediately when user is finishing for instant feedback
-      if (isUserFinishing && !isInPip) {
-        restoreSystemUI()
-      }
-
       saveVideoPlaybackState(fileName)
     }.onFailure { e ->
       Log.e(TAG, "Error during onPause", e)
@@ -669,12 +664,11 @@ class PlayerActivity :
   @RequiresApi(Build.VERSION_CODES.P)
   override fun finish() {
     runCatching {
-      // Restore UI immediately for responsive exit
-      if (!isInPictureInPictureMode) {
-        restoreSystemUI()
-      }
       isReady = false
       setReturnIntent()
+      if (!isInPictureInPictureMode) {
+        overridePendingTransition(0, android.R.anim.fade_out)
+      }
     }.onFailure { e ->
       Log.e(TAG, "Error during finish", e)
     }
@@ -685,13 +679,12 @@ class PlayerActivity :
   @RequiresApi(Build.VERSION_CODES.P)
   override fun finishAndRemoveTask() {
     runCatching {
-      // Restore UI immediately for responsive exit (same as finish())
-      if (!isInPictureInPictureMode) {
-        restoreSystemUI()
-      }
       isReady = false
       isUserFinishing = true
       setReturnIntent()
+      if (!isInPictureInPictureMode) {
+        overridePendingTransition(0, android.R.anim.fade_out)
+      }
     }.onFailure { e ->
       Log.e(TAG, "Error during finishAndRemoveTask", e)
     }

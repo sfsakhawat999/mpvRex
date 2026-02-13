@@ -10,6 +10,7 @@ enum class PlayerOrientation(
 ) {
   Free(R.string.pref_player_orientation_free),
   Video(R.string.pref_player_orientation_video),
+  Smart(R.string.pref_player_orientation_smart),
   Portrait(R.string.pref_player_orientation_portrait),
   ReversePortrait(R.string.pref_player_orientation_reverse_portrait),
   SensorPortrait(R.string.pref_player_orientation_sensor_portrait),

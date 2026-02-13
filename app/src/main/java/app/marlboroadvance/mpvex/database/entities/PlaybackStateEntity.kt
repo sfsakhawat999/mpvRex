@@ -16,5 +16,6 @@ data class PlaybackStateEntity(
   val aid: Int,
   val audioDelay: Int,
   val timeRemaining: Int = 0, // in seconds (duration - lastPosition)
+  val savedOrientation: Int? = null, // Persisted orientation for Smart mode
   val externalSubtitles: String = "", // Comma-separated list of external subtitle URIs
 )

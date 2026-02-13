@@ -1919,6 +1919,7 @@ class PlayerActivity :
                 (MPVLib.getPropertyDouble("audio-delay") ?: 0.0) * MILLISECONDS_TO_SECONDS
                 ).toInt(),
             timeRemaining = timeRemaining,
+            savedOrientation = requestedOrientation,
             externalSubtitles = viewModel.externalSubtitles.joinToString("|"),
           ),
         )
@@ -1976,7 +1977,7 @@ class PlayerActivity :
    *
    * @param state The saved playback state entity
    */
-  private fun applyPlaybackState(state: PlaybackStateEntity?) {
+  private suspend fun applyPlaybackState(state: PlaybackStateEntity?) {
     if (state == null) return
 
     val subDelay = state.subDelay / DELAY_DIVISOR
@@ -2021,6 +2022,14 @@ class PlayerActivity :
     MPVLib.setPropertyDouble("speed", state.playbackSpeed)
     MPVLib.setPropertyDouble("audio-delay", audioDelay)
     MPVLib.setPropertyDouble("sub-speed", state.subSpeed)
+
+    // Restore orientation if in Smart mode
+    if (playerPreferences.orientation.get() == PlayerOrientation.Smart && state.savedOrientation != null) {
+      withContext(Dispatchers.Main) {
+        requestedOrientation = state.savedOrientation
+        Log.d(TAG, "Restored orientation for Smart mode: ${state.savedOrientation}")
+      }
+    }
 
     // Restore video zoom from saved state
     MPVLib.setPropertyDouble("video-zoom", state.videoZoom.toDouble())
@@ -2335,10 +2344,21 @@ class PlayerActivity :
     requestedOrientation =
       when (orientationPref) {
         PlayerOrientation.Free -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
-        PlayerOrientation.Video -> {
-          // For video orientation, check if aspect is available
+        PlayerOrientation.Smart, PlayerOrientation.Video -> {
+          // For Smart mode, check if orientation was already restored from database
+          // requestedOrientation is updated in applyPlaybackState for Smart mode
+          val isSmartMode = orientationPref == PlayerOrientation.Smart
+          
+          // If in Smart mode and we've already set a specific orientation (not sensor landscape default),
+          // keep using it and don't re-calculate from aspect ratio.
+          if (isSmartMode && requestedOrientation != ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE) {
+             Log.d(TAG, "setOrientation - Smart mode: using restored orientation $requestedOrientation")
+             return
+          }
+
+          // For video orientation (or Smart mode fallback), check if aspect is available
           val aspect = runCatching { player.getVideoOutAspect() }.getOrNull()
-          Log.d(TAG, "setOrientation - Video mode: aspect=$aspect")
+          Log.d(TAG, "setOrientation - ${if (isSmartMode) "Smart (fallback)" else "Video"} mode: aspect=$aspect")
           if (aspect == null || aspect <= 0.0) {
             // Aspect not available yet - wait for video-params/aspect update
             Log.d(TAG, "setOrientation - Aspect not available, defaulting to landscape")

@@ -328,6 +328,8 @@ class PlayerActivity :
   @RequiresApi(Build.VERSION_CODES.P)
   override fun onCreate(savedInstanceState: Bundle?) {
     enableEdgeToEdge()
+    // Smooth fade-in transition when opening the player
+    overridePendingTransition(android.R.anim.fade_in, 0)
     super.onCreate(savedInstanceState)
     setContentView(binding.root)
 

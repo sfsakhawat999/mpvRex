@@ -1,6 +1,7 @@
 package app.marlboroadvance.mpvex.ui.player
 
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.Composable
@@ -43,7 +44,10 @@ data class PlayerScreen(
           addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
           launchSource?.let { putExtra("launch_source", it) }
         }
-      context.startActivity(intent)
+      context.startActivity(
+        intent,
+        ActivityOptions.makeCustomAnimation(context, android.R.anim.fade_in, 0).toBundle()
+      )
     }
   }
 }

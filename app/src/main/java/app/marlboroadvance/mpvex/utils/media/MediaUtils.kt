@@ -1,5 +1,6 @@
 package app.marlboroadvance.mpvex.utils.media
 
+import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
@@ -64,7 +65,10 @@ object MediaUtils {
             intent.putExtra("title", source.displayName)
           }
           
-          context.startActivity(intent)
+          context.startActivity(
+            intent,
+            ActivityOptions.makeCustomAnimation(context, android.R.anim.fade_in, 0).toBundle()
+          )
           return
         }
 
@@ -86,7 +90,10 @@ object MediaUtils {
     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     launchSource?.let { intent.putExtra("launch_source", it) }
-    context.startActivity(intent)
+    context.startActivity(
+      intent,
+      ActivityOptions.makeCustomAnimation(context, android.R.anim.fade_in, 0).toBundle()
+    )
   }
 
   /**

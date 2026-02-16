@@ -220,6 +220,7 @@ class PlayerActivity :
   private lateinit var pipHelper: MPVPipHelper
 
   private var isReady = false // Single flag: true when video loaded and ready
+  private var isOrientationRestored = false // Track if orientation was restored from DB
   private var isUserFinishing = false
   private var noisyReceiverRegistered = false
   private var mpvInitialized = false // Track MPV initialization state
@@ -327,6 +328,8 @@ class PlayerActivity :
   @RequiresApi(Build.VERSION_CODES.P)
   override fun onCreate(savedInstanceState: Bundle?) {
     enableEdgeToEdge()
+    // Smooth fade-in transition when opening the player
+    overridePendingTransition(android.R.anim.fade_in, 0)
     super.onCreate(savedInstanceState)
     setContentView(binding.root)
 
@@ -395,9 +398,10 @@ class PlayerActivity :
 
     getPlayableUri(intent)?.let(player::playFile)
 
-    // Only set orientation immediately if NOT in Video mode
-    // For Video mode, wait for video-params/aspect to become available
-    if (playerPreferences.orientation.get() != PlayerOrientation.Video) {
+    // Only set orientation immediately if NOT in Video or Smart mode
+    // For these modes, wait for video-params/aspect to become available
+    val orient = playerPreferences.orientation.get()
+    if (orient != PlayerOrientation.Video && orient != PlayerOrientation.Smart) {
       setOrientation()
     }
 
@@ -653,11 +657,6 @@ class PlayerActivity :
         viewModel.pause()
       }
 
-      // Restore UI immediately when user is finishing for instant feedback
-      if (isUserFinishing && !isInPip) {
-        restoreSystemUI()
-      }
-
       saveVideoPlaybackState(fileName)
     }.onFailure { e ->
       Log.e(TAG, "Error during onPause", e)
@@ -669,12 +668,11 @@ class PlayerActivity :
   @RequiresApi(Build.VERSION_CODES.P)
   override fun finish() {
     runCatching {
-      // Restore UI immediately for responsive exit
-      if (!isInPictureInPictureMode) {
-        restoreSystemUI()
-      }
       isReady = false
       setReturnIntent()
+      if (!isInPictureInPictureMode) {
+        overridePendingTransition(0, android.R.anim.fade_out)
+      }
     }.onFailure { e ->
       Log.e(TAG, "Error during finish", e)
     }
@@ -685,13 +683,12 @@ class PlayerActivity :
   @RequiresApi(Build.VERSION_CODES.P)
   override fun finishAndRemoveTask() {
     runCatching {
-      // Restore UI immediately for responsive exit (same as finish())
-      if (!isInPictureInPictureMode) {
-        restoreSystemUI()
-      }
       isReady = false
       isUserFinishing = true
       setReturnIntent()
+      if (!isInPictureInPictureMode) {
+        overridePendingTransition(0, android.R.anim.fade_out)
+      }
     }.onFailure { e ->
       Log.e(TAG, "Error during finishAndRemoveTask", e)
     }
@@ -1583,6 +1580,7 @@ class PlayerActivity :
    */
   @OptIn(DelicateCoroutinesApi::class)
   private fun handleFileLoaded() {
+    isOrientationRestored = false
     // Extract fileName from intent only if not already set
     // This preserves fileName set in onNewIntent or onCreate
     if (fileName.isBlank()) {
@@ -1632,18 +1630,19 @@ class PlayerActivity :
       }
     }
 
-    // Only set orientation immediately if NOT in Video mode
-    // For Video mode, wait for video-params/aspect to become available
-    if (playerPreferences.orientation.get() != PlayerOrientation.Video) {
+    // Only set orientation immediately if NOT in Video or Smart mode
+    // For these modes, wait for video-params/aspect to become available
+    val orientation = playerPreferences.orientation.get()
+    if (orientation != PlayerOrientation.Video && orientation != PlayerOrientation.Smart) {
       setOrientation()
     } else {
-      // For Video mode, try to set orientation after a short delay to ensure
+      // For Video and Smart mode, try to set orientation after a short delay to ensure
       // video dimensions are available
       lifecycleScope.launch {
         kotlinx.coroutines.delay(100)
         if (mpvInitialized && !player.isExiting && !isFinishing) {
           val aspect = player.getVideoOutAspect()
-          Log.d(TAG, "handleFileLoaded - Video mode, aspect after delay: $aspect")
+          Log.d(TAG, "handleFileLoaded - ${if (orientation == PlayerOrientation.Smart) "Smart" else "Video"} mode, aspect after delay: $aspect")
           if (aspect != null && aspect > 0) {
             setOrientation()
           }
@@ -1919,6 +1918,7 @@ class PlayerActivity :
                 (MPVLib.getPropertyDouble("audio-delay") ?: 0.0) * MILLISECONDS_TO_SECONDS
                 ).toInt(),
             timeRemaining = timeRemaining,
+            savedOrientation = requestedOrientation,
             externalSubtitles = viewModel.externalSubtitles.joinToString("|"),
           ),
         )
@@ -1976,7 +1976,7 @@ class PlayerActivity :
    *
    * @param state The saved playback state entity
    */
-  private fun applyPlaybackState(state: PlaybackStateEntity?) {
+  private suspend fun applyPlaybackState(state: PlaybackStateEntity?) {
     if (state == null) return
 
     val subDelay = state.subDelay / DELAY_DIVISOR
@@ -2021,6 +2021,15 @@ class PlayerActivity :
     MPVLib.setPropertyDouble("speed", state.playbackSpeed)
     MPVLib.setPropertyDouble("audio-delay", audioDelay)
     MPVLib.setPropertyDouble("sub-speed", state.subSpeed)
+
+    // Restore orientation if in Smart mode
+    if (playerPreferences.orientation.get() == PlayerOrientation.Smart && state.savedOrientation != null) {
+      withContext(Dispatchers.Main) {
+        requestedOrientation = state.savedOrientation
+        isOrientationRestored = true
+        Log.d(TAG, "Restored orientation for Smart mode: ${state.savedOrientation}")
+      }
+    }
 
     // Restore video zoom from saved state
     MPVLib.setPropertyDouble("video-zoom", state.videoZoom.toDouble())
@@ -2335,10 +2344,20 @@ class PlayerActivity :
     requestedOrientation =
       when (orientationPref) {
         PlayerOrientation.Free -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
-        PlayerOrientation.Video -> {
-          // For video orientation, check if aspect is available
+        PlayerOrientation.Smart, PlayerOrientation.Video -> {
+          // For Smart mode, check if orientation was already restored from database
+          val isSmartMode = orientationPref == PlayerOrientation.Smart
+          
+          // If in Smart mode and we've already restored a choice from the database,
+          // keep using it and don't re-calculate from aspect ratio.
+          if (isSmartMode && isOrientationRestored) {
+             Log.d(TAG, "setOrientation - Smart mode: using restored orientation $requestedOrientation")
+             return
+          }
+
+          // For video orientation (or Smart mode fallback), check if aspect is available
           val aspect = runCatching { player.getVideoOutAspect() }.getOrNull()
-          Log.d(TAG, "setOrientation - Video mode: aspect=$aspect")
+          Log.d(TAG, "setOrientation - ${if (isSmartMode) "Smart (fallback)" else "Video"} mode: aspect=$aspect")
           if (aspect == null || aspect <= 0.0) {
             // Aspect not available yet - wait for video-params/aspect update
             Log.d(TAG, "setOrientation - Aspect not available, defaulting to landscape")

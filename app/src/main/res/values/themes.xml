@@ -2,4 +2,8 @@
 <resources>
 
     <style name="Theme.mpvex" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar" />
+
+    <style name="Theme.mpvex.Player" parent="Theme.mpvex">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
 </resources>

@@ -103,7 +103,6 @@ enum class Sheets {
   VideoZoom,
   AspectRatios,
   Playlist,
-  AmbientConfig,
   FrameNavigation,
 }
 

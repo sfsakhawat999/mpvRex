@@ -242,11 +242,24 @@ object SubtitleOps : KoinComponent {
   }
 
   private fun isSubtitleFile(fileName: String): Boolean {
-    val lowerName = fileName.lowercase(Locale.getDefault())
-    return lowerName.endsWith(".srt") ||
-      lowerName.endsWith(".ass") ||
-      lowerName.endsWith(".ssa") ||
-      lowerName.endsWith(".vtt") ||
-      lowerName.endsWith(".sub")
+    val extension = fileName.substringAfterLast('.', "").lowercase(Locale.getDefault())
+    return extension in setOf(
+      // Common & modern
+      "srt", "vtt", "ass", "ssa",
+      // DVD / Blu-ray
+      "sub", "idx", "sup",
+      // Streaming / XML / Professional
+      "xml", "ttml", "dfxp", "itt", "ebu", "imsc", "usf",
+      // Online platforms
+      "sbv", "srv1", "srv2", "srv3", "json",
+      // Legacy & niche
+      "sami", "smi", "mpl", "pjs", "stl", "rt", "psb", "cap",
+      // Broadcast captions
+      "scc", "vttx",
+      // Karaoke / lyrics
+      "lrc", "krc",
+      // Fallback / raw text
+      "txt", "pgs"
+    )
   }
 }

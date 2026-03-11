@@ -55,6 +55,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.geometry.Offset
 import app.marlboroadvance.mpvex.presentation.components.PlayerSheet
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.ui.theme.spacing
@@ -98,66 +105,91 @@ class LRUBitmapCache(private val maxSize: Int) {
 
 /**
  * Loads a thumbnail from MediaStore cache (much faster than generating new thumbnails).
+ * Uses the modern loadThumbnail API on Android Q+ for better performance.
  * Falls back to null if no cached thumbnail exists (in which case a placeholder will be shown).
  */
-private fun loadMediaStoreThumbnail(context: Context, uri: Uri): Bitmap? {
-  return try {
-    when (uri.scheme) {
-      // For content:// URIs, we need to find the video ID first
-      "content" -> {
-        val path = uri.path
-        if (path != null) {
-          // Extract video ID from path if it's a MediaStore URI
+private suspend fun loadMediaStoreThumbnail(context: Context, uri: Uri): Bitmap? {
+  return withContext(Dispatchers.IO) {
+    try {
+      when (uri.scheme) {
+        // For content:// URIs, we need to find the video ID first
+        "content" -> {
           val videoId = extractVideoId(uri, context)
           if (videoId != null) {
-            Thumbnails.getThumbnail(
-              context.contentResolver,
-              videoId,
-              Thumbnails.MINI_KIND,
-              null
-            )
+            // Use modern API on Android Q+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+              val contentUri = android.content.ContentUris.withAppendedId(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                videoId
+              )
+              context.contentResolver.loadThumbnail(
+                contentUri,
+                android.util.Size(512, 512),
+                null
+              )
+            } else {
+              @Suppress("DEPRECATION")
+              Thumbnails.getThumbnail(
+                context.contentResolver,
+                videoId,
+                Thumbnails.MINI_KIND,
+                null
+              )
+            }
           } else {
             null
           }
-        } else {
-          null
         }
-      }
-      // For file:// URIs, try to find the corresponding MediaStore entry
-      "file" -> {
-        val filePath = uri.path ?: return null
-        val projection = arrayOf(
-          MediaStore.Video.Media._ID
-        )
-        val selection = "${MediaStore.Video.Media.DATA} = ?"
-        val selectionArgs = arrayOf(filePath)
+        // For file:// URIs, try to find the corresponding MediaStore entry
+        "file" -> {
+          val filePath = uri.path ?: return@withContext null
+          val projection = arrayOf(MediaStore.Video.Media._ID)
+          val selection = "${MediaStore.Video.Media.DATA} = ?"
+          val selectionArgs = arrayOf(filePath)
 
-        context.contentResolver.query(
-          MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-          projection,
-          selection,
-          selectionArgs,
-          null
-        )?.use { cursor ->
-          if (cursor.moveToFirst()) {
-            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
-            val videoId = cursor.getLong(idColumn)
-            Thumbnails.getThumbnail(
-              context.contentResolver,
-              videoId,
-              Thumbnails.MINI_KIND,
-              null
-            )
-          } else {
+          context.contentResolver.query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
             null
+          )?.use { cursor ->
+            if (cursor.moveToFirst()) {
+              val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
+              val videoId = cursor.getLong(idColumn)
+              
+              // Use modern API on Android Q+
+              if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                val contentUri = android.content.ContentUris.withAppendedId(
+                  MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                  videoId
+                )
+                context.contentResolver.loadThumbnail(
+                  contentUri,
+                  android.util.Size(512, 512),
+                  null
+                )
+              } else {
+                @Suppress("DEPRECATION")
+                Thumbnails.getThumbnail(
+                  context.contentResolver,
+                  videoId,
+                  Thumbnails.MINI_KIND,
+                  null
+                )
+              }
+            } else {
+              null
+            }
           }
         }
+        else -> null
       }
-      else -> null
+    } catch (e: Exception) {
+      // Fallback with placeholder if thumbnail loading fails
+      android.util.Log.w("PlaylistSheet", "Failed to load MediaStore thumbnail for $uri", e)
+      null
     }
-  } catch (e: Exception) {
-    // Fallback with placeholder if thumbnail loading fails
-    null
   }
 }
 
@@ -266,6 +298,7 @@ fun PlaylistSheet(
     onDismissRequest = onDismissRequest,
     modifier = Modifier.fillMaxWidth(),
     customMaxWidth = sheetWidth,
+    customMaxHeight = if (isPortrait) LocalConfiguration.current.screenHeightDp.dp * 0.5f else null,
   ) {
     Surface(
       modifier = Modifier.fillMaxWidth(),
@@ -279,7 +312,10 @@ fun PlaylistSheet(
       tonalElevation = 0.dp,
     ) {
       Column(
-        modifier = modifier.padding(vertical = MaterialTheme.spacing.smaller)
+        modifier = modifier.padding(
+          vertical = MaterialTheme.spacing.smaller,
+          horizontal = if (!isListMode) MaterialTheme.spacing.medium else 0.dp
+        )
       ) {
         // Header showing current playlist info with toggle button
         val currentItem = playlist.find { it.isPlaying }
@@ -287,7 +323,7 @@ fun PlaylistSheet(
           modifier = Modifier
             .fillMaxWidth()
             .padding(
-              horizontal = MaterialTheme.spacing.medium,
+              horizontal = if (isListMode) MaterialTheme.spacing.medium else 0.dp,
               vertical = MaterialTheme.spacing.small,
             ),
           verticalAlignment = Alignment.CenterVertically,
@@ -356,7 +392,7 @@ fun PlaylistSheet(
           LazyRow(
             state = lazyListState,
             contentPadding = PaddingValues(
-              horizontal = MaterialTheme.spacing.medium,
+              horizontal = if (isListMode) MaterialTheme.spacing.medium else 0.dp,
               vertical = MaterialTheme.spacing.small
             ),
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
@@ -398,19 +434,13 @@ fun PlaylistTrackListItem(
     mutableStateOf(thumbnailCache[videoPath])
   }
 
-  // Load thumbnail asynchronously for all items (not just visible ones)
+  // Load thumbnail asynchronously
   // Skip thumbnail loading for M3U playlists (network streams)
   LaunchedEffect(videoPath) {
-    if (!skipThumbnail && thumbnail == null && !thumbnailCache.containsKey(videoPath)) {
-      withContext(Dispatchers.IO) {
-        try {
-          val bmp = loadMediaStoreThumbnail(context, item.uri)
-          thumbnail = bmp
-          thumbnailCache[videoPath] = bmp
-        } catch (e: Exception) {
-          thumbnailCache[videoPath] = null
-        }
-      }
+    if (!skipThumbnail && !thumbnailCache.containsKey(videoPath)) {
+      val bmp = loadMediaStoreThumbnail(context, item.uri)
+      thumbnail = bmp
+      thumbnailCache[videoPath] = bmp
     }
   }
 
@@ -518,41 +548,46 @@ fun PlaylistTrackListItem(
           overflow = TextOverflow.Ellipsis,
         )
 
-        // Duration and resolution chips
-        if (item.duration.isNotEmpty() || item.resolution.isNotEmpty()) {
-          Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-          ) {
-            if (item.duration.isNotEmpty()) {
-              Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                shape = RoundedCornerShape(4.dp),
-              ) {
-                Text(
-                  text = item.duration,
-                  modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                  style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 10.sp,
-                  ),
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-              }
+        // Duration and resolution chips - always show with loading state if empty
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          // Duration chip
+          if (item.duration.isNotEmpty()) {
+            Surface(
+              color = if (item.isPlaying) accentColor.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
+              shape = RoundedCornerShape(4.dp),
+            ) {
+              Text(
+                text = item.duration,
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 10.sp,
+                ),
+                color = if (item.isPlaying) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
+              )
             }
-            if (item.resolution.isNotEmpty()) {
-              Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                shape = RoundedCornerShape(4.dp),
-              ) {
-                Text(
-                  text = item.resolution,
-                  modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                  style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 10.sp,
-                  ),
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-              }
+          } else {
+            LoadingChip(width = 40.dp)
+          }
+          
+          // Resolution chip
+          if (item.resolution.isNotEmpty()) {
+            Surface(
+              color = if (item.isPlaying) accentColor.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
+              shape = RoundedCornerShape(4.dp),
+            ) {
+              Text(
+                text = item.resolution,
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 10.sp,
+                ),
+                color = if (item.isPlaying) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
+              )
             }
+          } else {
+            LoadingChip(width = 60.dp)
           }
         }
       }
@@ -599,19 +634,13 @@ fun PlaylistTrackGridItem(
     mutableStateOf(thumbnailCache[videoPath])
   }
 
-  // Load thumbnail asynchronously for all items (not just visible ones)
+  // Load thumbnail asynchronously
   // Skip thumbnail loading for M3U playlists (network streams)
   LaunchedEffect(videoPath) {
-    if (!skipThumbnail && thumbnail == null && !thumbnailCache.containsKey(videoPath)) {
-      withContext(Dispatchers.IO) {
-        try {
-          val bmp = loadMediaStoreThumbnail(context, item.uri)
-          thumbnail = bmp
-          thumbnailCache[videoPath] = bmp
-        } catch (e: Exception) {
-          thumbnailCache[videoPath] = null
-        }
-      }
+    if (!skipThumbnail && !thumbnailCache.containsKey(videoPath)) {
+      val bmp = loadMediaStoreThumbnail(context, item.uri)
+      thumbnail = bmp
+      thumbnailCache[videoPath] = bmp
     }
   }
 
@@ -708,6 +737,15 @@ fun PlaylistTrackGridItem(
               color = Color.White,
             )
           }
+        } else {
+          // Loading duration badge
+          Box(
+            modifier = Modifier
+              .align(Alignment.BottomEnd)
+              .padding(6.dp)
+          ) {
+            LoadingChip(width = 40.dp, height = 18.dp, isDark = true)
+          }
         }
 
         // Playing indicator overlay
@@ -754,9 +792,10 @@ fun PlaylistTrackGridItem(
           horizontalArrangement = Arrangement.spacedBy(6.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
+          // Resolution chip
           if (item.resolution.isNotEmpty()) {
             Surface(
-              color = MaterialTheme.colorScheme.surfaceContainerHighest,
+              color = if (item.isPlaying) accentColor.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
               shape = RoundedCornerShape(4.dp),
             ) {
               Text(
@@ -765,9 +804,11 @@ fun PlaylistTrackGridItem(
                 style = MaterialTheme.typography.labelSmall.copy(
                   fontSize = 10.sp,
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (item.isPlaying) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
               )
             }
+          } else {
+            LoadingChip(width = 60.dp)
           }
 
           if (item.isPlaying) {
@@ -790,4 +831,54 @@ fun PlaylistTrackGridItem(
       }
     }
   }
+}
+
+
+@Composable
+fun LoadingChip(
+  width: androidx.compose.ui.unit.Dp,
+  height: androidx.compose.ui.unit.Dp = 18.dp,
+  isDark: Boolean = false,
+  modifier: Modifier = Modifier,
+) {
+  val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+  val shimmerTranslate = infiniteTransition.animateFloat(
+    initialValue = 0f,
+    targetValue = 1000f,
+    animationSpec = infiniteRepeatable(
+      animation = tween(durationMillis = 1200, easing = LinearEasing),
+      repeatMode = RepeatMode.Restart
+    ),
+    label = "shimmer"
+  )
+
+  val baseColor = if (isDark) {
+    Color.White.copy(alpha = 0.1f)
+  } else {
+    MaterialTheme.colorScheme.surfaceContainerHighest
+  }
+  
+  val shimmerColor = if (isDark) {
+    Color.White.copy(alpha = 0.2f)
+  } else {
+    MaterialTheme.colorScheme.surfaceContainerHigh
+  }
+
+  Box(
+    modifier = modifier
+      .width(width)
+      .height(height)
+      .clip(RoundedCornerShape(4.dp))
+      .background(
+        brush = Brush.linearGradient(
+          colors = listOf(
+            baseColor,
+            shimmerColor,
+            baseColor,
+          ),
+          start = Offset(shimmerTranslate.value - 200f, 0f),
+          end = Offset(shimmerTranslate.value, 0f)
+        )
+      )
+  )
 }

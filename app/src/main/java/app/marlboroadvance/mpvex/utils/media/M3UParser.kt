@@ -109,7 +109,7 @@ object M3UParser {
       }
       
       // Check if it's an extended M3U format
-      val isExtended = lines.firstOrNull()?.startsWith("#EXTM3U") == true
+      lines.firstOrNull()?.startsWith("#EXTM3U") == true
       
       val items = mutableListOf<M3UPlaylistItem>()
       var currentTitle: String? = null
@@ -233,7 +233,7 @@ object M3UParser {
       val lastSlash = path.lastIndexOf('/')
       val basePath = if (lastSlash >= 0) path.substring(0, lastSlash + 1) else "/"
       "${urlObj.protocol}://${urlObj.host}${if (urlObj.port != -1) ":${urlObj.port}" else ""}$basePath"
-    } catch (e: Exception) {
+    } catch (_: Exception) {
       url.substringBeforeLast('/') + "/"
     }
   }
@@ -244,7 +244,7 @@ object M3UParser {
   private fun resolveRelativeUrl(baseUrl: String, relativeUrl: String): String {
     return try {
       URL(URL(baseUrl), relativeUrl).toString()
-    } catch (e: Exception) {
+    } catch (_: Exception) {
       // Fallback to simple concatenation
       if (relativeUrl.startsWith("/")) {
         val base = URL(baseUrl)
@@ -269,7 +269,7 @@ object M3UParser {
       java.net.URLDecoder.decode(nameWithoutExt, "UTF-8")
         .replace('_', ' ')
         .replace('-', ' ')
-    } catch (e: Exception) {
+    } catch (_: Exception) {
       url.substringAfterLast('/').take(50)
     }
   }
@@ -289,19 +289,9 @@ object M3UParser {
         .replace('_', ' ')
         .replace('-', ' ')
         .replaceFirstChar { it.uppercase() }
-    } catch (e: Exception) {
+    } catch (_: Exception) {
       "M3U Playlist"
     }
   }
-  
-  /**
-   * Validate if URL points to an M3U/M3U8 file
-   */
-  fun isValidM3UUrl(url: String): Boolean {
-    val lowerUrl = url.lowercase()
-    return lowerUrl.endsWith(".m3u") || 
-           lowerUrl.endsWith(".m3u8") || 
-           lowerUrl.contains(".m3u?") ||
-           lowerUrl.contains(".m3u8?")
-  }
+
 }

@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "bf0e79372ac5b95a70212de75d3a6fda",
+    "identityHash": "caf82727750789ddec985ea0deaa44ff",
     "entities": [
       {
         "tableName": "PlaybackStateEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mediaTitle` TEXT NOT NULL, `lastPosition` INTEGER NOT NULL, `playbackSpeed` REAL NOT NULL, `videoZoom` REAL NOT NULL, `sid` INTEGER NOT NULL, `secondarySid` INTEGER NOT NULL, `subDelay` INTEGER NOT NULL, `subSpeed` REAL NOT NULL, `aid` INTEGER NOT NULL, `audioDelay` INTEGER NOT NULL, `timeRemaining` INTEGER NOT NULL, `savedOrientation` INTEGER, `externalSubtitles` TEXT NOT NULL, PRIMARY KEY(`mediaTitle`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mediaTitle` TEXT NOT NULL, `lastPosition` INTEGER NOT NULL, `playbackSpeed` REAL NOT NULL, `videoZoom` REAL NOT NULL, `sid` INTEGER NOT NULL, `secondarySid` INTEGER NOT NULL, `subDelay` INTEGER NOT NULL, `subSpeed` REAL NOT NULL, `aid` INTEGER NOT NULL, `audioDelay` INTEGER NOT NULL, `timeRemaining` INTEGER NOT NULL, `savedOrientation` INTEGER, `externalSubtitles` TEXT NOT NULL, `hasBeenWatched` INTEGER NOT NULL, PRIMARY KEY(`mediaTitle`))",
         "fields": [
           {
             "fieldPath": "mediaTitle",
@@ -83,6 +83,12 @@
             "fieldPath": "externalSubtitles",
             "columnName": "externalSubtitles",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hasBeenWatched",
+            "columnName": "hasBeenWatched",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -464,7 +470,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bf0e79372ac5b95a70212de75d3a6fda')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'caf82727750789ddec985ea0deaa44ff')"
     ]
   }
 }

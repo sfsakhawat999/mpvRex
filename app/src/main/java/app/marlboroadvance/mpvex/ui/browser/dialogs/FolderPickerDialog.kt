@@ -42,7 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.marlboroadvance.mpvex.utils.storage.StorageScanUtils
+import app.marlboroadvance.mpvex.utils.storage.StorageVolumeUtils
 import java.io.File
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -60,14 +60,14 @@ fun FolderPickerDialog(
   
   // Get all available storage volumes
   val storageVolumes = remember(isOpen) {
-    StorageScanUtils.getAllStorageVolumes(context)
+    StorageVolumeUtils.getAllStorageVolumes(context)
   }
   
   // If there's only one storage volume, start there directly
   // Otherwise, start at storage root view to show all volumes
   var selectedPath by remember(isOpen, storageVolumes) {
     val initialPath = if (storageVolumes.size == 1) {
-      StorageScanUtils.getVolumePath(storageVolumes.first())
+      StorageVolumeUtils.getVolumePath(storageVolumes.first())
     } else {
       null // Show storage root with all volumes
     }
@@ -220,7 +220,7 @@ fun FolderPickerDialog(
           if (showStorageRoot) {
             // Show storage volumes
             items(storageVolumes) { volume ->
-              val volumePath = StorageScanUtils.getVolumePath(volume)
+              val volumePath = StorageVolumeUtils.getVolumePath(volume)
               if (volumePath != null) {
                 StorageVolumeItem(
                   context = context,

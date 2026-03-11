@@ -20,7 +20,7 @@ abstract class BaseBrowserViewModel(
   application: Application,
 ) : AndroidViewModel(application),
   KoinComponent {
-  private val metadataCache: VideoMetadataCacheRepository by inject()
+  protected val metadataCache: VideoMetadataCacheRepository by inject()
   /**
    * Observable recently played file path for highlighting
    * Automatically filters out non-existent files
@@ -42,7 +42,7 @@ abstract class BaseBrowserViewModel(
    * @return Pair of (deletedCount, failedCount)
    */
   open suspend fun deleteVideos(videos: List<Video>): Pair<Int, Int> {
-    val result = StorageOps.deleteVideos(videos)
+    val result = StorageOps.deleteVideos(getApplication(), videos)
 
     // Invalidate cache for deleted videos
     val paths = videos.map { it.path }

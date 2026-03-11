@@ -109,56 +109,10 @@ object HttpUtils {
     return uri.host ?: "Network Stream"
   }
 
-  fun isNetworkStream(url: String?): Boolean {
-    if (url.isNullOrBlank()) return false
-    return try {
-      val uri = Uri.parse(url)
-      val scheme = uri.scheme?.lowercase()
-      scheme in listOf("http", "https", "rtmp", "rtmps", "rtsp", "rtsps", "mms", "mmsh", "ftp", "ftps")
-    } catch (e: Exception) {
-      false
-    }
-  }
-
   fun isNetworkStream(uri: Uri?): Boolean {
     if (uri == null) return false
     val scheme = uri.scheme?.lowercase()
     return scheme in listOf("http", "https", "rtmp", "rtmps", "rtsp", "rtsps", "mms", "mmsh", "ftp", "ftps")
-  }
-
-  /**
-   * Extracts the referer domain from a URL.
-   * Returns the full origin (scheme + host + port) to be used as Referer header.
-   * 
-   * Examples:
-   * - "https://example.com/video.m3u8" -> "https://example.com"
-   * - "http://example.com:8080/stream" -> "http://example.com:8080"
-   * - "https://subdomain.example.com/path" -> "https://subdomain.example.com"
-   * 
-   * @param url The URL to extract the referer from
-   * @return The referer origin string, or null if extraction fails
-   */
-  fun extractRefererDomain(url: String?): String? {
-    if (url.isNullOrBlank()) return null
-    
-    return try {
-      val uri = Uri.parse(url)
-      val scheme = uri.scheme ?: return null
-      val host = uri.host ?: return null
-      val port = uri.port
-      
-      // Build the referer origin
-      if (port != -1 && port != 80 && port != 443) {
-        // Include non-standard port
-        "$scheme://$host:$port"
-      } else {
-        // Standard port or no port specified
-        "$scheme://$host"
-      }
-    } catch (e: Exception) {
-      Log.e(TAG, "Error extracting referer domain: ${e.message}")
-      null
-    }
   }
 
   /**

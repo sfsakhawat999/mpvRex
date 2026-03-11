@@ -50,7 +50,6 @@ import app.marlboroadvance.mpvex.preferences.PlayerPreferences
 import app.marlboroadvance.mpvex.preferences.SeekbarStyle
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
-import app.marlboroadvance.mpvex.ui.player.controls.components.SeekbarPreview
 import app.marlboroadvance.mpvex.ui.utils.LocalBackStack
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ListPreference
@@ -193,7 +192,7 @@ object PlayerControlsPreferencesScreen : Screen {
           }
 
           item {
-            val seekbarStyle by appearancePrefs.seekbarStyle.collectAsState()
+            val currentSeekbarStyle by appearancePrefs.seekbarStyle.collectAsState()
             
             PreferenceCard {
               SeekbarStyle.entries.forEachIndexed { index, style ->
@@ -201,15 +200,9 @@ object PlayerControlsPreferencesScreen : Screen {
                   headlineContent = {
                     Text(text = style.name)
                   },
-                  supportingContent = {
-                    SeekbarPreview(
-                      style = style,
-                      modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    )
-                  },
                   trailingContent = {
                     RadioButton(
-                      selected = seekbarStyle == style,
+                      selected = currentSeekbarStyle == style,
                       onClick = null
                     )
                   },

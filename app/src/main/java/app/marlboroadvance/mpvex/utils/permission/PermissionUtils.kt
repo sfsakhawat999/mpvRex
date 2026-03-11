@@ -1,8 +1,16 @@
 package app.marlboroadvance.mpvex.utils.permission
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContentValues
+import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -14,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import app.marlboroadvance.mpvex.BuildConfig
 import app.marlboroadvance.mpvex.domain.media.model.Video
 import app.marlboroadvance.mpvex.utils.history.RecentlyPlayedOps
 import app.marlboroadvance.mpvex.utils.media.MediaLibraryEvents
@@ -23,6 +32,7 @@ import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.File
 
@@ -30,6 +40,81 @@ import java.io.File
  * Simplified storage permission utilities with MANAGE_EXTERNAL_STORAGE support.
  */
 object PermissionUtils {
+  private const val FILE_ACCESS_TAG = "FileAccessRequest"
+  
+  private var mediaRequestLauncher: ActivityResultLauncher<IntentSenderRequest>? = null
+  private var resultOkCallback: () -> Unit = {}
+  private var resultCancelledCallback: () -> Unit = {}
+
+  /**
+   * Set the media access launcher from MainActivity.
+   */
+  fun setMediaAccessLauncher(launcher: ActivityResultLauncher<IntentSenderRequest>) {
+    mediaRequestLauncher = launcher
+  }
+
+  /**
+   * Handle result from MainActivity's launcher callback.
+   */
+  fun handleMediaAccessResult(resultCode: Int) {
+    if (resultCode == Activity.RESULT_OK) {
+      resultOkCallback()
+    } else {
+      resultCancelledCallback()
+    }
+  }
+
+  suspend fun requestScopedWriteAccess(
+    context: Context,
+    uris: List<Uri>,
+  ): Boolean = requestWriteAccess(context, uris)
+
+  suspend fun requestScopedDeleteAccess(
+    context: Context,
+    uris: List<Uri>,
+  ): Boolean = requestDeleteAccess(context, uris)
+
+  private suspend fun requestWriteAccess(
+    context: Context,
+    uris: List<Uri>,
+  ): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R || uris.isEmpty()) return true
+    return withContext(Dispatchers.Main) {
+      suspendCancellableCoroutine { continuation ->
+        val launcher = mediaRequestLauncher ?: run {
+          continuation.resumeWith(Result.success(false))
+          return@suspendCancellableCoroutine
+        }
+
+        resultOkCallback = { continuation.resumeWith(Result.success(true)) }
+        resultCancelledCallback = { continuation.resumeWith(Result.success(false)) }
+        
+        val pendingIntent = MediaStore.createWriteRequest(context.contentResolver, uris)
+        launcher.launch(IntentSenderRequest.Builder(pendingIntent).build())
+      }
+    }
+  }
+
+  private suspend fun requestDeleteAccess(
+    context: Context,
+    uris: List<Uri>,
+  ): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R || uris.isEmpty()) return true
+    return withContext(Dispatchers.Main) {
+      suspendCancellableCoroutine { continuation ->
+        val launcher = mediaRequestLauncher ?: run {
+          continuation.resumeWith(Result.success(false))
+          return@suspendCancellableCoroutine
+        }
+
+        resultOkCallback = { continuation.resumeWith(Result.success(true)) }
+        resultCancelledCallback = { continuation.resumeWith(Result.success(false)) }
+        
+        val pendingIntent = MediaStore.createDeleteRequest(context.contentResolver, uris)
+        launcher.launch(IntentSenderRequest.Builder(pendingIntent).build())
+      }
+    }
+  }
   /**
    * Returns READ_EXTERNAL_STORAGE permission for all Android versions.
    * On Android 11+, MANAGE_EXTERNAL_STORAGE provides full file access.
@@ -85,7 +170,23 @@ object PermissionUtils {
     // Wrap permission state to consider MANAGE_EXTERNAL_STORAGE on Android 11+
     val effectivePermissionState =
       remember(permissionState.status, lifecycleTrigger) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+        if (!BuildConfig.SCOPED_STORAGE_ONLY && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+          if (android.os.Environment.isExternalStorageManager()) {
+            object : PermissionState {
+              override val permission = permissionState.permission
+              override val status = PermissionStatus.Granted
+
+              override fun launchPermissionRequest() = permissionState.launchPermissionRequest()
+            }
+          } else {
+            object : PermissionState {
+              override val permission = permissionState.permission
+              override val status = PermissionStatus.Denied(false)
+
+              override fun launchPermissionRequest() = permissionState.launchPermissionRequest()
+            }
+          }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
           android.os.Environment.isExternalStorageManager()
         ) {
           object : PermissionState {
@@ -109,17 +210,41 @@ object PermissionUtils {
   }
 
   // --------------------------------------------------------------------------
-  // Direct file operations (works with MANAGE_EXTERNAL_STORAGE)
+  // Storage operations (automatically uses scoped storage or direct file access)
   // --------------------------------------------------------------------------
 
   object StorageOps {
     private const val TAG = "StorageOps"
 
     /**
-     * Delete videos using direct file operations.
-     * Requires MANAGE_EXTERNAL_STORAGE on Android 11+.
+     * Check if MANAGE_EXTERNAL_STORAGE permission is available and granted
      */
-    suspend fun deleteVideos(videos: List<Video>): Pair<Int, Int> =
+    private fun hasManageStoragePermission(): Boolean =
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        android.os.Environment.isExternalStorageManager()
+      } else {
+        true // Pre-Android 11 devices don't need this permission
+      }
+
+    /**
+     * Delete videos using direct file operations (requires MANAGE_EXTERNAL_STORAGE on Android 11+)
+     */
+    suspend fun deleteVideos(
+      context: Context,
+      videos: List<Video>,
+    ): Pair<Int, Int> =
+      withContext(Dispatchers.IO) {
+        if (!BuildConfig.SCOPED_STORAGE_ONLY || hasManageStoragePermission()) {
+          deleteVideosDirectly(videos)
+        } else {
+          deleteVideosScoped(context, videos)
+        }
+      }
+
+    /**
+     * Delete videos using direct file operations (requires MANAGE_EXTERNAL_STORAGE on Android 11+)
+     */
+    private suspend fun deleteVideosDirectly(videos: List<Video>): Pair<Int, Int> =
       withContext(Dispatchers.IO) {
         var deleted = 0
         var failed = 0
@@ -151,10 +276,97 @@ object PermissionUtils {
       }
 
     /**
-     * Rename video using direct file operations.
-     * Requires MANAGE_EXTERNAL_STORAGE on Android 11+.
+     * Delete videos via scoped storage (Play Store flavor / no MANAGE_EXTERNAL_STORAGE)
+     */
+    private suspend fun deleteVideosScoped(
+      context: Context,
+      videos: List<Video>,
+    ): Pair<Int, Int> =
+      withContext(Dispatchers.IO) {
+        var deleted = 0
+        var failed = 0
+
+        val contentVideos = videos.filter { it.uri.scheme == "content" }
+        val fileVideos = videos.filter { it.uri.scheme != "content" }
+
+        if (contentVideos.isNotEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+          val granted = requestDeleteAccess(context, contentVideos.map { it.uri })
+          if (granted) {
+            contentVideos.forEach { video ->
+              deleted++
+              RecentlyPlayedOps.onVideoDeleted(video.path)
+              PlaybackStateOps.onVideoDeleted(video.path)
+              Log.d(TAG, "✓ Deleted (scoped request): ${video.displayName}")
+            }
+          } else {
+            failed += contentVideos.size
+            Log.w(TAG, "✗ Delete request denied/cancelled for ${contentVideos.size} item(s)")
+          }
+        } else {
+          for (video in contentVideos) {
+            try {
+              val rows = context.contentResolver.delete(video.uri, null, null)
+              if (rows > 0) {
+                deleted++
+                RecentlyPlayedOps.onVideoDeleted(video.path)
+                PlaybackStateOps.onVideoDeleted(video.path)
+                Log.d(TAG, "✓ Deleted (scoped): ${video.displayName}")
+              } else {
+                failed++
+                Log.w(TAG, "✗ Failed to delete (scoped): ${video.displayName}")
+              }
+            } catch (e: Exception) {
+              failed++
+              Log.e(TAG, "✗ Error deleting (scoped) ${video.displayName}", e)
+            }
+          }
+        }
+
+        for (video in fileVideos) {
+          try {
+            val file = File(video.path)
+            if (!file.exists() || file.delete()) {
+              deleted++
+              RecentlyPlayedOps.onVideoDeleted(video.path)
+              PlaybackStateOps.onVideoDeleted(video.path)
+              Log.d(TAG, "✓ Deleted (file fallback): ${video.displayName}")
+            } else {
+              failed++
+              Log.w(TAG, "✗ Failed to delete (file fallback): ${video.displayName}")
+            }
+          } catch (e: Exception) {
+            failed++
+            Log.e(TAG, "✗ Error deleting (file fallback) ${video.displayName}", e)
+          }
+        }
+
+        if (deleted > 0) {
+          MediaLibraryEvents.notifyChanged()
+        }
+
+        Pair(deleted, failed)
+      }
+
+    /**
+     * Rename video using direct file operations (requires MANAGE_EXTERNAL_STORAGE on Android 11+)
      */
     suspend fun renameVideo(
+      context: Context,
+      video: Video,
+      newDisplayName: String,
+    ): Result<Unit> =
+      withContext(Dispatchers.IO) {
+        if (!BuildConfig.SCOPED_STORAGE_ONLY || hasManageStoragePermission()) {
+          renameVideoDirectly(context, video, newDisplayName)
+        } else {
+          renameVideoScoped(context, video, newDisplayName)
+        }
+      }
+
+    /**
+     * Rename video using direct file operations (requires MANAGE_EXTERNAL_STORAGE on Android 11+)
+     */
+    private suspend fun renameVideoDirectly(
       context: Context,
       video: Video,
       newDisplayName: String,
@@ -190,6 +402,55 @@ object PermissionUtils {
           }
         } catch (e: Exception) {
           Log.e(TAG, "✗ Error renaming ${video.displayName}", e)
+          Result.failure(e)
+        }
+      }
+
+    /**
+     * Rename video via MediaStore update (scoped storage path)
+     */
+    private suspend fun renameVideoScoped(
+      context: Context,
+      video: Video,
+      newDisplayName: String,
+    ): Result<Unit> =
+      withContext(Dispatchers.IO) {
+        try {
+          if (video.uri.scheme != "content") {
+            return@withContext renameVideoDirectly(context, video, newDisplayName)
+          }
+
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val granted = requestWriteAccess(context, listOf(video.uri))
+            if (!granted) {
+              Log.w(TAG, "✗ Rename request denied/cancelled: ${video.displayName}")
+              return@withContext Result.failure(SecurityException("Rename permission denied"))
+            }
+          }
+
+          val values =
+            ContentValues().apply {
+              put(MediaStore.MediaColumns.DISPLAY_NAME, newDisplayName)
+            }
+
+          val updated = context.contentResolver.update(video.uri, values, null, null)
+          if (updated > 0) {
+            val oldPath = video.path
+            val parent = File(oldPath).parentFile
+            val newPath = parent?.let { File(it, newDisplayName).absolutePath } ?: oldPath
+
+            RecentlyPlayedOps.onVideoRenamed(oldPath, newPath)
+            PlaybackStateOps.onVideoRenamed(oldPath, newPath)
+            MediaLibraryEvents.notifyChanged()
+
+            Log.d(TAG, "✓ Renamed (scoped): ${video.displayName} -> $newDisplayName")
+            Result.success(Unit)
+          } else {
+            Log.w(TAG, "✗ Rename failed (scoped): ${video.displayName}")
+            Result.failure(IllegalStateException("Rename operation failed"))
+          }
+        } catch (e: Exception) {
+          Log.e(TAG, "✗ Error renaming (scoped) ${video.displayName}", e)
           Result.failure(e)
         }
       }

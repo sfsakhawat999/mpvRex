@@ -1,3 +1,4 @@
+
 package app.marlboroadvance.mpvex.preferences
 
 import app.marlboroadvance.mpvex.preferences.preference.PreferenceStore
@@ -21,11 +22,10 @@ class PlayerPreferences(
   val volumeGesture = preferenceStore.getBoolean("volume_brightness", true)
   val pinchToZoomGesture = preferenceStore.getBoolean("pinch_to_zoom_gesture", true)
   val horizontalSwipeToSeek = preferenceStore.getBoolean("horizontal_swipe_to_seek", true)
+  val swipeToSubtitleSeek = preferenceStore.getBoolean("swipe_to_subtitle_seek", false)
   val horizontalSwipeSensitivity = preferenceStore.getFloat("horizontal_swipe_sensitivity", 0.05f)
 
-  val videoAspect = preferenceStore.getEnum("video_aspect", VideoAspect.Fit)
   val customAspectRatios = preferenceStore.getStringSet("custom_aspect_ratios", emptySet())
-  val currentAspectRatio = preferenceStore.getFloat("current_aspect_ratio", -1f)
 
   val defaultSpeed = preferenceStore.getFloat("default_speed", 1f)
   val speedPresets =
@@ -51,6 +51,7 @@ class PlayerPreferences(
   val playerTimeToDisappear = preferenceStore.getInt("player_time_to_disappear", 4000)
 
   val defaultVideoZoom = preferenceStore.getFloat("default_video_zoom", 0f)
+  val panAndZoomEnabled = preferenceStore.getBoolean("pan_and_zoom_enabled", false)
 
   val includeSubtitlesInSnapshot = preferenceStore.getBoolean("include_subtitles_in_snapshot", false)
 
@@ -61,11 +62,22 @@ class PlayerPreferences(
   val bottomControlsBelowSeekbar = preferenceStore.getBoolean("bottom_controls_below_seekbar", false)
   val showSeekBarWhenSeeking = preferenceStore.getBoolean("show_seekbar_when_seeking", true)
 
+  val customSkipDuration = preferenceStore.getInt("custom_skip_duration", 90)
+
   val repeatMode = preferenceStore.getEnum("repeat_mode", RepeatMode.OFF)
   val shuffleEnabled = preferenceStore.getBoolean("shuffle_enabled", false)
 
   // New: autoplay next video when current file ends
-  val autoplayNextVideo = preferenceStore.getBoolean("autoplay_next_video", false)
+  val autoplayNextVideo = preferenceStore.getBoolean("autoplay_next_video", true)
 
   val autoPiPOnNavigation = preferenceStore.getBoolean("auto_pip_on_navigation", false)
+
+  val keepScreenOnWhenPaused = preferenceStore.getBoolean("keep_screen_on_when_paused", false)
+
+  // Custom Buttons - JSON List
+  val customButtons = preferenceStore.getString("custom_buttons_json", "[]")
+
+  // Ambience Mode
+  val isAmbientEnabled = preferenceStore.getBoolean("ambient_enabled", false)
+  
 }

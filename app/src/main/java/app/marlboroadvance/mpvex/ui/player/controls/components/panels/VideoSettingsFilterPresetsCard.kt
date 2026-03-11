@@ -101,6 +101,7 @@ fun VideoSettingsFilterPresetsCard(modifier: Modifier = Modifier) {
               MPVLib.setPropertyInt("sharpen", preset.sharpness)
             },
             label = { Text(preset.displayName) },
+            leadingIcon = null,
           )
         }
       }

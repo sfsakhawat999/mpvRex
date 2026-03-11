@@ -18,6 +18,11 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.Image
@@ -26,14 +31,18 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -71,6 +80,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -92,11 +103,14 @@ import app.marlboroadvance.mpvex.ui.player.PlayerActivity
 import app.marlboroadvance.mpvex.ui.player.PlayerUpdates
 import app.marlboroadvance.mpvex.ui.player.PlayerViewModel
 import app.marlboroadvance.mpvex.ui.player.Sheets
+import app.marlboroadvance.mpvex.ui.player.VideoAspect
 import app.marlboroadvance.mpvex.ui.player.controls.components.BrightnessSlider
 import app.marlboroadvance.mpvex.ui.player.controls.components.CompactSpeedIndicator
 import app.marlboroadvance.mpvex.ui.player.controls.components.ControlsButton
 import app.marlboroadvance.mpvex.ui.player.controls.components.MultipleSpeedPlayerUpdate
+import app.marlboroadvance.mpvex.ui.player.controls.components.SeekPlayerUpdate
 import app.marlboroadvance.mpvex.ui.player.controls.components.SeekbarWithTimers
+import app.marlboroadvance.mpvex.ui.player.controls.components.SlideToUnlock
 import app.marlboroadvance.mpvex.ui.player.controls.components.SpeedControlSlider
 import app.marlboroadvance.mpvex.ui.player.controls.components.TextPlayerUpdate
 import app.marlboroadvance.mpvex.ui.player.controls.components.VolumeSlider
@@ -132,6 +146,7 @@ fun <T> playerControlsEnterAnimationSpec(): FiniteAnimationSpec<T> =
   ExperimentalAnimationGraphicsApi::class,
   ExperimentalMaterial3Api::class,
   ExperimentalMaterial3ExpressiveApi::class,
+  ExperimentalFoundationApi::class,
 )
 @Composable
 @Suppress("CyclomaticComplexMethod", "ViewModelForwarding")
@@ -158,6 +173,8 @@ fun PlayerControls(
   val position by MPVLib.propInt["time-pos"].collectAsState()
   val demuxerCacheDuration by MPVLib.propFloat["demuxer-cache-duration"].collectAsState()
   val cacheBufferingState by MPVLib.propInt["cache-buffering-state"].collectAsState()
+  val precisePosition by viewModel.precisePosition.collectAsState()
+  val preciseDuration by viewModel.preciseDuration.collectAsState()
   val playbackSpeed by MPVLib.propFloat["speed"].collectAsState()
 
   val doubleTapSeekAmount by viewModel.doubleTapSeekAmount.collectAsState()
@@ -175,6 +192,12 @@ fun PlayerControls(
   val playerTimeToDisappear by playerPreferences.playerTimeToDisappear.collectAsState()
   val chapters by viewModel.chapters.collectAsState(persistentListOf())
   val playlistMode by playerPreferences.playlistMode.collectAsState()
+    val haptic = LocalHapticFeedback.current
+
+    val customButtons by viewModel.customButtons.collectAsState()
+    
+  val abLoopA by viewModel.abLoopA.collectAsState()
+  val abLoopB by viewModel.abLoopB.collectAsState()
 
   val onOpenSheet: (Sheets) -> Unit = {
     viewModel.sheetShown.update { _ -> it }
@@ -218,14 +241,20 @@ fun PlayerControls(
     appearancePreferences.parseButtons(portraitBottomControlsPref, mutableSetOf())
   }
 
+  var isUnlockSliderDragging by remember { mutableStateOf(false) }
+
   LaunchedEffect(
     controlsShown,
     paused,
     isSeeking,
     resetControlsTimestamp,
+    areControlsLocked,
+    isUnlockSliderDragging,
   ) {
-    if (controlsShown && paused == false && !isSeeking) {
-      delay(playerTimeToDisappear.toLong())
+    if (controlsShown && paused == false && !isSeeking && !isUnlockSliderDragging) {
+      // Use 2 second delay when controls are locked, otherwise use user preference
+      val delayTime = if (areControlsLocked) 2000L else playerTimeToDisappear.toLong()
+      delay(delayTime)
       viewModel.hideControls()
     }
   }
@@ -277,6 +306,8 @@ fun PlayerControls(
         val playerPauseButton = createRef()
         val seekbar = createRef()
         val (playerUpdates) = createRefs()
+        val (customLeftButtonsRef, customRightButtonsRef) = createRefs()
+        val customButtonsPortraitRef = createRef()
 
         val bottomControlsBelowSeekbar by playerPreferences.bottomControlsBelowSeekbar.collectAsState()
 
@@ -289,7 +320,7 @@ fun PlayerControls(
         val reduceMotion by playerPreferences.reduceMotion.collectAsState()
 
         val activity = LocalActivity.current as PlayerActivity
-        val aspect by playerPreferences.videoAspect.collectAsState()
+        val aspect by viewModel.videoAspect.collectAsState()
         val currentZoom by viewModel.videoZoom.collectAsState()
 
         val rawMediaTitle by MPVLib.propString["media-title"].collectAsState()
@@ -349,7 +380,7 @@ fun PlayerControls(
                 end.linkTo(parent.end, spacing.extraLarge)
               }
               top.linkTo(parent.top, spacing.larger)
-              bottom.linkTo(parent.bottom, spacing.larger)
+              bottom.linkTo(parent.bottom, spacing.extraLarge)
             },
         ) { BrightnessSlider(brightness, 0f..1f) }
 
@@ -357,17 +388,13 @@ fun PlayerControls(
           isVolumeSliderShown,
           enter =
             if (!reduceMotion) {
-              slideInHorizontally(playerControlsEnterAnimationSpec()) {
-                if (swapVolumeAndBrightness) it else -it
-              } + fadeIn(playerControlsEnterAnimationSpec())
+              slideInHorizontally(playerControlsEnterAnimationSpec()) { if (swapVolumeAndBrightness) it else -it } + fadeIn(playerControlsEnterAnimationSpec())
             } else {
               fadeIn(playerControlsEnterAnimationSpec())
             },
           exit =
             if (!reduceMotion) {
-              slideOutHorizontally(playerControlsExitAnimationSpec()) {
-                if (swapVolumeAndBrightness) it else -it
-              } + fadeOut(playerControlsExitAnimationSpec())
+              slideOutHorizontally(playerControlsExitAnimationSpec()) { if (swapVolumeAndBrightness) it else -it } + fadeOut(playerControlsExitAnimationSpec())
             } else {
               fadeOut(playerControlsExitAnimationSpec())
             },
@@ -379,7 +406,7 @@ fun PlayerControls(
                 start.linkTo(parent.start, spacing.extraLarge)
               }
               top.linkTo(parent.top, spacing.larger)
-              bottom.linkTo(parent.bottom, spacing.larger)
+              bottom.linkTo(parent.bottom, spacing.extraLarge)
             },
         ) {
           val boostCap by audioPreferences.volumeBoostCap.collectAsState()
@@ -401,7 +428,8 @@ fun PlayerControls(
 
         val holdForMultipleSpeed by playerPreferences.holdForMultipleSpeed.collectAsState()
         val currentPlayerUpdate by viewModel.playerUpdate.collectAsState()
-        val aspectRatio by playerPreferences.videoAspect.collectAsState()
+        val aspectRatio by viewModel.videoAspect.collectAsState()
+        val currentAspectRatio by viewModel.currentAspectRatio.collectAsState()
         val videoZoom by viewModel.videoZoom.collectAsState()
 
         LaunchedEffect(currentPlayerUpdate, aspectRatio, videoZoom) {
@@ -420,10 +448,18 @@ fun PlayerControls(
           enter = fadeIn(playerControlsEnterAnimationSpec()),
           exit = fadeOut(playerControlsExitAnimationSpec()),
           modifier =
-            Modifier.constrainAs(playerUpdates) {
-              linkTo(parent.start, parent.end)
-              linkTo(parent.top, parent.bottom, bias = 0.2f)
-            },
+            Modifier
+              .then(
+                if (showSystemStatusBar) {
+                  Modifier.windowInsetsPadding(WindowInsets.statusBars)
+                } else {
+                  Modifier
+                }
+              )
+              .constrainAs(playerUpdates) {
+                linkTo(parent.start, parent.end)
+                top.linkTo(parent.top, if (isPortrait) 104.dp else 64.dp)
+              },
         ) {
           when (currentPlayerUpdate) {
             is PlayerUpdates.MultipleSpeed -> MultipleSpeedPlayerUpdate(currentSpeed = holdForMultipleSpeed)
@@ -457,17 +493,63 @@ fun PlayerControls(
                 CompactSpeedIndicator(currentSpeed = currentSpeed)
               }
             }
-            is PlayerUpdates.AspectRatio -> TextPlayerUpdate(stringResource(aspectRatio.titleRes))
+            is PlayerUpdates.AspectRatio -> {
+              val customRatiosSet by playerPreferences.customAspectRatios.collectAsState()
+              val displayText = if (currentAspectRatio > 0) {
+                // Custom aspect ratio - try to find its label first
+                val customLabel = customRatiosSet.firstNotNullOfOrNull { str ->
+                  val parts = str.split("|")
+                  if (parts.size == 2) {
+                    val savedRatio = parts[1].toDoubleOrNull()
+                    if (savedRatio != null && kotlin.math.abs(savedRatio - currentAspectRatio) < 0.01) {
+                      parts[0] // Return the label
+                    } else null
+                  } else null
+                }
+                
+                customLabel ?: run {
+                  // No custom label found, use preset names or format as ratio
+                  val ratio = currentAspectRatio
+                  when {
+                    kotlin.math.abs(ratio - 16.0/9.0) < 0.01 -> "16:9"
+                    kotlin.math.abs(ratio - 4.0/3.0) < 0.01 -> "4:3"
+                    kotlin.math.abs(ratio - 16.0/10.0) < 0.01 -> "16:10"
+                    kotlin.math.abs(ratio - 21.0/9.0) < 0.01 -> "21:9"
+                    kotlin.math.abs(ratio - 32.0/9.0) < 0.01 -> "32:9"
+                    kotlin.math.abs(ratio - 1.0) < 0.01 -> "1:1"
+                    kotlin.math.abs(ratio - 2.35) < 0.01 -> "2.35:1"
+                    kotlin.math.abs(ratio - 2.39) < 0.01 -> "2.39:1"
+                    else -> String.format("%.2f:1", ratio)
+                  }
+                }
+              } else {
+                // Standard mode (Fit/Crop/Stretch)
+                stringResource(aspectRatio.titleRes)
+              }
+              TextPlayerUpdate(displayText)
+            }
             is PlayerUpdates.ShowText ->
               TextPlayerUpdate(
                 (currentPlayerUpdate as PlayerUpdates.ShowText).value,
+                modifier = Modifier.widthIn(min = 120.dp),
               )
 
             is PlayerUpdates.VideoZoom -> {
               val zoomPercentage = (videoZoom * 100).toInt()
-              TextPlayerUpdate("Zoom: $zoomPercentage%")
+              TextPlayerUpdate(
+                text = String.format("Zoom:%3d%%", zoomPercentage), 
+                modifier = Modifier, // Let content size determine width
+              )
             }
 
+            is PlayerUpdates.HorizontalSeek -> {
+              val seekUpdate = currentPlayerUpdate as PlayerUpdates.HorizontalSeek
+              SeekPlayerUpdate(
+                currentTime = seekUpdate.currentTime,
+                seekDelta = "[${seekUpdate.seekDelta}]",
+                modifier = Modifier, // Let content size determine width
+              )
+            }
             is PlayerUpdates.RepeatMode -> {
               val mode = (currentPlayerUpdate as PlayerUpdates.RepeatMode).mode
               val text = when (mode) {
@@ -508,13 +590,180 @@ fun PlayerControls(
               TextPlayerUpdate(text)
             }
 
-            is PlayerUpdates.HorizontalSeek -> {
-              val update = currentPlayerUpdate as PlayerUpdates.HorizontalSeek
-              TextPlayerUpdate("${update.currentTime} (${update.seekDelta})")
-            }
-
             else -> {}
           }
+        }
+
+        val areButtonsVisible = controlsShown && !areControlsLocked && !areSlidersShown
+
+        AnimatedVisibility(
+            visible = areButtonsVisible && !isPortrait,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.constrainAs(customLeftButtonsRef) {
+                start.linkTo(parent.start, spacing.large)
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                verticalBias = 0.65f
+                width = Dimension.preferredWrapContent
+                height = Dimension.wrapContent
+            }
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .horizontalScroll(rememberScrollState())
+            ) {
+                customButtons.filter { it.isLeft }.forEach { button ->
+                    val buttonInteractionSource = remember { MutableInteractionSource() }
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f),
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)),
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .combinedClickable(
+                                interactionSource = buttonInteractionSource,
+                                indication = ripple(),
+                                onClick = {
+                                    resetControlsTimestamp = System.currentTimeMillis()
+                                    viewModel.callCustomButton(button.id)
+                                },
+                                onLongClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    resetControlsTimestamp = System.currentTimeMillis()
+                                    viewModel.callCustomButtonLongPress(button.id)
+                                }
+                            )
+                    ) {
+                        Text(
+                            text = button.label,
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                                .basicMarquee(),
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
+                }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = areButtonsVisible && !isPortrait,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.constrainAs(customRightButtonsRef) {
+                end.linkTo(parent.end, spacing.large)
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                verticalBias = 0.65f
+                width = Dimension.preferredWrapContent
+                height = Dimension.wrapContent
+            }
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .horizontalScroll(rememberScrollState(), reverseScrolling = true)
+            ) {
+                customButtons.filter { !it.isLeft }.forEach { button ->
+                    val buttonInteractionSource = remember { MutableInteractionSource() }
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f),
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)),
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .combinedClickable(
+                                interactionSource = buttonInteractionSource,
+                                indication = ripple(),
+                                onClick = {
+                                    resetControlsTimestamp = System.currentTimeMillis()
+                                    viewModel.callCustomButton(button.id)
+                                },
+                                onLongClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    resetControlsTimestamp = System.currentTimeMillis()
+                                    viewModel.callCustomButtonLongPress(button.id)
+                                }
+                            )
+                    ) {
+                        Text(
+                            text = button.label,
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                                .basicMarquee(),
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
+                }
+            }
+        }
+        
+        AnimatedVisibility(
+            visible = areButtonsVisible && isPortrait,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.constrainAs(customButtonsPortraitRef) {
+                start.linkTo(parent.start, spacing.large)
+                end.linkTo(parent.end, spacing.large)
+                bottom.linkTo(seekbar.top, spacing.medium)
+                width = Dimension.fillToConstraints
+                height = Dimension.wrapContent
+            }
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .horizontalScroll(rememberScrollState())
+            ) {
+                customButtons.forEach { button ->
+                    val buttonInteractionSource = remember { MutableInteractionSource() }
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f),
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)),
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .combinedClickable(
+                                interactionSource = buttonInteractionSource,
+                                indication = ripple(),
+                                onClick = {
+                                    resetControlsTimestamp = System.currentTimeMillis()
+                                    viewModel.callCustomButton(button.id)
+                                },
+                                onLongClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    resetControlsTimestamp = System.currentTimeMillis()
+                                    viewModel.callCustomButtonLongPress(button.id)
+                                }
+                            )
+                    ) {
+                        Text(
+                            text = button.label,
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                                .basicMarquee(),
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
+                }
+            }
         }
 
         AnimatedVisibility(
@@ -523,23 +772,15 @@ fun PlayerControls(
           exit = fadeOut(),
           modifier =
             Modifier
-              .then(
-                if (showSystemStatusBar) {
-                  Modifier.windowInsetsPadding(WindowInsets.statusBars)
-                } else {
-                  Modifier
-                }
-              )
               .constrainAs(unlockControlsButton) {
-                // Significantly moves down the lock icon in portrait mode to avoid status bar overlap
-                top.linkTo(parent.top, if (isPortrait) 56.dp else spacing.medium)
-                start.linkTo(parent.start, spacing.medium)
+                bottom.linkTo(parent.bottom, spacing.extraLarge)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
               },
         ) {
-          ControlsButton(
-            Icons.Filled.Lock,
-            onClick = { viewModel.unlockControls() },
-            color = if (hideBackground) controlColor else MaterialTheme.colorScheme.onSurface,
+          SlideToUnlock(
+            onUnlock = { viewModel.unlockControls() },
+            onDraggingChanged = { isDragging -> isUnlockSliderDragging = isDragging },
           )
         }
 
@@ -836,11 +1077,10 @@ fun PlayerControls(
                   val bottomMargin = if (isPortrait) 96.dp else 45.dp + spacing.medium + spacing.small
                   bottom.linkTo(parent.bottom, bottomMargin)
                 } else {
-                  // Normal positioning at parent bottom
-                  bottom.linkTo(parent.bottom, if (isPortrait) 64.dp else spacing.small)
+                  bottom.linkTo(parent.bottom, if (isPortrait) 64.dp else spacing.extraSmall)
                 }
-                start.linkTo(parent.start, spacing.medium)
-                end.linkTo(parent.end, spacing.medium)
+                start.linkTo(parent.start, spacing.large)
+                end.linkTo(parent.end, spacing.large)
               },
         ) {
           val invertDuration by playerPreferences.invertDuration.collectAsState()
@@ -869,8 +1109,8 @@ fun PlayerControls(
           }
 
           SeekbarWithTimers(
-            position = position?.toFloat() ?: 0f,
-            duration = duration?.toFloat() ?: 0f,
+            position = precisePosition,
+            duration = if (preciseDuration > 0) preciseDuration else duration?.toFloat() ?: 0f,
             onValueChange = {
               isSeeking = true
               resetControlsTimestamp = System.currentTimeMillis()
@@ -892,6 +1132,8 @@ fun PlayerControls(
             paused = paused ?: false,
             readAheadValue = readAheadPosition,
             seekbarStyle = seekbarStyle,
+            loopStart = abLoopA?.toFloat(),
+            loopEnd = abLoopB?.toFloat(),
           )
         }
 
@@ -933,10 +1175,10 @@ fun PlayerControls(
               )
               .constrainAs(topLeftControls) {
                 top.linkTo(parent.top, if (isPortrait) spacing.extraLarge else spacing.small)
-                start.linkTo(parent.start, spacing.medium)
+                start.linkTo(parent.start, spacing.large)
                 if (isPortrait) {
                   width = Dimension.fillToConstraints
-                  end.linkTo(parent.end, spacing.medium)
+                  end.linkTo(parent.end, spacing.large)
                 } else {
                   width = Dimension.fillToConstraints
                   end.linkTo(topRightControls.start, spacing.extraSmall)
@@ -1000,7 +1242,7 @@ fun PlayerControls(
               )
               .constrainAs(topRightControls) {
                 top.linkTo(parent.top, spacing.small)
-                end.linkTo(parent.end, spacing.medium)
+                end.linkTo(parent.end, spacing.large)
               },
         ) {
           TopRightPlayerControlsLandscape(

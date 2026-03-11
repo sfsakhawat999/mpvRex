@@ -1,7 +1,11 @@
 package app.marlboroadvance.mpvex.ui.preferences
 
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,7 +41,9 @@ import app.marlboroadvance.mpvex.preferences.DecoderPreferences
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.ui.player.Debanding
+import app.marlboroadvance.mpvex.ui.player.MPVProfile
 import app.marlboroadvance.mpvex.ui.utils.LocalBackStack
+import app.marlboroadvance.mpvex.ui.preferences.VulkanUtils
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -52,6 +58,7 @@ object DecoderPreferencesScreen : Screen {
     val preferences = koinInject<DecoderPreferences>()
     val backstack = LocalBackStack.current
     val context = LocalContext.current
+    val isVulkanSupported = remember { VulkanUtils.isVulkanSupported(context) }
     var showGpuNextWarning by remember { mutableStateOf(false) }
     Scaffold(
       topBar = {
@@ -89,6 +96,23 @@ object DecoderPreferencesScreen : Screen {
 
           item {
             PreferenceCard {
+              val profile by preferences.profile.collectAsState()
+              val currentProfile = MPVProfile.fromValue(profile)
+              ListPreference(
+                value = currentProfile,
+                onValueChange = { preferences.profile.set(it.value) },
+                values = MPVProfile.entries,
+                title = { Text(stringResource(R.string.pref_decoder_profile_title)) },
+                summary = {
+                  Text(
+                    currentProfile.displayName,
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
+
+              PreferenceDivider()
+
               val tryHWDecoding by preferences.tryHWDecoding.collectAsState()
               SwitchPreference(
                 value = tryHWDecoding,
@@ -101,14 +125,15 @@ object DecoderPreferencesScreen : Screen {
               PreferenceDivider()
 
               val gpuNext by preferences.gpuNext.collectAsState()
+              val useVulkan by preferences.useVulkan.collectAsState() // Added to check Vulkan state
               SwitchPreference(
                 value = gpuNext,
                 onValueChange = { enabled ->
-                    if (enabled && !gpuNext) {
+                    if (enabled && !gpuNext && !useVulkan) { // Only show warning if Vulkan is disabled
                         showGpuNextWarning = true
                     } else {
                         preferences.gpuNext.set(enabled)
-                        if (enabled) {
+                        if (enabled && !useVulkan) { // Only disable Anime4K if Vulkan is disabled
                             preferences.enableAnime4K.set(false)
                         }
                     }
@@ -153,7 +178,7 @@ object DecoderPreferencesScreen : Screen {
                       confirmButton = {
                           Button(onClick = {
                               preferences.gpuNext.set(true)
-                              preferences.enableAnime4K.set(false)
+                              preferences.enableAnime4K.set(false) // Ensure Anime4K is disabled on confirmation
                               showGpuNextWarning = false
                           }) {
                               Text(stringResource(R.string.pref_decoder_gpu_next_enable_anyway))
@@ -166,6 +191,37 @@ object DecoderPreferencesScreen : Screen {
                       }
                   )
               }
+
+              PreferenceDivider()
+
+              // val useVulkan by preferences.useVulkan.collectAsState() // Moved up for gpuNext logic
+              SwitchPreference(
+                value = useVulkan,
+                onValueChange = { enabled ->
+                  preferences.useVulkan.set(enabled)
+                  // When Vulkan is disabled, ensure Anime4K and GPU Next are not both enabled
+                  if (!enabled) {
+                    val anime4kEnabled = preferences.enableAnime4K.get()
+                    val gpuNextEnabled = preferences.gpuNext.get()
+                    if (anime4kEnabled && gpuNextEnabled) {
+                      // Disable GPU Next to keep Anime4K
+                      preferences.gpuNext.set(false)
+                    }
+                  }
+                },
+                enabled = isVulkanSupported,
+                title = { Text(stringResource(R.string.pref_decoder_vulkan_title) + " (Experimental)") },
+                summary = {
+                  Text(
+                    stringResource(
+                      if (isVulkanSupported) R.string.pref_decoder_vulkan_summary
+                      else R.string.pref_decoder_vulkan_not_supported
+                    ),
+                    color = if (isVulkanSupported) MaterialTheme.colorScheme.outline
+                           else MaterialTheme.colorScheme.error,
+                  )
+                },
+              )
 
               PreferenceDivider()
 
@@ -207,7 +263,7 @@ object DecoderPreferencesScreen : Screen {
                 value = enableAnime4K,
                 onValueChange = { enabled ->
                     preferences.enableAnime4K.set(enabled)
-                    if (enabled) {
+                    if (enabled && !useVulkan) { // Only disable GPU Next if Vulkan is disabled
                         preferences.gpuNext.set(false)
                     }
                 },
@@ -237,4 +293,62 @@ object DecoderPreferencesScreen : Screen {
       }
     }
   }
+}
+
+object VulkanUtils {
+    private const val TAG = "VulkanUtils"
+
+    /**
+     * Checks if the device supports Vulkan for MPV rendering
+     *
+     * Requirements for MPV androidvk context:
+     * - Android 13 (API 33) minimum for Vulkan 1.3
+     * - Vulkan 1.3 (0x00403000) hardware version
+     * - GPU must also support OpenGL ES 3.1 or higher
+     *
+     * @return true if Vulkan 1.3+ is supported for MPV, false otherwise
+     */
+    fun isVulkanSupported(context: Context): Boolean {
+        try {
+            // Vulkan 1.3 requires Android 13 (API 33) minimum
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                Log.d(TAG, "Vulkan not supported: Android version ${Build.VERSION.SDK_INT} < 33 (Tiramisu)")
+                return false
+            }
+
+            val packageManager = context.packageManager
+
+            // Check for OpenGL ES 3.1+ support (required by Android for Vulkan)
+            val configInfo = packageManager.systemAvailableFeatures
+                .firstOrNull { it.name == null }
+
+            val glesVersion = configInfo?.reqGlEsVersion ?: 0
+            val glesMajor = glesVersion shr 16
+            val glesMinor = glesVersion and 0xFFFF
+
+            Log.d(TAG, "Device OpenGL ES version: $glesMajor.$glesMinor (raw: 0x${glesVersion.toString(16)})")
+
+            // OpenGL ES 3.1 = 0x00030001
+            if (glesVersion < 0x00030001) {
+                Log.d(TAG, "Vulkan not supported: OpenGL ES $glesMajor.$glesMinor < 3.1")
+                return false
+            }
+
+            // Check for Vulkan 1.3 hardware version (required for proper MPV support)
+            if (packageManager.hasSystemFeature(
+                    PackageManager.FEATURE_VULKAN_HARDWARE_VERSION,
+                    0x00403000 // Vulkan 1.3
+                )) {
+                Log.d(TAG, "Vulkan 1.3 supported ✓")
+                return true
+            }
+
+            Log.d(TAG, "Vulkan not supported: Vulkan 1.3 not available")
+            return false
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking Vulkan support", e)
+            return false
+        }
+    }
 }

@@ -3,8 +3,11 @@ package app.marlboroadvance.mpvex.ui.browser.videolist
 import android.content.Intent
 import android.os.Environment
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import app.marlboroadvance.mpvex.utils.media.OpenDocumentTreeContract
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +21,8 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -78,6 +83,7 @@ import app.marlboroadvance.mpvex.preferences.VideoSortType
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.presentation.components.pullrefresh.PullRefreshBox
+import app.marlboroadvance.mpvex.BuildConfig
 import app.marlboroadvance.mpvex.ui.browser.cards.VideoCard
 import app.marlboroadvance.mpvex.ui.browser.components.BrowserBottomBar
 import app.marlboroadvance.mpvex.ui.browser.components.BrowserTopBar
@@ -136,6 +142,7 @@ data class VideoListScreen(
     val videosWithPlaybackInfo by viewModel.videosWithPlaybackInfo.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val recentlyPlayedFilePath by viewModel.recentlyPlayedFilePath.collectAsState()
+    val lastPlayedInFolderPath by viewModel.lastPlayedInFolderPath.collectAsState()
     val playlistMode by playerPreferences.playlistMode.collectAsState()
     val videosWereDeletedOrMoved by viewModel.videosWereDeletedOrMoved.collectAsState()
 
@@ -144,10 +151,11 @@ data class VideoListScreen(
     val videoSortOrder by browserPreferences.videoSortOrder.collectAsState()
     val sortedVideosWithInfo =
       remember(videosWithPlaybackInfo, videoSortType, videoSortOrder) {
+        val infoById = videosWithPlaybackInfo.associateBy { it.video.id }
         val sortedVideos = SortUtils.sortVideos(videosWithPlaybackInfo.map { it.video }, videoSortType, videoSortOrder)
-        // Maintain the playback info mapping
+        // Maintain the playback info mapping — O(1) lookup per item
         sortedVideos.map { video ->
-          videosWithPlaybackInfo.find { it.video.id == video.id } ?: VideoWithPlaybackInfo(video)
+          infoById[video.id] ?: VideoWithPlaybackInfo(video)
         }
       }
 
@@ -173,6 +181,34 @@ data class VideoListScreen(
     val operationType = remember { mutableStateOf<CopyPasteOps.OperationType?>(null) }
     val progressDialogOpen = rememberSaveable { mutableStateOf(false) }
     val operationProgress by CopyPasteOps.operationProgress.collectAsState()
+    val treePickerLauncher =
+      rememberLauncherForActivityResult(OpenDocumentTreeContract()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val selectedVideos = selectionManager.getSelectedItems()
+        if (selectedVideos.isEmpty() || operationType.value == null) return@rememberLauncherForActivityResult
+
+        runCatching {
+          context.contentResolver.takePersistableUriPermission(
+            uri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+          )
+        }
+
+        progressDialogOpen.value = true
+        coroutineScope.launch {
+          when (operationType.value) {
+            is CopyPasteOps.OperationType.Copy -> {
+              CopyPasteOps.copyFilesToTreeUri(context, selectedVideos, uri)
+            }
+
+            is CopyPasteOps.OperationType.Move -> {
+              CopyPasteOps.moveFilesToTreeUri(context, selectedVideos, uri)
+            }
+
+            else -> {}
+          }
+        }
+      }
 
     // Private space state
     val movingToPrivateSpace = rememberSaveable { mutableStateOf(false) }
@@ -255,6 +291,9 @@ data class VideoListScreen(
           onSelectAll = { selectionManager.selectAll() },
           onInvertSelection = { selectionManager.invertSelection() },
           onDeselectAll = { selectionManager.clear() },
+          onAddToPlaylistClick = if (!BuildConfig.ENABLE_UPDATE_FEATURE) {
+            { addToPlaylistDialogOpen.value = true }
+          } else null,
         )
       },
       floatingActionButton = {
@@ -303,7 +342,7 @@ data class VideoListScreen(
           videosWithInfo = sortedVideosWithInfo,
           isLoading = isLoading && videos.isEmpty(),
           isRefreshing = isRefreshing,
-          recentlyPlayedFilePath = recentlyPlayedFilePath,
+          recentlyPlayedFilePath = lastPlayedInFolderPath ?: recentlyPlayedFilePath,
           videosWereDeletedOrMoved = videosWereDeletedOrMoved,
           autoScrollToLastPlayed = autoScrollToLastPlayed,
           onRefresh = { viewModel.refresh() },
@@ -325,6 +364,7 @@ data class VideoListScreen(
         )
         
         // Floating Material 3 Button Group overlay with animation
+        // Play Store gating is intentionally bypassed here.
         AnimatedVisibility(
           visible = showFloatingBottomBar,
           enter = slideInVertically(
@@ -341,11 +381,19 @@ data class VideoListScreen(
             isSelectionMode = true,
             onCopyClick = {
               operationType.value = CopyPasteOps.OperationType.Copy
-              folderPickerOpen.value = true
+              if (CopyPasteOps.canUseDirectFileOperations()) {
+                folderPickerOpen.value = true
+              } else {
+                treePickerLauncher.launch(null)
+              }
             },
             onMoveClick = {
               operationType.value = CopyPasteOps.OperationType.Move
-              folderPickerOpen.value = true
+              if (CopyPasteOps.canUseDirectFileOperations()) {
+                folderPickerOpen.value = true
+              } else {
+                treePickerLauncher.launch(null)
+              }
             },
             onRenameClick = { renameDialogOpen.value = true },
             onDeleteClick = { deleteDialogOpen.value = true },
@@ -515,7 +563,11 @@ private fun VideoListContent(
   val gesturePreferences = koinInject<GesturePreferences>()
   val browserPreferences = koinInject<BrowserPreferences>()
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
-  val videoGridColumns by browserPreferences.videoGridColumns.collectAsState()
+  val videoGridColumnsPortrait by browserPreferences.videoGridColumnsPortrait.collectAsState()
+  val videoGridColumnsLandscape by browserPreferences.videoGridColumnsLandscape.collectAsState()
+  val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+  val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+  val videoGridColumns = if (isLandscape) videoGridColumnsLandscape else videoGridColumnsPortrait
   val tapThumbnailToSelect by gesturePreferences.tapThumbnailToSelect.collectAsState()
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
   val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
@@ -697,6 +749,7 @@ private fun VideoListContent(
                 isRecentlyPlayed = isRecentlyPlayed,
                 isSelected = selectionManager.isSelected(videoWithInfo.video),
                 isOldAndUnplayed = videoWithInfo.isOldAndUnplayed,
+                isWatched = videoWithInfo.isWatched,
                 onClick = { onVideoClick(videoWithInfo.video) },
                 onLongClick = { onVideoLongClick(videoWithInfo.video) },
                 onThumbClick = if (tapThumbnailToSelect) {
@@ -748,6 +801,7 @@ private fun VideoListContent(
                   isRecentlyPlayed = isRecentlyPlayed,
                   isSelected = selectionManager.isSelected(videoWithInfo.video),
                   isOldAndUnplayed = videoWithInfo.isOldAndUnplayed,
+                  isWatched = videoWithInfo.isWatched,
                   onClick = { onVideoClick(videoWithInfo.video) },
                   onLongClick = { onVideoLongClick(videoWithInfo.video) },
                   onThumbClick = if (tapThumbnailToSelect) {
@@ -779,14 +833,23 @@ private fun VideoSortDialog(
   onSortOrderChange: (SortOrder) -> Unit,
 ) {
   val browserPreferences = koinInject<BrowserPreferences>()
-  val videoGridColumns by browserPreferences.videoGridColumns.collectAsState()
-  val folderGridColumns by browserPreferences.folderGridColumns.collectAsState()
+  val videoGridColumnsPortrait by browserPreferences.videoGridColumnsPortrait.collectAsState()
+  val videoGridColumnsLandscape by browserPreferences.videoGridColumnsLandscape.collectAsState()
+  val folderGridColumnsPortrait by browserPreferences.folderGridColumnsPortrait.collectAsState()
+  val folderGridColumnsLandscape by browserPreferences.folderGridColumnsLandscape.collectAsState()
+
+  val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+  val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
+  val videoGridColumns = if (isLandscape) videoGridColumnsLandscape else videoGridColumnsPortrait
+  val folderGridColumns = if (isLandscape) folderGridColumnsLandscape else folderGridColumnsPortrait
   val appearancePreferences = koinInject<AppearancePreferences>()
   val showThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
   val showSizeChip by browserPreferences.showSizeChip.collectAsState()
   val showResolutionChip by browserPreferences.showResolutionChip.collectAsState()
   val showFramerateInResolution by browserPreferences.showFramerateInResolution.collectAsState()
   val showProgressBar by browserPreferences.showProgressBar.collectAsState()
+  val showDateChip by browserPreferences.showDateChip.collectAsState()
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
   val unlimitedNameLines by appearancePreferences.unlimitedNameLines.collectAsState()
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
@@ -794,19 +857,27 @@ private fun VideoSortDialog(
 
   val folderGridColumnSelector = if (mediaLayoutMode == MediaLayoutMode.GRID) {
     GridColumnSelector(
-      label = "Folder Grid Columns",
+      label = "Folder Grid Columns (${if (isLandscape) "Landscape" else "Portrait"})",
       currentValue = folderGridColumns,
-      onValueChange = { browserPreferences.folderGridColumns.set(it) },
-      valueRange = 2f..4f,
-      steps = 1,
+      onValueChange = {
+        if (isLandscape) browserPreferences.folderGridColumnsLandscape.set(it)
+        else browserPreferences.folderGridColumnsPortrait.set(it)
+      },
+      valueRange = if (isLandscape) 3f..5f else 2f..4f,
+      steps = if (isLandscape) 1 else 1,
     )
   } else null
 
   val videoGridColumnSelector = if (mediaLayoutMode == MediaLayoutMode.GRID) {
     GridColumnSelector(
-      label = "Grid Columns",
+      label = "Grid Columns (${if (isLandscape) "Landscape" else "Portrait"})",
       currentValue = videoGridColumns,
-      onValueChange = { browserPreferences.videoGridColumns.set(it) },
+      onValueChange = {
+        if (isLandscape) browserPreferences.videoGridColumnsLandscape.set(it)
+        else browserPreferences.videoGridColumnsPortrait.set(it)
+      },
+      valueRange = if (isLandscape) 3f..5f else 1f..3f,
+      steps = if (isLandscape) 1 else 1,
     )
   } else null
 
@@ -902,6 +973,11 @@ private fun VideoSortDialog(
           label = "Framerate",
           checked = showFramerateInResolution,
           onCheckedChange = { browserPreferences.showFramerateInResolution.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Date",
+          checked = showDateChip,
+          onCheckedChange = { browserPreferences.showDateChip.set(it) },
         ),
       ),
     folderGridColumnSelector = folderGridColumnSelector,

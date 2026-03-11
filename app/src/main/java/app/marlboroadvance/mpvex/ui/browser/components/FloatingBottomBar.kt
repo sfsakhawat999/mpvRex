@@ -70,7 +70,10 @@ fun BrowserBottomBar(
           onClick = onCopyClick,
           enabled = showCopy,
           modifier = Modifier.size(50.dp),
-          colors = IconButtonDefaults.filledTonalIconButtonColors()
+          colors = IconButtonDefaults.filledTonalIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+          )
         ) {
           Icon(
             Icons.Filled.ContentCopy, 
@@ -83,7 +86,10 @@ fun BrowserBottomBar(
           onClick = onMoveClick,
           enabled = showMove,
           modifier = Modifier.size(50.dp),
-          colors = IconButtonDefaults.filledTonalIconButtonColors()
+          colors = IconButtonDefaults.filledTonalIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+          )
         ) {
           Icon(
             Icons.AutoMirrored.Filled.DriveFileMove, 
@@ -96,7 +102,10 @@ fun BrowserBottomBar(
           onClick = onRenameClick,
           enabled = showRename,
           modifier = Modifier.size(50.dp),
-          colors = IconButtonDefaults.filledTonalIconButtonColors()
+          colors = IconButtonDefaults.filledTonalIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+          )
         ) {
           Icon(
             Icons.Filled.DriveFileRenameOutline, 

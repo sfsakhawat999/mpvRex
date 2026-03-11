@@ -34,61 +34,35 @@ fun VideoSettingsPanel(
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  ConstraintLayout(
-    modifier =
-      modifier
-        .fillMaxSize()
-        .padding(MaterialTheme.spacing.medium),
+  DraggablePanel(
+    modifier = modifier,
+    header = {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = MaterialTheme.spacing.medium)
+          .padding(top = MaterialTheme.spacing.small),
+      ) {
+        Text(
+          stringResource(R.string.player_sheets_video_settings_title),
+          style = MaterialTheme.typography.titleLarge,
+        )
+        Spacer(Modifier.weight(1f))
+        IconButton(onClick = onDismissRequest) {
+          Icon(Icons.Default.Close, null, modifier = Modifier.size(32.dp))
+        }
+      }
+    }
   ) {
-    val settingsCard = createRef()
-
-    Card(
-      modifier =
-        Modifier
-          .constrainAs(settingsCard) {
-            top.linkTo(parent.top)
-            end.linkTo(parent.end)
-          }
-          .widthIn(max = CARDS_MAX_WIDTH),
-      colors = panelCardsColors(),
-      shape = MaterialTheme.shapes.large,
-      border = androidx.compose.foundation.BorderStroke(
-        1.dp,
-        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-      ),
-      elevation = androidx.compose.material3.CardDefaults.cardElevation(
-        defaultElevation = 0.dp,
-        pressedElevation = 0.dp,
-        focusedElevation = 0.dp,
-        hoveredElevation = 0.dp,
-        draggedElevation = 0.dp,
-        disabledElevation = 0.dp,
-      ),
-    ) {
       Column(
-        Modifier
-          .verticalScroll(rememberScrollState())
-          .padding(MaterialTheme.spacing.medium),
+        Modifier.padding(MaterialTheme.spacing.medium),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
       ) {
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.SpaceBetween,
-          modifier = Modifier.fillMaxWidth(),
-        ) {
-          Text(
-            stringResource(R.string.player_sheets_video_settings_title),
-            style = MaterialTheme.typography.titleLarge,
-          )
-          Spacer(Modifier.weight(1f))
-          IconButton(onClick = onDismissRequest) {
-            Icon(Icons.Default.Close, null, modifier = Modifier.size(32.dp))
-          }
-        }
         VideoSettingsFilterPresetsCard()
         VideoSettingsFiltersCard()
         VideoSettingsDebandCard()
       }
-    }
   }
 }

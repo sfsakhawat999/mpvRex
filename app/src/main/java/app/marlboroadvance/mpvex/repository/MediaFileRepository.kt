@@ -3,18 +3,20 @@ package app.marlboroadvance.mpvex.repository
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
-import app.marlboroadvance.mpvex.database.repository.VideoMetadataCacheRepository
 import app.marlboroadvance.mpvex.domain.browser.FileSystemItem
 import app.marlboroadvance.mpvex.domain.browser.PathComponent
 import app.marlboroadvance.mpvex.domain.media.model.Video
 import app.marlboroadvance.mpvex.domain.media.model.VideoFolder
-import app.marlboroadvance.mpvex.utils.storage.FolderScanUtils
-import app.marlboroadvance.mpvex.utils.storage.StorageScanUtils
+import app.marlboroadvance.mpvex.utils.storage.FolderViewScanner
+import app.marlboroadvance.mpvex.utils.storage.TreeViewScanner
+import app.marlboroadvance.mpvex.utils.storage.VideoScanUtils
+import app.marlboroadvance.mpvex.utils.storage.StorageVolumeUtils
+import app.marlboroadvance.mpvex.utils.storage.FileTypeUtils
+import app.marlboroadvance.mpvex.utils.media.MediaInfoOps
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import java.io.File
 import java.util.Locale
 import kotlin.math.log10
@@ -32,33 +34,17 @@ import kotlin.math.pow
  * - Path operations
  * - Storage volume detection
  */
-object MediaFileRepository : KoinComponent {
+object MediaFileRepository {
   private const val TAG = "MediaFileRepository"
-  private val metadataCache: VideoMetadataCacheRepository by inject()
-
-  // In-memory cache for fast subsequent loads
-  private val videoFoldersCache = mutableMapOf<String, Pair<List<VideoFolder>, Long>>()
-  private val videosCache = mutableMapOf<String, Pair<List<Video>, Long>>()
-  private const val CACHE_VALIDITY_MS = Long.MAX_VALUE // Never expire - only clear on manual refresh
 
   /**
-   * Clears all in-memory caches
-   * Call this when media library changes are detected
+   * Clears all caches
+   * Call this when media library changes are detected or when forcing a hard refresh
    */
   fun clearCache() {
-    videoFoldersCache.clear()
-    videosCache.clear()
-    Log.d(TAG, "Cleared all in-memory caches")
-  }
-
-  /**
-   * Clears cache for a specific folder (all variants)
-   */
-  fun clearCacheForFolder(bucketId: String) {
-    // Clear both cached variants (with and without hidden files)
-    videosCache.remove("$bucketId-true")
-    videosCache.remove("$bucketId-false")
-    Log.d(TAG, "Cleared cache for bucket: $bucketId")
+    Log.d(TAG, "Clearing all caches (FolderViewScanner + TreeViewScanner)")
+    FolderViewScanner.clearCache()
+    TreeViewScanner.clearCache()
   }
 
   // =============================================================================
@@ -67,119 +53,37 @@ object MediaFileRepository : KoinComponent {
 
   /**
    * Scans all storage volumes to find all folders containing videos
-   * Used by FolderListViewModel for album view
-   *
-   * LEGACY VERSION: Maintains backward compatibility with metadata extraction
-   * For better performance, use getAllVideoFoldersFast() instead
    */
   suspend fun getAllVideoFolders(
-    context: Context,
-    showHiddenFiles: Boolean,
+    context: Context
   ): List<VideoFolder> =
     withContext(Dispatchers.IO) {
-      val cacheKey = "all_folders_$showHiddenFiles"
-
-      // Check cache first
-      videoFoldersCache[cacheKey]?.let { (cached, timestamp) ->
-        if (System.currentTimeMillis() - timestamp < CACHE_VALIDITY_MS) {
-          Log.d(TAG, "Returning cached video folders (${cached.size} folders)")
-          return@withContext cached
-        }
-      }
-
       try {
-        val folders = FolderScanUtils.scanAllStorageForVideoFolders(
-          context = context,
-          showHiddenFiles = showHiddenFiles,
-          metadataCache = metadataCache,
-        )
-        val result = FolderScanUtils.convertToVideoFolders(folders)
-
-        // Update cache
-        videoFoldersCache[cacheKey] = Pair(result, System.currentTimeMillis())
-
-        result
+        FolderViewScanner.getAllVideoFolders(context)
       } catch (e: Exception) {
         Log.e(TAG, "Error scanning for video folders", e)
-        // Return cached data even if expired on error
-        videoFoldersCache[cacheKey]?.first ?: emptyList()
-      }
-    }
-
-  /**
-   * OPTIMIZED: Ultra-fast scan for video folders with parallel processing
-   * Returns folders immediately with basic info (count, size)
-   * Duration will be 0 initially - call enrichVideoFolders() to populate
-   *
-   * This is 5-10x faster than getAllVideoFolders() for large file systems
-   *
-   * @param context Application context
-   * @param showHiddenFiles Whether to show hidden files/folders
-   * @param onProgress Optional callback for progress updates (folder count found)
-   * @return List of VideoFolder with basic info (no duration)
-   */
-  suspend fun getAllVideoFoldersFast(
-    context: Context,
-    showHiddenFiles: Boolean,
-    onProgress: ((Int) -> Unit)? = null,
-  ): List<VideoFolder> =
-    withContext(Dispatchers.IO) {
-      try {
-        val folders = FolderScanUtils.scanAllStorageForVideoFoldersOptimized(
-          context = context,
-          showHiddenFiles = showHiddenFiles,
-          onProgress = onProgress,
-        )
-        FolderScanUtils.convertToVideoFolders(folders)
-      } catch (e: Exception) {
-        Log.e(TAG, "Error fast scanning for video folders", e)
         emptyList()
       }
     }
 
   /**
-   * OPTIMIZED: Enriches folder list with metadata (duration) in background
-   * Call after getAllVideoFoldersFast() to add duration information
-   *
-   * @param context Application context
-   * @param folders List of folders to enrich (from fast scan)
-   * @param onProgress Optional callback for progress (processed, total)
-   * @return Updated list with duration information
+   * Fast scan using MediaStore - same as getAllVideoFolders
+   * Kept for backward compatibility
+   */
+  suspend fun getAllVideoFoldersFast(
+    context: Context,
+    onProgress: ((Int) -> Unit)? = null,
+  ): List<VideoFolder> = getAllVideoFolders(context)
+
+  /**
+   * No-op enrichment - MediaStore already provides all metadata
+   * Kept for backward compatibility
    */
   suspend fun enrichVideoFolders(
     context: Context,
     folders: List<VideoFolder>,
     onProgress: ((Int, Int) -> Unit)? = null,
-  ): List<VideoFolder> =
-    withContext(Dispatchers.IO) {
-      try {
-        // Convert back to FolderData map
-        val folderDataMap = folders.associate { folder ->
-          folder.path to FolderScanUtils.FolderData(
-            path = folder.path,
-            name = folder.name,
-            videoCount = folder.videoCount,
-            totalSize = folder.totalSize,
-            totalDuration = folder.totalDuration,
-            lastModified = folder.lastModified,
-          )
-        }
-
-        // Enrich with metadata
-        val enrichedMap = FolderScanUtils.enrichFolderMetadata(
-          context = context,
-          folders = folderDataMap,
-          metadataCache = metadataCache,
-          onProgress = onProgress,
-        )
-
-        // Convert back to VideoFolder list
-        FolderScanUtils.convertToVideoFolders(enrichedMap)
-      } catch (e: Exception) {
-        Log.e(TAG, "Error enriching video folders", e)
-        folders // Return original on error
-      }
-    }
+  ): List<VideoFolder> = folders
 
   // =============================================================================
   // VIDEO FILE OPERATIONS
@@ -187,99 +91,33 @@ object MediaFileRepository : KoinComponent {
 
   /**
    * Gets all videos in a specific folder
-   * OPTIMIZED: Uses batch metadata extraction for faster loading
-   * @param bucketId Can be either a path or a bucket ID (path hash)
-   * @param showHiddenFiles Whether to show hidden files
+   * @param bucketId Folder path
    */
   suspend fun getVideosInFolder(
     context: Context,
-    bucketId: String,
-    showHiddenFiles: Boolean = true,
+    bucketId: String
   ): List<Video> =
     withContext(Dispatchers.IO) {
-      // Check cache first
-      // Cache key includes showHiddenFiles to ensure different results are cached separately
-      val cacheKey = "$bucketId-$showHiddenFiles"
-      videosCache[cacheKey]?.let { (cached, timestamp) ->
-        if (System.currentTimeMillis() - timestamp < CACHE_VALIDITY_MS) {
-          Log.d(TAG, "Returning cached videos for bucket $bucketId (${cached.size} videos)")
-          return@withContext cached
-        }
-      }
-
       try {
-        // Determine if bucketId is a path or hash
-        val folderPath = if (bucketId.contains("/")) {
-          bucketId // It's already a path
-        } else {
-          bucketId // Treat as path for now
-        }
-
-        // Scan the directory for video files
-        val directory = File(folderPath)
-        if (!directory.exists() || !directory.isDirectory || !directory.canRead()) {
-          Log.w(TAG, "Cannot access directory: $folderPath")
-          // Return cached data even if expired on error
-          return@withContext videosCache[cacheKey]?.first ?: emptyList()
-        }
-
-        val videoFiles = directory.listFiles()?.filter {
-          it.isFile && StorageScanUtils.isVideoFile(it) && !StorageScanUtils.shouldSkipFile(it, showHiddenFiles)
-        } ?: emptyList()
-
-        Log.d(TAG, "Found ${videoFiles.size} videos in $folderPath")
-
-        // Batch extract metadata for all videos
-        val fileTriples = videoFiles.map { file ->
-          Triple(file, Uri.fromFile(file), file.name)
-        }
-
-        val metadataMap = metadataCache.getOrExtractMetadataBatch(fileTriples)
-
-        // Create video objects with metadata
-        val videos = videoFiles.mapNotNull { videoFile ->
-          try {
-            if (videoFile.exists()) {
-              createVideoFromFileWithMetadata(
-                videoFile,
-                folderPath,
-                directory.name,
-                metadataMap[videoFile.absolutePath],
-              )
-            } else {
-              null
-            }
-          } catch (e: Exception) {
-            Log.w(TAG, "Error processing video file: ${videoFile.absolutePath}", e)
-            null
-          }
-        }
-
-        val result = videos.sortedBy { it.displayName.lowercase() }
-
-        // Update cache
-        videosCache[cacheKey] = Pair(result, System.currentTimeMillis())
-
-        result
+        VideoScanUtils.getVideosInFolder(context, bucketId)
       } catch (e: Exception) {
         Log.e(TAG, "Error getting videos for bucket $bucketId", e)
-        // Return cached data even if expired on error
-        return@withContext videosCache[cacheKey]?.first ?: emptyList()
+        emptyList()
       }
     }
 
   /**
    * Gets videos from multiple folders
+   * Shows all videos including hidden ones.
    */
   suspend fun getVideosForBuckets(
     context: Context,
-    bucketIds: Set<String>,
-    showHiddenFiles: Boolean = true,
+    bucketIds: Set<String>
   ): List<Video> =
     withContext(Dispatchers.IO) {
       val result = mutableListOf<Video>()
       for (id in bucketIds) {
-        runCatching { result += getVideosInFolder(context, id, showHiddenFiles) }
+        runCatching { result += getVideosInFolder(context, id) }
       }
       result
     }
@@ -288,6 +126,7 @@ object MediaFileRepository : KoinComponent {
    * Creates Video objects from a list of files
    */
   suspend fun getVideosFromFiles(
+    context: Context,
     files: List<File>,
   ): List<Video> =
     withContext(Dispatchers.IO) {
@@ -295,7 +134,7 @@ object MediaFileRepository : KoinComponent {
         try {
           val folderPath = file.parent ?: ""
           val folderName = file.parentFile?.name ?: ""
-          createVideoFromFile(file, folderPath, folderName)
+          createVideoFromFile(context, file, folderPath, folderName)
         } catch (e: Exception) {
           Log.w(TAG, "Error creating video from file: ${file.absolutePath}", e)
           null
@@ -307,6 +146,7 @@ object MediaFileRepository : KoinComponent {
    * Creates a Video object from a file with full metadata extraction
    */
   private suspend fun createVideoFromFile(
+    context: Context,
     file: File,
     bucketId: String,
     bucketDisplayName: String,
@@ -317,10 +157,10 @@ object MediaFileRepository : KoinComponent {
     val dateModified = file.lastModified() / 1000
 
     val extension = file.extension.lowercase()
-    val mimeType = StorageScanUtils.getMimeTypeFromExtension(extension)
+    val mimeType = FileTypeUtils.getMimeTypeFromExtension(extension)
     val uri = Uri.fromFile(file)
 
-    // Extract metadata using cache (with MediaInfo fallback)
+    // Extract metadata directly (no cache)
     var size = file.length()
     var duration = 0L
     var width = 0
@@ -329,7 +169,8 @@ object MediaFileRepository : KoinComponent {
     var hasEmbeddedSubtitles = false
     var subtitleCodec = ""
 
-    metadataCache.getOrExtractMetadata(file, uri, displayName)?.let { metadata ->
+    // Extract metadata using MediaInfo
+    MediaInfoOps.extractBasicMetadata(context, uri, displayName).onSuccess { metadata ->
       if (metadata.sizeBytes > 0) size = metadata.sizeBytes
       duration = metadata.durationMs
       width = metadata.width
@@ -364,14 +205,14 @@ object MediaFileRepository : KoinComponent {
   }
 
   /**
-   * OPTIMIZED: Creates a Video object from a file with pre-fetched metadata
+   * Creates a Video object from a file with pre-fetched metadata
    * Use this when metadata has already been batch-extracted
    */
   private fun createVideoFromFileWithMetadata(
     file: File,
     bucketId: String,
     bucketDisplayName: String,
-    metadata: app.marlboroadvance.mpvex.utils.media.MediaInfoOps.VideoMetadata?,
+    metadata: MediaInfoOps.VideoMetadata?,
   ): Video {
     val path = file.absolutePath
     val displayName = file.name
@@ -379,7 +220,7 @@ object MediaFileRepository : KoinComponent {
     val dateModified = file.lastModified() / 1000
 
     val extension = file.extension.lowercase()
-    val mimeType = StorageScanUtils.getMimeTypeFromExtension(extension)
+    val mimeType = FileTypeUtils.getMimeTypeFromExtension(extension)
     val uri = Uri.fromFile(file)
 
     // Use pre-fetched metadata
@@ -455,15 +296,14 @@ object MediaFileRepository : KoinComponent {
 
   /**
    * Scans a directory and returns its contents (folders and video files)
+   * OPTIMIZED: Uses UnifiedMediaScanner for fast, consistent results
    * @param showAllFileTypes If true, shows all files. If false, shows only videos.
-   * @param showHiddenFiles If true, shows hidden files and folders. If false, hides them.
    * @param useFastCount If true, uses fast shallow counting (immediate children only). If false, uses deep recursive counting.
    */
   suspend fun scanDirectory(
     context: Context,
     path: String,
     showAllFileTypes: Boolean = false,
-    showHiddenFiles: Boolean = false,
     useFastCount: Boolean = false,
   ): Result<List<FileSystemItem>> =
     withContext(Dispatchers.IO) {
@@ -484,47 +324,25 @@ object MediaFileRepository : KoinComponent {
         }
 
         val items = mutableListOf<FileSystemItem>()
-        val files = directory.listFiles()
 
-        if (files == null) {
-          return@withContext Result.failure(Exception("Failed to list directory contents: $path"))
+        // Get folders using TreeViewScanner (instant from cache)
+        val folders = TreeViewScanner.getFoldersInDirectory(context, path)
+        folders.forEach { folderData ->
+          items.add(
+            FileSystemItem.Folder(
+              name = folderData.name,
+              path = folderData.path,
+              lastModified = File(folderData.path).lastModified(),
+              videoCount = folderData.videoCount,
+              totalSize = folderData.totalSize,
+              totalDuration = folderData.totalDuration,
+              hasSubfolders = folderData.hasSubfolders,
+            ),
+          )
         }
 
-        // Process subdirectories
-        files
-          .filter { it.isDirectory && it.canRead() && !StorageScanUtils.shouldSkipFolder(it, showHiddenFiles) }
-          .forEach { subdir ->
-            val folderInfo = if (useFastCount) {
-              FolderScanUtils.getDirectChildrenCountFast(subdir, showHiddenFiles, showAllFileTypes)
-            } else {
-              FolderScanUtils.getDirectChildrenCount(subdir, showHiddenFiles, showAllFileTypes)
-            }
-
-            // Only add folder if it contains files (recursively counted)
-            if (folderInfo.videoCount > 0) {
-              items.add(
-                FileSystemItem.Folder(
-                  name = subdir.name,
-                  path = subdir.absolutePath,
-                  lastModified = subdir.lastModified(),
-                  videoCount = folderInfo.videoCount,
-                  totalSize = folderInfo.totalSize,
-                  totalDuration = 0L,
-                  hasSubfolders = folderInfo.hasSubfolders,
-                ),
-              )
-            }
-          }
-
-        // Process files in current directory
-        val targetFiles = if (showAllFileTypes) {
-          files.filter { it.isFile && !StorageScanUtils.shouldSkipFile(it, showHiddenFiles) }
-        } else {
-          files.filter { it.isFile && StorageScanUtils.isVideoFile(it) && !StorageScanUtils.shouldSkipFile(it, showHiddenFiles) }
-        }
-
-        val videos = getVideosFromFiles(targetFiles)
-
+        // Get videos in current directory
+        val videos = VideoScanUtils.getVideosInFolder(context, path)
         videos.forEach { video ->
           items.add(
             FileSystemItem.VideoFile(
@@ -536,10 +354,6 @@ object MediaFileRepository : KoinComponent {
           )
         }
 
-        Log.d(
-          TAG,
-          "Scanned directory: $path, found ${items.size} items (${items.filterIsInstance<FileSystemItem.Folder>().size} folders, ${items.filterIsInstance<FileSystemItem.VideoFile>().size} videos) [fastCount=$useFastCount]",
-        )
         Result.success(items)
       } catch (e: SecurityException) {
         Log.e(TAG, "Security exception scanning directory: $path", e)
@@ -551,7 +365,7 @@ object MediaFileRepository : KoinComponent {
     }
 
   /**
-   * Gets all storage volume roots
+   * Gets all storage volume roots with recursive video counts
    */
   suspend fun getStorageRoots(context: Context): List<FileSystemItem.Folder> =
     withContext(Dispatchers.IO) {
@@ -561,43 +375,50 @@ object MediaFileRepository : KoinComponent {
         // Primary storage (internal)
         val primaryStorage = Environment.getExternalStorageDirectory()
         if (primaryStorage.exists() && primaryStorage.canRead()) {
+          val primaryPath = primaryStorage.absolutePath
+          
+          // Get recursive count for this storage root
+          val folderData = TreeViewScanner.getFolderDataRecursive(context, primaryPath)
+          
           roots.add(
             FileSystemItem.Folder(
               name = "Internal Storage",
-              path = primaryStorage.absolutePath,
+              path = primaryPath,
               lastModified = primaryStorage.lastModified(),
-              videoCount = 0,
-              totalSize = 0L,
-              totalDuration = 0L,
+              videoCount = folderData?.videoCount ?: 0,
+              totalSize = folderData?.totalSize ?: 0L,
+              totalDuration = folderData?.totalDuration ?: 0L,
               hasSubfolders = true,
             ),
           )
         }
 
         // External volumes (SD cards, USB OTG)
-        val externalVolumes = StorageScanUtils.getExternalStorageVolumes(context)
+        val externalVolumes = StorageVolumeUtils.getExternalStorageVolumes(context)
         for (volume in externalVolumes) {
-          val volumePath = StorageScanUtils.getVolumePath(volume)
+          val volumePath = StorageVolumeUtils.getVolumePath(volume)
           if (volumePath != null) {
             val volumeDir = File(volumePath)
             if (volumeDir.exists() && volumeDir.canRead()) {
               val volumeName = volume.getDescription(context)
+              
+              // Get recursive count for this storage root
+              val folderData = TreeViewScanner.getFolderDataRecursive(context, volumePath)
+              
               roots.add(
                 FileSystemItem.Folder(
                   name = volumeName,
                   path = volumeDir.absolutePath,
                   lastModified = volumeDir.lastModified(),
-                  videoCount = 0,
-                  totalSize = 0L,
-                  totalDuration = 0L,
+                  videoCount = folderData?.videoCount ?: 0,
+                  totalSize = folderData?.totalSize ?: 0L,
+                  totalDuration = folderData?.totalDuration ?: 0L,
                   hasSubfolders = true,
                 ),
               )
             }
           }
         }
-
-        Log.d(TAG, "Found ${roots.size} storage roots")
       } catch (e: Exception) {
         Log.e(TAG, "Error getting storage roots", e)
       }

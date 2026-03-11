@@ -197,25 +197,6 @@ object AppearancePreferencesScreen : Screen {
 
                             PreferenceDivider()
 
-                            val showHiddenFiles by preferences.showHiddenFiles.collectAsState()
-                            SwitchPreference(
-                                value = showHiddenFiles,
-                                onValueChange = { preferences.showHiddenFiles.set(it) },
-                                title = {
-                                    Text(
-                                        text = stringResource(id = R.string.pref_appearance_show_hidden_files_title),
-                                    )
-                                },
-                                summary = {
-                                    Text(
-                                        text = stringResource(id = R.string.pref_appearance_show_hidden_files_summary),
-                                        color = MaterialTheme.colorScheme.outline,
-                                    )
-                                }
-                            )
-
-                            PreferenceDivider()
-
                             val showUnplayedOldVideoLabel by preferences.showUnplayedOldVideoLabel.collectAsState()
                             SwitchPreference(
                                 value = showUnplayedOldVideoLabel,
@@ -270,6 +251,28 @@ object AppearancePreferencesScreen : Screen {
                                         color = MaterialTheme.colorScheme.outline,
                                     )
                                 }
+                            )
+
+                            PreferenceDivider()
+
+                            val watchedThreshold by browserPreferences.watchedThreshold.collectAsState()
+                            SliderPreference(
+                                value = watchedThreshold.toFloat(),
+                                onValueChange = { browserPreferences.watchedThreshold.set(it.roundToInt()) },
+                                sliderValue = watchedThreshold.toFloat(),
+                                onSliderValueChange = { browserPreferences.watchedThreshold.set(it.roundToInt()) },
+                                title = { Text(text = stringResource(id = R.string.pref_appearance_watched_threshold_title)) },
+                                valueRange = 50f..100f,
+                                valueSteps = 9,
+                                summary = {
+                                    Text(
+                                        text = stringResource(
+                                            id = R.string.pref_appearance_watched_threshold_summary,
+                                            watchedThreshold,
+                                        ),
+                                        color = MaterialTheme.colorScheme.outline,
+                                    )
+                                },
                             )
 
                             PreferenceDivider()

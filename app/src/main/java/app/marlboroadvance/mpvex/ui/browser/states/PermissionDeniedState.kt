@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import app.marlboroadvance.mpvex.BuildConfig
 import app.marlboroadvance.mpvex.R
 
 @SuppressLint("UseKtx")
@@ -68,6 +69,9 @@ fun PermissionDeniedState(
 ) {
   val context = LocalContext.current
   var showExplanationDialog by remember { mutableStateOf(false) }
+
+  // Determine if we're using MANAGE_EXTERNAL_STORAGE or scoped storage permissions
+  val isPlayStoreBuild = remember { BuildConfig.SCOPED_STORAGE_ONLY }
 
   // Animated scale for the icon
   val infiniteTransition = rememberInfiniteTransition(label = "permission_icon")
@@ -150,7 +154,15 @@ fun PermissionDeniedState(
             verticalArrangement = Arrangement.spacedBy(12.dp),
           ) {
             Text(
-              text = "mpvEx requires \"All file access\" permission to discover media and subtitles on your device due to a change in security policy in Android 11 and later versions.",
+              text = if (isPlayStoreBuild) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                  "mpvEx requires \"Photos and videos\" permission to access and play your video files stored on your device."
+                } else {
+                  "mpvEx requires \"Storage\" permission to access and play your media files stored on your device."
+                }
+              } else {
+                "mpvEx requires \"All file access\" permission to discover media and subtitles on your device due to a change in security policy in Android 11 and later versions."
+              },
               style = MaterialTheme.typography.bodyLarge,
               color = MaterialTheme.colorScheme.onSurface,
               textAlign = TextAlign.Center,
@@ -163,20 +175,25 @@ fun PermissionDeniedState(
         // Allow Access Button
         FilledTonalButton(
           onClick = {
-            // Open All Files Access settings for Android 11+
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-              try {
-                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                intent.data = Uri.parse("package:${context.packageName}")
-                context.startActivity(intent)
-              } catch (_: Exception) {
-                // Fallback to general All Files Access settings
-                val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-                context.startActivity(intent)
-              }
-            } else {
-              // For older Android versions, use the regular permission request
+            if (isPlayStoreBuild) {
+              // Play Store build: Use regular permission request
               onRequestPermission()
+            } else {
+              // Standard build: Open All Files Access settings for Android 11+
+              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                try {
+                  val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                  intent.data = Uri.parse("package:${context.packageName}")
+                  context.startActivity(intent)
+                } catch (_: Exception) {
+                  // Fallback to general All Files Access settings
+                  val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                  context.startActivity(intent)
+                }
+              } else {
+                // For older Android versions, use the regular permission request
+                onRequestPermission()
+              }
             }
           },
           modifier =
@@ -245,23 +262,56 @@ fun PermissionDeniedState(
               .verticalScroll(rememberScrollState()),
           verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-          Text(
-            text = "mpvEx has always required storage access permission as it's essential for the app to find all media and subtitle files on your device, including the ones that are not supported by the system.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
+          if (isPlayStoreBuild) {
+            // Play Store build explanation
+            Text(
+              text = "mpvEx needs access to your video files to provide its core functionality as a media player.",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
 
-          Text(
-            text = "However, due to a change in security policy, apps built for Android 11 and above now require additional permission to continue accessing the same.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
+            Text(
+              text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                "On Android 13 and above, this permission allows the app to read video files from your device's storage, including Downloads, Movies, and DCIM folders."
+              } else {
+                "This permission allows the app to read media files from your device's storage to play videos and audio."
+              },
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
 
-          Text(
-            text = "Please know that this permission is only used for the auto-discovery of media/subtitle files on your device and will not allow us to access the private data files stored by other apps in any way.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
+            Text(
+              text = "The permission is used exclusively for:",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              fontWeight = FontWeight.Medium,
+            )
+
+            Text(
+              text = "• Discovering and displaying your video files\n• Playing media content\n• Loading subtitle files",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          } else {
+            // Standard build explanation
+            Text(
+              text = "mpvEx has always required storage access permission as it's essential for the app to find all media and subtitle files on your device, including the ones that are not supported by the system.",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Text(
+              text = "However, due to a change in security policy, apps built for Android 11 and above now require additional permission to continue accessing the same.",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Text(
+              text = "Please know that this permission is only used for the auto-discovery of media/subtitle files on your device and will not allow us to access the private data files stored by other apps in any way.",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
 
           Text(
             text = "mpvEx is an open source project. You can review the source code and verify how permissions are used by visiting our GitHub repository at:",

@@ -47,13 +47,6 @@ object SearchablePreferences {
                 screen = AppearancePreferencesScreen,
             ))
             add(SearchablePreference(
-                titleRes = R.string.pref_appearance_show_hidden_files_title,
-                summaryRes = R.string.pref_appearance_show_hidden_files_summary,
-                keywords = listOf("hidden", "files", "dot", "nomedia", "show"),
-                category = "Appearance",
-                screen = AppearancePreferencesScreen,
-            ))
-            add(SearchablePreference(
                 titleRes = R.string.pref_appearance_show_unplayed_old_video_label_title,
                 summaryRes = R.string.pref_appearance_show_unplayed_old_video_label_summary,
                 keywords = listOf("unplayed", "old", "label", "video", "new", "indicator"),
@@ -382,6 +375,13 @@ object SearchablePreferences {
                 screen = DecoderPreferencesScreen,
             ))
             add(SearchablePreference(
+                titleRes = R.string.pref_decoder_vulkan_title,
+                summaryRes = R.string.pref_decoder_vulkan_summary,
+                keywords = listOf("vulkan", "gpu", "rendering", "graphics", "api", "performance"),
+                category = "Decoder",
+                screen = DecoderPreferencesScreen,
+            ))
+            add(SearchablePreference(
                 titleRes = R.string.pref_decoder_debanding_title,
                 keywords = listOf("deband", "banding", "gradient", "visual", "quality"),
                 category = "Decoder",
@@ -406,7 +406,14 @@ object SearchablePreferences {
             add(SearchablePreference(
                 titleRes = R.string.pref_subtitles,
                 summaryRes = R.string.pref_subtitles_summary,
-                keywords = listOf("subtitles", "subs", "language", "fonts", "text"),
+                keywords = listOf("subtitles", "subs", "language", "fonts", "text", "wyzie", "subdl"),
+                category = "Subtitles",
+                screen = SubtitlesPreferencesScreen,
+            ))
+            add(SearchablePreference(
+                titleRes = R.string.pref_subtitle_search_title,
+                summaryRes = R.string.pref_subtitle_search_summary,
+                keywords = listOf("subtitle", "search", "online", "download", "wyzie", "subdl", "subs"),
                 category = "Subtitles",
                 screen = SubtitlesPreferencesScreen,
             ))
@@ -492,6 +499,13 @@ object SearchablePreferences {
             ))
 
             // Advanced preferences
+            add(SearchablePreference(
+                titleRes = R.string.pref_custom_lua_title,
+                summaryRes = R.string.pref_custom_lua_summary,
+                keywords = listOf("lua", "custom", "button", "code", "player", "overlay", "script"),
+                category = "Player",
+                screen = CustomButtonScreen,
+            ))
             add(SearchablePreference(
                 titleRes = R.string.pref_advanced,
                 summaryRes = R.string.pref_advanced_summary,

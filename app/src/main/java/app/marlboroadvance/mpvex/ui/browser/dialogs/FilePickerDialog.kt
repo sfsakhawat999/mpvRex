@@ -1,7 +1,10 @@
 package app.marlboroadvance.mpvex.ui.browser.dialogs
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Environment
+import androidx.compose.foundation.MarqueeAnimationMode
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,18 +35,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import app.marlboroadvance.mpvex.utils.storage.StorageScanUtils
+import app.marlboroadvance.mpvex.utils.storage.StorageVolumeUtils
 import java.io.File
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -54,7 +60,9 @@ fun FilePickerDialog(
   currentPath: String = Environment.getExternalStorageDirectory().absolutePath,
   onDismiss: () -> Unit,
   onFileSelected: (String) -> Unit,
+  onPathChanged: ((String?) -> Unit)? = null,
   onSystemPickerRequest: () -> Unit,
+  matchToName: String? = null,
   allowedExtensions: List<String> = listOf(
     // Common & modern
     "srt", "vtt", "ass", "ssa",
@@ -88,18 +96,26 @@ fun FilePickerDialog(
   
   // Get all available storage volumes
   val storageVolumes = remember(isOpen) {
-    StorageScanUtils.getAllStorageVolumes(context)
+    StorageVolumeUtils.getAllStorageVolumes(context)
   }
   
   // If there's only one storage volume, start there directly
   // Otherwise, start at storage root view to show all volumes
-  var selectedPath by remember(isOpen, storageVolumes) {
-    val initialPath = if (storageVolumes.size == 1) {
-      StorageScanUtils.getVolumePath(storageVolumes.first())
+  // Respect currentPath if it's valid and exists
+  var selectedPath by remember(isOpen, currentPath, storageVolumes) {
+    val initialPath = if (currentPath.isNotEmpty() && File(currentPath).exists()) {
+      currentPath
+    } else if (storageVolumes.size == 1) {
+      StorageVolumeUtils.getVolumePath(storageVolumes.first())
     } else {
       null // Show storage root with all volumes
     }
     mutableStateOf(initialPath)
+  }
+
+  // Notify parent when path changes for state persistence
+  LaunchedEffect(selectedPath) {
+    onPathChanged?.invoke(selectedPath)
   }
 
   // Determine what to show based on selectedPath
@@ -110,25 +126,48 @@ fun FilePickerDialog(
   }
   
   // Get folders and allowed files
-  val (folders, files) = remember(selectedPath) {
+  val (folders, files) = remember(selectedPath, matchToName) {
     if (showStorageRoot) {
       Pair(emptyList<File>(), emptyList<File>())
     } else {
       val allFiles = currentDir?.listFiles { file -> !file.name.startsWith(".") } ?: emptyArray()
-      val dirs = allFiles.filter { it.isDirectory }.sortedBy { it.name.lowercase() }
+      
+      // Use NaturalOrderComparator for better sorting (e.g., Ep 2 < Ep 10)
+      val dirs = allFiles.filter { it.isDirectory }.sortedWith { f1, f2 -> 
+          app.marlboroadvance.mpvex.utils.sort.SortUtils.NaturalOrderComparator.DEFAULT.compare(f1.name, f2.name)
+      }
+      
       val filteredFiles = allFiles.filter { file -> 
           !file.isDirectory && allowedExtensions.any { ext -> file.name.endsWith(ext, ignoreCase = true) } 
-      }.sortedBy { it.name.lowercase() }
-      Pair(dirs, filteredFiles)
+      }
+
+      // Final sorted files: matches first (alphabetical), then others (alphabetical)
+      val finalSortedFiles = filteredFiles.sortedWith { f1, f2 ->
+          val m1 = matchToName != null && f1.name.contains(matchToName, ignoreCase = true)
+          val m2 = matchToName != null && f2.name.contains(matchToName, ignoreCase = true)
+          
+          if (m1 && !m2) {
+              -1
+          } else if (!m1 && m2) {
+              1
+          } else {
+              app.marlboroadvance.mpvex.utils.sort.SortUtils.NaturalOrderComparator.DEFAULT.compare(f1.name, f2.name)
+          }
+      }
+      
+      Pair(dirs, finalSortedFiles)
     }
   }
+
+  val configuration = LocalConfiguration.current
+  val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
   androidx.compose.ui.window.Dialog(
     onDismissRequest = onDismiss,
     properties = DialogProperties(usePlatformDefaultWidth = false),
   ) {
       Surface(
-          modifier = modifier.fillMaxWidth(0.50f),
+          modifier = modifier.fillMaxWidth(if (isPortrait) 0.9f else 0.50f),
           shape = MaterialTheme.shapes.extraLarge,
           color = MaterialTheme.colorScheme.surface,
           tonalElevation = 6.dp,
@@ -137,72 +176,75 @@ fun FilePickerDialog(
               modifier = Modifier.padding(24.dp),
               verticalArrangement = Arrangement.spacedBy(16.dp)
           ) {
-              // Title Section
-              Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                          text = "Select Subtitle",
-                          style = MaterialTheme.typography.headlineMedium,
-                          fontWeight = FontWeight.Bold,
+              // Title Section - orientation-aware layout
+              if (isPortrait) {
+                // Portrait: title/path stacked on top, nav buttons centered below
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                  Column(modifier = Modifier.fillMaxWidth()) {
+                      Text(
+                        text = "Select Subtitle",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                      )
+                      Text(
+                        text = selectedPath ?: "Select a storage location",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 4.dp),
+                      )
+                  }
+                  Row(
+                      modifier = Modifier.fillMaxWidth(),
+                      horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                  ) {
+                    NavigationButtons(
+                      selectedPath = selectedPath,
+                      onBack = { selectedPath = currentDir?.parent },
+                      onHome = { selectedPath = Environment.getExternalStorageDirectory().absolutePath },
+                      onSystemPicker = onSystemPickerRequest,
+                      buttonSize = 48.dp,
+                      iconSize = 26.dp,
+                    )
+                  }
+                }
+              } else {
+                // Landscape: title/path left, nav buttons right (same row)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                  Row(
+                      modifier = Modifier.fillMaxWidth(),
+                      horizontalArrangement = Arrangement.SpaceBetween,
+                      verticalAlignment = Alignment.CenterVertically
+                  ) {
+                      Column(modifier = Modifier.weight(1f)) {
+                          Text(
+                            text = "Select Subtitle",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                          )
+                          Text(
+                            text = selectedPath ?: "Select a storage location",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 4.dp),
+                          )
+                      }
+                      Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        NavigationButtons(
+                          selectedPath = selectedPath,
+                          onBack = { selectedPath = currentDir?.parent },
+                          onHome = { selectedPath = Environment.getExternalStorageDirectory().absolutePath },
+                          onSystemPicker = onSystemPickerRequest,
+                          buttonSize = 40.dp,
+                          iconSize = 24.dp,
                         )
-                        Text(
-                          text = selectedPath ?: "Select a storage location",
-                          style = MaterialTheme.typography.bodyMedium,
-                          fontWeight = FontWeight.Medium,
-                          color = MaterialTheme.colorScheme.onSurfaceVariant,
-                          maxLines = 1,
-                          overflow = TextOverflow.Ellipsis,
-                          modifier = Modifier.padding(top = 4.dp),
-                        )
-                    }
-
-                    // Navigation Buttons in Title
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                         if (selectedPath != null) {
-                            FilledTonalIconButton(
-                              onClick = {
-                                val parent = currentDir?.parent
-                                selectedPath = parent
-                              },
-                              modifier = Modifier.size(40.dp),
-                              colors = IconButtonDefaults.filledTonalIconButtonColors(
-                                  containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                  contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                              )
-                            ) {
-                              Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", modifier = Modifier.size(24.dp))
-                            }
-                          }
-
-                          FilledTonalIconButton(
-                            onClick = {
-                              selectedPath = Environment.getExternalStorageDirectory().absolutePath
-                            },
-                            modifier = Modifier.size(40.dp),
-                            colors = IconButtonDefaults.filledTonalIconButtonColors(
-                                  containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                  contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                              )
-                          ) {
-                            Icon(Icons.Default.Home, "Home", modifier = Modifier.size(24.dp))
-                          }
-
-                          FilledTonalIconButton(
-                            onClick = onSystemPickerRequest,
-                            modifier = Modifier.size(40.dp),
-                            colors = IconButtonDefaults.filledTonalIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                            )
-                          ) {
-                            Icon(Icons.Default.DriveFolderUpload, "System Picker", modifier = Modifier.size(24.dp))
-                          }
-                    }
+                      }
+                  }
                 }
               }
 
@@ -222,7 +264,7 @@ fun FilePickerDialog(
                   if (showStorageRoot) {
                     // Show storage volumes
                     items(storageVolumes) { volume ->
-                      val volumePath = StorageScanUtils.getVolumePath(volume)
+                      val volumePath = StorageVolumeUtils.getVolumePath(volume)
                       if (volumePath != null) {
                         StorageVolumeItem(
                           context = context,
@@ -362,6 +404,10 @@ private fun FolderItem(
       fontWeight = FontWeight.Medium,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
+      modifier = Modifier.basicMarquee(
+        animationMode = MarqueeAnimationMode.Immediately,
+        repeatDelayMillis = 2000,
+      ),
     )
   }
 }
@@ -393,6 +439,57 @@ private fun FileItem(
       fontWeight = FontWeight.Normal,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
+      modifier = Modifier.basicMarquee(
+        animationMode = MarqueeAnimationMode.Immediately,
+        repeatDelayMillis = 2000,
+      ),
     )
   }
 }
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun NavigationButtons(
+  selectedPath: String?,
+  onBack: () -> Unit,
+  onHome: () -> Unit,
+  onSystemPicker: () -> Unit,
+  buttonSize: Dp,
+  iconSize: Dp,
+) {
+  if (selectedPath != null) {
+    FilledTonalIconButton(
+      onClick = onBack,
+      modifier = Modifier.size(buttonSize),
+      colors = IconButtonDefaults.filledTonalIconButtonColors(
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+      )
+    ) {
+      Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", modifier = Modifier.size(iconSize))
+    }
+  }
+
+  FilledTonalIconButton(
+    onClick = onHome,
+    modifier = Modifier.size(buttonSize),
+    colors = IconButtonDefaults.filledTonalIconButtonColors(
+      containerColor = MaterialTheme.colorScheme.secondaryContainer,
+      contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    )
+  ) {
+    Icon(Icons.Default.Home, "Home", modifier = Modifier.size(iconSize))
+  }
+
+  FilledTonalIconButton(
+    onClick = onSystemPicker,
+    modifier = Modifier.size(buttonSize),
+    colors = IconButtonDefaults.filledTonalIconButtonColors(
+      containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+      contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+    )
+  ) {
+    Icon(Icons.Default.DriveFolderUpload, "System Picker", modifier = Modifier.size(iconSize))
+  }
+}
+

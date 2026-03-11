@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -19,7 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -66,6 +64,7 @@ fun MoreSheet(
   onStartTimer: (Int) -> Unit,
   onDismissRequest: () -> Unit,
   onEnterFiltersPanel: () -> Unit,
+  onAnime4KChanged: () -> Unit = {},
   modifier: Modifier = Modifier,
 ) {
   val advancedPreferences = koinInject<AdvancedPreferences>()
@@ -78,23 +77,10 @@ fun MoreSheet(
   val anime4kMode by decoderPreferences.anime4kMode.collectAsState()
   val anime4kQuality by decoderPreferences.anime4kQuality.collectAsState()
   val gpuNext by decoderPreferences.gpuNext.collectAsState()
+  val useVulkan by decoderPreferences.useVulkan.collectAsState()
   
   val context = LocalContext.current
 val scope = rememberCoroutineScope()
-var infoDialogData by remember { mutableStateOf<Pair<String, String>?>(null) }
-
-if (infoDialogData != null) {
-    AlertDialog(
-        onDismissRequest = { },
-        title = { Text(infoDialogData!!.first) },
-        text = { Text(infoDialogData!!.second) },
-        confirmButton = {
-            TextButton(onClick = { infoDialogData = null }) {
-                Text(stringResource(R.string.generic_ok))
-            }
-        }
-    )
-}
 
   PlayerSheet(
     onDismissRequest,
@@ -158,19 +144,10 @@ if (infoDialogData != null) {
           }
         }
       }
-      SectionHeaderWithInfo(
-        title = stringResource(R.string.player_sheets_stats_page_title),
-        onInfoClick = {
-             val descResName = "player_sheets_stats_page_${statisticsPage}_desc"
-             val resId = context.resources.getIdentifier(descResName, "string", context.packageName)
-             val description = if (resId != 0) context.getString(resId) else ""
-             
-             // Title for dialog: "Page X" or "Direct Title"
-             val titleRes = if (statisticsPage == 0) R.string.player_sheets_tracks_off else R.string.player_sheets_stats_page_chip
-             val title = if (statisticsPage == 0) context.getString(titleRes) else context.getString(titleRes, statisticsPage)
-             
-             infoDialogData = Pair(context.getString(R.string.player_sheets_stats_page_title), "$title: $description")
-        }
+      Text(
+        text = stringResource(R.string.player_sheets_stats_page_title),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary
       )
       LazyRow(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
@@ -197,18 +174,34 @@ if (infoDialogData != null) {
               advancedPreferences.enabledStatisticsPage.set(page)
             },
             selected = statisticsPage == page,
+            leadingIcon = null,
           )
         }
       }
       
       // Shaders Controls
-      if (enableAnime4K && !gpuNext) {
+      if (enableAnime4K && (!gpuNext || useVulkan)) {
+        // Auto-detect resolution to disable for 4K+
+        val width = MPVLib.getPropertyInt("video-params/w") ?: 0
+        val height = MPVLib.getPropertyInt("video-params/h") ?: 0
+        val isHighRes = width >= 3840 || height >= 2160
+
         // Presets (Mode) - Now on Top
         Text(
             text = stringResource(R.string.anime4k_mode_title),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
+        
+        if (isHighRes) {
+            Text(
+                text = "Not available for 4K/8K video",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+        }
+
         LazyRow(
           horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
         ) {
@@ -216,6 +209,8 @@ if (infoDialogData != null) {
             FilterChip(
               label = { Text(stringResource(mode.titleRes)) },
               selected = anime4kMode == mode.name,
+              enabled = !isHighRes,
+              leadingIcon = null,
               onClick = {
                 decoderPreferences.anime4kMode.set(mode.name)
                 
@@ -238,6 +233,8 @@ if (infoDialogData != null) {
 
                     // Use setPropertyString for runtime changes
                     MPVLib.setPropertyString("glsl-shaders", if (shaderChain.isNotEmpty()) shaderChain else "")
+                    // Restart ambient mode if it was ON (Anime4K reset wiped it)
+                    onAnime4KChanged()
                   }
                 }
               }
@@ -257,7 +254,8 @@ if (infoDialogData != null) {
              FilterChip(
               label = { Text(stringResource(quality.titleRes)) },
               selected = anime4kQuality == quality.name,
-              enabled = anime4kMode != "OFF",
+              enabled = anime4kMode != "OFF" && !isHighRes,
+              leadingIcon = null,
               onClick = {
                 decoderPreferences.anime4kQuality.set(quality.name)
 
@@ -280,6 +278,8 @@ if (infoDialogData != null) {
 
                     // Use setPropertyString for runtime changes
                     MPVLib.setPropertyString("glsl-shaders", if (shaderChain.isNotEmpty()) shaderChain else "")
+                    // Restart ambient mode if it was ON (Anime4K reset wiped it)
+                    onAnime4KChanged()
                   }
                 }
               }
@@ -369,7 +369,8 @@ fun TimePickerDialog(
                             onTimeSelect(minutes * 60)
                             onDismissRequest()
                         },
-                        label = { Text("${minutes}m") }
+                        label = { Text("${minutes}m") },
+                        leadingIcon = null,
                     )
                 }
             }
@@ -410,31 +411,5 @@ fun TimePickerDialog(
   }
 
 
-@Composable
-fun SectionHeaderWithInfo(
-  title: String,
-  onInfoClick: () -> Unit,
-  modifier: Modifier = Modifier
-) {
-  Row(
-    modifier = modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.Start,
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    Text(
-      text = title,
-      style = MaterialTheme.typography.titleMedium,
-      color = MaterialTheme.colorScheme.primary
-    )
-    Spacer(modifier = Modifier.width(8.dp))
-    IconButton(onClick = onInfoClick, modifier = Modifier.size(24.dp)) {
-      Icon(
-        imageVector = Icons.Outlined.Info,
-        contentDescription = "Info",
-        tint = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.size(16.dp)
-      )
-    }
-  }
-}
+
 

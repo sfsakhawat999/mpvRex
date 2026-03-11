@@ -6,13 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -24,7 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -35,9 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,6 +43,12 @@ import app.marlboroadvance.mpvex.preferences.AdvancedPreferences
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.presentation.components.ConfirmDialog
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import app.marlboroadvance.mpvex.ui.utils.LocalBackStack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -89,13 +90,20 @@ data class LuaScriptEditorScreen(
           val tempFile = kotlin.io.path.createTempFile()
           runCatching {
             val tree = DocumentFile.fromTreeUri(context, mpvConfStorageLocation.toUri())
-            val scriptFile = tree?.findFile(scriptName)
-            if (scriptFile != null && scriptFile.exists()) {
-              context.contentResolver.openInputStream(scriptFile.uri)?.copyTo(tempFile.outputStream())
-              val content = tempFile.readLines().joinToString("\n")
-              withContext(Dispatchers.Main) {
-                scriptContent = content
-                hasUnsavedChanges = false
+            if (tree != null && tree.exists()) {
+              // Try to find "scripts" subdirectory first (case-insensitive)
+              val scriptsDir = tree.listFiles().firstOrNull { 
+                  it.isDirectory && it.name?.equals("scripts", ignoreCase = true) == true 
+              } ?: tree
+
+              val scriptFile = scriptsDir.findFile(scriptName)
+              if (scriptFile != null && scriptFile.exists()) {
+                context.contentResolver.openInputStream(scriptFile.uri)?.copyTo(tempFile.outputStream())
+                val content = tempFile.readLines().joinToString("\n")
+                withContext(Dispatchers.Main) {
+                  scriptContent = content
+                  hasUnsavedChanges = false
+                }
               }
             }
           }
@@ -128,14 +136,19 @@ data class LuaScriptEditorScreen(
             }
             return@launch
           }
+          
+          // Try to find "scripts" subdirectory first (case-insensitive)
+          val scriptsDir = tree.listFiles().firstOrNull { 
+              it.isDirectory && it.name?.equals("scripts", ignoreCase = true) == true 
+          } ?: tree
 
           // If renaming, delete old file
           if (!isNewScript && scriptName != null && scriptName != finalFileName) {
-            tree.findFile(scriptName)?.delete()
+            scriptsDir.findFile(scriptName)?.delete()
           }
 
-          val existing = tree.findFile(finalFileName)
-          val scriptFile = existing ?: tree.createFile("text/plain", finalFileName)?.also { it.renameTo(finalFileName) }
+          val existing = scriptsDir.findFile(finalFileName)
+          val scriptFile = existing ?: scriptsDir.createFile("text/plain", finalFileName)?.also { it.renameTo(finalFileName) }
           val uri = scriptFile?.uri ?: run {
             withContext(Dispatchers.Main) {
               Toast.makeText(context, "Failed to create file", Toast.LENGTH_LONG).show()
@@ -175,31 +188,38 @@ data class LuaScriptEditorScreen(
       scope.launch(Dispatchers.IO) {
         try {
           val tree = DocumentFile.fromTreeUri(context, mpvConfStorageLocation.toUri())
-          val scriptFile = tree?.findFile(scriptName)
-          if (scriptFile != null && scriptFile.exists()) {
-            // Copy to cache directory for sharing
-            val cacheFile = File(context.cacheDir, scriptName)
-            context.contentResolver.openInputStream(scriptFile.uri)?.use { input ->
-              cacheFile.outputStream().use { output ->
-                input.copyTo(output)
+          if (tree != null && tree.exists()) {
+            // Try to find "scripts" subdirectory first (case-insensitive)
+            val scriptsDir = tree.listFiles().firstOrNull { 
+                it.isDirectory && it.name?.equals("scripts", ignoreCase = true) == true 
+            } ?: tree
+
+            val scriptFile = scriptsDir.findFile(scriptName)
+            if (scriptFile != null && scriptFile.exists()) {
+              // Copy to cache directory for sharing
+              val cacheFile = File(context.cacheDir, scriptName)
+              context.contentResolver.openInputStream(scriptFile.uri)?.use { input ->
+                cacheFile.outputStream().use { output ->
+                  input.copyTo(output)
+                }
               }
-            }
-            
-            // Get content URI using FileProvider
-            val contentUri = FileProvider.getUriForFile(
-              context,
-              "${context.packageName}.provider",
-              cacheFile
-            )
-            
-            withContext(Dispatchers.Main) {
-              val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_STREAM, contentUri)
-                putExtra(Intent.EXTRA_SUBJECT, scriptName)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+              
+              // Get content URI using FileProvider
+              val contentUri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                cacheFile
+              )
+              
+              withContext(Dispatchers.Main) {
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                  type = "text/plain"
+                  putExtra(Intent.EXTRA_STREAM, contentUri)
+                  putExtra(Intent.EXTRA_SUBJECT, scriptName)
+                  addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(Intent.createChooser(shareIntent, "Share $scriptName"))
               }
-              context.startActivity(Intent.createChooser(shareIntent, "Share $scriptName"))
             }
           }
         } catch (e: Exception) {
@@ -223,22 +243,29 @@ data class LuaScriptEditorScreen(
       scope.launch(Dispatchers.IO) {
         try {
           val tree = DocumentFile.fromTreeUri(context, mpvConfStorageLocation.toUri())
-          val scriptFile = tree?.findFile(scriptName)
-          if (scriptFile != null && scriptFile.exists()) {
-            val deleted = scriptFile.delete()
-            
-            if (deleted) {
-              // Remove from selected scripts if it was selected
-              val selectedScripts = preferences.selectedLuaScripts.get()
-              if (selectedScripts.contains(scriptName)) {
-                preferences.selectedLuaScripts.set(selectedScripts - scriptName)
+          if (tree != null && tree.exists()) {
+              // Try to find "scripts" subdirectory first (case-insensitive)
+              val scriptsDir = tree.listFiles().firstOrNull { 
+                  it.isDirectory && it.name?.equals("scripts", ignoreCase = true) == true 
+              } ?: tree
+
+              val scriptFile = scriptsDir.findFile(scriptName)
+              if (scriptFile != null && scriptFile.exists()) {
+                val deleted = scriptFile.delete()
+                
+                if (deleted) {
+                  // Remove from selected scripts if it was selected
+                  val selectedScripts = preferences.selectedLuaScripts.get()
+                  if (selectedScripts.contains(scriptName)) {
+                    preferences.selectedLuaScripts.set(selectedScripts - scriptName)
+                  }
+                  
+                  withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "$scriptName deleted", Toast.LENGTH_SHORT).show()
+                    backStack.removeLastOrNull()
+                  }
+                }
               }
-              
-              withContext(Dispatchers.Main) {
-                Toast.makeText(context, "$scriptName deleted", Toast.LENGTH_SHORT).show()
-                backStack.removeLastOrNull()
-              }
-            }
           }
         } catch (e: Exception) {
           withContext(Dispatchers.Main) {
@@ -252,149 +279,137 @@ data class LuaScriptEditorScreen(
       }
     }
     
-    Scaffold(
-      topBar = {
-        TopAppBar(
-          title = {
-            Column {
-              Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
+    Column(
+      modifier = Modifier.fillMaxSize()
+    ) {
+      // Fixed TopAppBar
+      TopAppBar(
+        title = {
+          Column {
+            androidx.compose.foundation.text.BasicTextField(
+              value = fileName,
+              onValueChange = {
+                fileName = it
+                hasUnsavedChanges = true
+              },
+              textStyle = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.primary
+              ),
+              cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+              decorationBox = { innerTextField ->
+                Box {
+                  if (fileName.isEmpty()) {
+                    Text(
+                      text = "Script name",
+                      style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                      )
+                    )
+                  }
+                  innerTextField()
+                }
+              }
+            )
+            if (hasUnsavedChanges) {
+              Text(
+                text = "Unsaved changes",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary,
               )
-              if (hasUnsavedChanges) {
-                Text(
-                  text = "Unsaved changes",
-                  style = MaterialTheme.typography.bodySmall,
-                  color = MaterialTheme.colorScheme.secondary,
-                )
-              }
             }
-          },
-          navigationIcon = {
-            IconButton(onClick = backStack::removeLastOrNull) {
-              Icon(
-                Icons.AutoMirrored.Default.ArrowBack,
-                contentDescription = "Back",
-                tint = MaterialTheme.colorScheme.secondary,
-              )
-            }
-          },
-          actions = {
-            // Share button (only for existing scripts)
-            if (!isNewScript) {
-              IconButton(
-                onClick = { shareScript() },
-                modifier = Modifier
-                  .padding(horizontal = 4.dp)
-                  .size(40.dp),
-                colors = IconButtonDefaults.iconButtonColors(
-                  containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                  contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ),
-                shape = RoundedCornerShape(8.dp),
-              ) {
-                Icon(
-                  Icons.Default.Share,
-                  contentDescription = "Share",
-                )
-              }
-            }
-            
-            // Delete button (only for existing scripts)
-            if (!isNewScript) {
-              IconButton(
-                onClick = { showDeleteDialog = true },
-                modifier = Modifier
-                  .padding(horizontal = 4.dp)
-                  .size(40.dp),
-                colors = IconButtonDefaults.iconButtonColors(
-                  containerColor = MaterialTheme.colorScheme.errorContainer,
-                  contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                ),
-                shape = RoundedCornerShape(8.dp),
-              ) {
-                Icon(
-                  Icons.Default.Delete,
-                  contentDescription = "Delete",
-                )
-              }
-            }
-            
-            // Save button
+          }
+        },
+        navigationIcon = {
+          IconButton(onClick = backStack::removeLastOrNull) {
+            Icon(
+              Icons.AutoMirrored.Default.ArrowBack,
+              contentDescription = "Back",
+              tint = MaterialTheme.colorScheme.secondary,
+            )
+          }
+        },
+        actions = {
+          // Share button (only for existing scripts)
+          if (!isNewScript) {
             IconButton(
-              onClick = { saveScript() },
-              enabled = hasUnsavedChanges && fileName.isNotBlank(),
+              onClick = { shareScript() },
               modifier = Modifier
                 .padding(horizontal = 4.dp)
                 .size(40.dp),
               colors = IconButtonDefaults.iconButtonColors(
-                containerColor = if (hasUnsavedChanges && fileName.isNotBlank()) {
-                  MaterialTheme.colorScheme.primaryContainer
-                } else {
-                  MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f)
-                },
-                contentColor = if (hasUnsavedChanges && fileName.isNotBlank()) {
-                  MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                  MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                },
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f),
-                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
               ),
               shape = RoundedCornerShape(8.dp),
             ) {
               Icon(
-                Icons.Default.Check,
-                contentDescription = "Save",
+                Icons.Default.Share,
+                contentDescription = "Share",
               )
             }
-          },
-        )
-      },
-    ) { padding ->
-      Column(
+          }
+          
+          // Delete button (only for existing scripts)
+          if (!isNewScript) {
+            IconButton(
+              onClick = { showDeleteDialog = true },
+              modifier = Modifier
+                .padding(horizontal = 4.dp)
+                .size(40.dp),
+              colors = IconButtonDefaults.iconButtonColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+              ),
+              shape = RoundedCornerShape(8.dp),
+            ) {
+              Icon(
+                Icons.Default.Delete,
+                contentDescription = "Delete",
+              )
+            }
+          }
+          
+          // Save button
+          IconButton(
+            onClick = { saveScript() },
+            enabled = hasUnsavedChanges && fileName.isNotBlank(),
+            modifier = Modifier
+              .padding(horizontal = 4.dp)
+              .size(40.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+              containerColor = if (hasUnsavedChanges && fileName.isNotBlank()) {
+                MaterialTheme.colorScheme.primaryContainer
+              } else {
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f)
+              },
+              contentColor = if (hasUnsavedChanges && fileName.isNotBlank()) {
+                MaterialTheme.colorScheme.onPrimaryContainer
+              } else {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+              },
+              disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f),
+              disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            ),
+            shape = RoundedCornerShape(8.dp),
+          ) {
+            Icon(
+              Icons.Default.Check,
+              contentDescription = "Save",
+            )
+          }
+        },
+      )
+      
+      // Editor content with IME padding
+      val scrollState = rememberScrollState()
+      Box(
         modifier = Modifier
           .fillMaxSize()
-          .padding(padding)
+          .weight(1f)
+          .imePadding()
       ) {
-        // Editable title field
-        BasicTextField(
-          value = fileName,
-          onValueChange = {
-            fileName = it
-            hasUnsavedChanges = true
-          },
-          modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-          textStyle = LocalTextStyle.current.copy(
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-          ),
-          cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-          decorationBox = { innerTextField ->
-            Box(
-              modifier = Modifier.fillMaxWidth()
-            ) {
-              if (fileName.isEmpty()) {
-                Text(
-                  text = "Title",
-                  style = LocalTextStyle.current.copy(
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                  ),
-                )
-              }
-              innerTextField()
-            }
-          },
-        )
-        
-        // Script content editor
         BasicTextField(
           value = scriptContent,
           onValueChange = {
@@ -402,33 +417,15 @@ data class LuaScriptEditorScreen(
             hasUnsavedChanges = true
           },
           modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 400.dp)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-          textStyle = LocalTextStyle.current.copy(
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+          textStyle = TextStyle(
             fontFamily = FontFamily.Monospace,
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurface,
           ),
           cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-          decorationBox = { innerTextField ->
-            Box(
-              modifier = Modifier.fillMaxWidth()
-            ) {
-              if (scriptContent.isEmpty()) {
-                Text(
-                  text = "-- Enter your Lua script here...\n-- Example:\n-- mp.msg.info(\"Hello from MPV Lua script!\")",
-                  style = LocalTextStyle.current.copy(
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                  ),
-                )
-              }
-              innerTextField()
-            }
-          },
         )
       }
     }

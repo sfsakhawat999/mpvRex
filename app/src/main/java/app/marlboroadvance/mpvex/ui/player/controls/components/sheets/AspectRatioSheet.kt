@@ -101,6 +101,7 @@ fun AspectRatioSheet(
             onClick = { onSelectRatio(ratio.ratio) },
             label = { Text(ratio.label) },
             modifier = Modifier.animateItem(),
+            leadingIcon = null,
           )
         }
       }
@@ -125,6 +126,7 @@ fun AspectRatioSheet(
               selected = currentRatio?.let { abs(it - ratio.ratio) < 0.01 } ?: false,
               onClick = { onSelectRatio(ratio.ratio) },
               label = { Text(ratio.label) },
+              leadingIcon = null,
               trailingIcon = {
                 Icon(
                   Icons.Default.Close,

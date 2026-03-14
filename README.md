@@ -1,24 +1,61 @@
 # mpvRex
 
-**mpvRex is a fork of [mpvEx](https://github.com/marlboro-advance/mpvEx), which is based on [mpv-android](https://github.com/mpv-android/mpv-android). It aims to combine the powerful features of mpv with an easy to use interface and additional features.**
+<p align="center">
+  <img src="app/src/main/ic_launcher-playstore.png" width="128" height="128" />
+</p>
 
-## Acknowledgments
-This project is built upon the hard work of many open-source contributors. Special thanks to the following repositories:
+<p align="center">
+  <b>Feature-rich Android video player based on libmpv.</b>
+</p>
 
-- [mpvEx](https://github.com/marlboro-advance/mpvEx) (Direct Upstream)
-- [mpv-android](https://github.com/mpv-android) (Base)
-- [mpvKt](https://github.com/abdallahmehiz/mpvKt)
-- [Next player](https://github.com/anilbeesetti/nextplayer)
-- [Gramophone](https://github.com/FoedusProgramme/Gramophone)
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-Android-brightgreen.svg" />
+  <img src="https://img.shields.io/badge/License-Apache--2.0-blue.svg" />
+  <img src="https://img.shields.io/badge/Kotlin-2.3.10-purple.svg" />
+  <a href="https://github.com/sfsakhawat999/mpvRex/releases"><img src="https://img.shields.io/github/downloads/sfsakhawat999/mpvRex/total?logo=Github"/></a>
+</p>
 
-## Extra Features
-mpvRex adds the following features on top of the upstream mpvEx (**feel free to copy**):
+mpvRex is an advanced, customizable video player for Android. It combines the versatility of libmpv with a modern Jetpack Compose interface and unique user-centric features.
 
-- **Player Control Always Dark Mode** ([f1eb7c2](https://github.com/sfsakhawat999/mpvRex/commit/f1eb7c2c1b82d6a24c9b14e5cac0d8dc484bed6a)): Option to force player controls to always use dark theme.
-- **Subtitle Seeking Gesture** ([bbbb10b](https://github.com/sfsakhawat999/mpvRex/commit/bbbb10bf22e0f393f00064d524324989ee6207a5)): dedicated gesture action to seek to the next/previous subtitle line.
-- **Primary Subtitle Indicator** ([bbbb10b](https://github.com/sfsakhawat999/mpvRex/commit/bbbb10bf22e0f393f00064d524324989ee6207a5)): Visual indicator in the track menu showing the active primary subtitle.
-- **Bottom Controls Layout** ([aff35d1](https://github.com/sfsakhawat999/mpvRex/commit/aff35d1e5b411faa0eede9a532bc24d23eed576c)): Option to place playback controls below the seekbar implementation.
-- **Accidental Tap Prevention** ([e305c26](https://github.com/sfsakhawat999/mpvRex/commit/e305c26b2a332805151633ac179b709b5a50c6ce)): Preference to ignore single taps on the seekbar to prevent accidental seeks.
-- **Relative Seeking** ([e305c26](https://github.com/sfsakhawat999/mpvRex/commit/e305c26b2a332805151633ac179b709b5a50c6ce)): Drag on the seekbar seeks relative to the start position rather than absolute position.
-- **Reverse Double Tap Gestures** ([50cb8f1](https://github.com/sfsakhawat999/mpvRex/commit/50cb8f1c9d28686c17def515d0ea590d7f5a766e)): Option to reverse left and right double tap gestures.
-- **Single Tap Gestures** ([0ffa87e](https://github.com/sfsakhawat999/mpvRex/commit/0ffa87eb31a618edc553b1f2facc05d40271e441)): Add single tap gesture support for left and right regions.
+---
+
+## Origin and Acknowledgments
+
+mpvRex is a fork of **[mpvEx](https://github.com/marlboro-advance/mpvEx)**, which is based on **[mpv-android](https://github.com/mpv-android/mpv-android)**. This project aims to extend the core functionality of these upstream repositories with specialized features and aesthetic refinements.
+
+We extend our sincere gratitude to the developers of the following projects, whose work serves as the foundation for mpvRex:
+
+*   **[mpvEx](https://github.com/marlboro-advance/mpvEx)** - Direct Upstream
+*   **[mpv-android](https://github.com/mpv-android)** - Core Base
+*   **[mpvKt](https://github.com/abdallahmehiz/mpvKt)** - UI Inspiration
+*   **[Next player](https://github.com/anilbeesetti/nextplayer)** - Feature Ideas
+*   **[Gramophone](https://github.com/FoedusProgramme/Gramophone)** - Design Concepts
+
+---
+
+## Features
+
+For a detailed list of exclusive improvements and technical commits, see **[FEATURES_REX.md](FEATURES_REX.md)**.
+
+### Advanced Gesture Controls
+*   **Subtitle Swipe Seeking:** Intuitive swipe gestures to jump between subtitle lines.
+*   **Instant Single Tap Logic:** Improved single tap response with exclusion zones and refined behavior.
+*   **Reverse Double Tap Gestures:** Option to reverse left/right seek directions to match your preference.
+*   **Accidental Tap Prevention:** Preference to ignore single taps on the seekbar to prevent accidental seeks.
+
+### UI & Aesthetics
+*   **Smart Orientation Mode:** Per-video persistence of orientation preferences with intelligent fallback logic.
+*   **Enhanced Transitions:** Seamless fade-in when opening videos and elimination of white flashes on player exit.
+*   **Custom Branding & Themes:** Dedicated theme, custom icons, and an "Always Dark Mode" option for controls.
+*   **Layout Customization:** Option to place playback controls below the seekbar and adjust gradient opacity.
+
+### Core Player Improvements
+*   **Chapter Navigation:** Auto-scrolling chapter lists that stay synchronized with current playback.
+*   **Seekbar Enhancements:** Increased bottom margins to prevent overlap and support for relative seeking.
+*   **Primary Subtitle Indicator:** Visual indicator in the track menu showing the active primary subtitle.
+
+---
+
+## License
+
+Distributed under the **Apache License 2.0**. See `LICENSE` for more information.

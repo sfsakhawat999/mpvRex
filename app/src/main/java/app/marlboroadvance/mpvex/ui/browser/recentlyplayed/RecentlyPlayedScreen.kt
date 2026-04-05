@@ -6,7 +6,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -64,6 +66,7 @@ import app.marlboroadvance.mpvex.preferences.AdvancedPreferences
 import app.marlboroadvance.mpvex.preferences.BrowserPreferences
 import app.marlboroadvance.mpvex.preferences.GesturePreferences
 import app.marlboroadvance.mpvex.preferences.MediaLayoutMode
+import app.marlboroadvance.mpvex.preferences.UiSettings
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.presentation.components.ConfirmDialog
@@ -83,6 +86,7 @@ import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.LazyVerticalGridScrollbar
 import my.nanihadesuka.compose.ScrollbarSettings
 import org.koin.compose.koinInject
+import java.io.File
 
 @Serializable
 object RecentlyPlayedScreen : Screen {
@@ -96,8 +100,8 @@ object RecentlyPlayedScreen : Screen {
       viewModel(factory = RecentlyPlayedViewModel.factory(context.applicationContext as android.app.Application))
 
     val recentItems by viewModel.recentItems.collectAsState()
-    val recentVideos by viewModel.recentVideos.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val uiSettings by viewModel.uiSettings.collectAsState()
     val deleteDialogOpen = rememberSaveable { mutableStateOf(false) }
     val deleteFilesCheckbox = rememberSaveable { mutableStateOf(false) }
     val advancedPreferences = koinInject<AdvancedPreferences>()
@@ -121,28 +125,8 @@ object RecentlyPlayedScreen : Screen {
             is RecentlyPlayedItem.PlaylistItem -> "playlist_${item.playlist.id}"
           }
         },
-        onDeleteItems = { items, deleteFiles ->
-          val videos = items.filterIsInstance<RecentlyPlayedItem.VideoItem>().map { it.video }
-          val playlistIds = items.filterIsInstance<RecentlyPlayedItem.PlaylistItem>().map { it.playlist.id }
-
-          var successCount = 0
-          var failCount = 0
-
-          // Delete videos from history
-          if (videos.isNotEmpty()) {
-            val (videoSuccess, videoFail) = viewModel.deleteVideosFromHistory(videos, deleteFiles)
-            successCount += videoSuccess
-            failCount += videoFail
-          }
-
-          // Delete playlist items from history
-          if (playlistIds.isNotEmpty()) {
-            val (playlistSuccess, playlistFail) = viewModel.deletePlaylistsFromHistory(playlistIds)
-            successCount += playlistSuccess
-            failCount += playlistFail
-          }
-
-          Pair(successCount, failCount)
+        onDeleteItems = { items, _ ->
+          viewModel.deleteRecentItems(items)
         },
         onRenameItem = null, // Cannot rename from history screen
         onOperationComplete = { },
@@ -331,6 +315,7 @@ object RecentlyPlayedScreen : Screen {
           RecentItemsContent(
             recentItems = recentItems,
             playlistRepository = playlistRepository,
+            uiSettings = uiSettings,
             selectionManager = selectionManager,
             onVideoClick = { video ->
               // Always play individual videos without creating a playlist
@@ -376,9 +361,9 @@ object RecentlyPlayedScreen : Screen {
           title = title,
           subtitle = subtitle,
           customContent = {
-            androidx.compose.foundation.layout.Row(
+            Row(
               modifier = Modifier.fillMaxWidth(),
-              verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+              verticalAlignment = Alignment.CenterVertically,
             ) {
               androidx.compose.material3.Checkbox(
                 checked = deleteFilesCheckbox.value,
@@ -386,7 +371,7 @@ object RecentlyPlayedScreen : Screen {
                   deleteFilesCheckbox.value = it
                 },
               )
-              androidx.compose.material3.Text(
+              Text(
                 text = "Also delete original file(s)",
                 modifier = Modifier.padding(start = 8.dp),
                 style = MaterialTheme.typography.bodyMedium,
@@ -419,6 +404,7 @@ object RecentlyPlayedScreen : Screen {
 private fun RecentItemsContent(
   recentItems: List<RecentlyPlayedItem>,
   playlistRepository: PlaylistRepository,
+  uiSettings: UiSettings,
   selectionManager: app.marlboroadvance.mpvex.ui.browser.selection.SelectionManager<RecentlyPlayedItem, String>,
   onVideoClick: (Video) -> Unit,
   onPlaylistClick: suspend (RecentlyPlayedItem.PlaylistItem) -> Unit,
@@ -435,15 +421,12 @@ private fun RecentItemsContent(
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
   val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
-  val folderGridColumnsPortrait by browserPreferences.folderGridColumnsPortrait.collectAsState()
-  val folderGridColumnsLandscape by browserPreferences.folderGridColumnsLandscape.collectAsState()
   val videoGridColumnsPortrait by browserPreferences.videoGridColumnsPortrait.collectAsState()
   val videoGridColumnsLandscape by browserPreferences.videoGridColumnsLandscape.collectAsState()
 
   val configuration = androidx.compose.ui.platform.LocalConfiguration.current
   val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
 
-  val folderGridColumns = if (isLandscape) folderGridColumnsLandscape else folderGridColumnsPortrait
   val videoGridColumns = if (isLandscape) videoGridColumnsLandscape else videoGridColumnsPortrait
 
   val isGridMode = mediaLayoutMode == MediaLayoutMode.GRID
@@ -538,6 +521,7 @@ private fun RecentItemsContent(
                 is RecentlyPlayedItem.VideoItem -> {
                   VideoCard(
                     video = item.video,
+                    uiSettings = uiSettings,
                     progressPercentage = null,
                     isSelected = selectionManager.isSelected(item),
                     onClick = {
@@ -577,6 +561,7 @@ private fun RecentItemsContent(
                   )
                   FolderCard(
                     folder = folderModel,
+                    uiSettings = uiSettings,
                     isSelected = selectionManager.isSelected(item),
                     isRecentlyPlayed = false,
                     onClick = {
@@ -648,6 +633,7 @@ private fun RecentItemsContent(
                 is RecentlyPlayedItem.VideoItem -> {
                   VideoCard(
                     video = item.video,
+                    uiSettings = uiSettings,
                     progressPercentage = null,
                     isSelected = selectionManager.isSelected(item),
                     onClick = {
@@ -686,6 +672,7 @@ private fun RecentItemsContent(
                   )
                   FolderCard(
                     folder = folderModel,
+                    uiSettings = uiSettings,
                     isSelected = selectionManager.isSelected(item),
                     isRecentlyPlayed = false,
                     onClick = {
@@ -724,4 +711,3 @@ private fun RecentItemsContent(
     }
   }
 }
-

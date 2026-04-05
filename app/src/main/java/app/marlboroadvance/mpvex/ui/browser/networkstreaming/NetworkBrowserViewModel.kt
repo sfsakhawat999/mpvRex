@@ -3,7 +3,7 @@ package app.marlboroadvance.mpvex.ui.browser.networkstreaming
 import android.app.Application
 import android.content.Intent
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -12,6 +12,7 @@ import app.marlboroadvance.mpvex.domain.network.NetworkConnection
 import app.marlboroadvance.mpvex.domain.network.NetworkFile
 import app.marlboroadvance.mpvex.domain.network.NetworkProtocol
 import app.marlboroadvance.mpvex.repository.NetworkRepository
+import app.marlboroadvance.mpvex.ui.browser.base.BaseBrowserViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,23 +28,21 @@ class NetworkBrowserViewModel(
   private val application: Application,
   private val connectionId: Long,
   private val currentPath: String,
-) : AndroidViewModel(application),
+) : BaseBrowserViewModel<NetworkFile>(application),
   KoinComponent {
   private val repository: NetworkRepository by inject()
-
-  private val _files = MutableStateFlow<List<NetworkFile>>(emptyList())
-  val files: StateFlow<List<NetworkFile>> = _files.asStateFlow()
-
-  private val _isLoading = MutableStateFlow(false)
-  val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
   private val _error = MutableStateFlow<String?>(null)
   val error: StateFlow<String?> = _error.asStateFlow()
 
+  init {
+    loadData()
+  }
+
   /**
    * Load files in the current directory
    */
-  fun loadFiles() {
+  override fun loadData() {
     viewModelScope.launch {
       _isLoading.value = true
       _error.value = null
@@ -54,7 +53,7 @@ class NetworkBrowserViewModel(
 
         repository.listFiles(connection, currentPath)
           .onSuccess { fileList ->
-            _files.value = fileList.sortedWith(
+            _items.value = fileList.sortedWith(
               compareBy<NetworkFile> { !it.isDirectory }
                 .thenBy { it.name.lowercase() },
             )
@@ -70,7 +69,9 @@ class NetworkBrowserViewModel(
     }
   }
 
-
+  override fun refresh() {
+    loadData()
+  }
 
   /**
    * Play a video file

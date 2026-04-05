@@ -64,6 +64,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import app.marlboroadvance.mpvex.database.repository.PlaylistRepository
 import app.marlboroadvance.mpvex.preferences.BrowserPreferences
 import app.marlboroadvance.mpvex.preferences.MediaLayoutMode
+import app.marlboroadvance.mpvex.preferences.UiSettings
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.presentation.components.pullrefresh.PullRefreshBox
@@ -99,6 +100,7 @@ object PlaylistScreen : Screen {
 
     val playlistsWithCount by viewModel.playlistsWithCount.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val uiSettings by viewModel.uiSettings.collectAsState()
     val hasCompletedInitialLoad by viewModel.hasCompletedInitialLoad.collectAsState()
 
     // Search state
@@ -129,9 +131,12 @@ object PlaylistScreen : Screen {
       items = filteredPlaylists,
       getId = { it.playlist.id },
       onDeleteItems = { itemsToDelete, _ ->
-        // Delete all items sequentially (this is a suspend function, so it blocks until complete)
-        itemsToDelete.forEach { item ->
-          viewModel.deletePlaylist(item.playlist)
+        // Delete all items sequentially
+        scope.launch {
+          itemsToDelete.forEach { item ->
+            repository.deletePlaylist(item.playlist)
+          }
+          viewModel.refresh()
         }
         Pair(itemsToDelete.size, 0)
       },
@@ -289,6 +294,7 @@ object PlaylistScreen : Screen {
             playlistsWithCount = filteredPlaylists,
             listState = listState,
             gridState = gridState,
+            uiSettings = uiSettings,
             isRefreshing = isRefreshing,
             onRefresh = { viewModel.refresh() },
             selectionManager = selectionManager,
@@ -382,6 +388,7 @@ object PlaylistScreen : Screen {
     playlistsWithCount: List<PlaylistWithCount>,
     listState: LazyListState,
     gridState: androidx.compose.foundation.lazy.grid.LazyGridState,
+    uiSettings: UiSettings,
     isRefreshing: androidx.compose.runtime.MutableState<Boolean>,
     onRefresh: suspend () -> Unit,
     selectionManager: app.marlboroadvance.mpvex.ui.browser.selection.SelectionManager<PlaylistWithCount, Int>,
@@ -461,6 +468,8 @@ object PlaylistScreen : Screen {
                 PlaylistCard(
                   playlist = playlistWithCount.playlist,
                   itemCount = playlistWithCount.itemCount,
+                  uiSettings = uiSettings,
+
                   isSelected = selectionManager.isSelected(playlistWithCount),
                   onClick = { onPlaylistClick(playlistWithCount) },
                   onLongClick = { onPlaylistLongClick(playlistWithCount) },
@@ -499,6 +508,8 @@ object PlaylistScreen : Screen {
                 PlaylistCard(
                   playlist = playlistWithCount.playlist,
                   itemCount = playlistWithCount.itemCount,
+                  uiSettings = uiSettings,
+
                   isSelected = selectionManager.isSelected(playlistWithCount),
                   onClick = { onPlaylistClick(playlistWithCount) },
                   onLongClick = { onPlaylistLongClick(playlistWithCount) },

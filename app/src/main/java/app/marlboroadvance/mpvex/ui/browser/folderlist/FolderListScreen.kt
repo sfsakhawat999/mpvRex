@@ -92,6 +92,7 @@ import app.marlboroadvance.mpvex.preferences.FoldersPreferences
 import app.marlboroadvance.mpvex.preferences.GesturePreferences
 import app.marlboroadvance.mpvex.preferences.MediaLayoutMode
 import app.marlboroadvance.mpvex.preferences.SortOrder
+import app.marlboroadvance.mpvex.preferences.UiSettings
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.presentation.components.pullrefresh.PullRefreshBox
@@ -160,6 +161,7 @@ object FolderListScreen : Screen {
     // State collection
     val videoFolders by viewModel.videoFolders.collectAsState()
     val foldersWithNewCount by viewModel.foldersWithNewCount.collectAsState()
+    val uiSettings by viewModel.uiSettings.collectAsState()
     val recentlyPlayedFilePath by viewModel.recentlyPlayedFilePath.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val scanStatus by viewModel.scanStatus.collectAsState()
@@ -514,6 +516,7 @@ object FolderListScreen : Screen {
                   SearchResultsContent(
                     searchResults = searchResults,
                     navigationBarHeight = navigationBarHeight,
+                    uiSettings = uiSettings,
                     onFolderClick = { folder ->
                       backstack.add(app.marlboroadvance.mpvex.ui.browser.videolist.VideoListScreen(folder.bucketId, folder.name))
                     },
@@ -530,6 +533,7 @@ object FolderListScreen : Screen {
             FolderListContent(
               folders = filteredFolders,
               foldersWithNewCount = foldersWithNewCount,
+              uiSettings = uiSettings,
               scanStatus = scanStatus,
               listState = listState,
               gridState = gridState,
@@ -599,6 +603,7 @@ object FolderListScreen : Screen {
 private fun FolderListContent(
   folders: List<VideoFolder>,
   foldersWithNewCount: List<app.marlboroadvance.mpvex.ui.browser.folderlist.FolderWithNewCount>,
+  uiSettings: UiSettings,
   recentlyPlayedFilePath: String?,
   isLoading: Boolean,
   scanStatus: String?,
@@ -668,6 +673,7 @@ private fun FolderListContent(
         GridContent(
           folders = folders,
           foldersWithNewCount = foldersWithNewCount,
+          uiSettings = uiSettings,
           recentlyPlayedFilePath = recentlyPlayedFilePath,
           folderGridColumns = folderGridColumns,
           tapThumbnailToSelect = tapThumbnailToSelect,
@@ -682,6 +688,7 @@ private fun FolderListContent(
         ListContent(
           folders = folders,
           foldersWithNewCount = foldersWithNewCount,
+          uiSettings = uiSettings,
           recentlyPlayedFilePath = recentlyPlayedFilePath,
           tapThumbnailToSelect = tapThumbnailToSelect,
           navigationBarHeight = navigationBarHeight,
@@ -711,6 +718,7 @@ private fun FolderListContent(
 private fun GridContent(
   folders: List<VideoFolder>,
   foldersWithNewCount: List<app.marlboroadvance.mpvex.ui.browser.folderlist.FolderWithNewCount>,
+  uiSettings: UiSettings,
   recentlyPlayedFilePath: String?,
   folderGridColumns: Int,
   tapThumbnailToSelect: Boolean,
@@ -747,6 +755,7 @@ private fun GridContent(
 
         FolderCard(
           folder = folder,
+          uiSettings = uiSettings,
           isSelected = selectionManager.isSelected(folder),
           isRecentlyPlayed = isRecentlyPlayed,
           onClick = { onFolderClick(folder) },
@@ -785,6 +794,7 @@ private fun GridContent(
 private fun ListContent(
   folders: List<VideoFolder>,
   foldersWithNewCount: List<FolderWithNewCount>,
+  uiSettings: UiSettings,
   recentlyPlayedFilePath: String?,
 
   tapThumbnailToSelect: Boolean,
@@ -817,6 +827,7 @@ private fun ListContent(
 
         FolderCard(
           folder = folder,
+          uiSettings = uiSettings,
           isSelected = selectionManager.isSelected(folder),
           isRecentlyPlayed = isRecentlyPlayed,
           onClick = { onFolderClick(folder) },
@@ -1016,6 +1027,7 @@ private fun FolderSortDialog(
 private fun SearchResultsContent(
   searchResults: List<FileSystemItem>,
   navigationBarHeight: androidx.compose.ui.unit.Dp,
+  uiSettings: UiSettings,
   onFolderClick: (app.marlboroadvance.mpvex.domain.media.model.VideoFolder) -> Unit,
   onVideoClick: (app.marlboroadvance.mpvex.domain.media.model.Video) -> Unit,
   mediaLayoutMode: app.marlboroadvance.mpvex.preferences.MediaLayoutMode,
@@ -1054,6 +1066,7 @@ private fun SearchResultsContent(
           val folder = folders[index]
           FolderCard(
             folder = folder,
+            uiSettings = uiSettings,
             isSelected = false,
             isRecentlyPlayed = false,
             onClick = { onFolderClick(folder) },
@@ -1068,6 +1081,7 @@ private fun SearchResultsContent(
           val video = videos[index]
           VideoCard(
             video = video,
+            uiSettings = uiSettings,
             isSelected = false,
             onClick = { onVideoClick(video) },
             onLongClick = {},
@@ -1090,6 +1104,7 @@ private fun SearchResultsContent(
           val folder = folders[index]
           FolderCard(
             folder = folder,
+            uiSettings = uiSettings,
             isSelected = false,
             isRecentlyPlayed = false,
             onClick = { onFolderClick(folder) },
@@ -1104,6 +1119,7 @@ private fun SearchResultsContent(
           val video = videos[index]
           VideoCard(
             video = video,
+            uiSettings = uiSettings,
             isSelected = false,
             onClick = { onVideoClick(video) },
             onLongClick = {},

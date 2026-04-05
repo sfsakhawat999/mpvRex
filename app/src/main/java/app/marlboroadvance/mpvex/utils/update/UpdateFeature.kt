@@ -23,6 +23,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import app.marlboroadvance.mpvex.utils.media.MediaFormatter
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -439,7 +440,7 @@ fun UpdateDialog(
                     InfoRow(label = "Current Version", value = currentVersion)
                     InfoRow(label = "Latest Version", value = release.tagName.removePrefix("v"))
                     InfoRow(label = "Release Date", value = formattedDate)
-                    InfoRow(label = "Size", value = formatFileSize(downloadSize))
+                    InfoRow(label = "Size", value = MediaFormatter.formatFileSize(downloadSize))
                 }
 
                 if (isDownloading) {
@@ -504,13 +505,6 @@ private fun InfoRow(label: String, value: String) {
             color = MaterialTheme.colorScheme.onSurface
         )
     }
-}
-
-private fun formatFileSize(size: Long): String {
-    if (size <= 0) return "Unknown size"
-    val units = arrayOf("B", "KB", "MB", "GB", "TB")
-    val digitGroups = (Math.log10(size.toDouble()) / Math.log10(1024.0)).toInt()
-    return String.format("%.1f %s", size / Math.pow(1024.0, digitGroups.toDouble()), units[digitGroups])
 }
 
 private fun formatDate(dateString: String): String {

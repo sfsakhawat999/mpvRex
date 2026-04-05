@@ -36,94 +36,46 @@ import org.koin.compose.koinInject
  * Card for displaying M3U/M3U8 playlist items (streaming URLs)
  * Shows simple layout without thumbnail since no metadata is available
  */
+import app.marlboroadvance.mpvex.preferences.UiSettings
+
 @Composable
 fun M3UVideoCard(
   title: String,
   url: String,
+  uiSettings: UiSettings,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
   onLongClick: (() -> Unit)? = null,
   isSelected: Boolean = false,
   isRecentlyPlayed: Boolean = false,
 ) {
-  val appearancePreferences = koinInject<AppearancePreferences>()
-  val unlimitedNameLines by appearancePreferences.unlimitedNameLines.collectAsState()
-  val maxLines = if (unlimitedNameLines) Int.MAX_VALUE else 2
+  val maxLines = if (uiSettings.unlimitedNameLines) Int.MAX_VALUE else 2
 
-  val thumbSizeDp = 64.dp
-
-  Card(
-    modifier =
-      modifier
-        .fillMaxWidth()
-        .combinedClickable(
-          onClick = onClick,
-          onLongClick = onLongClick,
-        ),
-    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-  ) {
-    Row(
-      modifier =
-        Modifier
-          .fillMaxWidth()
-          .background(
-            if (isSelected) {
-              MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)
-            } else {
-              Color.Transparent
-            },
-          )
-          .padding(16.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      // Square placeholder with streaming icon
-      Box(
-        modifier =
-          Modifier
-            .size(thumbSizeDp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .combinedClickable(
-              onClick = onClick,
-              onLongClick = onLongClick,
-            ),
-        contentAlignment = Alignment.Center,
-      ) {
-        // Play icon overlay
-        Icon(
-          Icons.Filled.PlayArrow,
-          contentDescription = "Play",
-          modifier = Modifier.size(48.dp),
-          tint = MaterialTheme.colorScheme.secondary,
-        )
-      }
-      Spacer(modifier = Modifier.width(16.dp))
-      Column(
-        modifier = Modifier.weight(1f),
-      ) {
-        Text(
-          title,
-          style = MaterialTheme.typography.titleSmall,
-          color = if (isRecentlyPlayed) {
-            MaterialTheme.colorScheme.primary
-          } else {
-            MaterialTheme.colorScheme.onSurface
-          },
-          maxLines = maxLines,
-          overflow = TextOverflow.Ellipsis,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        // Show URL like a file path
-        Text(
-          url,
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          maxLines = 2,
-          overflow = TextOverflow.Ellipsis,
-        )
-      }
+  BaseMediaCard(
+    title = title,
+    modifier = modifier,
+    onClick = onClick,
+    onLongClick = onLongClick,
+    isSelected = isSelected,
+    maxTitleLines = maxLines,
+    thumbnailIcon = {
+      Icon(
+        Icons.Filled.PlayArrow,
+        contentDescription = null,
+        modifier = Modifier.size(48.dp),
+        tint = MaterialTheme.colorScheme.secondary,
+      )
+    },
+    infoContent = {
+      Text(
+        url,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+      )
     }
-  }
+  )
 }
 
 

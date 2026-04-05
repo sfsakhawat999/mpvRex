@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.marlboroadvance.mpvex.domain.media.model.VideoFolder
+import app.marlboroadvance.mpvex.utils.media.MediaFormatter
 import app.marlboroadvance.mpvex.preferences.AppearancePreferences
 import app.marlboroadvance.mpvex.preferences.BrowserPreferences
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
@@ -39,10 +40,13 @@ import kotlin.math.pow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 
+import app.marlboroadvance.mpvex.preferences.UiSettings
+
 @Composable
 fun FolderCard(
   folder: VideoFolder,
   onClick: () -> Unit,
+  uiSettings: UiSettings,
   modifier: Modifier = Modifier,
   isRecentlyPlayed: Boolean = false,
   onLongClick: (() -> Unit)? = null,
@@ -54,24 +58,12 @@ fun FolderCard(
   customChipContent: @Composable (() -> Unit)? = null,
   isGridMode: Boolean = false,
 ) {
-  val appearancePreferences = koinInject<AppearancePreferences>()
   val browserPreferences = koinInject<BrowserPreferences>()
-  val unlimitedNameLines by appearancePreferences.unlimitedNameLines.collectAsState()
-  val showTotalVideosChip by browserPreferences.showTotalVideosChip.collectAsState()
-  val showTotalDurationChip by browserPreferences.showTotalDurationChip.collectAsState()
-  val showTotalSizeChip by browserPreferences.showTotalSizeChip.collectAsState()
-  val showDateChip by browserPreferences.showDateChip.collectAsState()
-  val showFolderPath by browserPreferences.showFolderPath.collectAsState()
-  val showAudioFiles by browserPreferences.showAudioFiles.collectAsState()
   
-  val totalCount = if (showAudioFiles) folder.videoCount + folder.audioCount else folder.videoCount
-  val countLabel = if (showAudioFiles) {
-    if (totalCount == 1) "1 Item" else "$totalCount Items"
-  } else {
-    if (totalCount == 1) "1 Video" else "$totalCount Videos"
-  }
+  val totalCount = folder.videoCount + folder.audioCount
+  val countLabel = if (totalCount == 1) "1 Item" else "$totalCount Items"
   
-  val maxLines = if (unlimitedNameLines) Int.MAX_VALUE else 2
+  val maxLines = if (uiSettings.unlimitedNameLines) Int.MAX_VALUE else 2
 
   // Remove the redundant folder name from the path
   val parentPath = folder.path.substringBeforeLast("/", folder.path)
@@ -157,7 +149,7 @@ fun FolderCard(
             }
           }
           
-          if (showTotalDurationChip && folder.totalDuration > 0) {
+          if (uiSettings.showTotalDurationChip && folder.totalDuration > 0) {
             Box(
               modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -167,7 +159,7 @@ fun FolderCard(
                 .padding(horizontal = 6.dp, vertical = 2.dp),
             ) {
               Text(
-                text = formatDuration(folder.totalDuration),
+                text = MediaFormatter.formatDuration(folder.totalDuration),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White,
               )
@@ -186,7 +178,7 @@ fun FolderCard(
           textAlign = androidx.compose.ui. text.style.TextAlign.Center,
         )
 
-        if (showTotalVideosChip && totalCount > 0) {
+        if (totalCount > 0) {
           Text(
             countLabel,
             style = MaterialTheme.typography.labelSmall,
@@ -258,7 +250,8 @@ fun FolderCard(
             maxLines = maxLines,
             overflow = TextOverflow.Ellipsis,
           )
-          if (showFolderPath && parentPath.isNotEmpty()) {
+          // Always show path in list view for now, or use a new logic
+          if (parentPath.isNotEmpty()) {
             Text(
               parentPath,
               style = MaterialTheme.typography.bodySmall,
@@ -282,7 +275,7 @@ fun FolderCard(
           }
 
           // Hide chips at storage root level (when totalCount is 0)
-            if (showTotalVideosChip && totalCount > 0) {
+            if (totalCount > 0) {
               Text(
                 countLabel,
                 style = MaterialTheme.typography.labelSmall,
@@ -298,9 +291,10 @@ fun FolderCard(
               hasChip = true
             }
 
-            if (showTotalSizeChip && folder.totalSize > 0) {
+            if (uiSettings.showSizeChip && folder.totalSize > 0) {
               Text(
-                formatFileSize(folder.totalSize),
+                MediaFormatter.formatFileSize(folder.totalSize)
+,
                 style = MaterialTheme.typography.labelSmall,
                 modifier =
                   Modifier
@@ -314,9 +308,10 @@ fun FolderCard(
               hasChip = true
             }
 
-            if (showTotalDurationChip && folder.totalDuration > 0) {
+            if (uiSettings.showTotalDurationChip && folder.totalDuration > 0) {
               Text(
-                formatDuration(folder.totalDuration),
+                MediaFormatter.formatDuration(folder.totalDuration)
+,
                 style = MaterialTheme.typography.labelSmall,
                 modifier =
                   Modifier
@@ -332,9 +327,10 @@ fun FolderCard(
 
 
 
-            if (showDateChip && folder.lastModified > 0) {
+            if (uiSettings.showDateChip && folder.lastModified > 0) {
               Text(
-                formatDate(folder.lastModified),
+                MediaFormatter.formatDate(folder.lastModified * 1000)
+,
                 style = MaterialTheme.typography.labelSmall,
                 modifier =
                   Modifier
@@ -351,30 +347,4 @@ fun FolderCard(
       }
     }
   }
-}
-
-private fun formatDuration(durationMs: Long): String {
-  val seconds = durationMs / 1000
-  val hours = seconds / 3600
-  val minutes = (seconds % 3600) / 60
-  val secs = seconds % 60
-
-  return when {
-    hours > 0 -> "${hours}h ${minutes}m"
-    minutes > 0 -> "${minutes}m"
-    else -> "${secs}s"
-  }
-}
-
-private fun formatFileSize(bytes: Long): String {
-  if (bytes <= 0) return "0 B"
-  val units = arrayOf("B", "KB", "MB", "GB", "TB")
-  val digitGroups = (kotlin.math.log10(bytes.toDouble()) / kotlin.math.log10(1024.0)).toInt()
-  val value = bytes / 1024.0.pow(digitGroups.toDouble())
-  return String.format(java.util.Locale.getDefault(), "%.1f %s", value, units[digitGroups])
-}
-
-private fun formatDate(timestampSeconds: Long): String {
-  val sdf = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
-  return sdf.format(java.util.Date(timestampSeconds * 1000))
 }

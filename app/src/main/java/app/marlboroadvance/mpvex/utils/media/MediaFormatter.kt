@@ -1,5 +1,7 @@
 package app.marlboroadvance.mpvex.utils.media
 
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 import kotlin.math.log10
 import kotlin.math.pow
@@ -8,6 +10,16 @@ import kotlin.math.pow
  * Unified formatting utilities for media-related data
  */
 object MediaFormatter {
+
+    /**
+     * Formats a timestamp in milliseconds to a human-readable date (MMM dd)
+     */
+    fun formatDate(timestamp: Long): String {
+        if (timestamp <= 0) return "--"
+        val date = Date(timestamp)
+        val format = SimpleDateFormat("MMM dd", Locale.getDefault())
+        return format.format(date)
+    }
 
     /**
      * Formats duration in milliseconds to HH:MM:SS or MM:SS

@@ -1,6 +1,8 @@
 package app.marlboroadvance.mpvex.ui.browser.networkstreaming
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import app.marlboroadvance.mpvex.database.dao.NetworkConnectionDao
 import app.marlboroadvance.mpvex.domain.network.NetworkConnection
 import app.marlboroadvance.mpvex.domain.network.NetworkFile
+import app.marlboroadvance.mpvex.preferences.UiSettings
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.presentation.components.pullrefresh.PullRefreshBox
@@ -41,7 +44,6 @@ import app.marlboroadvance.mpvex.ui.browser.cards.NetworkFolderCard
 import app.marlboroadvance.mpvex.ui.browser.cards.NetworkVideoCard
 import app.marlboroadvance.mpvex.ui.browser.components.BrowserTopBar
 import app.marlboroadvance.mpvex.ui.browser.states.EmptyState
-import app.marlboroadvance.mpvex.ui.preferences.PreferencesScreen
 import app.marlboroadvance.mpvex.ui.utils.LocalBackStack
 import kotlinx.serialization.Serializable
 import my.nanihadesuka.compose.LazyColumnScrollbar
@@ -70,8 +72,9 @@ data class NetworkBrowserScreen(
           ),
       )
 
-    val files by viewModel.files.collectAsState()
+    val files by viewModel.items.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val uiSettings by viewModel.uiSettings.collectAsState()
     val error by viewModel.error.collectAsState()
 
     // UI State
@@ -79,7 +82,7 @@ data class NetworkBrowserScreen(
 
     // Load files when connectionId or currentPath changes
     LaunchedEffect(connectionId, currentPath) {
-      viewModel.loadFiles()
+      viewModel.loadData()
     }
 
     BackHandler {
@@ -117,9 +120,10 @@ data class NetworkBrowserScreen(
         connectionId = connectionId,
         connectionName = connectionName,
         isLoading = isLoading && files.isEmpty(),
+        uiSettings = uiSettings,
         isRefreshing = isRefreshing,
         error = error,
-        onRefresh = { viewModel.loadFiles() },
+        onRefresh = { viewModel.loadData() },
         onFolderClick = { folder ->
           backstack.add(
             NetworkBrowserScreen(
@@ -144,6 +148,7 @@ private fun NetworkBrowserContent(
   connectionId: Long,
   connectionName: String,
   isLoading: Boolean,
+  uiSettings: UiSettings,
   isRefreshing: MutableState<Boolean>,
   error: String?,
   onRefresh: suspend () -> Unit,
@@ -216,9 +221,9 @@ private fun NetworkBrowserContent(
       val hasEnoughItems = (folders.size + videos.size) > 20
 
       // Animate scrollbar alpha
-      val scrollbarAlpha by androidx.compose.animation.core.animateFloatAsState(
+      val scrollbarAlpha by animateFloatAsState(
         targetValue = if (isAtTop || !hasEnoughItems) 0f else 1f,
-        animationSpec = androidx.compose.animation.core.tween(durationMillis = 200),
+        animationSpec = tween(durationMillis = 200),
         label = "scrollbarAlpha",
       )
 
@@ -292,6 +297,7 @@ private fun NetworkBrowserContent(
                   NetworkVideoCard(
                     file = video,
                     connection = conn,
+                    uiSettings = uiSettings,
                     onClick = { onVideoClick(video) },
                     modifier = Modifier,
                   )

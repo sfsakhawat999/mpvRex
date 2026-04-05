@@ -10,11 +10,14 @@ import androidx.compose.ui.unit.dp
 import app.marlboroadvance.mpvex.database.entities.PlaylistEntity
 import app.marlboroadvance.mpvex.domain.media.model.VideoFolder
 
+import app.marlboroadvance.mpvex.preferences.UiSettings
+
 /**
  * Card for displaying a playlist item
  * 
  * @param playlist The playlist entity to display
  * @param itemCount Number of items in the playlist
+ * @param uiSettings Consolidated UI settings
  * @param onClick Action to perform when the card is clicked
  * @param onLongClick Action to perform when the card is long-pressed
  * @param onThumbClick Action to perform when the thumbnail is clicked
@@ -26,6 +29,7 @@ import app.marlboroadvance.mpvex.domain.media.model.VideoFolder
 fun PlaylistCard(
   playlist: PlaylistEntity,
   itemCount: Int,
+  uiSettings: UiSettings,
   onClick: () -> Unit,
   onLongClick: () -> Unit,
   onThumbClick: () -> Unit,
@@ -73,6 +77,7 @@ fun PlaylistCard(
   // Use the FolderCard component with playlist-specific customizations
   FolderCard(
     folder = folderModel,
+    uiSettings = uiSettings,
     isSelected = isSelected,
     isRecentlyPlayed = false,
     onClick = onClick,

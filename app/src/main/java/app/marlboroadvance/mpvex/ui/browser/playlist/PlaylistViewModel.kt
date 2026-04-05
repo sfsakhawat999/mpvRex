@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import app.marlboroadvance.mpvex.database.entities.PlaylistEntity
 import app.marlboroadvance.mpvex.database.repository.PlaylistRepository
 import app.marlboroadvance.mpvex.repository.MediaFileRepository
+import app.marlboroadvance.mpvex.ui.browser.base.BaseBrowserViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,16 +26,11 @@ data class PlaylistWithCount(
 
 class PlaylistViewModel(
   application: Application,
-) : androidx.lifecycle.AndroidViewModel(application),
+) : BaseBrowserViewModel<PlaylistWithCount>(application),
   KoinComponent {
   private val repository: PlaylistRepository by inject()
-  // Using MediaFileRepository singleton directly
 
-  private val _playlistsWithCount = MutableStateFlow<List<PlaylistWithCount>>(emptyList())
-  val playlistsWithCount: StateFlow<List<PlaylistWithCount>> = _playlistsWithCount.asStateFlow()
-
-  private val _isLoading = MutableStateFlow(false)
-  val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+  val playlistsWithCount: StateFlow<List<PlaylistWithCount>> = items
 
   // Track if initial load has completed to prevent empty state flicker
   private val _hasCompletedInitialLoad = MutableStateFlow(false)
@@ -51,103 +47,46 @@ class PlaylistViewModel(
   }
 
   init {
-    // Load cached playlists instantly for immediate display
+    loadData()
+
+    // Observe all playlists and update items
     viewModelScope.launch(Dispatchers.IO) {
-      try {
-        // Get initial cached data synchronously
-        val cachedPlaylists = repository.getAllPlaylists()
-        if (cachedPlaylists.isNotEmpty()) {
-          // Show cached data immediately (without video counts for speed)
-          val quickLoad = cachedPlaylists.sortedBy { it.name.lowercase() }.map { playlist ->
-            PlaylistWithCount(playlist, 0) // Show 0 count initially
-          }
-          _playlistsWithCount.value = quickLoad
-          _hasCompletedInitialLoad.value = true
-        }
-      } catch (e: Exception) {
-        Log.e(TAG, "Error loading cached playlists", e)
+      repository.observeAllPlaylists().collectLatest { playlists ->
+        loadData()
       }
     }
+  }
 
-    // Then observe for updates with actual counts
+  override fun loadData() {
     viewModelScope.launch(Dispatchers.IO) {
-      repository.observeAllPlaylists().collectLatest { playlistsFromDb ->
-        val sortedPlaylists = playlistsFromDb.sortedBy { it.name.lowercase() }
-
-        val playlistsWithCounts = sortedPlaylists.map { playlist ->
-          val count = getActualVideoCount(playlist.id)
+      _isLoading.value = true
+      try {
+        val playlists = repository.getAllPlaylists()
+        val playlistsWithCounts = playlists.map { playlist ->
+          val count = repository.getPlaylistItemCount(playlist.id)
           PlaylistWithCount(playlist, count)
-        }
+        }.sortedByDescending { it.playlist.updatedAt }
 
-        _playlistsWithCount.value = playlistsWithCounts
+        _items.value = playlistsWithCounts
         _hasCompletedInitialLoad.value = true
-      }
-    }
-  }
-
-  /**
-   * Get the actual count of videos that exist for a playlist
-   */
-  private suspend fun getActualVideoCount(playlistId: Int): Int {
-    val playlist = repository.getPlaylistById(playlistId)
-    val items = repository.getPlaylistItems(playlistId)
-    if (items.isEmpty()) return 0
-
-    // For M3U playlists, return item count directly (URLs don't need file system check)
-    if (playlist?.isM3uPlaylist == true) {
-      return items.size
-    }
-
-    // For regular playlists, check if files still exist
-    val bucketIds = items.map { item ->
-      File(item.filePath).parent ?: ""
-    }.toSet()
-
-    val allVideos = MediaFileRepository.getVideosForBuckets(getApplication(), bucketIds)
-
-    return items.count { item ->
-      allVideos.any { video -> video.path == item.filePath }
-    }
-  }
-
-  fun refresh() {
-    viewModelScope.launch(Dispatchers.IO) {
-      try {
-        _isLoading.value = true
-        val playlistsFromDb = repository.getAllPlaylists()
-        val sortedPlaylists = playlistsFromDb.sortedBy { it.name.lowercase() }
-
-        val playlistsWithCounts = sortedPlaylists.map { playlist ->
-          val count = getActualVideoCount(playlist.id)
-          PlaylistWithCount(playlist, count)
-        }
-
-        _playlistsWithCount.value = playlistsWithCounts
-      } catch (e: Exception) {
-        Log.e(TAG, "Error refreshing playlists", e)
       } finally {
         _isLoading.value = false
       }
     }
   }
 
+  override fun refresh() {
+    loadData()
+  }
+
   suspend fun createPlaylist(name: String): Long {
     return repository.createPlaylist(name)
   }
 
-  suspend fun createM3UPlaylist(url: String): Result<Long> {
-    return repository.createM3UPlaylist(url)
-  }
-
-  suspend fun createM3UPlaylistFromFile(uri: android.net.Uri): Result<Long> {
-    return repository.createM3UPlaylistFromFile(getApplication(), uri)
-  }
-
-  suspend fun refreshM3UPlaylist(playlistId: Int): Result<Unit> {
-    return repository.refreshM3UPlaylist(playlistId)
-  }
-
-  suspend fun deletePlaylist(playlist: PlaylistEntity) {
-    repository.deletePlaylist(playlist)
+  suspend fun deletePlaylists(playlistsToDelete: List<PlaylistWithCount>) {
+    playlistsToDelete.forEach {
+      repository.deletePlaylist(it.playlist)
+    }
+    loadData()
   }
 }

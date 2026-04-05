@@ -62,6 +62,8 @@ import app.marlboroadvance.mpvex.database.repository.PlaylistRepository
 import app.marlboroadvance.mpvex.domain.media.model.Video
 import app.marlboroadvance.mpvex.preferences.GesturePreferences
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
+import app.marlboroadvance.mpvex.preferences.UiSettings
+import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.presentation.components.pullrefresh.PullRefreshBox
 import app.marlboroadvance.mpvex.ui.browser.cards.M3UVideoCard
@@ -120,6 +122,7 @@ data class PlaylistDetailScreen(val playlistId: Int) : Screen {
     val videoItems by viewModel.videoItems.collectAsState()
     val videos = videoItems.map { it.video }
     val isLoading by viewModel.isLoading.collectAsState()
+    val uiSettings by viewModel.uiSettings.collectAsState()
     val isRefreshing = remember { mutableStateOf(false) }
 
     // Search state
@@ -470,6 +473,7 @@ data class PlaylistDetailScreen(val playlistId: Int) : Screen {
           PlaylistVideoListContent(
             videoItems = filteredVideoItems,
             isLoading = isLoading && videoItems.isEmpty(),
+            uiSettings = uiSettings,
             selectionManager = selectionManager,
             isM3uPlaylist = playlist?.isM3uPlaylist == true,
             isReorderMode = isReorderMode,
@@ -543,6 +547,7 @@ data class PlaylistDetailScreen(val playlistId: Int) : Screen {
 private fun PlaylistVideoListContent(
   videoItems: List<PlaylistVideoItem>,
   isLoading: Boolean,
+  uiSettings: UiSettings,
   selectionManager: app.marlboroadvance.mpvex.ui.browser.selection.SelectionManager<PlaylistVideoItem, Int>,
   isReorderMode: Boolean,
   onReorder: (Int, Int) -> Unit,
@@ -656,6 +661,7 @@ private fun PlaylistVideoListContent(
                   M3UVideoCard(
                     title = item.video.displayName,
                     url = item.video.path,
+                    uiSettings = uiSettings,
                     onClick = { onVideoItemClick(item) },
                     onLongClick = { onVideoItemLongClick(item) },
                     isSelected = selectionManager.isSelected(item),
@@ -665,6 +671,7 @@ private fun PlaylistVideoListContent(
                 } else {
                   VideoCard(
                     video = item.video,
+                    uiSettings = uiSettings,
                     progressPercentage = progressPercentage,
                     isRecentlyPlayed = item.playlistItem.id == mostRecentlyPlayedItem?.playlistItem?.id,
                     isSelected = selectionManager.isSelected(item),

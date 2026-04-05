@@ -41,7 +41,7 @@ data class VideoWithPlaybackInfo(
 class VideoListViewModel(
   application: Application,
   private val bucketId: String,
-) : BaseBrowserViewModel(application),
+) : BaseBrowserViewModel<VideoWithPlaybackInfo>(application),
   KoinComponent {
   private val playbackStateRepository: PlaybackStateRepository by inject()
   private val appearancePreferences: app.marlboroadvance.mpvex.preferences.AppearancePreferences by inject()
@@ -54,9 +54,6 @@ class VideoListViewModel(
 
   private val _videosWithPlaybackInfo = MutableStateFlow<List<VideoWithPlaybackInfo>>(emptyList())
   val videosWithPlaybackInfo: StateFlow<List<VideoWithPlaybackInfo>> = _videosWithPlaybackInfo.asStateFlow()
-
-  private val _isLoading = MutableStateFlow(true)
-  val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
   // Track if items were deleted/moved leaving folder empty
   private val _videosWereDeletedOrMoved = MutableStateFlow(false)
@@ -88,40 +85,22 @@ class VideoListViewModel(
   private val tag = "VideoListViewModel"
 
   init {
-    loadVideos()
+    loadData()
 
     // Listen for global media library changes and refresh this list when they occur
     viewModelScope.launch(Dispatchers.IO) {
       MediaLibraryEvents.changes.collectLatest {
         // Clear cache when media library changes
         MediaFileRepository.clearCache()
-        loadVideos()
+        loadData()
       }
     }
   }
 
-  override fun refresh() {
-    Log.d(tag, "Hard refreshing video list for bucket: $bucketId")
-    
-    // Set loading state
-    _isLoading.value = true
-    
-    // Clear cache to force fresh data from filesystem
-    MediaFileRepository.clearCache()
-    
-    // Trigger media scan before loading to ensure MediaStore is up-to-date
-    triggerMediaScan()
-    
-    // Wait a bit for MediaStore to update, then reload
-    viewModelScope.launch(Dispatchers.IO) {
-      delay(1500) // Give MediaStore time to index
-      loadVideos()
-    }
-  }
-
-  private fun loadVideos() {
+  override fun loadData() {
     viewModelScope.launch(Dispatchers.IO) {
       try {
+        _isLoading.value = true
         // First attempt to load videos (basic info from MediaStore)
         var videoList = MediaFileRepository.getVideosInFolder(getApplication(), bucketId)
         

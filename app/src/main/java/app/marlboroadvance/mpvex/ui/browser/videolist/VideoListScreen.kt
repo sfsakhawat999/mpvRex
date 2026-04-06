@@ -7,41 +7,32 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import app.marlboroadvance.mpvex.utils.media.OpenDocumentTreeContract
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.filled.VideoLibrary
@@ -50,12 +41,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
@@ -76,23 +64,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
-import app.marlboroadvance.mpvex.R
-import app.marlboroadvance.mpvex.BuildConfig
 import app.marlboroadvance.mpvex.domain.media.model.Video
 import app.marlboroadvance.mpvex.domain.thumbnail.ThumbnailRepository
 import app.marlboroadvance.mpvex.preferences.AppearancePreferences
@@ -102,11 +79,12 @@ import app.marlboroadvance.mpvex.preferences.GesturePreferences
 import app.marlboroadvance.mpvex.preferences.MediaLayoutMode
 import app.marlboroadvance.mpvex.preferences.PlayerPreferences
 import app.marlboroadvance.mpvex.preferences.SortOrder
-import app.marlboroadvance.mpvex.preferences.UiSettings
 import app.marlboroadvance.mpvex.preferences.VideoSortType
+import app.marlboroadvance.mpvex.preferences.UiSettings
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.presentation.components.pullrefresh.PullRefreshBox
+import app.marlboroadvance.mpvex.BuildConfig
 import app.marlboroadvance.mpvex.ui.browser.cards.VideoCard
 import app.marlboroadvance.mpvex.ui.browser.components.BrowserBottomBar
 import app.marlboroadvance.mpvex.ui.browser.components.BrowserTopBar
@@ -124,12 +102,10 @@ import app.marlboroadvance.mpvex.ui.browser.fab.FabScrollHelper
 import app.marlboroadvance.mpvex.ui.browser.selection.SelectionManager
 import app.marlboroadvance.mpvex.ui.browser.selection.rememberSelectionManager
 import app.marlboroadvance.mpvex.ui.browser.states.EmptyState
-import app.marlboroadvance.mpvex.ui.player.PlayerActivity
 import app.marlboroadvance.mpvex.ui.utils.LocalBackStack
 import app.marlboroadvance.mpvex.utils.history.RecentlyPlayedOps
 import app.marlboroadvance.mpvex.utils.media.CopyPasteOps
 import app.marlboroadvance.mpvex.utils.media.MediaUtils
-import app.marlboroadvance.mpvex.utils.media.OpenDocumentTreeContract
 import app.marlboroadvance.mpvex.utils.sort.SortUtils
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -139,6 +115,7 @@ import my.nanihadesuka.compose.ScrollbarSettings
 import org.koin.compose.koinInject
 import java.io.File
 import kotlin.math.roundToInt
+
 
 @Serializable
 data class VideoListScreen(
@@ -178,6 +155,7 @@ data class VideoListScreen(
       remember(videosWithPlaybackInfo, videoSortType, videoSortOrder) {
         val infoById = videosWithPlaybackInfo.associateBy { it.video.id }
         val sortedVideos = SortUtils.sortVideos(videosWithPlaybackInfo.map { it.video }, videoSortType, videoSortOrder)
+        // Maintain the playback info mapping — O(1) lookup per item
         sortedVideos.map { video ->
           infoById[video.id] ?: VideoWithPlaybackInfo(video)
         }
@@ -200,144 +178,170 @@ data class VideoListScreen(
     val renameDialogOpen = rememberSaveable { mutableStateOf(false) }
     val addToPlaylistDialogOpen = rememberSaveable { mutableStateOf(false) }
 
+    // Copy/Move state
+    val folderPickerOpen = rememberSaveable { mutableStateOf(false) }
+    val operationType = remember { mutableStateOf<CopyPasteOps.OperationType?>(null) }
+    val progressDialogOpen = rememberSaveable { mutableStateOf(false) }
+    val operationProgress by CopyPasteOps.operationProgress.collectAsState()
+    val treePickerLauncher =
+      rememberLauncherForActivityResult(OpenDocumentTreeContract()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val selectedVideos = selectionManager.getSelectedItems()
+        if (selectedVideos.isEmpty() || operationType.value == null) return@rememberLauncherForActivityResult
+
+        runCatching {
+          context.contentResolver.takePersistableUriPermission(
+            uri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+          )
+        }
+
+        progressDialogOpen.value = true
+        coroutineScope.launch {
+          when (operationType.value) {
+            is CopyPasteOps.OperationType.Copy -> {
+              CopyPasteOps.copyFilesToTreeUri(context, selectedVideos, uri)
+            }
+
+            is CopyPasteOps.OperationType.Move -> {
+              CopyPasteOps.moveFilesToTreeUri(context, selectedVideos, uri)
+            }
+
+            else -> {}
+          }
+        }
+      }
+
+    // Private space state
+    val movingToPrivateSpace = rememberSaveable { mutableStateOf(false) }
+    val showPrivateSpaceCompletionDialog = rememberSaveable { mutableStateOf(false) }
+    val privateSpaceMovedCount = remember { mutableIntStateOf(0) }
+
+    val displayFolderName = videos.firstOrNull()?.bucketDisplayName ?: folderName
+
     // FAB visibility state
     val isFabVisible = remember { mutableStateOf(true) }
 
     // Bottom bar animation state
     var showFloatingBottomBar by remember { mutableStateOf(false) }
-    
-    // Search state
-    var searchQuery by rememberSaveable { mutableStateOf("") }
-    var isSearching by rememberSaveable { mutableStateOf(false) }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusRequester = remember { FocusRequester() }
+    val animationDuration = 300
 
+    // Handle selection mode changes with animation
     LaunchedEffect(selectionManager.isInSelectionMode) {
-      showFloatingBottomBar = selectionManager.isInSelectionMode
+      if (selectionManager.isInSelectionMode) {
+        // Entering selection mode: Show floating bar immediately
+        showFloatingBottomBar = true
+      } else {
+        // Exiting selection mode: Hide floating bar
+        showFloatingBottomBar = false
+      }
     }
 
-    BackHandler(enabled = selectionManager.isInSelectionMode || isSearching) {
-      if (isSearching) {
-        isSearching = false
-        searchQuery = ""
-      } else if (selectionManager.isInSelectionMode) {
-        selectionManager.clear()
+    // Predictive back: Only intercept when in selection mode
+    BackHandler(enabled = selectionManager.isInSelectionMode) {
+      selectionManager.clear()
+    }
+
+    // Listen for lifecycle resume events and refresh videos when coming into focus
+    DisposableEffect(lifecycleOwner) {
+      val observer =
+        LifecycleEventObserver { _, event ->
+          if (event == Lifecycle.Event.ON_RESUME) {
+            viewModel.refresh()
+          }
+        }
+      lifecycleOwner.lifecycle.addObserver(observer)
+      onDispose {
+        lifecycleOwner.lifecycle.removeObserver(observer)
       }
     }
 
     Scaffold(
       topBar = {
-        if (isSearching) {
-          SearchBar(
-            inputField = {
-              SearchBarDefaults.InputField(
-                query = searchQuery,
-                onQueryChange = { searchQuery = it },
-                onSearch = { },
-                expanded = false,
-                onExpandedChange = { },
-                placeholder = { Text("Search videos...") },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                trailingIcon = {
-                  IconButton(onClick = { isSearching = false; searchQuery = "" }) {
-                    Icon(Icons.Filled.Close, contentDescription = null)
-                  }
-                },
-                modifier = Modifier.focusRequester(focusRequester),
-              )
-            },
-            expanded = false,
-            onExpandedChange = { },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            shape = RoundedCornerShape(28.dp),
-            tonalElevation = 6.dp,
-          ) { }
-        } else {
-          BrowserTopBar(
-            title = videos.firstOrNull()?.bucketDisplayName ?: folderName,
-            isInSelectionMode = selectionManager.isInSelectionMode,
-            selectedCount = selectionManager.selectedCount,
-            totalCount = sortedVideosWithInfo.size,
-            onBackClick = {
-              if (selectionManager.isInSelectionMode) {
+        BrowserTopBar(
+          title = displayFolderName,
+          isInSelectionMode = selectionManager.isInSelectionMode,
+          selectedCount = selectionManager.selectedCount,
+          totalCount = sortedVideosWithInfo.size,
+          onBackClick = {
+            if (selectionManager.isInSelectionMode) {
+              selectionManager.clear()
+            } else {
+              backstack.removeLastOrNull()
+            }
+          },
+          onCancelSelection = { selectionManager.clear() },
+          onSortClick = { sortDialogOpen.value = true },
+          onSettingsClick = {
+            backstack.add(app.marlboroadvance.mpvex.ui.preferences.PreferencesScreen)
+          },
+          isSingleSelection = selectionManager.isSingleSelection,
+          onInfoClick = {
+            if (selectionManager.isSingleSelection) {
+              val video = selectionManager.getSelectedItems().firstOrNull()
+              if (video != null) {
+                val intent = Intent(context, app.marlboroadvance.mpvex.ui.mediainfo.MediaInfoActivity::class.java)
+                intent.action = Intent.ACTION_VIEW
+                intent.data = video.uri
+                context.startActivity(intent)
                 selectionManager.clear()
-              } else {
-                backstack.removeLastOrNull()
               }
-            },
-            onCancelSelection = { selectionManager.clear() },
-            onSortClick = { sortDialogOpen.value = true },
-            onSearchClick = { isSearching = true },
-            onSettingsClick = {
-              backstack.add(app.marlboroadvance.mpvex.ui.preferences.PreferencesScreen)
-            },
-            isSingleSelection = selectionManager.isSingleSelection,
-            onInfoClick = {
-              if (selectionManager.isSingleSelection) {
-                val video = selectionManager.getSelectedItems().firstOrNull()
-                if (video != null) {
-                  val intent = Intent(context, app.marlboroadvance.mpvex.ui.mediainfo.MediaInfoActivity::class.java)
-                  intent.action = Intent.ACTION_VIEW
-                  intent.data = video.uri
-                  context.startActivity(intent)
-                  selectionManager.clear()
-                }
-              }
-            },
-            onShareClick = { selectionManager.shareSelected() },
-            onPlayClick = { selectionManager.playSelected() },
-            onSelectAll = { selectionManager.selectAll() },
-            onInvertSelection = { selectionManager.invertSelection() },
-            onDeselectAll = { selectionManager.clear() },
-            onAddToPlaylistClick = { addToPlaylistDialogOpen.value = true },
-          )
-        }
+            }
+          },
+          onShareClick = { selectionManager.shareSelected() },
+          onPlayClick = { selectionManager.playSelected() },
+          onSelectAll = { selectionManager.selectAll() },
+          onInvertSelection = { selectionManager.invertSelection() },
+          onDeselectAll = { selectionManager.clear() },
+          onAddToPlaylistClick = if (!BuildConfig.ENABLE_UPDATE_FEATURE) {
+            { addToPlaylistDialogOpen.value = true }
+          } else null,
+        )
       },
       floatingActionButton = {
+        val navigationBarHeight = app.marlboroadvance.mpvex.ui.browser.LocalNavigationBarHeight.current
         if (sortedVideosWithInfo.isNotEmpty()) {
-          FloatingActionButton(
-            modifier = Modifier
-              .windowInsetsPadding(WindowInsets.systemBars)
-              .padding(bottom = navigationBarHeight)
-              .animateFloatingActionButton(
-                visible = !selectionManager.isInSelectionMode && isFabVisible.value && !isSearching,
-                alignment = Alignment.BottomEnd,
-              ),
-            onClick = {
-              coroutineScope.launch {
-                val folderPath = sortedVideosWithInfo.firstOrNull()?.video?.path?.let { File(it).parent } ?: ""
-                val recentlyPlayedVideos = RecentlyPlayedOps.getRecentlyPlayed(limit = 100)
-                val lastPlayedInFolder = recentlyPlayedVideos.firstOrNull {
-                  File(it.filePath).parent == folderPath
-                }
-
-                if (lastPlayedInFolder != null) {
-                  MediaUtils.playFile(lastPlayedInFolder.filePath, context, "recently_played_button")
-                } else {
-                  MediaUtils.playFile(sortedVideosWithInfo.first().video, context, "first_video_button")
-                }
-              }
-            },
+          TooltipBox(
+            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+            tooltip = { PlainTooltip { Text("Play recently played or first video") } },
+            state = rememberTooltipState(),
           ) {
-            Icon(Icons.Filled.PlayArrow, contentDescription = "Play recently played or first video")
+            FloatingActionButton(
+              modifier = Modifier
+                .windowInsetsPadding(WindowInsets.systemBars)
+                .padding(bottom = navigationBarHeight)
+                .animateFloatingActionButton(
+                  visible = !selectionManager.isInSelectionMode && isFabVisible.value,
+                  alignment = Alignment.BottomEnd,
+                ),
+              onClick = {
+                coroutineScope.launch {
+                  val folderPath = sortedVideosWithInfo.firstOrNull()?.video?.path?.let { File(it).parent } ?: ""
+                  val recentlyPlayedVideos = RecentlyPlayedOps.getRecentlyPlayed(limit = 100)
+                  val lastPlayedInFolder = recentlyPlayedVideos.firstOrNull {
+                    File(it.filePath).parent == folderPath
+                  }
+
+                  if (lastPlayedInFolder != null) {
+                    MediaUtils.playFile(lastPlayedInFolder.filePath, context, "recently_played_button")
+                  } else {
+                    MediaUtils.playFile(sortedVideosWithInfo.first().video, context, "first_video_button")
+                  }
+                }
+              },
+            ) {
+              Icon(Icons.Filled.PlayArrow, contentDescription = "Play recently played or first video")
+            }
           }
         }
       }
     ) { padding ->
       val autoScrollToLastPlayed by browserPreferences.autoScrollToLastPlayed.collectAsState()
       
-      val displayVideos = if (isSearching && searchQuery.isNotBlank()) {
-        sortedVideosWithInfo.filter { 
-          it.video.displayName.contains(searchQuery, ignoreCase = true) 
-        }
-      } else {
-        sortedVideosWithInfo
-      }
-
       Box(modifier = Modifier.fillMaxSize()) {
         VideoListContent(
           folderId = bucketId,
-          videosWithInfo = displayVideos,
+          videosWithInfo = sortedVideosWithInfo,
           isLoading = isLoading && videos.isEmpty(),
           uiSettings = uiSettings,
           isRefreshing = isRefreshing,
@@ -350,6 +354,9 @@ data class VideoListScreen(
             if (selectionManager.isInSelectionMode) {
               selectionManager.toggle(video)
             } else {
+              // Always use MediaUtils.playFile which lets PlayerActivity auto-generate playlist
+              // This avoids TransactionTooLargeException from passing large playlists
+              // PlayerActivity will auto-generate playlist from folder if playlistMode is enabled
               MediaUtils.playFile(video, context, "video_list")
             }
           },
@@ -359,16 +366,38 @@ data class VideoListScreen(
           showFloatingBottomBar = showFloatingBottomBar,
         )
         
+        // Floating Material 3 Button Group overlay with animation
+        // Play Store gating is intentionally bypassed here.
         AnimatedVisibility(
           visible = showFloatingBottomBar,
-          enter = slideInVertically(initialOffsetY = { it }),
-          exit = slideOutVertically(targetOffsetY = { it }),
+          enter = slideInVertically(
+            animationSpec = tween(durationMillis = animationDuration),
+            initialOffsetY = { fullHeight -> fullHeight }
+          ),
+          exit = slideOutVertically(
+            animationSpec = tween(durationMillis = animationDuration),
+            targetOffsetY = { fullHeight -> fullHeight }
+          ),
           modifier = Modifier.align(Alignment.BottomCenter)
         ) {
           BrowserBottomBar(
             isSelectionMode = true,
-            onCopyClick = { /* Logic */ },
-            onMoveClick = { /* Logic */ },
+            onCopyClick = {
+              operationType.value = CopyPasteOps.OperationType.Copy
+              if (CopyPasteOps.canUseDirectFileOperations()) {
+                folderPickerOpen.value = true
+              } else {
+                treePickerLauncher.launch(null)
+              }
+            },
+            onMoveClick = {
+              operationType.value = CopyPasteOps.OperationType.Move
+              if (CopyPasteOps.canUseDirectFileOperations()) {
+                folderPickerOpen.value = true
+              } else {
+                treePickerLauncher.launch(null)
+              }
+            },
             onRenameClick = { renameDialogOpen.value = true },
             onDeleteClick = { deleteDialogOpen.value = true },
             onAddToPlaylistClick = { addToPlaylistDialogOpen.value = true },
@@ -377,7 +406,141 @@ data class VideoListScreen(
         }
       }
 
-      // Dialogs omitted for brevity in rewrite but normally would be here
+      // Sort Dialog
+      VideoSortDialog(
+        isOpen = sortDialogOpen.value,
+        onDismiss = { sortDialogOpen.value = false },
+        sortType = videoSortType,
+        sortOrder = videoSortOrder,
+        onSortTypeChange = { browserPreferences.videoSortType.set(it) },
+        onSortOrderChange = { browserPreferences.videoSortOrder.set(it) },
+      )
+
+      // Delete Dialog
+      DeleteConfirmationDialog(
+        isOpen = deleteDialogOpen.value,
+        onDismiss = { deleteDialogOpen.value = false },
+        onConfirm = { selectionManager.deleteSelected() },
+        itemType = "video",
+        itemCount = selectionManager.selectedCount,
+        itemNames = selectionManager.getSelectedItems().map { it.displayName },
+      )
+
+      // Rename Dialog
+      if (renameDialogOpen.value && selectionManager.isSingleSelection) {
+        val video = selectionManager.getSelectedItems().firstOrNull()
+        if (video != null) {
+          val baseName = video.displayName.substringBeforeLast('.')
+          val extension = "." + video.displayName.substringAfterLast('.', "")
+          RenameDialog(
+            isOpen = true,
+            onDismiss = { renameDialogOpen.value = false },
+            onConfirm = { newName -> selectionManager.renameSelected(newName) },
+            currentName = baseName,
+            itemType = "file",
+            extension = if (extension != ".") extension else null,
+          )
+        }
+      }
+
+      // Folder Picker Dialog
+      FolderPickerDialog(
+        isOpen = folderPickerOpen.value,
+        currentPath =
+          videos.firstOrNull()?.let { File(it.path).parent }
+            ?: Environment.getExternalStorageDirectory().absolutePath,
+        onDismiss = { folderPickerOpen.value = false },
+        onFolderSelected = { destinationPath ->
+          folderPickerOpen.value = false
+          val selectedVideos = selectionManager.getSelectedItems()
+          if (selectedVideos.isNotEmpty() && operationType.value != null) {
+            progressDialogOpen.value = true
+            coroutineScope.launch {
+              when (operationType.value) {
+                is CopyPasteOps.OperationType.Copy -> {
+                  CopyPasteOps.copyFiles(context, selectedVideos, destinationPath)
+                }
+
+                is CopyPasteOps.OperationType.Move -> {
+                  CopyPasteOps.moveFiles(context, selectedVideos, destinationPath)
+                }
+
+                else -> {}
+              }
+            }
+          }
+        },
+      )
+
+      // File Operation Progress Dialog
+      if (operationType.value != null) {
+        FileOperationProgressDialog(
+          isOpen = progressDialogOpen.value,
+          operationType = operationType.value!!,
+          progress = operationProgress,
+          onCancel = {
+            CopyPasteOps.cancelOperation()
+          },
+          onDismiss = {
+            progressDialogOpen.value = false
+            // Set flag if move operation was successful
+            if (operationType.value is CopyPasteOps.OperationType.Move &&
+              operationProgress.isComplete &&
+              operationProgress.error == null
+            ) {
+              viewModel.setVideosWereDeletedOrMoved()
+            }
+            operationType.value = null
+            selectionManager.clear()
+            viewModel.refresh()
+          },
+        )
+      }
+
+      // Private Space Loading Dialog
+      LoadingDialog(
+        isOpen = movingToPrivateSpace.value,
+        message = "Moving to private space...",
+      )
+
+      // Private Space Completion Dialog
+      if (showPrivateSpaceCompletionDialog.value) {
+        androidx.compose.material3.AlertDialog(
+          onDismissRequest = { showPrivateSpaceCompletionDialog.value = false },
+          title = {
+            Text(
+              text = "Moved to Private Space",
+              style = MaterialTheme.typography.headlineSmall,
+            )
+          },
+          text = {
+            Text(
+              text =
+                "Successfully moved ${privateSpaceMovedCount.intValue} video(s) to private space.\n\n" +
+                  "To access private space, long press on the app name at the top of the main screen.",
+              style = MaterialTheme.typography.bodyMedium,
+            )
+          },
+          confirmButton = {
+            androidx.compose.material3.Button(
+              onClick = { showPrivateSpaceCompletionDialog.value = false },
+            ) {
+              Text("Close")
+            }
+          },
+        )
+      }
+
+      // Add to Playlist Dialog
+      AddToPlaylistDialog(
+        isOpen = addToPlaylistDialogOpen.value,
+        videos = selectionManager.getSelectedItems(),
+        onDismiss = { addToPlaylistDialogOpen.value = false },
+        onSuccess = {
+          selectionManager.clear()
+          viewModel.refresh()
+        },
+      )
     }
   }
 }
@@ -400,6 +563,8 @@ private fun VideoListContent(
   modifier: Modifier = Modifier,
   showFloatingBottomBar: Boolean = false,
 ) {
+  val thumbnailRepository = koinInject<ThumbnailRepository>()
+  val gesturePreferences = koinInject<GesturePreferences>()
   val browserPreferences = koinInject<BrowserPreferences>()
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
   val videoGridColumnsPortrait by browserPreferences.videoGridColumnsPortrait.collectAsState()
@@ -407,93 +572,262 @@ private fun VideoListContent(
   val configuration = androidx.compose.ui.platform.LocalConfiguration.current
   val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
   val videoGridColumns = if (isLandscape) videoGridColumnsLandscape else videoGridColumnsPortrait
-  val gesturePreferences = koinInject<GesturePreferences>()
   val tapThumbnailToSelect by gesturePreferences.tapThumbnailToSelect.collectAsState()
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
+  val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
+  val density = LocalDensity.current
   val navigationBarHeight = app.marlboroadvance.mpvex.ui.browser.LocalNavigationBarHeight.current
+  // Must match the thumbnail size logic inside `VideoCard` for this screen,
+  // otherwise the cache keys won't line up and the UI won't receive updates.
+  val thumbWidthDp = if (mediaLayoutMode == MediaLayoutMode.GRID) 160.dp else 128.dp
+  val aspect = 16f / 9f
+  val thumbWidthPx = with(density) { thumbWidthDp.roundToPx() }
+  val thumbHeightPx = (thumbWidthPx / aspect).roundToInt()
 
-  val listState = rememberLazyListState()
-  val gridState = rememberLazyGridState()
+  LaunchedEffect(folderId, showVideoThumbnails, videosWithInfo.size, thumbWidthPx, thumbHeightPx) {
+    if (showVideoThumbnails && videosWithInfo.isNotEmpty()) {
+      thumbnailRepository.startFolderThumbnailGeneration(
+        folderId = folderId,
+        videos = videosWithInfo.map { it.video },
+        widthPx = thumbWidthPx,
+        heightPx = thumbHeightPx,
+      )
+    }
+  }
 
-  FabScrollHelper.trackScrollForFabVisibility(
-    listState = listState,
-    gridState = if (mediaLayoutMode == MediaLayoutMode.GRID) gridState else null,
-    isFabVisible = isFabVisible,
-    expanded = false,
-    onExpandedChange = {},
-  )
-
-  PullRefreshBox(
-    isRefreshing = isRefreshing,
-    onRefresh = onRefresh,
-    listState = listState,
-    modifier = modifier.fillMaxSize(),
-  ) {
-    if (mediaLayoutMode == MediaLayoutMode.GRID) {
-      LazyVerticalGrid(
-        columns = GridCells.Fixed(videoGridColumns),
-        state = gridState,
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = if (showFloatingBottomBar) 88.dp else navigationBarHeight),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+  when {
+    isLoading && videosWithInfo.isEmpty() -> {
+      Box(
+        modifier = modifier
+          .fillMaxSize()
+          .padding(bottom = 80.dp), // Account for bottom navigation bar
+        contentAlignment = Alignment.Center,
       ) {
-        items(
-          count = videosWithInfo.size,
-          key = { index -> "${videosWithInfo[index].video.id}" },
-        ) { index ->
-          val videoWithInfo = videosWithInfo[index]
-          val isRecentlyPlayed = recentlyPlayedFilePath?.let { videoWithInfo.video.path == it } ?: false
+        CircularProgressIndicator(
+          modifier = Modifier.size(48.dp),
+          color = MaterialTheme.colorScheme.primary,
+        )
+      }
+    }
 
-          VideoCard(
-            video = videoWithInfo.video,
-            uiSettings = uiSettings,
-            progressPercentage = videoWithInfo.progressPercentage,
-            isRecentlyPlayed = isRecentlyPlayed,
-            isSelected = selectionManager.isSelected(videoWithInfo.video),
-            isOldAndUnplayed = videoWithInfo.isOldAndUnplayed,
-            isWatched = videoWithInfo.isWatched,
-            onClick = { onVideoClick(videoWithInfo.video) },
-            onLongClick = { onVideoLongClick(videoWithInfo.video) },
-            onThumbClick = { if (tapThumbnailToSelect) onVideoLongClick(videoWithInfo.video) else onVideoClick(videoWithInfo.video) },
-            isGridMode = true,
-            gridColumns = videoGridColumns,
-            showSubtitleIndicator = showSubtitleIndicator,
-          )
+    videosWithInfo.isEmpty() && !isLoading && videosWereDeletedOrMoved -> {
+      Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+      ) {
+        EmptyState(
+          icon = Icons.Filled.VideoLibrary,
+          title = "No videos in this folder",
+          message = "Videos you add to this folder will appear here",
+        )
+      }
+    }
+
+    else -> {
+      val rememberedListIndex = rememberSaveable { mutableIntStateOf(0) }
+      val rememberedListOffset = rememberSaveable { mutableIntStateOf(0) }
+      val rememberedGridIndex = rememberSaveable { mutableIntStateOf(0) }
+      val rememberedGridOffset = rememberSaveable { mutableIntStateOf(0) }
+      
+      val initialListIndex = if (rememberedListIndex.intValue > 0) {
+          rememberedListIndex.intValue
+      } else if (autoScrollToLastPlayed && recentlyPlayedFilePath != null && videosWithInfo.isNotEmpty()) {
+          var foundIndex = 0
+          for (i in videosWithInfo.indices) {
+              if (videosWithInfo[i].video.path == recentlyPlayedFilePath) {
+                  foundIndex = i
+                  break
+              }
+          }
+          foundIndex
+      } else 0
+      
+      val initialGridIndex = if (rememberedGridIndex.intValue > 0) {
+          rememberedGridIndex.intValue
+      } else if (autoScrollToLastPlayed && recentlyPlayedFilePath != null && videosWithInfo.isNotEmpty()) {
+          var foundIndex = 0
+          for (i in videosWithInfo.indices) {
+              if (videosWithInfo[i].video.path == recentlyPlayedFilePath) {
+                  foundIndex = i
+                  break
+              }
+          }
+          foundIndex
+      } else 0
+      
+      val listState = rememberLazyListState(
+          initialFirstVisibleItemIndex = initialListIndex,
+          initialFirstVisibleItemScrollOffset = rememberedListOffset.intValue
+      )
+      
+      val gridState = rememberLazyGridState(
+          initialFirstVisibleItemIndex = initialGridIndex,
+          initialFirstVisibleItemScrollOffset = rememberedGridOffset.intValue
+      )
+      
+      LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
+          rememberedListIndex.intValue = listState.firstVisibleItemIndex
+          rememberedListOffset.intValue = listState.firstVisibleItemScrollOffset
+      }
+      
+      LaunchedEffect(gridState.firstVisibleItemIndex, gridState.firstVisibleItemScrollOffset) {
+          rememberedGridIndex.intValue = gridState.firstVisibleItemIndex
+          rememberedGridOffset.intValue = gridState.firstVisibleItemScrollOffset
+      }
+
+      FabScrollHelper.trackScrollForFabVisibility(
+        listState = listState,
+        gridState = if (mediaLayoutMode == MediaLayoutMode.GRID) gridState else null,
+        isFabVisible = isFabVisible,
+        expanded = false,
+        onExpandedChange = {},
+      )
+      
+      val coroutineScope = rememberCoroutineScope()
+
+      val isAtTop by remember {
+        derivedStateOf {
+          if (mediaLayoutMode == MediaLayoutMode.GRID) {
+            gridState.firstVisibleItemIndex == 0 && gridState.firstVisibleItemScrollOffset == 0
+          } else {
+            listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
+          }
         }
       }
-    } else {
-      LazyColumn(
-        state = listState,
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = if (showFloatingBottomBar) 88.dp else navigationBarHeight),
-      ) {
-        items(
-          count = videosWithInfo.size,
-          key = { index -> "${videosWithInfo[index].video.id}" },
-        ) { index ->
-          val videoWithInfo = videosWithInfo[index]
-          val isRecentlyPlayed = recentlyPlayedFilePath?.let { videoWithInfo.video.path == it } ?: false
 
-          VideoCard(
-            video = videoWithInfo.video,
-            uiSettings = uiSettings,
-            progressPercentage = videoWithInfo.progressPercentage,
-            isRecentlyPlayed = isRecentlyPlayed,
-            isSelected = selectionManager.isSelected(videoWithInfo.video),
-            isOldAndUnplayed = videoWithInfo.isOldAndUnplayed,
-            isWatched = videoWithInfo.isWatched,
-            onClick = { onVideoClick(videoWithInfo.video) },
-            onLongClick = { onVideoLongClick(videoWithInfo.video) },
-            onThumbClick = { if (tapThumbnailToSelect) onVideoLongClick(videoWithInfo.video) else onVideoClick(videoWithInfo.video) },
-            isGridMode = false,
-            showSubtitleIndicator = showSubtitleIndicator,
-          )
+      val hasEnoughItems = videosWithInfo.size > 20
+
+      val scrollbarAlpha by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isAtTop || !hasEnoughItems) 0f else 1f,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 200),
+        label = "scrollbarAlpha",
+      )
+
+      PullRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        listState = listState,
+        modifier = modifier.fillMaxSize(),
+      ) {
+
+        val columns = when (mediaLayoutMode) {
+          MediaLayoutMode.LIST -> 1
+          MediaLayoutMode.GRID -> videoGridColumns
         }
+
+        if (mediaLayoutMode == MediaLayoutMode.GRID) {
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(bottom = navigationBarHeight)
+          ) {
+            LazyVerticalGridScrollbar(
+              state = gridState,
+              settings = ScrollbarSettings(
+                thumbUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f * scrollbarAlpha),
+                thumbSelectedColor = MaterialTheme.colorScheme.primary.copy(alpha = scrollbarAlpha),
+              ),
+            ) {
+              LazyVerticalGrid(
+                columns = GridCells.Fixed(columns),
+                state = gridState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                  start = 8.dp,
+                  end = 8.dp,
+                  bottom = if (showFloatingBottomBar) 88.dp else 16.dp
+                ),
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+              verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+            items(
+              count = videosWithInfo.size,
+              key = { index -> "${videosWithInfo[index].video.id}_${videosWithInfo[index].video.path}" },
+            ) { index ->
+              val videoWithInfo = videosWithInfo[index]
+              val isRecentlyPlayed = recentlyPlayedFilePath?.let { videoWithInfo.video.path == it } ?: false
+
+              VideoCard(
+                video = videoWithInfo.video,
+                uiSettings = uiSettings,
+                progressPercentage = videoWithInfo.progressPercentage,
+                isRecentlyPlayed = isRecentlyPlayed,
+                isSelected = selectionManager.isSelected(videoWithInfo.video),
+                isOldAndUnplayed = videoWithInfo.isOldAndUnplayed,
+                isWatched = videoWithInfo.isWatched,
+                onClick = { onVideoClick(videoWithInfo.video) },
+                onLongClick = { onVideoLongClick(videoWithInfo.video) },
+                onThumbClick = if (tapThumbnailToSelect) {
+                  { onVideoLongClick(videoWithInfo.video) }
+                } else {
+                  { onVideoClick(videoWithInfo.video) }
+                },
+                isGridMode = mediaLayoutMode == MediaLayoutMode.GRID,
+                gridColumns = videoGridColumns,
+                showSubtitleIndicator = showSubtitleIndicator,
+                allowThumbnailGeneration = false,
+              )
+            }
+            }
+          }
+        }
+        } else {
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(bottom = navigationBarHeight)
+          ) {
+            LazyColumnScrollbar(
+              state = listState,
+              settings = ScrollbarSettings(
+                thumbUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f * scrollbarAlpha),
+                thumbSelectedColor = MaterialTheme.colorScheme.primary.copy(alpha = scrollbarAlpha),
+              ),
+            ) {
+              LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                  start = 8.dp,
+                  end = 8.dp,
+                  bottom = if (showFloatingBottomBar) 88.dp else 16.dp
+                ),
+            ) {
+              items(
+                count = videosWithInfo.size,
+                key = { index -> "${videosWithInfo[index].video.id}_${videosWithInfo[index].video.path}" },
+              ) { index ->
+                val videoWithInfo = videosWithInfo[index]
+                val isRecentlyPlayed = recentlyPlayedFilePath?.let { videoWithInfo.video.path == it } ?: false
+
+                VideoCard(
+                  video = videoWithInfo.video,
+                  uiSettings = uiSettings,
+                  progressPercentage = videoWithInfo.progressPercentage,
+                  isRecentlyPlayed = isRecentlyPlayed,
+                  isSelected = selectionManager.isSelected(videoWithInfo.video),
+                  isOldAndUnplayed = videoWithInfo.isOldAndUnplayed,
+                  isWatched = videoWithInfo.isWatched,
+                  onClick = { onVideoClick(videoWithInfo.video) },
+                  onLongClick = { onVideoLongClick(videoWithInfo.video) },
+                  onThumbClick = if (tapThumbnailToSelect) {
+                    { onVideoLongClick(videoWithInfo.video) }
+                  } else {
+                    { onVideoClick(videoWithInfo.video) }
+                  },
+                  isGridMode = false,
+                  showSubtitleIndicator = showSubtitleIndicator,
+                  allowThumbnailGeneration = false,
+                )
+              }
+            }
+          }
+        }
+        }
+      }
       }
     }
   }
-}
 
 @Composable
 private fun VideoSortDialog(
@@ -504,5 +838,155 @@ private fun VideoSortDialog(
   onSortTypeChange: (VideoSortType) -> Unit,
   onSortOrderChange: (SortOrder) -> Unit,
 ) {
-  /* Logic for sort dialog */
+  val browserPreferences = koinInject<BrowserPreferences>()
+  val videoGridColumnsPortrait by browserPreferences.videoGridColumnsPortrait.collectAsState()
+  val videoGridColumnsLandscape by browserPreferences.videoGridColumnsLandscape.collectAsState()
+  val folderGridColumnsPortrait by browserPreferences.folderGridColumnsPortrait.collectAsState()
+  val folderGridColumnsLandscape by browserPreferences.folderGridColumnsLandscape.collectAsState()
+
+  val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+  val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
+  val videoGridColumns = if (isLandscape) videoGridColumnsLandscape else videoGridColumnsPortrait
+  val folderGridColumns = if (isLandscape) folderGridColumnsLandscape else folderGridColumnsPortrait
+  val appearancePreferences = koinInject<AppearancePreferences>()
+  val showThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
+  val showSizeChip by browserPreferences.showSizeChip.collectAsState()
+  val showResolutionChip by browserPreferences.showResolutionChip.collectAsState()
+  val showFramerateInResolution by browserPreferences.showFramerateInResolution.collectAsState()
+  val showProgressBar by browserPreferences.showProgressBar.collectAsState()
+  val showDateChip by browserPreferences.showDateChip.collectAsState()
+  val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
+  val unlimitedNameLines by appearancePreferences.unlimitedNameLines.collectAsState()
+  val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
+  val folderViewMode by browserPreferences.folderViewMode.collectAsState()
+
+  val folderGridColumnSelector = if (mediaLayoutMode == MediaLayoutMode.GRID) {
+    GridColumnSelector(
+      label = "Folder Grid Columns (${if (isLandscape) "Landscape" else "Portrait"})",
+      currentValue = folderGridColumns,
+      onValueChange = {
+        if (isLandscape) browserPreferences.folderGridColumnsLandscape.set(it)
+        else browserPreferences.folderGridColumnsPortrait.set(it)
+      },
+      valueRange = if (isLandscape) 3f..5f else 2f..4f,
+      steps = if (isLandscape) 1 else 1,
+    )
+  } else null
+
+  val videoGridColumnSelector = if (mediaLayoutMode == MediaLayoutMode.GRID) {
+    GridColumnSelector(
+      label = "Grid Columns (${if (isLandscape) "Landscape" else "Portrait"})",
+      currentValue = videoGridColumns,
+      onValueChange = {
+        if (isLandscape) browserPreferences.videoGridColumnsLandscape.set(it)
+        else browserPreferences.videoGridColumnsPortrait.set(it)
+      },
+      valueRange = if (isLandscape) 3f..5f else 1f..3f,
+      steps = if (isLandscape) 1 else 1,
+    )
+  } else null
+
+  SortDialog(
+    isOpen = isOpen,
+    onDismiss = onDismiss,
+    title = "Sort & View Options",
+    sortType = sortType.displayName,
+    onSortTypeChange = { typeName ->
+      VideoSortType.entries.find { it.displayName == typeName }?.let(onSortTypeChange)
+    },
+    sortOrderAsc = sortOrder.isAscending,
+    onSortOrderChange = { isAsc ->
+      onSortOrderChange(if (isAsc) SortOrder.Ascending else SortOrder.Descending)
+    },
+    types =
+      listOf(
+        VideoSortType.Title.displayName,
+        VideoSortType.Duration.displayName,
+        VideoSortType.Date.displayName,
+        VideoSortType.Size.displayName,
+      ),
+    icons =
+      listOf(
+        Icons.Filled.Title,
+        Icons.Filled.AccessTime,
+        Icons.Filled.CalendarToday,
+        Icons.Filled.SwapVert,
+      ),
+    getLabelForType = { type, _ ->
+      when (type) {
+        VideoSortType.Title.displayName -> Pair("A-Z", "Z-A")
+        VideoSortType.Duration.displayName -> Pair("Shortest", "Longest")
+        VideoSortType.Date.displayName -> Pair("Oldest", "Newest")
+        VideoSortType.Size.displayName -> Pair("Smallest", "Biggest")
+        else -> Pair("Asc", "Desc")
+      }
+    },
+    viewModeSelector = ViewModeSelector(
+      label = "View Mode",
+      firstOptionLabel = "Folder",
+      secondOptionLabel = "Tree",
+      firstOptionIcon = Icons.Filled.ViewModule,
+      secondOptionIcon = Icons.Filled.AccountTree,
+      isFirstOptionSelected = folderViewMode == FolderViewMode.AlbumView,
+      onViewModeChange = { isFirstOption ->
+        browserPreferences.folderViewMode.set(
+          if (isFirstOption) FolderViewMode.AlbumView else FolderViewMode.FileManager,
+        )
+      },
+    ),
+    layoutModeSelector = ViewModeSelector(
+      label = "Layout",
+      firstOptionLabel = "List",
+      secondOptionLabel = "Grid",
+      firstOptionIcon = Icons.AutoMirrored.Filled.ViewList,
+      secondOptionIcon = Icons.Filled.GridView,
+      isFirstOptionSelected = mediaLayoutMode == MediaLayoutMode.LIST,
+      onViewModeChange = { isFirstOption ->
+        browserPreferences.mediaLayoutMode.set(
+          if (isFirstOption) MediaLayoutMode.LIST else MediaLayoutMode.GRID
+        )
+      },
+    ),
+    visibilityToggles =
+      listOf(
+        VisibilityToggle(
+          label = "Thumbnails",
+          checked = showThumbnails,
+          onCheckedChange = { browserPreferences.showVideoThumbnails.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Subtitle Indicator",
+          checked = showSubtitleIndicator,
+          onCheckedChange = { browserPreferences.showSubtitleIndicator.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Full Name",
+          checked = unlimitedNameLines,
+          onCheckedChange = { appearancePreferences.unlimitedNameLines.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Size",
+          checked = showSizeChip,
+          onCheckedChange = { browserPreferences.showSizeChip.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Resolution",
+          checked = showResolutionChip,
+          onCheckedChange = { browserPreferences.showResolutionChip.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Framerate",
+          checked = showFramerateInResolution,
+          onCheckedChange = { browserPreferences.showFramerateInResolution.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Date",
+          checked = showDateChip,
+          onCheckedChange = { browserPreferences.showDateChip.set(it) },
+        ),
+      ),
+    folderGridColumnSelector = folderGridColumnSelector,
+    videoGridColumnSelector = videoGridColumnSelector,
+  )
 }

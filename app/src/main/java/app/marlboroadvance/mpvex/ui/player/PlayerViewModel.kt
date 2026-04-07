@@ -98,53 +98,36 @@ class PlayerViewModel(
   private val _playlistManager = PlaylistManager()
   val playlistManager: PlaylistManager get() = _playlistManager
 
+  /**
+   * Manager for subtitle state and operations.
+   */
+  private val _subtitleManager = SubtitleManager(
+    context = host.context,
+    wyzieRepository = wyzieRepository,
+    scope = viewModelScope,
+    onShowToast = { showToast(it) }
+  )
+  val subtitleManager: SubtitleManager get() = _subtitleManager
+
+  // Subtitle state delegates
+  val isDownloadingSub = _subtitleManager.isDownloadingSub
+  val isSearchingSub = _subtitleManager.isSearchingSub
+  val isOnlineSectionExpanded = _subtitleManager.isOnlineSectionExpanded
+  val wyzieSearchResults = _subtitleManager.wyzieSearchResults
+  val mediaSearchResults = _subtitleManager.mediaSearchResults
+  val isSearchingMedia = _subtitleManager.isSearchingMedia
+  val selectedTvShow = _subtitleManager.selectedTvShow
+  val isFetchingTvDetails = _subtitleManager.isFetchingTvDetails
+  val selectedSeason = _subtitleManager.selectedSeason
+  val seasonEpisodes = _subtitleManager.seasonEpisodes
+  val isFetchingEpisodes = _subtitleManager.isFetchingEpisodes
+  val selectedEpisode = _subtitleManager.selectedEpisode
+
   // Playlist items for the playlist sheet
   private val _playlistItems = kotlinx.coroutines.flow.MutableStateFlow<List<app.marlboroadvance.mpvex.ui.player.controls.components.sheets.PlaylistItem>>(emptyList())
   val playlistItems: kotlinx.coroutines.flow.StateFlow<List<app.marlboroadvance.mpvex.ui.player.controls.components.sheets.PlaylistItem>> = _playlistItems.asStateFlow()
 
-  // Wyzie Search Results
-  private val _wyzieSearchResults = MutableStateFlow<List<WyzieSubtitle>>(emptyList())
-  val wyzieSearchResults: StateFlow<List<WyzieSubtitle>> = _wyzieSearchResults.asStateFlow()
-
-  private val _isDownloadingSub = MutableStateFlow(false)
-  val isDownloadingSub: StateFlow<Boolean> = _isDownloadingSub.asStateFlow()
-
-  private val _isSearchingSub = MutableStateFlow(false)
-  val isSearchingSub: StateFlow<Boolean> = _isSearchingSub.asStateFlow()
-
-  private val _isOnlineSectionExpanded = MutableStateFlow(true)
-  val isOnlineSectionExpanded: StateFlow<Boolean> = _isOnlineSectionExpanded.asStateFlow()
-
-  // Media Search / Autocomplete
-  private val _mediaSearchResults = MutableStateFlow<List<app.marlboroadvance.mpvex.repository.wyzie.WyzieTmdbResult>>(emptyList())
-  val mediaSearchResults: StateFlow<List<app.marlboroadvance.mpvex.repository.wyzie.WyzieTmdbResult>> = _mediaSearchResults.asStateFlow()
-
-  private val _isSearchingMedia = MutableStateFlow(false)
-  val isSearchingMedia: StateFlow<Boolean> = _isSearchingMedia.asStateFlow()
-
-  // TV Show Details
-  private val _selectedTvShow = MutableStateFlow<app.marlboroadvance.mpvex.repository.wyzie.WyzieTvShowDetails?>(null)
-  val selectedTvShow: StateFlow<app.marlboroadvance.mpvex.repository.wyzie.WyzieTvShowDetails?> = _selectedTvShow.asStateFlow()
-
-  private val _isFetchingTvDetails = MutableStateFlow(false)
-  val isFetchingTvDetails: StateFlow<Boolean> = _isFetchingTvDetails.asStateFlow()
-
-  // Season / Episode
-  private val _selectedSeason = MutableStateFlow<app.marlboroadvance.mpvex.repository.wyzie.WyzieSeason?>(null)
-  val selectedSeason: StateFlow<app.marlboroadvance.mpvex.repository.wyzie.WyzieSeason?> = _selectedSeason.asStateFlow()
-
-  private val _seasonEpisodes = MutableStateFlow<List<app.marlboroadvance.mpvex.repository.wyzie.WyzieEpisode>>(emptyList())
-  val seasonEpisodes: StateFlow<List<app.marlboroadvance.mpvex.repository.wyzie.WyzieEpisode>> = _seasonEpisodes.asStateFlow()
-
-  private val _isFetchingEpisodes = MutableStateFlow(false)
-  val isFetchingEpisodes: StateFlow<Boolean> = _isFetchingEpisodes.asStateFlow()
-
-  private val _selectedEpisode = MutableStateFlow<app.marlboroadvance.mpvex.repository.wyzie.WyzieEpisode?>(null)
-  val selectedEpisode: StateFlow<app.marlboroadvance.mpvex.repository.wyzie.WyzieEpisode?> = _selectedEpisode.asStateFlow()
-
-  fun toggleOnlineSection() {
-      _isOnlineSectionExpanded.value = !_isOnlineSectionExpanded.value
-  }
+  fun toggleOnlineSection() = _subtitleManager.toggleOnlineSection()
 
   // Cache for video metadata to avoid re-extracting — LruCache handles bounds + thread-safety
   private val metadataCache = object : android.util.LruCache<String, Pair<String, String>>(100) {}
@@ -671,65 +654,7 @@ class PlayerViewModel(
     }
   }
 
-  fun addSubtitle(uri: Uri, select: Boolean = true, silent: Boolean = false) {
-    viewModelScope.launch(Dispatchers.IO) {
-      val uriString = uri.toString()
-      if (_externalSubtitles.contains(uriString)) {
-        android.util.Log.d("PlayerViewModel", "Subtitle already tracked, skipping: $uriString")
-        return@launch
-      }
-
-      runCatching {
-        val fileName = getFileNameFromUri(uri) ?: "subtitle.srt"
-
-        if (!isValidSubtitleFile(fileName)) {
-          return@launch withContext(Dispatchers.Main) {
-            showToast("Invalid subtitle file format")
-          }
-        }
-
-        // Take persistent URI permission for content:// URIs
-        if (uri.scheme == "content") {
-          try {
-            host.context.contentResolver.takePersistableUriPermission(
-              uri,
-              Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-          } catch (e: SecurityException) {
-            // Permission already granted, not available, or not needed (e.g. from tree).
-            android.util.Log.i("PlayerViewModel", "Persistent permission not taken for $uri (may already have it via tree)")
-          }
-        }
-
-        val mpvPath = uri.resolveUri(host.context) ?: uri.toString()
-        val mode = if (select) "select" else "auto"
-        
-        // Store mapping for reliable physical deletion later
-        mpvPathToUriMap[mpvPath] = uri.toString()
-        
-        MPVLib.command("sub-add", mpvPath, mode)
-
-        // Track external subtitle URI for persistence
-        val uriString = uri.toString()
-        if (!_externalSubtitles.contains(uriString)) {
-          _externalSubtitles.add(uriString)
-        }
-
-        val displayName = fileName.take(30).let { if (fileName.length > 30) "$it..." else it }
-        if (!silent) {
-          withContext(Dispatchers.Main) {
-            showToast("$displayName added")
-          }
-        }
-      }.onFailure {
-        if (!silent) {
-          withContext(Dispatchers.Main) {
-            showToast("Failed to load subtitle")
-          }
-        }
-      }
-    }
-  }
+  fun addSubtitle(uri: Uri, select: Boolean = true, silent: Boolean = false) = _subtitleManager.addSubtitle(uri, select, silent)
 
   private fun scanLocalSubtitles(mediaTitle: String) {
     viewModelScope.launch(Dispatchers.IO) {
@@ -747,7 +672,12 @@ class PlayerViewModel(
           val movieDir = parentDir.findFile(folderName) ?: return@forEach
           if (movieDir.isDirectory) {
             movieDir.listFiles().forEach { file ->
-              if (file.isFile && isValidSubtitleFile(file.name ?: "")) {
+              val fileName = file.name ?: ""
+              val lower = fileName.lowercase()
+              val isValid = lower.endsWith(".srt") || lower.endsWith(".vtt") ||
+                            lower.endsWith(".ssa") || lower.endsWith(".ass")
+              
+              if (file.isFile && isValid) {
                 withContext(Dispatchers.Main) {
                   // Don't auto-select during scan, just make available
                   addSubtitle(file.uri, select = false, silent = true)
@@ -767,7 +697,7 @@ class PlayerViewModel(
       currentMediaTitle = mediaTitle
       lastAutoSelectedMediaTitle = null
       // Clear external subtitles when media changes
-      _externalSubtitles.clear()
+      _subtitleManager.clearExternalSubtitles()
       // Scan for previously downloaded/added subtitles
       scanLocalSubtitles(mediaTitle)
 
@@ -801,149 +731,24 @@ class PlayerViewModel(
   }
 
 
-  fun removeSubtitle(id: Int) {
-    viewModelScope.launch(Dispatchers.IO) {
-      // Find the subtitle track info before removing
-      val tracks = subtitleTracks.value
-      val trackToRemove = tracks.firstOrNull { it.id == id }
-      
-      // If it's external, physically delete the file if we can find its URI
-      if (trackToRemove?.external == true && trackToRemove.externalFilename != null) {
-        val mpvPath = trackToRemove.externalFilename
-        val originalUriString = mpvPathToUriMap[mpvPath] ?: mpvPath
-        val uri = Uri.parse(originalUriString)
-        
-        val deleted = wyzieRepository.deleteSubtitleFile(uri)
-        
-        if (deleted) {
-          _externalSubtitles.remove(originalUriString)
-          mpvPathToUriMap.remove(mpvPath)
-          withContext(Dispatchers.Main) {
-            showToast("Subtitle deleted")
-          }
-        }
-      }
-      
-        MPVLib.command("sub-remove", id.toString())
-    }
-  }
+  fun removeSubtitle(id: Int) = _subtitleManager.removeSubtitle(id, subtitleTracks.value)
 
   // --- Media Search and Series Management ---
 
-  private var mediaSearchJob: Job? = null
+  fun searchMedia(query: String) = _subtitleManager.searchMedia(query)
 
-  fun searchMedia(query: String) {
-    mediaSearchJob?.cancel()
-    if (query.isBlank()) {
-      _mediaSearchResults.value = emptyList()
-      return
-    }
+  fun selectMedia(result: app.marlboroadvance.mpvex.repository.wyzie.WyzieTmdbResult) = _subtitleManager.selectMedia(result)
 
-    mediaSearchJob = viewModelScope.launch {
-      delay(300) // Debounce
-      _isSearchingMedia.value = true
-      wyzieRepository.searchMedia(query)
-        .onSuccess { results ->
-          _mediaSearchResults.value = results
-        }
-        .onFailure {
-          // Silent failure for autocomplete, or optionally show toast(if someone is reading this if u need u can impelmen this in future )
-        }
-      _isSearchingMedia.value = false
-    }
-  }
+  fun selectSeason(season: app.marlboroadvance.mpvex.repository.wyzie.WyzieSeason) = _subtitleManager.selectSeason(season)
 
-  fun selectMedia(result: app.marlboroadvance.mpvex.repository.wyzie.WyzieTmdbResult) {
-    _mediaSearchResults.value = emptyList() // Clear results after selection
-    _wyzieSearchResults.value = emptyList() // Clear old subtitle results
-    
-    if (result.mediaType == "tv") {
-      fetchTvShowDetails(result.id)
-    } else {
-      // For movies, just search subtitles directly with the TMDB ID
-      searchSubtitles(result.title)
-      // Ideally we should pass the TMDB ID to searchSubtitles too if the API supports it
-    }
-  }
+  fun selectEpisode(episode: app.marlboroadvance.mpvex.repository.wyzie.WyzieEpisode) = _subtitleManager.selectEpisode(episode, currentMediaTitle)
 
-  private fun fetchTvShowDetails(id: Int) {
-    viewModelScope.launch {
-      _isFetchingTvDetails.value = true
-      wyzieRepository.getTvShowDetails(id)
-        .onSuccess { details ->
-          val validSeasons = details.seasons.filter { it.season_number > 0 }.sortedBy { it.season_number }
-          _selectedTvShow.value = details.copy(seasons = validSeasons)
-          _selectedSeason.value = null
-          _seasonEpisodes.value = emptyList()
-        }
-        .onFailure {
-          showToast("Failed to load series details: ${it.message}")
-        }
-      _isFetchingTvDetails.value = false
-    }
-  }
-
-  fun selectSeason(season: app.marlboroadvance.mpvex.repository.wyzie.WyzieSeason) {
-    val tvShowId = _selectedTvShow.value?.id ?: return
-    _selectedSeason.value = season
-    
-    viewModelScope.launch {
-      _isFetchingEpisodes.value = true
-      wyzieRepository.getSeasonEpisodes(tvShowId, season.season_number)
-        .onSuccess { episodes ->
-          val validEpisodes = episodes.filter { it.episode_number > 0 }.sortedBy { it.episode_number }
-          _seasonEpisodes.value = validEpisodes
-          _selectedEpisode.value = null
-        }
-        .onFailure {
-          showToast("Failed to load episodes: ${it.message}")
-        }
-      _isFetchingEpisodes.value = false
-    }
-  }
-
-  fun selectEpisode(episode: app.marlboroadvance.mpvex.repository.wyzie.WyzieEpisode) {
-    _selectedEpisode.value = episode
-    val tvShowName = _selectedTvShow.value?.name ?: currentMediaTitle
-    searchSubtitles(tvShowName, episode.season_number, episode.episode_number)
-  }
-
-  fun clearMediaSelection() {
-    _selectedTvShow.value = null
-    _selectedSeason.value = null
-    _seasonEpisodes.value = emptyList()
-    _selectedEpisode.value = null
-    _mediaSearchResults.value = emptyList()
-  }
+  fun clearMediaSelection() = _subtitleManager.clearMediaSelection()
 
   // --- Subtitle Search ---
-  fun searchSubtitles(query: String, season: Int? = null, episode: Int? = null, year: String? = null) {
-     viewModelScope.launch {
-         _isSearchingSub.value = true
-         wyzieRepository.search(query, season, episode, year)
-             .onSuccess { results ->
-                 _wyzieSearchResults.value = results
-             }
-             .onFailure {
-                 showToast("Search failed: ${it.message}")
-             }
-         _isSearchingSub.value = false
-     }
-  }
+  fun searchSubtitles(query: String, season: Int? = null, episode: Int? = null, year: String? = null) = _subtitleManager.searchSubtitles(query, season, episode, year)
 
-  fun downloadSubtitle(subtitle: WyzieSubtitle) {
-      viewModelScope.launch {
-          _isDownloadingSub.value = true
-          wyzieRepository.download(subtitle, currentMediaTitle)
-              .onSuccess { uri ->
-                  addSubtitle(uri)
-              }
-              .onFailure {
-                  showToast("Download failed: ${it.message}")
-              }
-          _isDownloadingSub.value = false
-      }
-  }
+  fun downloadSubtitle(subtitle: WyzieSubtitle) = _subtitleManager.downloadSubtitle(subtitle, currentMediaTitle)
 
 
   fun toggleSubtitle(id: Int) {

@@ -174,24 +174,24 @@ fun PlayerSheets(
           
           // Use clean title from query for TMDB search (strip S01E05 noise)
           val searchTitle = queryInfo.title.ifBlank { query }
-          viewModel.searchMedia(searchTitle)
+          viewModel.subtitleManager.searchMedia(searchTitle)
           
           // Priority: TMDB selection > query parsed > file parsed
           val s = selectedSeason?.season_number ?: queryInfo.season ?: fileInfo.season
           val e = selectedEpisode?.episode_number ?: queryInfo.episode ?: fileInfo.episode
           val y = queryInfo.year ?: fileInfo.year
-          viewModel.searchSubtitles(searchTitle, s, e, y)
+          viewModel.subtitleManager.searchSubtitles(searchTitle, s, e, y)
         },
-        onSelectMedia = { viewModel.selectMedia(it) },
+        onSelectMedia = { viewModel.subtitleManager.selectMedia(it) },
         selectedTvShow = selectedTvShow,
         isFetchingTvDetails = isFetchingTvDetails,
         selectedSeason = selectedSeason,
-        onSelectSeason = { viewModel.selectSeason(it) },
+        onSelectSeason = { viewModel.subtitleManager.selectSeason(it) },
         seasonEpisodes = seasonEpisodes.toImmutableList(),
         isFetchingEpisodes = isFetchingEpisodes,
         selectedEpisode = selectedEpisode,
-        onSelectEpisode = { viewModel.selectEpisode(it) },
-        onClearMediaSelection = { viewModel.clearMediaSelection() }
+        onSelectEpisode = { viewModel.subtitleManager.selectEpisode(it, viewModel.currentMediaTitle) },
+        onClearMediaSelection = { viewModel.subtitleManager.clearMediaSelection() }
       )
     }
 

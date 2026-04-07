@@ -121,6 +121,15 @@ class PlayerViewModel(
   )
   val customButtonManager: CustomButtonManager get() = _customButtonManager
 
+  /**
+   * Manager for playback operations (seeking, speed).
+   */
+  private val _playbackManager = PlaybackManager(
+    playerPreferences = playerPreferences,
+    scope = viewModelScope
+  )
+  val playbackManager: PlaybackManager get() = _playbackManager
+
   // Subtitle state delegates
   val isDownloadingSub = _subtitleManager.isDownloadingSub
   val isSearchingSub = _subtitleManager.isSearchingSub
@@ -198,25 +207,18 @@ class PlayerViewModel(
   val maxVolume = host.audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
 
   val subtitleTracks: StateFlow<List<TrackNode>> =
-    MPVLib.propNode["track-list"]
-      .map { node ->
-        node?.toObject<List<TrackNode>>(json)?.filter { it.isSubtitle }?.toImmutableList()
-          ?: persistentListOf()
-      }.stateIn(viewModelScope, SharingStarted.Lazily, persistentListOf())
+    observeTracks(json)
+      .map { it.filter { t -> t.isSubtitle } }
+      .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
   val audioTracks: StateFlow<List<TrackNode>> =
-    MPVLib.propNode["track-list"]
-      .map { node ->
-        node?.toObject<List<TrackNode>>(json)?.filter { it.isAudio }?.toImmutableList()
-          ?: persistentListOf()
-      }.stateIn(viewModelScope, SharingStarted.Lazily, persistentListOf())
+    observeTracks(json)
+      .map { it.filter { t -> t.isAudio } }
+      .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
   val chapters: StateFlow<List<dev.vivvvek.seeker.Segment>> =
-    MPVLib.propNode["chapter-list"]
-      .map { node ->
-        node?.toObject<List<ChapterNode>>(json)?.map { it.toSegment() }?.toImmutableList()
-          ?: persistentListOf()
-      }.stateIn(viewModelScope, SharingStarted.Lazily, persistentListOf())
+    observeChapters(json)
+      .stateIn(viewModelScope, SharingStarted.Lazily, persistentListOf())
 
   // UI state
   private val _controlsShown = MutableStateFlow(false)
@@ -727,60 +729,23 @@ class PlayerViewModel(
   // ==================== Seeking ====================
 
   fun seekBy(offset: Int) {
-    coalesceSeek(offset)
+    _playbackManager.seekBy(offset)
   }
 
   fun seekTo(position: Int) {
-    viewModelScope.launch(Dispatchers.IO) {
-      val maxDuration = MPVLib.getPropertyInt("duration") ?: 0
-      var clampedPosition = position.coerceIn(0, maxDuration)
-
-      // Clamp within AB loop if active
-      val loopA = _abLoopA.value
-      val loopB = _abLoopB.value
-      if (loopA != null && loopB != null) {
-        val min = minOf(loopA.toInt(), loopB.toInt())
-        val max = maxOf(loopA.toInt(), loopB.toInt())
-        clampedPosition = clampedPosition.coerceIn(min, max)
-      }
-
-      if (clampedPosition !in 0..maxDuration) return@launch
-
-      // Cancel pending relative seek before absolute seek
-      seekCoalesceJob?.cancel()
-      pendingSeekOffset = 0
-      
-      // Use precise seeking for videos shorter than 2 minutes (120 seconds) or if preference is enabled
-      val shouldUsePreciseSeeking = playerPreferences.usePreciseSeeking.get() || maxDuration < 120
-      val seekMode = if (shouldUsePreciseSeeking) "absolute+exact" else "absolute+keyframes"
-      MPVLib.command("seek", clampedPosition.toString(), seekMode)
-    }
+    _playbackManager.seekTo(position, _abLoopA.value, _abLoopB.value)
   }
 
-  private fun coalesceSeek(offset: Int) {
-    pendingSeekOffset += offset
-    seekCoalesceJob?.cancel()
-    seekCoalesceJob =
-      viewModelScope.launch(Dispatchers.IO) {
-        delay(SEEK_COALESCE_DELAY_MS)
-        val toApply = pendingSeekOffset
-        pendingSeekOffset = 0
-        
-        if (toApply != 0) {
-          val duration = MPVLib.getPropertyInt("duration") ?: 0
-          val currentPos = MPVLib.getPropertyInt("time-pos") ?: 0
-          
-          if (duration > 0 && currentPos + toApply >= duration) {
-              // If seeking past the end, force seek to 100% absolute to ensure EOF is triggered
-              MPVLib.command("seek", "100", "absolute-percent+exact")
-          } else {
-              // Use precise seeking for videos shorter than 2 minutes (120 seconds) or if preference is enabled
-              val shouldUsePreciseSeeking = playerPreferences.usePreciseSeeking.get() || duration < 120
-              val seekMode = if (shouldUsePreciseSeeking) "relative+exact" else "relative+keyframes"
-              MPVLib.command("seek", toApply.toString(), seekMode)
-          }
-        }
-      }
+  fun setPlaybackSpeed(speed: Float) {
+    _playbackManager.setSpeed(speed)
+  }
+
+  fun resetPlaybackSpeed() {
+    _playbackManager.resetSpeed()
+  }
+
+  fun setSubtitleSpeed(speed: Double) {
+    _playbackManager.setSubSpeed(speed)
   }
 
   fun leftSeek() {

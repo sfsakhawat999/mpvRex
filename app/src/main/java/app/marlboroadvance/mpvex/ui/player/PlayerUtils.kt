@@ -7,8 +7,14 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import app.marlboroadvance.mpvex.ui.player.PlayerActivity.Companion.TAG
+import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.MPVNode
 import `is`.xyz.mpv.Utils
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import java.io.File
 
@@ -185,6 +191,25 @@ internal fun Uri.resolveUri(context: Context): String? {
       Log.e(TAG, "Unsupported URI scheme: $scheme")
       null
     }
+  }
+}
+
+/**
+ * Extension to observe and map the track list from MPV.
+ */
+fun observeTracks(json: Json): Flow<List<TrackNode>> {
+  return MPVLib.propNode["track-list"].map { node ->
+    node?.toObject<List<TrackNode>>(json) ?: emptyList()
+  }
+}
+
+/**
+ * Extension to observe and map the chapter list from MPV.
+ */
+fun observeChapters(json: Json): Flow<ImmutableList<dev.vivvvek.seeker.Segment>> {
+  return MPVLib.propNode["chapter-list"].map { node ->
+    node?.toObject<List<ChapterNode>>(json)?.map { it.toSegment() }?.toImmutableList()
+      ?: persistentListOf()
   }
 }
 

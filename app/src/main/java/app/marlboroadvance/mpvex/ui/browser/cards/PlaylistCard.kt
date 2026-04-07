@@ -44,7 +44,7 @@ fun PlaylistCard(
   uiSettings: UiSettings,
   onClick: () -> Unit,
   onLongClick: () -> Unit,
-  onThumbClick: () -> Unit,
+  onThumbClick: (() -> Unit)? = null,
   modifier: Modifier = Modifier,
   isSelected: Boolean = false,
   isGridMode: Boolean = false,

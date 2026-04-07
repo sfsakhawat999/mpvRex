@@ -2,6 +2,7 @@ package app.marlboroadvance.mpvex.ui.browser.cards
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,6 +55,7 @@ fun BaseMediaCard(
     thumbnailIcon: @Composable (() -> Unit)? = null,
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
+    onThumbClick: (() -> Unit)? = null,
     isSelected: Boolean = false,
     isGridMode: Boolean = false,
     gridColumns: Int = 1,
@@ -92,7 +94,8 @@ fun BaseMediaCard(
                         .then(if (gridColumns == 1) Modifier.width(160.dp) else Modifier.fillMaxWidth())
                         .aspectRatio(thumbnailAspectRatio)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .then(if (onThumbClick != null) Modifier.clickable { onThumbClick() } else Modifier),
                     contentAlignment = Alignment.Center
                 ) {
                     if (thumbnail != null) {
@@ -171,7 +174,8 @@ fun BaseMediaCard(
             .width(thumbnailSize)
             .aspectRatio(thumbnailAspectRatio)
             .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .then(if (onThumbClick != null) Modifier.clickable { onThumbClick() } else Modifier),
           contentAlignment = Alignment.Center,
         ) {
                     if (thumbnail != null) {

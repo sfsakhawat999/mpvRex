@@ -37,4 +37,9 @@ interface NetworkClient {
    * Get file URI for playback
    */
   suspend fun getFileUri(path: String): Result<Uri>
+
+  /**
+   * Get file size in bytes
+   */
+  suspend fun getFileSize(path: String): Result<Long>
 }

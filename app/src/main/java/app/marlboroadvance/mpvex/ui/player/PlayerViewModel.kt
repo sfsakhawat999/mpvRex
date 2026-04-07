@@ -92,6 +92,12 @@ class PlayerViewModel(
   private val playbackStateDao: app.marlboroadvance.mpvex.database.dao.PlaybackStateDao by inject()
   private val wyzieRepository: WyzieSearchRepository by inject()
 
+  /**
+   * Manager for playlist state and logic.
+   */
+  private val _playlistManager = PlaylistManager()
+  val playlistManager: PlaylistManager get() = _playlistManager
+
   // Playlist items for the playlist sheet
   private val _playlistItems = kotlinx.coroutines.flow.MutableStateFlow<List<app.marlboroadvance.mpvex.ui.player.controls.components.sheets.PlaylistItem>>(emptyList())
   val playlistItems: kotlinx.coroutines.flow.StateFlow<List<app.marlboroadvance.mpvex.ui.player.controls.components.sheets.PlaylistItem>> = _playlistItems.asStateFlow()
@@ -1763,30 +1769,28 @@ class PlayerViewModel(
 
   fun hasPlaylistSupport(): Boolean {
     val playlistModeEnabled = playerPreferences.playlistMode.get()
-    return playlistModeEnabled && ((host as? PlayerActivity)?.playlist?.isNotEmpty() ?: false)
+    return playlistModeEnabled && _playlistManager.playlist.value.isNotEmpty()
   }
 
   fun getPlaylistInfo(): String? {
-    val activity = host as? PlayerActivity ?: return null
-    if (activity.playlist.isEmpty()) return null
+    if (_playlistManager.playlist.value.isEmpty()) return null
 
     val totalCount = getPlaylistTotalCount()
-    return "${activity.playlistIndex + 1}/$totalCount"
+    return "${_playlistManager.currentIndex.value + 1}/$totalCount"
   }
 
   fun isPlaylistM3U(): Boolean {
-    val activity = host as? PlayerActivity ?: return false
-    return activity.isCurrentPlaylistM3U()
+    return _playlistManager.isM3uPlaylist
   }
 
   fun getPlaylistTotalCount(): Int {
-    val activity = host as? PlayerActivity ?: return 0
-    return activity.playlist.size
+    val totalCount = _playlistManager.playlistTotalCount
+    return if (totalCount > 0) totalCount else _playlistManager.playlist.value.size
   }
 
   fun getPlaylistData(): List<app.marlboroadvance.mpvex.ui.player.controls.components.sheets.PlaylistItem>? {
     val activity = host as? PlayerActivity ?: return null
-    if (activity.playlist.isEmpty()) return null
+    if (_playlistManager.playlist.value.isEmpty()) return null
 
     // Get current video progress
     val currentPos = pos ?: 0
@@ -1795,12 +1799,12 @@ class PlayerViewModel(
       ((currentPos.toFloat() / currentDuration.toFloat()) * 100f).coerceIn(0f, 100f)
     } else 0f
 
-    return activity.playlist.mapIndexed { index, uri ->
+    return _playlistManager.playlist.value.mapIndexed { index, uri ->
       val title = activity.getPlaylistItemTitle(uri)
       // Path is not used for thumbnail loading - thumbnails are loaded directly from URI
       // Keep it for cache key compatibility
       val path = uri.toString()
-      val isCurrentlyPlaying = index == activity.playlistIndex
+      val isCurrentlyPlaying = index == _playlistManager.currentIndex.value
 
       // Try to get from cache first (synchronized access)
       val cacheKey = uri.toString()
@@ -1809,7 +1813,7 @@ class PlayerViewModel(
       app.marlboroadvance.mpvex.ui.player.controls.components.sheets.PlaylistItem(
         uri = uri,
         title = title,
-        index = index,
+        index = index + _playlistManager.playlistWindowOffset,
         isPlaying = isCurrentlyPlaying,
         path = path,
         progressPercent = if (isCurrentlyPlaying) currentProgress else 0f,
@@ -2087,29 +2091,34 @@ class PlayerViewModel(
     }
   }
 
-  fun hasNext(): Boolean = (host as? PlayerActivity)?.hasNext() ?: false
+  fun hasNext(): Boolean = _playlistManager.hasNext(shouldRepeatPlaylist())
 
-  fun hasPrevious(): Boolean = (host as? PlayerActivity)?.hasPrevious() ?: false
+  fun hasPrevious(): Boolean = _playlistManager.hasPrevious(shouldRepeatPlaylist())
 
   fun playNext() {
-    (host as? PlayerActivity)?.playNext()
+    val nextIndex = _playlistManager.getNextIndex(shouldRepeatPlaylist())
+    if (nextIndex != null) {
+      (host as? PlayerActivity)?.loadPlaylistItem(nextIndex)
+    }
   }
 
   fun playPrevious() {
-    (host as? PlayerActivity)?.playPrevious()
+    val prevIndex = _playlistManager.getPreviousIndex(shouldRepeatPlaylist())
+    if (prevIndex != null) {
+      (host as? PlayerActivity)?.loadPlaylistItem(prevIndex)
+    }
   }
 
   // ==================== Repeat and Shuffle ====================
 
   fun applyPersistedShuffleState() {
     if (_shuffleEnabled.value) {
-      val activity = host as? PlayerActivity
-      activity?.onShuffleToggled(true)
+      _playlistManager.setShuffleEnabled(true)
     }
   }
 
   fun cycleRepeatMode() {
-    val hasPlaylist = (host as? PlayerActivity)?.playlist?.isNotEmpty() == true
+    val hasPlaylist = _playlistManager.playlist.value.isNotEmpty()
 
     _repeatMode.value = when (_repeatMode.value) {
       RepeatMode.OFF -> RepeatMode.ONE
@@ -2126,13 +2135,12 @@ class PlayerViewModel(
 
   fun toggleShuffle() {
     _shuffleEnabled.value = !_shuffleEnabled.value
-    val activity = host as? PlayerActivity
 
     // Persist the shuffle state
     playerPreferences.shuffleEnabled.set(_shuffleEnabled.value)
 
-    // Notify activity to handle shuffle state change
-    activity?.onShuffleToggled(_shuffleEnabled.value)
+    // Notify manager to handle shuffle state change
+    _playlistManager.setShuffleEnabled(_shuffleEnabled.value)
 
     // Show overlay update instead of toast
     playerUpdate.value = PlayerUpdates.Shuffle(_shuffleEnabled.value)
@@ -2140,11 +2148,11 @@ class PlayerViewModel(
 
   fun shouldRepeatCurrentFile(): Boolean {
     return _repeatMode.value == RepeatMode.ONE ||
-      (_repeatMode.value == RepeatMode.ALL && (host as? PlayerActivity)?.playlist?.isEmpty() == true)
+      (_repeatMode.value == RepeatMode.ALL && _playlistManager.playlist.value.isEmpty())
   }
 
   fun shouldRepeatPlaylist(): Boolean {
-    return _repeatMode.value == RepeatMode.ALL && (host as? PlayerActivity)?.playlist?.isNotEmpty() == true
+    return _repeatMode.value == RepeatMode.ALL && _playlistManager.playlist.value.isNotEmpty()
   }
 
   // ==================== A-B Loop ====================

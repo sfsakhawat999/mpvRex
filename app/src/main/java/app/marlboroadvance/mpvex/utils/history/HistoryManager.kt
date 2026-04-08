@@ -57,7 +57,9 @@ class HistoryManager(
                 val fileSize = getMPVFileSize()
                 val (width, height) = getMPVResolution()
                 val (artist, album) = getMPVMetadata()
-                val isAudio = height <= 0
+                
+                // Use extension first, then height
+                val isAudio = app.marlboroadvance.mpvex.utils.storage.FileTypeUtils.isAudioFile(File(filePath)) || (height <= 0)
 
                 addRecentlyPlayed(
                     filePath = filePath,

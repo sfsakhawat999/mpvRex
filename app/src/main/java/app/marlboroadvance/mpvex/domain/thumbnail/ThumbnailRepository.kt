@@ -76,9 +76,10 @@ class ThumbnailRepository(
     heightPx: Int,
   ): Bitmap? =
     withContext(Dispatchers.IO) {
-      if (video.isAudio) {
+      if (video.isAudio || app.marlboroadvance.mpvex.utils.storage.FileTypeUtils.isAudioFile(java.io.File(video.path))) {
         return@withContext null
       }
+      
       val key = thumbnailKey(video, widthPx, heightPx)
 
       if (isNetworkUrl(video.path) && !appearancePreferences.showNetworkThumbnails.get()) {
@@ -147,7 +148,7 @@ class ThumbnailRepository(
     heightPx: Int,
   ): Bitmap? =
     withContext(Dispatchers.IO) {
-      if (video.isAudio) {
+      if (video.isAudio || app.marlboroadvance.mpvex.utils.storage.FileTypeUtils.isAudioFile(java.io.File(video.path))) {
         return@withContext null
       }
       if (isNetworkUrl(video.path) && !appearancePreferences.showNetworkThumbnails.get()) {
@@ -168,7 +169,7 @@ class ThumbnailRepository(
     widthPx: Int,
     heightPx: Int,
   ): Bitmap? {
-    if (video.isAudio) {
+    if (video.isAudio || app.marlboroadvance.mpvex.utils.storage.FileTypeUtils.isAudioFile(java.io.File(video.path))) {
       return null
     }
     if (isNetworkUrl(video.path) && !appearancePreferences.showNetworkThumbnails.get()) {
@@ -317,7 +318,23 @@ class ThumbnailRepository(
     video: Video,
     dimension: Int,
   ): Bitmap? {
-    return runCatching {
+    if (video.isAudio) return null
+    
+    // Additional extension-based safety check
+    val extension = video.path.substringAfterLast(".", "").lowercase()
+    val audioExtensions = setOf("mp3", "wav", "flac", "ogg", "m4a", "aac", "wma", "opus", "m4p", "amr")
+    if (extension in audioExtensions) {
+      android.util.Log.d("ThumbnailRepository", "Skipping FastThumbnails for suspected audio extension: $extension")
+      return null
+    }
+
+    // MIME type check
+    if (video.mimeType.startsWith("audio/", ignoreCase = true)) {
+      android.util.Log.d("ThumbnailRepository", "Skipping FastThumbnails for audio MIME type: ${video.mimeType}")
+      return null
+    }
+    
+    return try {
       val positionSec = preferredPositionSeconds(video)
       
       val bmp = FastThumbnails.generateAsync(
@@ -325,8 +342,45 @@ class ThumbnailRepository(
           positionSec,
           dimension,
           useHwDec = false
-      ) ?: return@runCatching null
+      ) ?: return null
       rotateIfNeeded(video, bmp)
+    } catch (e: Throwable) {
+      android.util.Log.e("ThumbnailRepository", "FastThumbnails crashed for ${video.displayName}", e)
+      null
+    }
+  }
+
+  private suspend fun generateAudioThumbnail(
+    video: Video,
+    dimension: Int,
+  ): Bitmap? = withContext(Dispatchers.IO) {
+    if (isNetworkUrl(video.path)) return@withContext null
+
+    runCatching {
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+        val contentUri = android.content.ContentUris.withAppendedId(
+          android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+          video.id
+        )
+        context.contentResolver.loadThumbnail(
+          contentUri,
+          android.util.Size(dimension, dimension),
+          null
+        )
+      } else {
+        val retriever = android.media.MediaMetadataRetriever()
+        try {
+          retriever.setDataSource(video.path)
+          val art = retriever.embeddedPicture
+          if (art != null) {
+            BitmapFactory.decodeByteArray(art, 0, art.size)
+          } else {
+            null
+          }
+        } finally {
+          retriever.release()
+        }
+      }
     }.getOrNull()
   }
 
@@ -346,10 +400,12 @@ class ThumbnailRepository(
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
           // Use modern API for Android Q+
           // Build proper MediaStore content URI
-          val contentUri = android.content.ContentUris.withAppendedId(
-            android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-            video.id
-          )
+          val baseUri = if (video.isAudio) {
+            android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+          } else {
+            android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+          }
+          val contentUri = android.content.ContentUris.withAppendedId(baseUri, video.id)
           android.util.Log.d("ThumbnailRepository", "Generating MediaStore thumbnail for ${video.displayName} using loadThumbnail")
           val thumbnail = context.contentResolver.loadThumbnail(
             contentUri,
@@ -357,41 +413,46 @@ class ThumbnailRepository(
             null
           )
           android.util.Log.d("ThumbnailRepository", "MediaStore thumbnail generated successfully for ${video.displayName}")
-          rotateIfNeeded(video, thumbnail)
+          if (video.isAudio) thumbnail else rotateIfNeeded(video, thumbnail)
         } else {
           // Use legacy API for older versions
-          android.util.Log.d("ThumbnailRepository", "Generating MediaStore thumbnail for ${video.displayName} using getThumbnail")
-          @Suppress("DEPRECATION")
-          val thumbnail = android.provider.MediaStore.Video.Thumbnails.getThumbnail(
-            context.contentResolver,
-            video.id,
-            android.provider.MediaStore.Video.Thumbnails.MINI_KIND,
+          if (video.isAudio) {
+            // Audio thumbnails not easily available via legacy MediaStore, use MediaMetadataRetriever
             null
-          )
-          if (thumbnail != null) {
-            // Scale to desired dimension
-            val scaled = Bitmap.createScaledBitmap(
-              thumbnail,
-              dimension,
-              (dimension * thumbnail.height) / thumbnail.width,
-              true
-            )
-            if (scaled != thumbnail) {
-              thumbnail.recycle()
-            }
-            android.util.Log.d("ThumbnailRepository", "MediaStore thumbnail generated successfully for ${video.displayName}")
-            rotateIfNeeded(video, scaled)
           } else {
-            android.util.Log.w("ThumbnailRepository", "MediaStore returned null thumbnail for ${video.displayName}")
-            null
+            android.util.Log.d("ThumbnailRepository", "Generating MediaStore thumbnail for ${video.displayName} using getThumbnail")
+            @Suppress("DEPRECATION")
+            val thumbnail = android.provider.MediaStore.Video.Thumbnails.getThumbnail(
+              context.contentResolver,
+              video.id,
+              android.provider.MediaStore.Video.Thumbnails.MINI_KIND,
+              null
+            )
+            if (thumbnail != null) {
+              // Scale to desired dimension
+              val scaled = Bitmap.createScaledBitmap(
+                thumbnail,
+                dimension,
+                (dimension * thumbnail.height) / thumbnail.width,
+                true
+              )
+              if (scaled != thumbnail) {
+                thumbnail.recycle()
+              }
+              android.util.Log.d("ThumbnailRepository", "MediaStore thumbnail generated successfully for ${video.displayName}")
+              rotateIfNeeded(video, scaled)
+            } else {
+              android.util.Log.w("ThumbnailRepository", "MediaStore returned null thumbnail for ${video.displayName}")
+              null
+            }
           }
         }
       }.onFailure { e ->
-        android.util.Log.w("ThumbnailRepository", "MediaStore thumbnail failed for ${video.displayName}, will try ThumbnailUtils: ${e.message}")
+        android.util.Log.w("ThumbnailRepository", "MediaStore thumbnail failed for ${video.displayName}: ${e.message}")
       }.getOrNull()
       
-      // If MediaStore failed, try ThumbnailUtils as last resort
-      if (mediaStoreThumbnail != null) {
+      // If MediaStore failed, try ThumbnailUtils as last resort (only for video)
+      if (mediaStoreThumbnail != null || video.isAudio) {
         return@withContext mediaStoreThumbnail
       }
       

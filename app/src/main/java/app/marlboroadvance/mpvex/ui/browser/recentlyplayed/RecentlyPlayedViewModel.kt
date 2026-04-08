@@ -112,7 +112,10 @@ class RecentlyPlayedViewModel(application: Application) :
     val dateAdded = dateModified
     val bucketId = file.parent ?: ""
     val bucketDisplayName = File(bucketId).name
-    
+
+    // Force isAudio based on extension even if database says otherwise
+    val isAudio = entity.isAudio || app.marlboroadvance.mpvex.utils.storage.FileTypeUtils.isAudioFile(file)
+
     return Video(
       id = filePath.hashCode().toLong(),
       title = videoTitle,
@@ -130,18 +133,18 @@ class RecentlyPlayedViewModel(application: Application) :
       sizeFormatted = MediaFormatter.formatFileSize(size),
       dateModified = dateModified,
       dateAdded = dateAdded,
-      mimeType = "video/*",
+      mimeType = if (isAudio) "audio/*" else "video/*",
       bucketId = bucketId,
       bucketDisplayName = bucketDisplayName,
-      width = entity.width,
-      height = entity.height,
+      width = if (isAudio) 0 else entity.width,
+      height = if (isAudio) 0 else entity.height,
       fps = 0f, 
-      resolution = MediaFormatter.formatResolution(entity.width, entity.height),
-      isAudio = entity.isAudio,
+      resolution = if (isAudio) "" else MediaFormatter.formatResolution(entity.width, entity.height),
+      isAudio = isAudio,
       artist = entity.artist,
       album = entity.album,
     )
-  }
+    }
 
   suspend fun deleteRecentItems(itemsToDelete: List<RecentlyPlayedItem>): Pair<Int, Int> {
     return try {

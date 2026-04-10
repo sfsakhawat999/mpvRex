@@ -67,6 +67,7 @@ enum class ControlRegion {
   BOTTOM_RIGHT,
   BOTTOM_LEFT,
   PORTRAIT_BOTTOM,
+  MORE_SHEET,
 }
 
 @Serializable
@@ -83,6 +84,7 @@ object PlayerControlsPreferencesScreen : Screen {
     val bottomRState by appearancePrefs.bottomRightControls.collectAsState()
     val bottomLState by appearancePrefs.bottomLeftControls.collectAsState()
     val portraitBottomState by appearancePrefs.portraitBottomControls.collectAsState()
+    val moreSheetState by appearancePrefs.moreSheetControls.collectAsState()
 
     val topRightButtons = remember(topRState) {
       appearancePrefs.parseButtons(topRState, mutableSetOf())
@@ -98,6 +100,10 @@ object PlayerControlsPreferencesScreen : Screen {
 
     val portraitBottomButtons = remember(portraitBottomState) {
       appearancePrefs.parseButtons(portraitBottomState, mutableSetOf())
+    }
+
+    val moreSheetButtons = remember(moreSheetState) {
+      appearancePrefs.parseButtons(moreSheetState, mutableSetOf())
     }
 
     Scaffold(
@@ -183,6 +189,22 @@ object PlayerControlsPreferencesScreen : Screen {
                 },
               )
               PreferenceIconSummary(buttons = portraitBottomButtons)
+            }
+          }
+
+          item {
+            PreferenceSectionHeader(title = "More Sheet Controls")
+          }
+
+          item {
+            PreferenceCard {
+              PreferenceCategoryWithEditButton(
+                title = "Buttons in Controls Tab",
+                onClick = {
+                  backstack.add(ControlLayoutEditorScreen(ControlRegion.MORE_SHEET))
+                },
+              )
+              PreferenceIconSummary(buttons = moreSheetButtons)
             }
           }
           

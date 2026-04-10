@@ -258,6 +258,7 @@ class PlayerViewModel(
     )
 
   val sheetShown = MutableStateFlow(Sheets.None)
+  val lastMoreSheetTab = MutableStateFlow(1) // Default to Controls tab (index 1)
   val panelShown = MutableStateFlow(Panels.None)
 
   // Seek state

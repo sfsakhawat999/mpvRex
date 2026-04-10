@@ -12,6 +12,8 @@ import app.marlboroadvance.mpvex.ui.player.Decoder
 import app.marlboroadvance.mpvex.ui.player.Panels
 import app.marlboroadvance.mpvex.ui.player.Sheets
 import app.marlboroadvance.mpvex.ui.player.TrackNode
+import androidx.navigation3.runtime.NavBackStack
+import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.ui.player.controls.components.sheets.AspectRatioSheet
 import app.marlboroadvance.mpvex.ui.player.controls.components.sheets.AudioTracksSheet
 import app.marlboroadvance.mpvex.ui.player.controls.components.sheets.ChaptersSheet
@@ -237,6 +239,8 @@ fun PlayerSheets(
         onDismissRequest = onDismissRequest,
         onEnterFiltersPanel = { onOpenPanel(Panels.VideoFilters) },
         onAnime4KChanged = { viewModel.restartAmbientIfActive() },
+        viewModel = viewModel,
+        onShowSheet = onShowSheet,
       )
     }
 

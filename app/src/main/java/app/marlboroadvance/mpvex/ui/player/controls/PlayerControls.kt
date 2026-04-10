@@ -468,33 +468,13 @@ fun PlayerControls(
               val speedUpdate = currentPlayerUpdate as PlayerUpdates.DynamicSpeedControl
               val currentSpeed = speedUpdate.speed
               val showDynamicSpeedOverlay by playerPreferences.showDynamicSpeedOverlay.collectAsState()
-              val shouldShowFull = speedUpdate.showFullOverlay
-              var isCollapsed by remember { mutableStateOf(false) }
-              
-              LaunchedEffect(currentSpeed, shouldShowFull) {
-                if (shouldShowFull) {
-                  isCollapsed = false
-                  delay(1500)
-                  isCollapsed = true
-                } else {
-                  isCollapsed = true
-                }
-              }
-              
+
               if (showDynamicSpeedOverlay) {
-                if (isCollapsed) {
-                  // Simple compact indicator
-                  CompactSpeedIndicator(currentSpeed = currentSpeed)
-                } else {
-                  // Full speed control slider
-                  SpeedControlSlider(currentSpeed = currentSpeed)
-                }
+                CompactSpeedIndicator(currentSpeed = currentSpeed)
               } else {
-                // fallback, simple indicator
                 CompactSpeedIndicator(currentSpeed = currentSpeed)
               }
-            }
-            is PlayerUpdates.AspectRatio -> {
+            }            is PlayerUpdates.AspectRatio -> {
               val customRatiosSet by playerPreferences.customAspectRatios.collectAsState()
               val displayText = if (currentAspectRatio > 0) {
                 // Custom aspect ratio - try to find its label first

@@ -444,8 +444,10 @@ fun PlayerControls(
           viewModel.playerUpdate.update { PlayerUpdates.None }
         }
 
+        val isSpeedLocked by viewModel.isSpeedLocked.collectAsState()
+
         AnimatedVisibility(
-          currentPlayerUpdate !is PlayerUpdates.None,
+          currentPlayerUpdate !is PlayerUpdates.None || isSpeedLocked,
           enter = fadeIn(playerControlsEnterAnimationSpec()),
           exit = fadeOut(playerControlsExitAnimationSpec()),
           modifier =
@@ -462,8 +464,19 @@ fun PlayerControls(
                 top.linkTo(parent.top, if (isPortrait) 104.dp else 64.dp)
               },
         ) {
-          when (currentPlayerUpdate) {
-            is PlayerUpdates.MultipleSpeed -> MultipleSpeedPlayerUpdate(currentSpeed = holdForMultipleSpeed)
+          val currentPlaybackSpeed = playbackSpeed ?: 1f
+          if (isSpeedLocked && currentPlayerUpdate is PlayerUpdates.None && abs(currentPlaybackSpeed - 1f) > 0.01f) {
+            CompactSpeedIndicator(
+              currentSpeed = currentPlaybackSpeed,
+              prefix = "Speed Locked at",
+              onReset = {
+                viewModel.isSpeedLocked.value = false
+                viewModel.resetPlaybackSpeed()
+              }
+            )
+          } else {
+            when (currentPlayerUpdate) {
+              is PlayerUpdates.MultipleSpeed -> MultipleSpeedPlayerUpdate(currentSpeed = holdForMultipleSpeed)
             is PlayerUpdates.DynamicSpeedControl -> {
               val speedUpdate = currentPlayerUpdate as PlayerUpdates.DynamicSpeedControl
               val currentSpeed = speedUpdate.speed
@@ -474,6 +487,24 @@ fun PlayerControls(
               } else {
                 CompactSpeedIndicator(currentSpeed = currentSpeed)
               }
+            }
+
+            is PlayerUpdates.SpeedLockHint -> {
+              val hintUpdate = currentPlayerUpdate as PlayerUpdates.SpeedLockHint
+              val currentSpeed = hintUpdate.speed
+              val isLocked = hintUpdate.isLocked
+              
+              CompactSpeedIndicator(
+                currentSpeed = currentSpeed,
+                prefix = if (isLocked) "Speed Locked at" else "Swipe up to lock",
+                suffix = if (isLocked) null else "speed",
+                onReset = if (isLocked) {
+                    {
+                        viewModel.isSpeedLocked.value = false
+                        viewModel.resetPlaybackSpeed()
+                    }
+                } else null
+              )
             }            is PlayerUpdates.AspectRatio -> {
               val customRatiosSet by playerPreferences.customAspectRatios.collectAsState()
               val displayText = if (currentAspectRatio > 0) {
@@ -574,6 +605,7 @@ fun PlayerControls(
             else -> {}
           }
         }
+      }
 
         val areButtonsVisible = controlsShown && !areControlsLocked && !areSlidersShown
 
@@ -1258,7 +1290,7 @@ fun PlayerControls(
             chapters = chapters,
             currentChapter = currentChapter,
             isSpeedNonOne = isSpeedNonOne,
-            currentZoom = currentZoom,
+            currentZoom = videoZoom,
             aspect = aspect,
             mediaTitle = mediaTitle,
             hideBackground = hideBackground,
@@ -1324,7 +1356,7 @@ fun PlayerControls(
               chapters = chapters,
               currentChapter = currentChapter,
               isSpeedNonOne = isSpeedNonOne,
-              currentZoom = currentZoom,
+              currentZoom = videoZoom,
               aspect = aspect,
               mediaTitle = mediaTitle,
               hideBackground = hideBackground,
@@ -1342,7 +1374,7 @@ fun PlayerControls(
               chapters = chapters,
               currentChapter = currentChapter,
               isSpeedNonOne = isSpeedNonOne,
-              currentZoom = currentZoom,
+              currentZoom = videoZoom,
               aspect = aspect,
               mediaTitle = mediaTitle,
               hideBackground = hideBackground,
@@ -1404,7 +1436,7 @@ fun PlayerControls(
             chapters = chapters,
             currentChapter = currentChapter,
             isSpeedNonOne = isSpeedNonOne,
-            currentZoom = currentZoom,
+            currentZoom = videoZoom,
             aspect = aspect,
             mediaTitle = mediaTitle,
             hideBackground = hideBackground,

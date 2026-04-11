@@ -98,6 +98,7 @@ fun GestureHandler(
   val reverseDoubleTap by gesturePreferences.reverseDoubleTap.collectAsState()
   val doubleTapSeekAreaWidth by gesturePreferences.doubleTapSeekAreaWidth.collectAsState()
   var isDoubleTapSeeking by remember { mutableStateOf(false) }
+  var longPressStartTime by remember { mutableStateOf(0L) }
   LaunchedEffect(seekAmount) {
     delay(800)
     isDoubleTapSeeking = false
@@ -414,6 +415,7 @@ fun GestureHandler(
               if (distance < 10f && multipleSpeedGesture > 0f) {
                 longPressTriggered = true
                 isLongPressing = true
+                longPressStartTime = System.currentTimeMillis()
                 longPressTriggeredDuringTouch = true
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                 originalSpeed = playbackSpeed ?: 1f
@@ -503,15 +505,31 @@ fun GestureHandler(
                       if (isLongPressing && isDynamicSpeedControlActive && paused == false) {
                         change.consume()
 
-                        val speedPresets = listOf(0.25f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 4.0f)
+                        val speedPresets = listOf(0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 3.5f, 4.0f)
                         val screenWidth = size.width.toFloat()
 
                         val deltaX = currentPosition.x - dynamicSpeedStartX
+                        val deltaY = currentPosition.y - startPosition.y
                         val swipeDetectionThreshold = 10.dp.toPx()
+                        val lockThreshold = 60.dp.toPx()
 
                         if (!hasSwipedEnough && abs(deltaX) >= swipeDetectionThreshold) {
                           hasSwipedEnough = true
-                          viewModel.playerUpdate.update { PlayerUpdates.DynamicSpeedControl(lastAppliedSpeed, true) }
+                        }
+
+                        // Vertical swipe to lock/unlock (Always available immediately)
+                        if (abs(deltaY) > lockThreshold) {
+                            if (deltaY < -lockThreshold && !viewModel.isSpeedLocked.value) {
+                                // Swipe Up -> Lock
+                                viewModel.isSpeedLocked.value = true
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                viewModel.playerUpdate.update { PlayerUpdates.SpeedLockHint(lastAppliedSpeed, true) }
+                            } else if (deltaY > lockThreshold && viewModel.isSpeedLocked.value) {
+                                // Swipe Down -> Unlock
+                                viewModel.isSpeedLocked.value = false
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                viewModel.playerUpdate.update { PlayerUpdates.SpeedLockHint(lastAppliedSpeed, false) }
+                            }
                         }
 
                         if (hasSwipedEnough) {
@@ -520,7 +538,7 @@ fun GestureHandler(
 
                           val startIndex = speedPresets.indexOfFirst {
                             abs(it - dynamicSpeedStartValue) < 0.01f
-                          }.takeIf { it >= 0 } ?: 4
+                          }.takeIf { it >= 0 } ?: 3 // Default to 1.0x (index 3)
 
                           val newIndex = (startIndex + indexDelta.toInt()).coerceIn(0, speedPresets.size - 1)
                           val newSpeed = speedPresets[newIndex]
@@ -529,8 +547,21 @@ fun GestureHandler(
                             haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             lastAppliedSpeed = newSpeed
                             MPVLib.setPropertyFloat("speed", newSpeed)
-                            viewModel.playerUpdate.update { PlayerUpdates.DynamicSpeedControl(newSpeed, true) }
                           }
+                        }
+
+                        // Smart Hint Logic: only show "Swipe up to lock" after 2 seconds of holding
+                        val holdDuration = System.currentTimeMillis() - longPressStartTime
+                        val shouldShowLockHint = holdDuration > 2000L || viewModel.isSpeedLocked.value
+
+                        if (shouldShowLockHint) {
+                            viewModel.playerUpdate.update { 
+                                PlayerUpdates.SpeedLockHint(lastAppliedSpeed, viewModel.isSpeedLocked.value) 
+                            }
+                        } else {
+                            viewModel.playerUpdate.update { 
+                                PlayerUpdates.DynamicSpeedControl(lastAppliedSpeed, hasSwipedEnough) 
+                            }
                         }
                       }
                     }
@@ -650,20 +681,27 @@ fun GestureHandler(
             isLongPressing = false
             isDynamicSpeedControlActive = false
             hasSwipedEnough = false
-            // Ramp speed back down incrementally to avoid audio filter stutter
-            val currentSpeed = MPVLib.getPropertyFloat("speed") ?: multipleSpeedGesture
-            val targetSpeed = originalSpeed
-            val steps = 5
-            val stepDelay = 16L
-            coroutineScope.launch {
-              for (i in 1..steps) {
-                val t = i.toFloat() / steps
-                val intermediateSpeed = currentSpeed + (targetSpeed - currentSpeed) * t
-                MPVLib.setPropertyFloat("speed", intermediateSpeed)
-                if (i < steps) delay(stepDelay)
-              }
+            
+            // Only ramp back down if NOT locked
+            if (!viewModel.isSpeedLocked.value) {
+                // Ramp speed back down incrementally to avoid audio filter stutter
+                val currentSpeed = MPVLib.getPropertyFloat("speed") ?: multipleSpeedGesture
+                val targetSpeed = originalSpeed
+                val steps = 5
+                val stepDelay = 16L
+                coroutineScope.launch {
+                  for (i in 1..steps) {
+                    val t = i.toFloat() / steps
+                    val intermediateSpeed = currentSpeed + (targetSpeed - currentSpeed) * t
+                    MPVLib.setPropertyFloat("speed", intermediateSpeed)
+                    if (i < steps) delay(stepDelay)
+                  }
+                }
+                viewModel.playerUpdate.update { PlayerUpdates.None }
+            } else {
+                // If locked, just clear the hint overlay
+                viewModel.playerUpdate.update { PlayerUpdates.None }
             }
-            viewModel.playerUpdate.update { PlayerUpdates.None }
           }
 
           when (gestureType) {

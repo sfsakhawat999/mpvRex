@@ -8,12 +8,17 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +29,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,6 +54,9 @@ fun SpeedControlSlider(
 fun CompactSpeedIndicator(
   currentSpeed: Float,
   modifier: Modifier = Modifier,
+  prefix: String? = null,
+  suffix: String? = null,
+  onReset: (() -> Unit)? = null,
 ) {
   val speedString = remember(currentSpeed) {
     String.format("%.2f", currentSpeed)
@@ -80,6 +90,15 @@ fun CompactSpeedIndicator(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(start = 6.dp)
       ) {
+        if (prefix != null) {
+            Text(
+                text = "$prefix ",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
+            )
+        }
+
         // Map each character to its own AnimatedContent for the slot machine effect
         speedString.forEachIndexed { index, char ->
           val isDigit = char.isDigit()
@@ -130,6 +149,36 @@ fun CompactSpeedIndicator(
           modifier = Modifier.padding(start = 1.dp),
           color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
+
+        if (suffix != null) {
+            Text(
+                text = " $suffix",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
+            )
+        }
+
+        if (onReset != null) {
+            Spacer(modifier = Modifier.size(MaterialTheme.spacing.small))
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .clickable { onReset() }
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Reset Speed",
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
       }
     }
   }

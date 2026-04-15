@@ -156,8 +156,7 @@ data class PlaylistDetailScreen(val playlistId: Int) : Screen {
         items = filteredVideoItems,
         getId = { it.playlistItem.id },
         onDeleteItems = { itemsToDelete, _ ->
-          val videosToRemove = itemsToDelete.map { it.video }
-          viewModel.removeVideosFromPlaylist(videosToRemove)
+          viewModel.removeVideosFromPlaylist(itemsToDelete)
           Pair(itemsToDelete.size, 0)
         },
         onOperationComplete = { viewModel.refresh() },

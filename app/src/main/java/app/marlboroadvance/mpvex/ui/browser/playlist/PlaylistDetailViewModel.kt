@@ -160,19 +160,12 @@ class PlaylistDetailViewModel(
     }
   }
 
-  suspend fun removeVideoFromPlaylist(video: Video) {
-    val itemsList = playlistRepository.getPlaylistItems(playlistId)
-    val itemToRemove = itemsList.find { it.filePath == video.path }
-    itemToRemove?.let {
-      playlistRepository.removeItemFromPlaylist(it)
-    }
+  suspend fun removeVideoFromPlaylist(item: PlaylistVideoItem) {
+    playlistRepository.removeItemFromPlaylist(item.playlistItem)
   }
 
-  suspend fun removeVideosFromPlaylist(videos: List<Video>) {
-    val itemsList = playlistRepository.getPlaylistItems(playlistId)
-    val videoPaths = videos.map { it.path }.toSet()
-    val itemsToRemove = itemsList.filter { it.filePath in videoPaths }
-    playlistRepository.removeItemsFromPlaylist(itemsToRemove)
+  suspend fun removeVideosFromPlaylist(items: List<PlaylistVideoItem>) {
+    playlistRepository.removeItemsFromPlaylist(items.map { it.playlistItem })
   }
 
   suspend fun updatePlayHistory(filePath: String, position: Long = 0) {

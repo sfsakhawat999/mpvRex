@@ -56,7 +56,17 @@ This document tracks the unique features and improvements implemented in **mpvRe
 
 ---
 
-### 4. Build & Maintenance
+### 4. Modernized File Browser
+
+*   **Standardized Architecture**
+    *   **Ops/Manager Pattern:** Refactored from a procedural model to a highly modular architecture using specialized logic handlers (`FileSystemOps`, `MediaMetadataOps`).
+    *   **Unified Media Scanner:** Centralized media discovery via `CoreMediaScanner` for consistent hierarchical scanning across local and network storage.
+    *   **Standardized UI (BaseMediaCard):** All browser items now follow a unified card architecture for consistent 16:9 aspect ratios, reactive "NEW" badges, and recursive folder counts.
+    *   **Reactive Browser State:** Implementation of `BaseBrowserViewModel` to ensure UI state remains synchronized with background playback events and history updates.
+
+---
+
+### 5. Build & Maintenance
 
 *   **Signing & CI/CD**
     *   ([34a086a](https://github.com/sfsakhawat999/mpvRex/commit/34a086a00f0f38d383e94621a31fa0978af6d09d)) - Setup GitHub Actions workflows and project renaming.

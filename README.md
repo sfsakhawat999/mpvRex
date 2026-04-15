@@ -49,6 +49,11 @@ For a detailed list of exclusive improvements and technical commits, see **[FEAT
 *   **Custom Branding & Themes:** Dedicated theme, custom icons, and an "Always Dark Mode" option for controls.
 *   **Layout Customization:** Option to place playback controls below the seekbar and adjust gradient opacity.
 
+### Standardized File Browser
+*   **Modern Architecture:** Refactored to a modular **Ops/Manager-driven architecture** for better reliability and performance.
+*   **Unified UI Elements:** All media cards follow a standard design with reactive "NEW" badges and recursive folder counts.
+*   **Centralized Discovery:** Uses a unified media engine for consistent local and network file scanning.
+
 ### Core Player Improvements
 *   **Chapter Navigation:** Auto-scrolling chapter lists that stay synchronized with current playback.
 *   **Seekbar Enhancements:** Increased bottom margins to prevent overlap and support for relative seeking.

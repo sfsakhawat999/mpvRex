@@ -126,6 +126,7 @@ fun MoreSheet(
       PrimaryTabRow(
         selectedTabIndex = pagerState.currentPage,
         containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.primary,
         divider = {}
       ) {
         tabs.forEachIndexed { index, title ->
@@ -134,6 +135,8 @@ fun MoreSheet(
             onClick = { 
               scope.launch { pagerState.animateScrollToPage(index) }
             },
+            selectedContentColor = MaterialTheme.colorScheme.primary,
+            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
             text = { Text(title) },
             icon = {
               Icon(
@@ -484,7 +487,7 @@ fun ControlsTab(
                       currentZoom = currentZoom,
                       aspect = aspect,
                       mediaTitle = mediaTitle,
-                      hideBackground = hideBackground,
+                      hideBackground = false, // Force background for better visibility on sheet surface
                       decoder = decoder,
                       playbackSpeed = playbackSpeed ?: 1f,
                       onBackPress = { activity.onBackPressedDispatcher.onBackPressed() },

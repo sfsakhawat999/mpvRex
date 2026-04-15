@@ -276,11 +276,13 @@ fun PlayerControls(
   CompositionLocalProvider(
     LocalRippleConfiguration provides playerRippleConfiguration,
     LocalPlayerButtonsClickEvent provides { resetControlsTimestamp = System.currentTimeMillis() },
-    LocalContentColor provides Color.White,
   ) {
     CompositionLocalProvider(
-      LocalLayoutDirection provides LayoutDirection.Ltr,
+      LocalContentColor provides Color.White,
     ) {
+      CompositionLocalProvider(
+        LocalLayoutDirection provides LayoutDirection.Ltr,
+      ) {
       val configuration = LocalConfiguration.current
       val isPortrait by remember(configuration) {
         derivedStateOf { configuration.orientation == ORIENTATION_PORTRAIT }
@@ -1450,6 +1452,7 @@ fun PlayerControls(
           )
         }
       }
+    }
     }
 
     val sheetShown by viewModel.sheetShown.collectAsState()

@@ -513,11 +513,7 @@ fun GestureHandler(
                         val swipeDetectionThreshold = 10.dp.toPx()
                         val lockThreshold = 60.dp.toPx()
 
-                        if (!hasSwipedEnough && abs(deltaX) >= swipeDetectionThreshold) {
-                          hasSwipedEnough = true
-                        }
-
-                        // Vertical swipe to lock/unlock (Always available immediately)
+                        // Vertical swipe to lock/unlock (Always available immediately after long press triggers)
                         if (abs(deltaY) > lockThreshold) {
                             if (deltaY < -lockThreshold && !viewModel.isSpeedLocked.value) {
                                 // Swipe Up -> Lock
@@ -530,6 +526,10 @@ fun GestureHandler(
                                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                 viewModel.playerUpdate.update { PlayerUpdates.SpeedLockHint(lastAppliedSpeed, false) }
                             }
+                        }
+
+                        if (!hasSwipedEnough && abs(deltaX) >= swipeDetectionThreshold) {
+                          hasSwipedEnough = true
                         }
 
                         if (hasSwipedEnough) {

@@ -80,6 +80,27 @@ fun TextPlayerUpdate(
 }
 
 @Composable
+fun LockHint(
+  text: String,
+  modifier: Modifier = Modifier,
+) {
+  Surface(
+    shape = RoundedCornerShape(8.dp),
+    color = Color.Black.copy(alpha = 0.6f),
+    contentColor = Color.White,
+    modifier = modifier
+  ) {
+    Text(
+      text = text,
+      modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+      style = MaterialTheme.typography.labelLarge,
+      fontWeight = FontWeight.Bold,
+      color = Color.White
+    )
+  }
+}
+
+@Composable
 fun MultipleSpeedPlayerUpdate(
   currentSpeed: Float,
   modifier: Modifier = Modifier,

@@ -107,6 +107,7 @@ import app.marlboroadvance.mpvex.ui.player.VideoAspect
 import app.marlboroadvance.mpvex.ui.player.controls.components.BrightnessSlider
 import app.marlboroadvance.mpvex.ui.player.controls.components.CompactSpeedIndicator
 import app.marlboroadvance.mpvex.ui.player.controls.components.ControlsButton
+import app.marlboroadvance.mpvex.ui.player.controls.components.LockHint
 import app.marlboroadvance.mpvex.ui.player.controls.components.MultipleSpeedPlayerUpdate
 import app.marlboroadvance.mpvex.ui.player.controls.components.SeekPlayerUpdate
 import app.marlboroadvance.mpvex.ui.player.controls.components.SeekbarWithTimers
@@ -308,7 +309,7 @@ fun PlayerControls(
         val (bottomRightControls, bottomLeftControls) = createRefs()
         val playerPauseButton = createRef()
         val seekbar = createRef()
-        val (playerUpdates) = createRefs()
+        val (playerUpdates, playerLockHint) = createRefs()
         val (customLeftButtonsRef, customRightButtonsRef) = createRefs()
         val customButtonsPortraitRef = createRef()
 
@@ -463,14 +464,13 @@ fun PlayerControls(
               )
               .constrainAs(playerUpdates) {
                 linkTo(parent.start, parent.end)
-                top.linkTo(parent.top, if (isPortrait) 104.dp else 64.dp)
+                top.linkTo(parent.top, if (isPortrait) 64.dp else 32.dp)
               },
         ) {
           val currentPlaybackSpeed = playbackSpeed ?: 1f
           if (isSpeedLocked && currentPlayerUpdate is PlayerUpdates.None && abs(currentPlaybackSpeed - 1f) > 0.01f) {
             CompactSpeedIndicator(
               currentSpeed = currentPlaybackSpeed,
-              prefix = "Speed Locked at",
               onReset = {
                 viewModel.isSpeedLocked.value = false
                 viewModel.resetPlaybackSpeed()
@@ -482,13 +482,7 @@ fun PlayerControls(
             is PlayerUpdates.DynamicSpeedControl -> {
               val speedUpdate = currentPlayerUpdate as PlayerUpdates.DynamicSpeedControl
               val currentSpeed = speedUpdate.speed
-              val showDynamicSpeedOverlay by playerPreferences.showDynamicSpeedOverlay.collectAsState()
-
-              if (showDynamicSpeedOverlay) {
-                CompactSpeedIndicator(currentSpeed = currentSpeed)
-              } else {
-                CompactSpeedIndicator(currentSpeed = currentSpeed)
-              }
+              CompactSpeedIndicator(currentSpeed = currentSpeed)
             }
 
             is PlayerUpdates.SpeedLockHint -> {
@@ -498,8 +492,6 @@ fun PlayerControls(
               
               CompactSpeedIndicator(
                 currentSpeed = currentSpeed,
-                prefix = if (isLocked) "Speed Locked at" else "Swipe up to lock",
-                suffix = if (isLocked) null else "speed",
                 onReset = if (isLocked) {
                     {
                         viewModel.isSpeedLocked.value = false
@@ -507,7 +499,9 @@ fun PlayerControls(
                     }
                 } else null
               )
-            }            is PlayerUpdates.AspectRatio -> {
+            }
+
+            is PlayerUpdates.AspectRatio -> {
               val customRatiosSet by playerPreferences.customAspectRatios.collectAsState()
               val displayText = if (currentAspectRatio > 0) {
                 // Custom aspect ratio - try to find its label first
@@ -1450,6 +1444,21 @@ fun PlayerControls(
             viewModel = viewModel,
             activity = activity,
           )
+        }
+
+        AnimatedVisibility(
+          visible = currentPlayerUpdate is PlayerUpdates.SpeedLockHint,
+          enter = fadeIn(playerControlsEnterAnimationSpec()),
+          exit = fadeOut(playerControlsExitAnimationSpec()),
+          modifier = Modifier.constrainAs(playerLockHint) {
+            bottom.linkTo(parent.bottom, if (isPortrait) 64.dp else 32.dp)
+            linkTo(parent.start, parent.end)
+          }
+        ) {
+          if (currentPlayerUpdate is PlayerUpdates.SpeedLockHint) {
+            val update = currentPlayerUpdate as PlayerUpdates.SpeedLockHint
+            LockHint(text = if (update.isLocked) "Speed Locked" else "Swipe up to lock")
+          }
         }
       }
     }

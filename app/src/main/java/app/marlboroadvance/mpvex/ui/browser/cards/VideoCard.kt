@@ -82,7 +82,10 @@ fun VideoCard(
   val maxLines = if (uiSettings.unlimitedNameLines) Int.MAX_VALUE else 2
   
   val thumbnailRepository = koinInject<ThumbnailRepository>()
-  val thumbWidthDp = if (isGridMode) 160.dp else 128.dp
+  val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+  val thumbWidthDp = if (isGridMode) {
+    if (gridColumns == 1) configuration.screenWidthDp.dp else 180.dp
+  } else 128.dp
   val aspect = 16f / 9f
   val thumbWidthPx = with(LocalDensity.current) { thumbWidthDp.roundToPx() }
   val thumbHeightPx = (thumbWidthPx / aspect).roundToInt()

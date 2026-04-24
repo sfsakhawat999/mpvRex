@@ -505,8 +505,9 @@ private fun RecentItemsContent(
             state = gridState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-              start = 8.dp,
-              end = 8.dp,
+              start = if (videoGridColumns == 1) 20.dp else 8.dp,
+              end = if (videoGridColumns == 1) 20.dp else 8.dp,
+              top = if (videoGridColumns == 1) 20.dp else 8.dp,
               bottom = if (isInSelectionMode) 88.dp else 16.dp
             ),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -587,6 +588,7 @@ private fun RecentItemsContent(
                       }
                     },
                     isGridMode = true,
+                    gridColumns = videoGridColumns,
                   )
                 }
               }

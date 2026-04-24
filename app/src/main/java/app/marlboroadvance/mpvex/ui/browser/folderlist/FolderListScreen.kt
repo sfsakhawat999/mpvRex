@@ -749,12 +749,13 @@ private fun GridContent(
       state = gridState,
       modifier = Modifier.fillMaxSize(),
       contentPadding = PaddingValues(
-        start = 8.dp,
-        end = 8.dp,
+        start = if (folderGridColumns == 1) 20.dp else 8.dp,
+        end = if (folderGridColumns == 1) 20.dp else 8.dp,
+        top = if (folderGridColumns == 1) 20.dp else 8.dp,
         bottom = navigationBarHeight
       ),
-      horizontalArrangement = Arrangement.spacedBy(4.dp),
-      verticalArrangement = Arrangement.spacedBy(4.dp),
+      horizontalArrangement = Arrangement.spacedBy(if (folderGridColumns == 1) 0.dp else 4.dp),
+      verticalArrangement = Arrangement.spacedBy(if (folderGridColumns == 1) 20.dp else 4.dp),
     ) {
       items(folders.size) { index ->
         val folder = folders[index]
@@ -780,6 +781,7 @@ private fun GridContent(
           },
           newVideoCount = newCount,
           isGridMode = true,
+          gridColumns = folderGridColumns,
         )
       }
     }

@@ -737,17 +737,18 @@ private fun VideoListContent(
                 thumbSelectedColor = MaterialTheme.colorScheme.primary.copy(alpha = scrollbarAlpha),
               ),
             ) {
-              LazyVerticalGrid(
+            LazyVerticalGrid(
                 columns = GridCells.Fixed(columns),
                 state = gridState,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
-                  start = 8.dp,
-                  end = 8.dp,
+                  start = if (columns == 1) 20.dp else 8.dp,
+                  end = if (columns == 1) 20.dp else 8.dp,
+                  top = if (columns == 1) 20.dp else 8.dp,
                   bottom = if (showFloatingBottomBar) 88.dp else 16.dp
                 ),
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
-              verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(if (columns == 1) 0.dp else 8.dp),
+                verticalArrangement = Arrangement.spacedBy(if (columns == 1) 20.dp else 8.dp),
             ) {
             items(
               count = videosWithInfo.size,

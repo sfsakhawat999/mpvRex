@@ -454,8 +454,9 @@ object PlaylistScreen : Screen {
               state = gridState,
               modifier = Modifier.fillMaxSize(),
               contentPadding = PaddingValues(
-                start = 8.dp,
-                end = 8.dp,
+                start = if (folderGridColumns == 1) 20.dp else 8.dp,
+                end = if (folderGridColumns == 1) 20.dp else 8.dp,
+                top = if (folderGridColumns == 1) 20.dp else 8.dp,
               ),
               horizontalArrangement = Arrangement.spacedBy(8.dp),
               verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -475,6 +476,7 @@ object PlaylistScreen : Screen {
                   onLongClick = { onPlaylistLongClick(playlistWithCount) },
                   onThumbClick = { onPlaylistClick(playlistWithCount) },
                   isGridMode = true,
+                  gridColumns = folderGridColumns,
                 )
               }
             }

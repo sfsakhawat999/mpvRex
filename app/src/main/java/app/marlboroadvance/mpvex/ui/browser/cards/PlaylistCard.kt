@@ -48,6 +48,7 @@ fun PlaylistCard(
   modifier: Modifier = Modifier,
   isSelected: Boolean = false,
   isGridMode: Boolean = false,
+  gridColumns: Int = 1,
   mostRecentVideoPath: String? = null,
   thumbnailSize: Dp = 64.dp,
   thumbnailAspectRatio: Float = 1f,
@@ -161,6 +162,7 @@ fun PlaylistCard(
     modifier = modifier,
     customChipContent = customChipRenderer,
     isGridMode = isGridMode,
+    gridColumns = gridColumns,
     thumbnailSize = thumbnailSize,
     thumbnailAspectRatio = thumbnailAspectRatio
   )

@@ -87,13 +87,13 @@ fun BaseMediaCard(
                         if (isSelected) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f) 
                         else Color.Transparent
                     )
-                    .padding(12.dp),
+                    .then(if (gridColumns == 1) Modifier else Modifier.padding(12.dp)),
                 horizontalAlignment = if (gridColumns == 1) Alignment.Start else Alignment.CenterHorizontally,
             ) {
                 // Thumbnail Box
                 Box(
                     modifier = Modifier
-                        .then(if (gridColumns == 1) Modifier.width(160.dp) else Modifier.fillMaxWidth())
+                        .fillMaxWidth()
                         .aspectRatio(thumbnailAspectRatio)
                         .clip(RoundedCornerShape(12.dp))
                         .background(MaterialTheme.colorScheme.surfaceContainerHigh)
@@ -156,12 +156,15 @@ fun BaseMediaCard(
                     overflow = TextOverflow.Ellipsis,
                     textAlign = if (gridColumns == 1) TextAlign.Start else TextAlign.Center,
                     fontWeight = if (isRecentlyPlayed) FontWeight.Black else FontWeight.Medium,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 
                 // Extra info row (if any)
                 if (infoContent != null) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().then(
+                            if (gridColumns == 1) Modifier.padding(vertical = 4.dp) else Modifier
+                        ),
                         horizontalArrangement = if (gridColumns == 1) Arrangement.Start else Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {

@@ -57,6 +57,7 @@ fun FolderCard(
   newVideoCount: Int = 0,
   customChipContent: @Composable (() -> Unit)? = null,
   isGridMode: Boolean = false,
+  gridColumns: Int = 1,
   thumbnailSize: androidx.compose.ui.unit.Dp = 64.dp,
   thumbnailAspectRatio: Float = 1f,
 ) {
@@ -86,6 +87,7 @@ fun FolderCard(
     isSelected = isSelected,
     isRecentlyPlayed = isRecentlyPlayed,
     isGridMode = isGridMode,
+    gridColumns = gridColumns,
     maxTitleLines = maxLines,
     overlayContent = {
       if (newVideoCount > 0) {

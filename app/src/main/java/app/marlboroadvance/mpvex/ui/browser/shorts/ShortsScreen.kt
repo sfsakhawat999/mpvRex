@@ -1,5 +1,6 @@
 package app.marlboroadvance.mpvex.ui.browser.shorts
 
+import android.app.Activity
 import android.graphics.Bitmap
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
@@ -42,6 +43,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -54,15 +56,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -79,6 +86,16 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 object ShortsScreen : Screen {
+
+    private val textWithStroke = TextStyle(
+        fontWeight = FontWeight.Bold,
+        shadow = Shadow(
+            color = Color.Black,
+            offset = Offset(2f, 2f),
+            blurRadius = 4f
+        )
+    )
+
     @Composable
     override fun Content() {
         val context = LocalContext.current
@@ -90,6 +107,18 @@ object ShortsScreen : Screen {
         val shorts by viewModel.shorts.collectAsState()
         val isLoading by viewModel.isLoading.collectAsState()
         val lovedPaths by viewModel.lovedPaths.collectAsState()
+        
+        // Force status bar and navigation bar to have white icons (Dark Mode style)
+        val view = LocalView.current
+        if (!view.isInEditMode) {
+            SideEffect {
+                val window = (view.context as Activity).window
+                // Set status bar and navigation bar to "dark" mode (which means light icons)
+                val insetsController = WindowCompat.getInsetsController(window, view)
+                insetsController.isAppearanceLightStatusBars = false
+                insetsController.isAppearanceLightNavigationBars = false
+            }
+        }
 
         LaunchedEffect(Unit) {
             viewModel.loadShorts()
@@ -124,7 +153,6 @@ object ShortsScreen : Screen {
                             .background(Color.Black)
                             .graphicsLayer {
                                 translationY = -scrollOffset + (playingPageIndex * heightPx)
-                                // Only show when ready AND the page is settled or closely pinned
                                 alpha = if (isPlayerReady) 1f else 0f
                             }
                     ) {
@@ -272,7 +300,6 @@ object ShortsScreen : Screen {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                // IMPORTANT: Removed background(Color.Black) to let the player surface through.
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = {
@@ -309,7 +336,6 @@ object ShortsScreen : Screen {
                         )
                     } ?: Box(modifier = Modifier.fillMaxSize().background(Color.Black))
                 } else {
-                    // Transparent box to let the player surface through
                     Box(modifier = Modifier.fillMaxSize())
                 }
             }
@@ -340,12 +366,24 @@ object ShortsScreen : Screen {
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(top = 48.dp, start = 24.dp)
+                    .graphicsLayer {
+                        shadowElevation = 0f
+                    }
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White
-                )
+                Box {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.Black,
+                        modifier = Modifier.size(28.dp).graphicsLayer { translationX = 2f; translationY = 2f }
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
 
             ActionColumn(
@@ -383,7 +421,7 @@ object ShortsScreen : Screen {
                         text = app.marlboroadvance.mpvex.utils.media.MediaFormatter.formatDuration(pos.toLong() * 1000),
                         color = Color.White,
                         fontSize = 48.sp,
-                        fontWeight = FontWeight.Bold
+                        style = textWithStroke
                     )
                 }
             }
@@ -403,8 +441,8 @@ object ShortsScreen : Screen {
                     text = video.displayName,
                     color = Color.White,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
+                    maxLines = 1,
+                    style = textWithStroke
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 LinearProgressIndicator(
@@ -453,20 +491,20 @@ object ShortsScreen : Screen {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ActionButton(icon = Icons.Filled.Shuffle, label = "Shuffle", onClick = onShuffle)
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             ActionButton(
                 icon = if (isLoved) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                 label = if (isLoved) "Loved" else "Love",
                 iconColor = if (isLoved) Color.Red else Color.White,
                 onClick = onLove
             )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             ActionButton(icon = Icons.Filled.Block, label = "Block", onClick = onBlock)
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             ActionButton(icon = Icons.Filled.Speed, label = "Speed", onClick = onSpeed)
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             ActionButton(icon = Icons.Filled.Info, label = "Info", onClick = onInfo)
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             ActionButton(icon = Icons.Filled.MoreVert, label = "More") { /* TODO */ }
         }
     }
@@ -481,20 +519,28 @@ object ShortsScreen : Screen {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             IconButton(
                 onClick = onClick,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(40.dp)
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = label,
-                    tint = iconColor,
-                    modifier = Modifier.size(28.dp)
-                )
+                Box {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color.Black,
+                        modifier = Modifier.size(26.dp).graphicsLayer { translationX = 1f; translationY = 1f }
+                    )
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = label,
+                        tint = iconColor,
+                        modifier = Modifier.size(26.dp)
+                    )
+                }
             }
             Text(
                 text = label,
                 color = Color.White,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium
+                fontSize = 11.sp,
+                style = textWithStroke
             )
         }
     }

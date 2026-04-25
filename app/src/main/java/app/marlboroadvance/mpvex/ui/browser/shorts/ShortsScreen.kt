@@ -1,12 +1,17 @@
 package app.marlboroadvance.mpvex.ui.browser.shorts
 
+import android.graphics.Bitmap
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,9 +51,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -95,55 +103,71 @@ object ShortsScreen : Screen {
                 )
             } else {
                 var mpvView by remember { mutableStateOf<MPVView?>(null) }
+                var isPlayerReady by remember { mutableStateOf(false) }
                 val pagerState = rememberPagerState(pageCount = { shorts.size })
                 val lifecycleOwner = LocalLifecycleOwner.current
+                val density = LocalDensity.current
 
-                // Single Player Instance behind the pager
-                ShortsPlayerHost(
-                    modifier = Modifier.fillMaxSize(),
-                    onReady = { mpvView = it }
-                )
+                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                    val heightPx = with(density) { maxHeight.toPx() }
+                    
+                    val scrollOffset = (pagerState.currentPage + pagerState.currentPageOffsetFraction) * heightPx
+                    
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer {
+                                translationY = -scrollOffset + (pagerState.currentPage * heightPx)
+                                alpha = if (isPlayerReady) 1f else 0f
+                            }
+                    ) {
+                        ShortsPlayerHost(
+                            modifier = Modifier.fillMaxSize(),
+                            onReady = { mpvView = it },
+                            onPlayerReadyChange = { isPlayerReady = it }
+                        )
+                    }
 
-                // Manage Lifecycle (Pause/Resume on Background)
-                DisposableEffect(lifecycleOwner) {
-                    val observer = LifecycleEventObserver { _, event ->
-                        when (event) {
-                            Lifecycle.Event.ON_PAUSE -> MPVLib.setPropertyBoolean("pause", true)
-                            Lifecycle.Event.ON_RESUME -> MPVLib.setPropertyBoolean("pause", false)
-                            else -> {}
+                    DisposableEffect(lifecycleOwner) {
+                        val observer = LifecycleEventObserver { _, event ->
+                            when (event) {
+                                Lifecycle.Event.ON_PAUSE -> MPVLib.setPropertyBoolean("pause", true)
+                                Lifecycle.Event.ON_RESUME -> MPVLib.setPropertyBoolean("pause", false)
+                                else -> {}
+                            }
+                        }
+                        lifecycleOwner.lifecycle.addObserver(observer)
+                        onDispose {
+                            lifecycleOwner.lifecycle.removeObserver(observer)
                         }
                     }
-                    lifecycleOwner.lifecycle.addObserver(observer)
-                    onDispose {
-                        lifecycleOwner.lifecycle.removeObserver(observer)
-                    }
-                }
 
-                // Load media when page settles
-                LaunchedEffect(pagerState.settledPage, mpvView) {
-                    if (mpvView != null && shorts.isNotEmpty() && pagerState.settledPage < shorts.size) {
-                        val video = shorts[pagerState.settledPage]
-                        MPVLib.command("loadfile", video.path)
-                        MPVLib.setPropertyBoolean("pause", false)
-                    }
-                }
-
-                ShortsPager(
-                    shorts = shorts,
-                    pagerState = pagerState,
-                    lovedPaths = lovedPaths,
-                    onBack = { 
-                        if (backstack.size > 1) {
-                            backstack.removeLastOrNull()
-                        } else {
-                            // If we are in the main tab backstack, switch back to Home tab
-                            MainScreen.requestTab(0)
+                    LaunchedEffect(pagerState.settledPage, mpvView) {
+                        if (mpvView != null && shorts.isNotEmpty() && pagerState.settledPage < shorts.size) {
+                            val video = shorts[pagerState.settledPage]
+                            MPVLib.command("loadfile", video.path)
+                            MPVLib.setPropertyBoolean("pause", false)
                         }
-                    },
-                    onLove = { viewModel.toggleLove(it) },
-                    onBlock = { viewModel.blockVideo(it) },
-                    onShuffle = { viewModel.shuffleShorts() }
-                )
+                    }
+
+                    ShortsPager(
+                        shorts = shorts,
+                        pagerState = pagerState,
+                        lovedPaths = lovedPaths,
+                        isPlayerReady = isPlayerReady,
+                        viewModel = viewModel,
+                        onBack = { 
+                            if (backstack.size > 1) {
+                                backstack.removeLastOrNull()
+                            } else {
+                                MainScreen.requestTab(0)
+                            }
+                        },
+                        onLove = { viewModel.toggleLove(it) },
+                        onBlock = { viewModel.blockVideo(it) },
+                        onShuffle = { viewModel.shuffleShorts() }
+                    )
+                }
             }
         }
     }
@@ -153,6 +177,8 @@ object ShortsScreen : Screen {
         shorts: List<Video>,
         pagerState: PagerState,
         lovedPaths: Set<String>,
+        isPlayerReady: Boolean,
+        viewModel: ShortsViewModel,
         onBack: () -> Unit,
         onLove: (Video) -> Unit,
         onBlock: (Video) -> Unit,
@@ -167,8 +193,11 @@ object ShortsScreen : Screen {
                 val video = shorts[page]
                 ShortPageItem(
                     video = video,
-                    isCurrent = page == pagerState.settledPage,
+                    isCurrent = page == pagerState.currentPage,
+                    isSettled = page == pagerState.settledPage,
+                    isPlayerReady = isPlayerReady,
                     isLoved = lovedPaths.contains(video.path),
+                    viewModel = viewModel,
                     onBack = onBack,
                     onLove = { onLove(video) },
                     onBlock = { onBlock(video) },
@@ -182,7 +211,10 @@ object ShortsScreen : Screen {
     private fun ShortPageItem(
         video: Video,
         isCurrent: Boolean,
+        isSettled: Boolean,
+        isPlayerReady: Boolean,
         isLoved: Boolean,
+        viewModel: ShortsViewModel,
         onBack: () -> Unit,
         onLove: () -> Unit,
         onBlock: () -> Unit,
@@ -192,13 +224,17 @@ object ShortsScreen : Screen {
         var isPaused by remember { mutableStateOf(false) }
         var showHeart by remember { mutableStateOf(false) }
         var heartOffset by remember { mutableStateOf(Offset.Zero) }
+        var thumbnail by remember { mutableStateOf<Bitmap?>(null) }
         
         val interactionSource = remember { MutableInteractionSource() }
         val isPressed by interactionSource.collectIsPressedAsState()
         
-        // Track progress if this is the current page
-        LaunchedEffect(isCurrent, isPressed) {
-            if (isCurrent && !isPressed) {
+        LaunchedEffect(video.path) {
+            thumbnail = viewModel.getThumbnail(video)
+        }
+
+        LaunchedEffect(isSettled, isPressed) {
+            if (isSettled && !isPressed) {
                 while (isActive) {
                     val pos = MPVLib.getPropertyInt("time-pos") ?: 0
                     val duration = MPVLib.getPropertyInt("duration") ?: 1
@@ -209,7 +245,6 @@ object ShortsScreen : Screen {
             }
         }
 
-        // Heart animation
         val heartScale by animateFloatAsState(
             targetValue = if (showHeart) 1.5f else 0f,
             animationSpec = spring(),
@@ -222,19 +257,49 @@ object ShortsScreen : Screen {
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = {
-                            val currentPause = MPVLib.getPropertyBoolean("pause") ?: false
-                            MPVLib.setPropertyBoolean("pause", !currentPause)
-                            isPaused = !currentPause
+                            if (isSettled) {
+                                val currentPause = MPVLib.getPropertyBoolean("pause") ?: false
+                                MPVLib.setPropertyBoolean("pause", !currentPause)
+                                isPaused = !currentPause
+                            }
                         },
                         onDoubleTap = { offset ->
-                            heartOffset = offset
-                            showHeart = true
-                            if (!isLoved) onLove()
+                            if (isSettled) {
+                                heartOffset = offset
+                                showHeart = true
+                                if (!isLoved) onLove()
+                            }
                         }
                     )
                 }
         ) {
-            // Heart Animation Overlay
+            // FIX: Removed isPaused from showThumbnail. Only show during swipe/load.
+            val showThumbnail = !isSettled || !isPlayerReady
+            
+            Crossfade(
+                targetState = showThumbnail,
+                animationSpec = tween(300),
+                label = "thumbnail_fade"
+            ) { targetShowThumbnail ->
+                if (targetShowThumbnail) {
+                    thumbnail?.let {
+                        Image(
+                            bitmap = it.asImageBitmap(),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            // FIX: Changed ContentScale from Crop to Fit to match video resolution exactly
+                            contentScale = ContentScale.Fit
+                        )
+                    } ?: Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+                } else {
+                    Box(modifier = Modifier.fillMaxSize())
+                }
+            }
+
+            if (!isCurrent) {
+                Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)))
+            }
+
             if (showHeart || heartScale > 0f) {
                 Icon(
                     imageVector = Icons.Filled.Favorite,
@@ -252,12 +317,11 @@ object ShortsScreen : Screen {
                 )
             }
 
-            // Top Bar
             IconButton(
                 onClick = onBack,
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(16.dp)
+                    .padding(top = 48.dp, start = 24.dp)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -266,7 +330,6 @@ object ShortsScreen : Screen {
                 )
             }
 
-            // Right Action Column
             ActionColumn(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -276,20 +339,21 @@ object ShortsScreen : Screen {
                 onBlock = onBlock,
                 onShuffle = onShuffle,
                 onSpeed = { 
-                    val currentSpeed = MPVLib.getPropertyDouble("speed") ?: 1.0
-                    val nextSpeed = when {
-                        currentSpeed < 1.0 -> 1.0
-                        currentSpeed < 1.5 -> 1.5
-                        currentSpeed < 2.0 -> 2.0
-                        else -> 0.5
+                    if (isSettled) {
+                        val currentSpeed = MPVLib.getPropertyDouble("speed") ?: 1.0
+                        val nextSpeed = when {
+                            currentSpeed < 1.0 -> 1.0
+                            currentSpeed < 1.5 -> 1.5
+                            currentSpeed < 2.0 -> 2.0
+                            else -> 0.5
+                        }
+                        MPVLib.setPropertyDouble("speed", nextSpeed)
                     }
-                    MPVLib.setPropertyDouble("speed", nextSpeed)
                 },
                 onInfo = { /* Show info sheet */ }
             )
 
-            // Seeking Overlay (Press and Hold)
-            if (isPressed) {
+            if (isPressed && isSettled) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -306,7 +370,6 @@ object ShortsScreen : Screen {
                 }
             }
 
-            // Bottom Info & Progress
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)

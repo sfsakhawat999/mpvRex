@@ -1,6 +1,7 @@
 package app.marlboroadvance.mpvex.ui.browser.shorts
 
 import android.app.Application
+import android.graphics.Bitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -9,6 +10,7 @@ import app.marlboroadvance.mpvex.database.dao.ShortsMediaDao
 import app.marlboroadvance.mpvex.database.entities.ShortsMediaEntity
 import app.marlboroadvance.mpvex.database.repository.VideoMetadataCacheRepository
 import app.marlboroadvance.mpvex.domain.media.model.Video
+import app.marlboroadvance.mpvex.domain.thumbnail.ThumbnailRepository
 import app.marlboroadvance.mpvex.preferences.BrowserPreferences
 import app.marlboroadvance.mpvex.utils.media.ShortsDiscoveryOps
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +30,7 @@ class ShortsViewModel(
     private val shortsMediaDao: ShortsMediaDao by inject()
     private val browserPreferences: BrowserPreferences by inject()
     private val metadataCache: VideoMetadataCacheRepository by inject()
+    private val thumbnailRepository: ThumbnailRepository by inject()
 
     private val _shorts = MutableStateFlow<List<Video>>(emptyList())
     val shorts: StateFlow<List<Video>> = _shorts.asStateFlow()
@@ -51,6 +54,11 @@ class ShortsViewModel(
             _shorts.value = discoveredShorts
             _isLoading.value = false
         }
+    }
+
+    suspend fun getThumbnail(video: Video): Bitmap? {
+        // High quality thumbnails for full screen
+        return thumbnailRepository.getThumbnail(video, 1080, 1920)
     }
 
     fun shuffleShorts() {

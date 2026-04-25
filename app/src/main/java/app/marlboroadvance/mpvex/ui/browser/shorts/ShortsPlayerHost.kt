@@ -11,22 +11,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import app.marlboroadvance.mpvex.R
 import app.marlboroadvance.mpvex.ui.player.MPVView
+import `is`.xyz.mpv.MPVLib
+import `is`.xyz.mpv.MPVNode
 import org.xmlpull.v1.XmlPullParser
 
 @Composable
 fun ShortsPlayerHost(
     modifier: Modifier = Modifier,
-    onReady: (MPVView) -> Unit
+    onReady: (MPVView) -> Unit,
+    onPlayerReadyChange: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
     
     val mpvView = remember {
-        // Use a real AttributeSet from a dummy XML layout to avoid ClassCastException
-        // and satisfy the non-null requirement of BaseMPVView.
         val parser = context.resources.getLayout(R.layout.shorts_dummy_layout)
         var type: Int
         while (parser.next().also { type = it } != XmlPullParser.START_TAG && type != XmlPullParser.END_DOCUMENT) {
-            // Seek to the start tag
         }
         val attrs = Xml.asAttributeSet(parser)
         
@@ -39,9 +39,31 @@ fun ShortsPlayerHost(
     }
 
     DisposableEffect(Unit) {
+        val observer = object : MPVLib.EventObserver {
+            override fun event(eventId: Int, data: MPVNode) {
+                when (eventId) {
+                    MPVLib.MpvEvent.MPV_EVENT_START_FILE -> {
+                        onPlayerReadyChange(false)
+                    }
+                    MPVLib.MpvEvent.MPV_EVENT_FILE_LOADED -> {
+                        onPlayerReadyChange(true)
+                    }
+                }
+            }
+            override fun eventProperty(property: String) {}
+            override fun eventProperty(property: String, value: Long) {}
+            override fun eventProperty(property: String, value: Boolean) {}
+            override fun eventProperty(property: String, value: String) {}
+            override fun eventProperty(property: String, value: Double) {}
+            override fun eventProperty(property: String, value: MPVNode) {}
+        }
+
         mpvView.initialize(context.filesDir.path, context.cacheDir.path)
+        MPVLib.addObserver(observer)
         onReady(mpvView)
+        
         onDispose {
+            MPVLib.removeObserver(observer)
             mpvView.destroy()
         }
     }

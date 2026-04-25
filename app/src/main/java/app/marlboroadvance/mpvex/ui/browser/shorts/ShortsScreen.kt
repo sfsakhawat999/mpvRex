@@ -31,18 +31,21 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -104,27 +107,36 @@ object ShortsScreen : Screen {
             } else {
                 var mpvView by remember { mutableStateOf<MPVView?>(null) }
                 var isPlayerReady by remember { mutableStateOf(false) }
+                var playingPageIndex by remember { mutableIntStateOf(0) }
+                
                 val pagerState = rememberPagerState(pageCount = { shorts.size })
                 val lifecycleOwner = LocalLifecycleOwner.current
                 val density = LocalDensity.current
 
-                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color.Black)) {
                     val heightPx = with(density) { maxHeight.toPx() }
-                    
-                    val scrollOffset = (pagerState.currentPage + pagerState.currentPageOffsetFraction) * heightPx
+                    val totalScroll = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                    val scrollOffset = totalScroll * heightPx
                     
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
+                            .background(Color.Black)
                             .graphicsLayer {
-                                translationY = -scrollOffset + (pagerState.currentPage * heightPx)
+                                translationY = -scrollOffset + (playingPageIndex * heightPx)
+                                // Only show when ready AND the page is settled or closely pinned
                                 alpha = if (isPlayerReady) 1f else 0f
                             }
                     ) {
                         ShortsPlayerHost(
                             modifier = Modifier.fillMaxSize(),
                             onReady = { mpvView = it },
-                            onPlayerReadyChange = { isPlayerReady = it }
+                            onPlayerReadyChange = { ready ->
+                                isPlayerReady = ready
+                                if (ready) {
+                                    playingPageIndex = pagerState.settledPage
+                                }
+                            }
                         )
                     }
 
@@ -145,6 +157,7 @@ object ShortsScreen : Screen {
                     LaunchedEffect(pagerState.settledPage, mpvView) {
                         if (mpvView != null && shorts.isNotEmpty() && pagerState.settledPage < shorts.size) {
                             val video = shorts[pagerState.settledPage]
+                            MPVLib.command("stop") 
                             MPVLib.command("loadfile", video.path)
                             MPVLib.setPropertyBoolean("pause", false)
                         }
@@ -155,6 +168,7 @@ object ShortsScreen : Screen {
                         pagerState = pagerState,
                         lovedPaths = lovedPaths,
                         isPlayerReady = isPlayerReady,
+                        playingPageIndex = playingPageIndex,
                         viewModel = viewModel,
                         onBack = { 
                             if (backstack.size > 1) {
@@ -178,6 +192,7 @@ object ShortsScreen : Screen {
         pagerState: PagerState,
         lovedPaths: Set<String>,
         isPlayerReady: Boolean,
+        playingPageIndex: Int,
         viewModel: ShortsViewModel,
         onBack: () -> Unit,
         onLove: (Video) -> Unit,
@@ -195,6 +210,7 @@ object ShortsScreen : Screen {
                     video = video,
                     isCurrent = page == pagerState.currentPage,
                     isSettled = page == pagerState.settledPage,
+                    isPlaying = page == playingPageIndex,
                     isPlayerReady = isPlayerReady,
                     isLoved = lovedPaths.contains(video.path),
                     viewModel = viewModel,
@@ -212,6 +228,7 @@ object ShortsScreen : Screen {
         video: Video,
         isCurrent: Boolean,
         isSettled: Boolean,
+        isPlaying: Boolean,
         isPlayerReady: Boolean,
         isLoved: Boolean,
         viewModel: ShortsViewModel,
@@ -225,6 +242,7 @@ object ShortsScreen : Screen {
         var showHeart by remember { mutableStateOf(false) }
         var heartOffset by remember { mutableStateOf(Offset.Zero) }
         var thumbnail by remember { mutableStateOf<Bitmap?>(null) }
+        var showInfo by remember { mutableStateOf(false) }
         
         val interactionSource = remember { MutableInteractionSource() }
         val isPressed by interactionSource.collectIsPressedAsState()
@@ -234,7 +252,7 @@ object ShortsScreen : Screen {
         }
 
         LaunchedEffect(isSettled, isPressed) {
-            if (isSettled && !isPressed) {
+            if (isSettled && isPlaying && !isPressed) {
                 while (isActive) {
                     val pos = MPVLib.getPropertyInt("time-pos") ?: 0
                     val duration = MPVLib.getPropertyInt("duration") ?: 1
@@ -254,10 +272,11 @@ object ShortsScreen : Screen {
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                // IMPORTANT: Removed background(Color.Black) to let the player surface through.
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = {
-                            if (isSettled) {
+                            if (isSettled && isPlaying) {
                                 val currentPause = MPVLib.getPropertyBoolean("pause") ?: false
                                 MPVLib.setPropertyBoolean("pause", !currentPause)
                                 isPaused = !currentPause
@@ -273,8 +292,7 @@ object ShortsScreen : Screen {
                     )
                 }
         ) {
-            // FIX: Removed isPaused from showThumbnail. Only show during swipe/load.
-            val showThumbnail = !isSettled || !isPlayerReady
+            val showThumbnail = !isPlaying || !isPlayerReady
             
             Crossfade(
                 targetState = showThumbnail,
@@ -286,12 +304,12 @@ object ShortsScreen : Screen {
                         Image(
                             bitmap = it.asImageBitmap(),
                             contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            // FIX: Changed ContentScale from Crop to Fit to match video resolution exactly
+                            modifier = Modifier.fillMaxSize().background(Color.Black),
                             contentScale = ContentScale.Fit
                         )
                     } ?: Box(modifier = Modifier.fillMaxSize().background(Color.Black))
                 } else {
+                    // Transparent box to let the player surface through
                     Box(modifier = Modifier.fillMaxSize())
                 }
             }
@@ -339,7 +357,7 @@ object ShortsScreen : Screen {
                 onBlock = onBlock,
                 onShuffle = onShuffle,
                 onSpeed = { 
-                    if (isSettled) {
+                    if (isSettled && isPlaying) {
                         val currentSpeed = MPVLib.getPropertyDouble("speed") ?: 1.0
                         val nextSpeed = when {
                             currentSpeed < 1.0 -> 1.0
@@ -350,10 +368,10 @@ object ShortsScreen : Screen {
                         MPVLib.setPropertyDouble("speed", nextSpeed)
                     }
                 },
-                onInfo = { /* Show info sheet */ }
+                onInfo = { showInfo = true }
             )
 
-            if (isPressed && isSettled) {
+            if (isPressed && isSettled && isPlaying) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -394,6 +412,27 @@ object ShortsScreen : Screen {
                     modifier = Modifier.fillMaxWidth().height(4.dp),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = Color.White.copy(alpha = 0.3f)
+                )
+            }
+
+            if (showInfo) {
+                AlertDialog(
+                    onDismissRequest = { showInfo = false },
+                    title = { Text(text = "Video Info") },
+                    text = {
+                        Column {
+                            Text(text = "Name: ${video.displayName}", fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = "Resolution: ${video.width}x${video.height}")
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = "Path: ${video.path}", fontSize = 12.sp)
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showInfo = false }) {
+                            Text("Close")
+                        }
+                    }
                 )
             }
         }

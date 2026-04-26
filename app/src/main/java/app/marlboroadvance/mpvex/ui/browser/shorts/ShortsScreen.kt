@@ -3,11 +3,13 @@ package app.marlboroadvance.mpvex.ui.browser.shorts
 import android.app.Activity
 import android.graphics.Bitmap
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -43,6 +45,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -109,7 +112,6 @@ object ShortsScreen : Screen {
         val isShuffleEnabled by viewModel.isShuffleEnabled.collectAsState()
         val currentSpeed by viewModel.currentSpeed.collectAsState()
         
-        // Force status bar and navigation bar to have white icons (Dark Mode style)
         val view = LocalView.current
         val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
         
@@ -118,12 +120,10 @@ object ShortsScreen : Screen {
                 val window = (view.context as Activity).window
                 val insetsController = WindowCompat.getInsetsController(window, view)
                 
-                // Switch to white icons
                 insetsController.isAppearanceLightStatusBars = false
                 insetsController.isAppearanceLightNavigationBars = false
                 
                 onDispose {
-                    // Restore original theme-based icons when leaving Shorts
                     insetsController.isAppearanceLightStatusBars = !isDarkTheme
                     insetsController.isAppearanceLightNavigationBars = !isDarkTheme
                 }
@@ -198,7 +198,6 @@ object ShortsScreen : Screen {
                             MPVLib.command("stop") 
                             MPVLib.command("loadfile", video.path)
                             MPVLib.setPropertyBoolean("pause", false)
-                            // Initial speed update
                             viewModel.updatePlaybackSpeed()
                         }
                     }
@@ -300,18 +299,23 @@ object ShortsScreen : Screen {
         var thumbnail by remember { mutableStateOf<Bitmap?>(null) }
         var showInfo by remember { mutableStateOf(false) }
         
+        // --- Phase 2: Seeking States ---
+        var isSeeking by remember { mutableStateOf(false) }
+        var seekProgress by remember { mutableFloatStateOf(0f) }
+        
         val interactionSource = remember { MutableInteractionSource() }
-        val isPressed by interactionSource.collectIsPressedAsState()
         
         LaunchedEffect(video.path) {
             thumbnail = viewModel.getThumbnail(video)
         }
 
-        LaunchedEffect(isSettled, isPressed) {
-            if (isSettled && isPlaying && !isPressed) {
+        // Track progress if this is the settled page
+        LaunchedEffect(isSettled, isPlaying, isSeeking) {
+            if (isSettled && isPlaying && !isSeeking) {
                 while (isActive) {
                     val pos = MPVLib.getPropertyInt("time-pos") ?: 0
                     val duration = MPVLib.getPropertyInt("duration") ?: 1
+                    // Correctly handle duration for accurate progress
                     progress = if (duration > 0) pos.toFloat() / duration.toFloat() else 0f
                     isPaused = MPVLib.getPropertyBoolean("pause") ?: false
                     delay(500)
@@ -325,13 +329,17 @@ object ShortsScreen : Screen {
             finishedListener = { if (it == 1.5f) showHeart = false }
         )
 
+        val progressBarHeight by animateDpAsState(
+            targetValue = if (isSeeking) 12.dp else 4.dp,
+            animationSpec = tween(300)
+        )
+
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = { offset ->
-                            // FIX: Only trigger pause in middle 80% of screen height
                             val screenHeight = size.height
                             val topThreshold = screenHeight * 0.1f
                             val bottomThreshold = screenHeight * 0.9f
@@ -349,6 +357,38 @@ object ShortsScreen : Screen {
                                 heartOffset = offset
                                 showHeart = true
                                 if (!isLoved) onLove()
+                            }
+                        }
+                    )
+                }
+                .pointerInput(Unit) {
+                    // Implement Press-and-Hold to Seek
+                    detectDragGesturesAfterLongPress(
+                        onDragStart = {
+                            if (isSettled && isPlaying) {
+                                isSeeking = true
+                                seekProgress = progress
+                            }
+                        },
+                        onDragEnd = {
+                            if (isSeeking) {
+                                val duration = MPVLib.getPropertyInt("duration") ?: 0
+                                if (duration > 0) {
+                                    val newPos = (seekProgress * duration).toInt()
+                                    MPVLib.setPropertyInt("time-pos", newPos)
+                                    progress = seekProgress
+                                }
+                                isSeeking = false
+                            }
+                        },
+                        onDragCancel = { isSeeking = false },
+                        onDrag = { change, dragAmount ->
+                            if (isSeeking) {
+                                // Horizontal drag changes progress
+                                val screenWidth = size.width.toFloat()
+                                val delta = dragAmount.x / screenWidth
+                                seekProgress = (seekProgress + delta).coerceIn(0f, 1f)
+                                change.consume()
                             }
                         }
                     )
@@ -448,16 +488,18 @@ object ShortsScreen : Screen {
                 onInfo = { showInfo = true }
             )
 
-            if (isPressed && isSettled && isPlaying) {
+            // --- Phase 2: Seeking Tooltip ---
+            if (isSeeking) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.Black.copy(alpha = 0.3f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    val pos = MPVLib.getPropertyInt("time-pos") ?: 0
+                    val duration = MPVLib.getPropertyInt("duration") ?: 0
+                    val currentSeekTime = (seekProgress * duration).toInt()
                     Text(
-                        text = app.marlboroadvance.mpvex.utils.media.MediaFormatter.formatDuration(pos.toLong() * 1000),
+                        text = app.marlboroadvance.mpvex.utils.media.MediaFormatter.formatDuration(currentSeekTime.toLong() * 1000),
                         color = Color.White,
                         fontSize = 48.sp,
                         style = textWithStroke
@@ -465,6 +507,7 @@ object ShortsScreen : Screen {
                 }
             }
 
+            // Bottom Progress
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
@@ -476,18 +519,11 @@ object ShortsScreen : Screen {
                     )
                     .padding(start = 16.dp, end = 16.dp, bottom = 48.dp)
             ) {
-                Text(
-                    text = video.displayName,
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    maxLines = 1,
-                    style = textWithStroke
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                // FIX: Title removed as it's available in Info button
                 LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier.fillMaxWidth().height(4.dp),
-                    color = MaterialTheme.colorScheme.primary,
+                    progress = { if (isSeeking) seekProgress else progress },
+                    modifier = Modifier.fillMaxWidth().height(progressBarHeight),
+                    color = if (isSeeking) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                     trackColor = Color.White.copy(alpha = 0.3f)
                 )
             }
@@ -535,7 +571,7 @@ object ShortsScreen : Screen {
             ActionButton(
                 icon = Icons.Filled.Shuffle, 
                 label = if (isShuffleEnabled) "Shuffled" else "Shuffle",
-                iconColor = if (isShuffleEnabled) Color(0xFF2E7D32) else Color.White, // Deep Green
+                iconColor = if (isShuffleEnabled) Color(0xFF2E7D32) else Color.White,
                 onClick = onShuffle
             )
             Spacer(modifier = Modifier.height(12.dp))

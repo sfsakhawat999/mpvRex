@@ -35,17 +35,19 @@ object ShortsDiscoveryOps {
                 VideoScanUtils.getVideosInFolder(context, folder.path)
             }.filter { !it.isAudio }
 
-            // 3. Enrich videos with metadata (we need width/height)
-            // Even if chips are disabled, we NEED metadata for vertical detection.
-            // We use MetadataRetrieval but we must ensure we get the dimensions.
+            // 3. Enrich videos with metadata
             val enrichedVideos = MetadataRetrieval.enrichVideosIfNeeded(
                 context, allVideos, browserPreferences, metadataCache
             )
 
             // 4. Get shorts metadata from DB
             val shortsMetadata = shortsMediaDao.getAllShortsMedia().associateBy { it.path }
+            
+            // 5. Get Discovery Preferences
+            val includeHorizontal = browserPreferences.includeShortHorizontalVideos.get()
+            val maxHorizontalMs = browserPreferences.maxHorizontalVideoDurationMinutes.get() * 60 * 1000L
 
-            // 5. Filter for vertical videos or manually added shorts, excluding blocked
+            // 6. Filter for shorts based on orientation or user-defined short-duration preference
             enrichedVideos.filter { video ->
                 val metadata = shortsMetadata[video.path]
                 val isBlocked = metadata?.isBlocked ?: false
@@ -53,11 +55,10 @@ object ShortsDiscoveryOps {
 
                 val isManuallyAdded = metadata?.isManuallyAdded ?: false
                 
-                // If width/height are still 0 (because enrichment was skipped by prefs),
-                // we might need to extract them anyway for the vertical check.
                 var width = video.width
                 var height = video.height
                 
+                // Force dimension extraction if missing
                 if (width == 0 || height == 0) {
                    val file = java.io.File(video.path)
                    if (file.exists()) {
@@ -70,8 +71,14 @@ object ShortsDiscoveryOps {
                 }
 
                 val isVertical = height > width && height > 0
+                
+                // --- Phase 3: Horizontal Inclusion Logic ---
+                val isShortHorizontal = includeHorizontal && 
+                                        height <= width && 
+                                        video.duration > 0 && 
+                                        video.duration <= maxHorizontalMs
 
-                isVertical || isManuallyAdded
+                isVertical || isManuallyAdded || isShortHorizontal
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error discovering shorts", e)

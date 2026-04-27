@@ -1,11 +1,13 @@
 package app.marlboroadvance.mpvex.ui.preferences
 
+import android.app.Activity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material.icons.outlined.HorizontalRule
 import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import app.marlboroadvance.mpvex.preferences.BrowserPreferences
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
@@ -26,8 +29,10 @@ import app.marlboroadvance.mpvex.ui.utils.LocalBackStack
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
+import me.zhanghai.compose.preference.SliderPreference
 import me.zhanghai.compose.preference.SwitchPreference
 import org.koin.compose.koinInject
+import kotlin.math.roundToInt
 
 @Serializable
 object ShortsPreferencesScreen : Screen {
@@ -38,6 +43,8 @@ object ShortsPreferencesScreen : Screen {
         val browserPreferences = koinInject<BrowserPreferences>()
         val enableShorts by browserPreferences.enableShorts.collectAsState()
         val persistentShuffle by browserPreferences.persistentShuffle.collectAsState()
+        val includeHorizontal by browserPreferences.includeShortHorizontalVideos.collectAsState()
+        val maxDuration by browserPreferences.maxHorizontalVideoDurationMinutes.collectAsState()
 
         Scaffold(
             topBar = {
@@ -101,6 +108,45 @@ object ShortsPreferencesScreen : Screen {
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary
                                     )
+                                }
+                            )
+                        }
+                    }
+
+                    item {
+                        PreferenceSectionHeader(title = "Discovery")
+                    }
+
+                    item {
+                        PreferenceCard {
+                            SwitchPreference(
+                                value = includeHorizontal,
+                                onValueChange = { browserPreferences.includeShortHorizontalVideos.set(it) },
+                                title = { Text("Include Short Normal Videos") },
+                                summary = { Text("Show horizontal videos in the feed if they are short") },
+                                icon = {
+                                    Icon(
+                                        Icons.Outlined.HorizontalRule,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            )
+
+                            PreferenceDivider()
+
+                            SliderPreference(
+                                value = maxDuration.toFloat(),
+                                onValueChange = { browserPreferences.maxHorizontalVideoDurationMinutes.set(it.roundToInt()) },
+                                sliderValue = maxDuration.toFloat(),
+                                onSliderValueChange = { browserPreferences.maxHorizontalVideoDurationMinutes.set(it.roundToInt()) },
+                                title = { Text("Max Horizontal Duration") },
+                                summary = { Text("Limit horizontal videos to $maxDuration minute${if (maxDuration > 1) "s" else ""}") },
+                                valueRange = 1f..10f,
+                                valueSteps = 9,
+                                enabled = includeHorizontal,
+                                icon = {
+                                    // Empty icon for alignment if needed or specific icon
                                 }
                             )
                         }

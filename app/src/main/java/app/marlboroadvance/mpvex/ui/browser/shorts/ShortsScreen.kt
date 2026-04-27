@@ -18,14 +18,12 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -54,7 +52,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -65,6 +62,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -74,6 +72,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -227,7 +227,7 @@ data class ShortsScreen(
                         },
                         onLove = { viewModel.toggleLove(it) },
                         onBlock = { viewModel.toggleBlock(it) },
-                        onShuffle = { viewModel.toggleShuffle(pagerState.currentPage) }
+                        onToggleShuffle = { viewModel.toggleShuffle(pagerState.currentPage) }
                     )
                 }
             }
@@ -262,7 +262,7 @@ private fun ShortsPager(
     onBack: () -> Unit,
     onLove: (Video) -> Unit,
     onBlock: (Video) -> Unit,
-    onShuffle: () -> Unit
+    onToggleShuffle: () -> Unit
 ) {
     VerticalPager(
         state = pagerState,
@@ -285,7 +285,7 @@ private fun ShortsPager(
                 onBack = onBack,
                 onLove = { onLove(video) },
                 onBlock = { onBlock(video) },
-                onShuffle = onShuffle
+                onToggleShuffle = onToggleShuffle
             )
         }
     }
@@ -306,22 +306,22 @@ private fun ShortPageItem(
     onBack: () -> Unit,
     onLove: () -> Unit,
     onBlock: () -> Unit,
-    onShuffle: () -> Unit
+    onToggleShuffle: () -> Unit
 ) {
     val backstack = LocalBackStack.current
+    val coroutineScope = rememberCoroutineScope()
     var progress by remember { mutableFloatStateOf(0f) }
     var isPaused by remember { mutableStateOf(false) }
     var thumbnail by remember { mutableStateOf<Bitmap?>(null) }
     var showInfo by remember { mutableStateOf(false) }
     var showMore by remember { mutableStateOf(false) }
     
-    // --- Phase 5: Advanced Animation States ---
-    var heartOffset by remember { mutableStateOf(Offset.Zero) }
+    // --- Visual Refinements ---
+    var heartTapOffset by remember { mutableStateOf(Offset.Zero) }
+    var loveButtonCenter by remember { mutableStateOf(Offset.Zero) }
     val heartScale = remember { Animatable(0f) }
     val heartAlpha = remember { Animatable(0f) }
     val confettiTrigger = remember { mutableStateOf(0L) }
-    
-    val coroutineScope = rememberCoroutineScope()
     
     var isSeeking by remember { mutableStateOf(false) }
     var seekProgress by remember { mutableFloatStateOf(0f) }
@@ -367,11 +367,12 @@ private fun ShortPageItem(
                     },
                     onDoubleTap = { offset ->
                         if (isSettled) {
-                            heartOffset = offset
+                            heartTapOffset = offset
                             coroutineScope.launch {
-                                // Premium Animation: Pop -> Zoom -> Fade
+                                // Premium Animation
                                 heartAlpha.snapTo(1f)
                                 heartScale.snapTo(0.7f)
+                                // Confetti triggered here, but logic below anchors it to button center
                                 confettiTrigger.value = System.currentTimeMillis()
                                 
                                 heartScale.animateTo(1.5f, spring(dampingRatio = 0.5f))
@@ -379,6 +380,7 @@ private fun ShortPageItem(
                                 launch { heartScale.animateTo(2f, tween(400)) }
                                 launch { heartAlpha.animateTo(0f, tween(400)) }
                             }
+                            // Double click only ADDS love, never removes it.
                             if (!isLoved) onLove()
                         }
                     }
@@ -440,10 +442,10 @@ private fun ShortPageItem(
             Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)))
         }
 
-        // Confetti Effect
-        ConfettiBurst(trigger = confettiTrigger.value, center = heartOffset)
+        // Confetti Effect - now anchored to loveButtonCenter
+        ConfettiBurst(trigger = confettiTrigger.value, center = loveButtonCenter)
 
-        // Premium Heart Animation Overlay
+        // Premium Heart Animation Overlay (still at tap location for visual feedback)
         if (heartAlpha.value > 0f) {
             Icon(
                 imageVector = Icons.Filled.Favorite,
@@ -452,8 +454,8 @@ private fun ShortPageItem(
                 modifier = Modifier
                     .size(100.dp)
                     .graphicsLayer {
-                        translationX = heartOffset.x - 150f
-                        translationY = heartOffset.y - 150f
+                        translationX = heartTapOffset.x - 150f
+                        translationY = heartTapOffset.y - 150f
                         scaleX = heartScale.value
                         scaleY = heartScale.value
                         alpha = heartAlpha.value
@@ -489,25 +491,11 @@ private fun ShortPageItem(
                 .padding(bottom = 100.dp, end = 16.dp),
             isLoved = isLoved,
             isBlocked = isBlocked,
-            isShuffleEnabled = isShuffleEnabled,
             currentSpeed = currentSpeed,
             onLove = onLove,
             onBlock = onBlock,
-            onShuffle = onShuffle,
-            onSpeed = { 
-                if (isSettled && isPlaying) {
-                    val currentSpd = MPVLib.getPropertyDouble("speed") ?: 1.0
-                    val nextSpeed = when {
-                        currentSpd < 1.0 -> 1.0
-                        currentSpd < 1.5 -> 1.5
-                        currentSpd < 2.0 -> 2.0
-                        else -> 0.5
-                    }
-                    MPVLib.setPropertyDouble("speed", nextSpeed)
-                    viewModel.updatePlaybackSpeed()
-                }
-            },
-            onMore = { showMore = true }
+            onMore = { showMore = true },
+            onLoveButtonPositioned = { loveButtonCenter = it }
         )
 
         if (isSeeking) {
@@ -571,6 +559,8 @@ private fun ShortPageItem(
         if (showMore) {
             MoreActionsSheet(
                 onDismiss = { showMore = false },
+                isShuffleEnabled = isShuffleEnabled,
+                onToggleShuffle = onToggleShuffle,
                 onShowBlocked = { 
                     showMore = false
                     backstack.add(BlockedShortsScreen)
@@ -586,9 +576,8 @@ private fun ShortPageItem(
 
 @Composable
 private fun ConfettiBurst(trigger: Long, center: Offset) {
-    if (trigger == 0L) return
+    if (trigger == 0L || center == Offset.Zero) return
     
-    // Simple particle system using LaunchedEffect
     val particles = remember(trigger) {
         List(15) {
             val angle = Random.nextFloat() * 360f
@@ -628,6 +617,8 @@ private fun ConfettiBurst(trigger: Long, center: Offset) {
 @Composable
 private fun MoreActionsSheet(
     onDismiss: () -> Unit,
+    isShuffleEnabled: Boolean,
+    onToggleShuffle: () -> Unit,
     onShowBlocked: () -> Unit,
     onShowInfo: () -> Unit
 ) {
@@ -636,6 +627,14 @@ private fun MoreActionsSheet(
         sheetState = rememberModalBottomSheetState()
     ) {
         Column(modifier = Modifier.padding(bottom = 32.dp)) {
+            ListItem(
+                headlineContent = { Text(if (isShuffleEnabled) "Stop Shuffling" else "Shuffle Shorts") },
+                leadingContent = { Icon(Icons.Default.Shuffle, contentDescription = null) },
+                modifier = Modifier.clickable { 
+                    onToggleShuffle()
+                    onDismiss()
+                }
+            )
             ListItem(
                 headlineContent = { Text("Video Information") },
                 leadingContent = { Icon(Icons.Default.Info, contentDescription = null) },
@@ -655,45 +654,54 @@ private fun ActionColumn(
     modifier: Modifier = Modifier,
     isLoved: Boolean,
     isBlocked: Boolean,
-    isShuffleEnabled: Boolean,
     currentSpeed: Double,
     onLove: () -> Unit,
     onBlock: () -> Unit,
-    onShuffle: () -> Unit,
-    onSpeed: () -> Unit,
-    onMore: () -> Unit
+    onMore: () -> Unit,
+    onLoveButtonPositioned: (Offset) -> Unit
 ) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ActionButton(
-            icon = Icons.Filled.Shuffle, 
-            label = if (isShuffleEnabled) "Shuffled" else "Shuffle",
-            iconColor = if (isShuffleEnabled) Color(0xFF2E7D32) else Color.White,
-            onClick = onShuffle
-        )
+        // Love Button (Semi-transparent as requested)
+        Box(modifier = Modifier.alpha(0.8f)) {
+            ActionButton(
+                icon = if (isLoved) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                label = if (isLoved) "Loved" else "Love",
+                iconColor = if (isLoved) Color.Red else Color.White,
+                onClick = onLove,
+                modifier = Modifier.onGloballyPositioned { coords ->
+                    val position = coords.positionInRoot()
+                    onLoveButtonPositioned(
+                        Offset(
+                            position.x + coords.size.width / 2,
+                            position.y + coords.size.height / 2
+                        )
+                    )
+                }
+            )
+        }
+        
         Spacer(modifier = Modifier.height(12.dp))
-        ActionButton(
-            icon = if (isLoved) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-            label = if (isLoved) "Loved" else "Love",
-            iconColor = if (isLoved) Color.Red else Color.White,
-            onClick = onLove
-        )
-        Spacer(modifier = Modifier.height(12.dp))
+        
         ActionButton(
             icon = Icons.Filled.Block, 
             label = if (isBlocked) "Blocked" else "Block", 
             iconColor = if (isBlocked) Color.Red else Color.White,
             onClick = onBlock
         )
+        
         Spacer(modifier = Modifier.height(12.dp))
+        
         ActionButton(
             icon = Icons.Filled.Speed, 
             label = "${currentSpeed}x", 
-            onClick = onSpeed
+            onClick = {} // Speed is now info-only or we can keep toggle here.
         )
+        
         Spacer(modifier = Modifier.height(12.dp))
+        
         ActionButton(icon = Icons.Filled.MoreVert, label = "More", onClick = onMore)
     }
 }
@@ -702,10 +710,14 @@ private fun ActionColumn(
 private fun ActionButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
+    modifier: Modifier = Modifier,
     iconColor: Color = Color.White,
     onClick: () -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
         IconButton(
             onClick = onClick,
             modifier = Modifier.size(40.dp)

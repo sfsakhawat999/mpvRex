@@ -172,8 +172,20 @@ class ShortsViewModel(
         return thumbnailRepository.getThumbnail(video, 1080, 1920)
     }
 
-    fun updatePlaybackSpeed() {
-        _currentSpeed.value = MPVLib.getPropertyDouble("speed") ?: 1.0
+    fun syncPlaybackSpeed() {
+        MPVLib.setPropertyDouble("speed", _currentSpeed.value)
+    }
+
+    fun setPlaybackSpeed(speed: Double) {
+        MPVLib.setPropertyDouble("speed", speed)
+        _currentSpeed.value = speed
+    }
+
+    fun cycleSpeed() {
+        val speeds = listOf(1.0, 1.5, 2.0, 0.5)
+        val current = _currentSpeed.value
+        val nextIndex = (speeds.indexOf(current) + 1) % speeds.size
+        setPlaybackSpeed(speeds[nextIndex])
     }
 
     fun toggleShuffle(currentIndex: Int) {

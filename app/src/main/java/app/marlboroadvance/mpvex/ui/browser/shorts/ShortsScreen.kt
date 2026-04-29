@@ -224,7 +224,7 @@ data class ShortsScreen(
                                 MPVLib.command("stop") 
                                 MPVLib.command("loadfile", video.path)
                                 MPVLib.setPropertyBoolean("pause", false)
-                                viewModel.updatePlaybackSpeed()
+                                viewModel.syncPlaybackSpeed()
                                 
                                 // Phase B: Mark as seen in current session
                                 viewModel.markAsSeen(video)
@@ -568,6 +568,7 @@ private fun ShortPageItem(
             currentSpeed = currentSpeed,
             onLove = onLove,
             onBlock = onBlock,
+            onSpeedClick = { viewModel.cycleSpeed() },
             onMore = { showMore = true },
             onLoveButtonPositioned = { loveButtonCenter = it }
         )
@@ -731,6 +732,7 @@ private fun ActionColumn(
     currentSpeed: Double,
     onLove: () -> Unit,
     onBlock: () -> Unit,
+    onSpeedClick: () -> Unit,
     onMore: () -> Unit,
     onLoveButtonPositioned: (Offset) -> Unit
 ) {
@@ -771,7 +773,7 @@ private fun ActionColumn(
         ActionButton(
             icon = Icons.Filled.Speed, 
             label = "${currentSpeed}x", 
-            onClick = {} // Speed is now info-only or we can keep toggle here.
+            onClick = onSpeedClick
         )
         
         Spacer(modifier = Modifier.height(12.dp))

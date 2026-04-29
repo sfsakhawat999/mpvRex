@@ -22,6 +22,7 @@ import org.koin.core.annotation.KoinExperimentalAPI
 class App : Application() {
   private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
   private val metadataCache: VideoMetadataCacheRepository by inject()
+  private val advancedPreferences: app.marlboroadvance.mpvex.preferences.AdvancedPreferences by inject()
 
   override fun onCreate() {
     super.onCreate()
@@ -40,6 +41,9 @@ class App : Application() {
     Thread.setDefaultUncaughtExceptionHandler(GlobalExceptionHandler(applicationContext, CrashActivity::class.java))
 
     FastThumbnails.initialize(this)
+
+    // Sync MediaInfoActivity status with user preference
+    advancedPreferences.syncMediaInfoActivityStatus(this)
 
     // Perform cache maintenance on app startup (non-blocking)
     applicationScope.launch {

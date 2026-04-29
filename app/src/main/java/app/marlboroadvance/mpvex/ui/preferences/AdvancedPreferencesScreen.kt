@@ -688,6 +688,32 @@ object AdvancedPreferencesScreen : Screen {
               )
             }
           }
+
+          // System Integration Section
+          item {
+            PreferenceSectionHeader(title = "System Integration")
+          }
+
+          item {
+            PreferenceCard {
+              val enableMediaInfoActivity by preferences.enableMediaInfoActivity.collectAsState()
+
+              SwitchPreference(
+                value = enableMediaInfoActivity,
+                onValueChange = {
+                  preferences.enableMediaInfoActivity.set(it)
+                  preferences.syncMediaInfoActivityStatus(context)
+                },
+                title = { Text("Enable Media Info Activity") },
+                summary = {
+                  Text(
+                    "Show 'Media Info' as an option in system-wide 'Open with' menus",
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
+            }
+          }
           
           // Logging Section
           item {

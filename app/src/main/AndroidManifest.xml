@@ -218,8 +218,14 @@
 
         <activity
             android:name=".ui.mediainfo.MediaInfoActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.mpvex"
+            android:label="Media Info" />
+
+        <activity-alias
+            android:name=".MediaInfoIntentHandler"
+            android:targetActivity=".ui.mediainfo.MediaInfoActivity"
+            android:exported="true"
             android:label="Media Info">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -260,7 +266,7 @@
                 <data android:mimeType="application/x-flac" />
                 <data android:mimeType="application/mp4" />
             </intent-filter>
-        </activity>
+        </activity-alias>
 
         <service
             android:name=".ui.player.MediaPlaybackService"

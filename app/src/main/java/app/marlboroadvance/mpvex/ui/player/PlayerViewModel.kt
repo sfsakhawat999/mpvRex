@@ -307,11 +307,7 @@ class PlayerViewModel(
   private var lastAutoSelectedMediaTitle: String? = null
 
   // External subtitle tracking
-  private val _externalSubtitles = mutableListOf<String>()
-  val externalSubtitles: List<String> get() = _externalSubtitles.toList()
-  
-  // Mapping from mpv internal path/URI to the original source URI (resolves deletion issues)
-  private val mpvPathToUriMap = mutableMapOf<String, String>()
+  val externalSubtitles: List<String> get() = _subtitleManager.externalSubtitles
 
   // Repeat and Shuffle state
   private val _repeatMode = MutableStateFlow(RepeatMode.OFF)

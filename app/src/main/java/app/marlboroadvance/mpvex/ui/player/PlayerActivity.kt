@@ -2343,8 +2343,9 @@ class PlayerActivity :
       val externalSubUris = state.externalSubtitles.split("|").filter { it.isNotBlank() }
       Log.d(TAG, "Restoring ${externalSubUris.size} external subtitle(s)")
 
+      val lastUri = externalSubUris.last()
       for (subUri in externalSubUris) {
-        viewModel.addSubtitle(Uri.parse(subUri), select = false, silent = true)
+        viewModel.addSubtitle(Uri.parse(subUri), select = subUri == lastUri, silent = true)
       }
     }
 

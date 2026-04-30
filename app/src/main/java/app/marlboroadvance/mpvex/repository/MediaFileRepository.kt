@@ -79,6 +79,7 @@ object MediaFileRepository {
         val isAudioEnabled = browserPreferences.showAudioFiles.get()
         val playbackStates = playbackStateRepository.getAllPlaybackStates()
         val thresholdDays = appearancePreferences.unplayedOldVideoDays.get()
+        val watchedThreshold = browserPreferences.watchedThreshold.get()
         
         // Get blacklisted folders
         val foldersPreferences = koin.get<app.marlboroadvance.mpvex.preferences.FoldersPreferences>()
@@ -90,6 +91,7 @@ object MediaFileRepository {
             parentPath = path, 
             playbackStates = playbackStates, 
             thresholdDays = thresholdDays,
+            watchedThreshold = watchedThreshold,
             blacklistedFolders = blacklistedFolders
         )
         folders
@@ -107,7 +109,8 @@ object MediaFileRepository {
                 totalSize = folderData.totalSize,
                 totalDuration = folderData.totalDuration,
                 hasSubfolders = folderData.hasSubfolders,
-                newCount = folderData.newCount
+                newCount = folderData.newCount,
+                unwatchedCount = folderData.unwatchedCount
               ),
             )
           }

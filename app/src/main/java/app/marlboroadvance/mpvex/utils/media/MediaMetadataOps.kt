@@ -31,6 +31,7 @@ object MediaMetadataOps {
                 val isAudioEnabled = browserPreferences.showAudioFiles.get()
                 val playbackStates = playbackStateRepository.getAllPlaybackStates()
                 val thresholdDays = appearancePreferences.unplayedOldVideoDays.get()
+                val watchedThreshold = browserPreferences.watchedThreshold.get()
                 
                 val foldersPreferences = koin.get<app.marlboroadvance.mpvex.preferences.FoldersPreferences>()
                 val blacklistedFolders = foldersPreferences.blacklistedFolders.get()
@@ -39,6 +40,7 @@ object MediaMetadataOps {
                     context = context, 
                     playbackStates = playbackStates, 
                     thresholdDays = thresholdDays,
+                    watchedThreshold = watchedThreshold,
                     blacklistedFolders = blacklistedFolders
                 )
                 folders
@@ -55,7 +57,8 @@ object MediaMetadataOps {
                             totalSize = folder.totalSize,
                             totalDuration = folder.totalDuration,
                             lastModified = folder.lastModified,
-                            newCount = folder.newCount
+                            newCount = folder.newCount,
+                            unwatchedCount = folder.unwatchedCount
                         )
                     }
             } catch (e: Exception) {

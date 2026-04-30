@@ -43,10 +43,12 @@ object FileSystemOps {
             try {
                 val koin = GlobalContext.get()
                 val appearancePreferences = koin.get<AppearancePreferences>()
+                val browserPreferences = koin.get<app.marlboroadvance.mpvex.preferences.BrowserPreferences>()
                 val playbackStateRepository = koin.get<PlaybackStateRepository>()
                 
                 val playbackStates = playbackStateRepository.getAllPlaybackStates()
                 val thresholdDays = appearancePreferences.unplayedOldVideoDays.get()
+                val watchedThreshold = browserPreferences.watchedThreshold.get()
                 
                 val foldersPreferences = koin.get<app.marlboroadvance.mpvex.preferences.FoldersPreferences>()
                 val blacklistedFolders = foldersPreferences.blacklistedFolders.get()
@@ -55,7 +57,7 @@ object FileSystemOps {
                 val primaryStorage = Environment.getExternalStorageDirectory()
                 if (primaryStorage.exists() && primaryStorage.canRead()) {
                     val primaryPath = primaryStorage.absolutePath
-                    val folderData = CoreMediaScanner.getFolderRecursiveData(context, primaryPath, playbackStates, thresholdDays, blacklistedFolders)
+                    val folderData = CoreMediaScanner.getFolderRecursiveData(context, primaryPath, playbackStates, thresholdDays, watchedThreshold, blacklistedFolders)
                     if (folderData != null) {
                         roots.add(
                             FileSystemItem.Folder(
@@ -67,7 +69,8 @@ object FileSystemOps {
                                 totalSize = folderData.totalSize,
                                 totalDuration = folderData.totalDuration,
                                 hasSubfolders = true,
-                                newCount = folderData.newCount
+                                newCount = folderData.newCount,
+                                unwatchedCount = folderData.unwatchedCount
                             )
                         )
                     }
@@ -79,7 +82,7 @@ object FileSystemOps {
                     val volumePath = StorageVolumeUtils.getVolumePath(volume) ?: continue
                     val volumeDir = File(volumePath)
                     if (volumeDir.exists() && volumeDir.canRead()) {
-                        val folderData = CoreMediaScanner.getFolderRecursiveData(context, volumePath, playbackStates, thresholdDays, blacklistedFolders)
+                        val folderData = CoreMediaScanner.getFolderRecursiveData(context, volumePath, playbackStates, thresholdDays, watchedThreshold, blacklistedFolders)
                         if (folderData != null) {
                             roots.add(
                                 FileSystemItem.Folder(
@@ -91,7 +94,8 @@ object FileSystemOps {
                                     totalSize = folderData.totalSize,
                                     totalDuration = folderData.totalDuration,
                                     hasSubfolders = true,
-                                    newCount = folderData.newCount
+                                    newCount = folderData.newCount,
+                                    unwatchedCount = folderData.unwatchedCount
                                 )
                             )
                         }

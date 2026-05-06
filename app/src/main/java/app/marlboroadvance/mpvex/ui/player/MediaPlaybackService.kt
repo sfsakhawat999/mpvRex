@@ -67,12 +67,27 @@ class MediaPlaybackService :
   private val binder = MediaPlaybackBinder()
   private lateinit var mediaSession: MediaSessionCompat
   private val playerPreferences: PlayerPreferences by inject()
+  private val gesturePreferences: GesturePreferences by inject()
 
   private var mediaTitle = ""
   private var mediaArtist = ""
   private var paused = false
   private var lastNotificationUpdateTime = 0L
   private val notificationUpdateIntervalMs = 1000L // Update notification every 1 second
+
+  /**
+   * Listener for playback actions that the service cannot handle alone (like playlist navigation).
+   */
+  interface ServiceListener {
+    fun onNextRequested()
+    fun onPreviousRequested()
+  }
+
+  private var listener: ServiceListener? = null
+
+  fun setListener(listener: ServiceListener?) {
+    this.listener = listener
+  }
 
   inner class MediaPlaybackBinder : Binder() {
     fun getService() = this@MediaPlaybackService
@@ -202,20 +217,42 @@ class MediaPlaybackService :
 
             override fun onSkipToNext() {
               Log.d(TAG, "onSkipToNext called")
-              // Use precise seeking for videos shorter than 2 minutes (120 seconds) or if preference is enabled
-              val duration = MPVLib.getPropertyInt("duration") ?: 0
-              val shouldUsePreciseSeeking = playerPreferences.usePreciseSeeking.get() || duration < 120
-              val seekMode = if (shouldUsePreciseSeeking) "relative+exact" else "relative+keyframes"
-              MPVLib.command("seek", "10", seekMode)
+              when (gesturePreferences.mediaNextGesture.get()) {
+                SingleActionGesture.PlaylistNext -> {
+                  listener?.onNextRequested() ?: run {
+                    // Fallback if no listener
+                    MPVLib.command("playlist-next")
+                  }
+                }
+                SingleActionGesture.Seek -> {
+                  // Use precise seeking for videos shorter than 2 minutes (120 seconds) or if preference is enabled
+                  val duration = MPVLib.getPropertyInt("duration") ?: 0
+                  val shouldUsePreciseSeeking = playerPreferences.usePreciseSeeking.get() || duration < 120
+                  val seekMode = if (shouldUsePreciseSeeking) "relative+exact" else "relative+keyframes"
+                  MPVLib.command("seek", "10", seekMode)
+                }
+                else -> { /* Handle other gestures if needed */ }
+              }
             }
 
             override fun onSkipToPrevious() {
               Log.d(TAG, "onSkipToPrevious called")
-              // Use precise seeking for videos shorter than 2 minutes (120 seconds) or if preference is enabled
-              val duration = MPVLib.getPropertyInt("duration") ?: 0
-              val shouldUsePreciseSeeking = playerPreferences.usePreciseSeeking.get() || duration < 120
-              val seekMode = if (shouldUsePreciseSeeking) "relative+exact" else "relative+keyframes"
-              MPVLib.command("seek", "-10", seekMode)
+              when (gesturePreferences.mediaPreviousGesture.get()) {
+                SingleActionGesture.PlaylistPrev -> {
+                  listener?.onPreviousRequested() ?: run {
+                    // Fallback if no listener
+                    MPVLib.command("playlist-prev")
+                  }
+                }
+                SingleActionGesture.Seek -> {
+                  // Use precise seeking for videos shorter than 2 minutes (120 seconds) or if preference is enabled
+                  val duration = MPVLib.getPropertyInt("duration") ?: 0
+                  val shouldUsePreciseSeeking = playerPreferences.usePreciseSeeking.get() || duration < 120
+                  val seekMode = if (shouldUsePreciseSeeking) "relative+exact" else "relative+keyframes"
+                  MPVLib.command("seek", "-10", seekMode)
+                }
+                else -> { /* Handle other gestures if needed */ }
+              }
             }
 
             override fun onSeekTo(pos: Long) {

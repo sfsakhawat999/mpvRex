@@ -121,6 +121,11 @@ class PlayerActivity :
   private val playerPreferences: PlayerPreferences by inject()
 
   /**
+   * Preferences for gesture settings.
+   */
+  private val gesturePreferences: GesturePreferences by inject()
+
+  /**
    * Preferences for audio settings.
    */
   private val audioPreferences: AudioPreferences by inject()
@@ -2805,6 +2810,26 @@ class PlayerActivity :
                 updateMediaSessionPlaybackState(isPlaying = false)
               }
 
+              override fun onSkipToNext() {
+                when (gesturePreferences.mediaNextGesture.get()) {
+                  SingleActionGesture.PlaylistNext -> playNext()
+                  SingleActionGesture.Seek -> {
+                    viewModel.handleRightDoubleTap()
+                  }
+                  else -> {}
+                }
+              }
+
+              override fun onSkipToPrevious() {
+                when (gesturePreferences.mediaPreviousGesture.get()) {
+                  SingleActionGesture.PlaylistPrev -> playPrevious()
+                  SingleActionGesture.Seek -> {
+                    viewModel.handleLeftDoubleTap()
+                  }
+                  else -> {}
+                }
+              }
+
               override fun onSeekTo(pos: Long) {
                 viewModel.seekTo((pos / 1000).toInt())
                 updateMediaSessionPlaybackState(isPlaying = viewModel.paused == false)
@@ -2820,7 +2845,9 @@ class PlayerActivity :
             PlaybackState.ACTION_PLAY or
               PlaybackState.ACTION_PAUSE or
               PlaybackState.ACTION_PLAY_PAUSE or
-              PlaybackState.ACTION_SEEK_TO,
+              PlaybackState.ACTION_SEEK_TO or
+              PlaybackState.ACTION_SKIP_TO_NEXT or
+              PlaybackState.ACTION_SKIP_TO_PREVIOUS,
           )
       mediaSessionInitialized = true
     }.onFailure { e ->

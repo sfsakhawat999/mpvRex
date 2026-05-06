@@ -35,6 +35,8 @@ enum class SingleActionGesture(
   SubSeek(R.string.pref_gesture_double_tap_subseek),
   PlayPause(R.string.pref_gesture_double_tap_play),
   Custom(R.string.pref_gesture_double_tap_custom),
+  PlaylistNext(R.string.pref_gesture_media_next),
+  PlaylistPrev(R.string.pref_gesture_media_previous),
 }
 
 enum class CustomKeyCodes(

@@ -17,8 +17,8 @@ class GesturePreferences(
   val useRelativeSeeking = preferenceStore.getBoolean("use_relative_seeking", true)
   val useSingleTapForLeftRight = preferenceStore.getBoolean("use_single_tap_for_left_right", false)
   val reverseDoubleTap = preferenceStore.getBoolean("reverse_double_tap", false)
-  val mediaPreviousGesture = preferenceStore.getEnum("meda_previous_gesture", SingleActionGesture.Seek)
+  val mediaPreviousGesture = preferenceStore.getEnum("media_previous_gesture", SingleActionGesture.PlaylistPrev)
   val mediaPlayGesture = preferenceStore.getEnum("media_play_gesture", SingleActionGesture.PlayPause)
-  val mediaNextGesture = preferenceStore.getEnum("media_next_gesture", SingleActionGesture.Seek)
+  val mediaNextGesture = preferenceStore.getEnum("media_next_gesture", SingleActionGesture.PlaylistNext)
   val tapThumbnailToSelect = preferenceStore.getBoolean("tap_thumbnail_to_select", false)
 }

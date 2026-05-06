@@ -1078,6 +1078,8 @@ class PlayerViewModel(
       SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
         MPVLib.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
       }
+      SingleActionGesture.PlaylistNext -> MPVLib.command("playlist-next")
+      SingleActionGesture.PlaylistPrev -> MPVLib.command("playlist-prev")
       SingleActionGesture.None -> {}
     }
   }
@@ -1088,6 +1090,8 @@ class PlayerViewModel(
       SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
         MPVLib.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
       }
+      SingleActionGesture.PlaylistNext -> MPVLib.command("playlist-next")
+      SingleActionGesture.PlaylistPrev -> MPVLib.command("playlist-prev")
       SingleActionGesture.Seek, SingleActionGesture.SubSeek, SingleActionGesture.None -> {}
     }
   }
@@ -1098,6 +1102,8 @@ class PlayerViewModel(
       SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
         MPVLib.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
       }
+      SingleActionGesture.PlaylistNext -> MPVLib.command("playlist-next")
+      SingleActionGesture.PlaylistPrev -> MPVLib.command("playlist-prev")
       SingleActionGesture.Seek, SingleActionGesture.SubSeek, SingleActionGesture.None -> {}
     }
   }
@@ -1110,6 +1116,8 @@ class PlayerViewModel(
       SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
         MPVLib.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
       }
+      SingleActionGesture.PlaylistNext -> MPVLib.command("playlist-next")
+      SingleActionGesture.PlaylistPrev -> MPVLib.command("playlist-prev")
       SingleActionGesture.None -> {}
     }
   }
@@ -1122,6 +1130,8 @@ class PlayerViewModel(
       SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
         MPVLib.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
       }
+      SingleActionGesture.PlaylistNext -> MPVLib.command("playlist-next")
+      SingleActionGesture.PlaylistPrev -> MPVLib.command("playlist-prev")
       SingleActionGesture.None -> {}
     }
   }
@@ -1134,6 +1144,8 @@ class PlayerViewModel(
       SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
         MPVLib.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
       }
+      SingleActionGesture.PlaylistNext -> MPVLib.command("playlist-next")
+      SingleActionGesture.PlaylistPrev -> MPVLib.command("playlist-prev")
       SingleActionGesture.None -> {}
     }
   }

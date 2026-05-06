@@ -25,6 +25,8 @@ import app.marlboroadvance.mpvex.R
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.MPVNode
 import app.marlboroadvance.mpvex.preferences.PlayerPreferences
+import app.marlboroadvance.mpvex.preferences.GesturePreferences
+import app.marlboroadvance.mpvex.ui.player.SingleActionGesture
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 

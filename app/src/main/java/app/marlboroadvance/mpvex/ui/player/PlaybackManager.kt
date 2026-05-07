@@ -12,8 +12,7 @@ import kotlinx.coroutines.launch
  * Manages playback operations like seeking and speed control.
  */
 class PlaybackManager(
-    private val playerPreferences: PlayerPreferences,
-    private val scope: CoroutineScope
+    private val playerPreferences: PlayerPreferences
 ) {
     companion object {
         private const val TAG = "PlaybackManager"
@@ -23,7 +22,7 @@ class PlaybackManager(
      * Performs an absolute seek to the specified position.
      * Clamps the position between 0 and duration, and optionally within AB loop.
      */
-    fun seekTo(position: Int, abLoopA: Double?, abLoopB: Double?) {
+    fun seekTo(scope: CoroutineScope, position: Int, abLoopA: Double?, abLoopB: Double?) {
         scope.launch(Dispatchers.IO) {
             val maxDuration = MPVLib.getPropertyInt("duration") ?: 0
             if (maxDuration <= 0) return@launch
@@ -47,7 +46,7 @@ class PlaybackManager(
     /**
      * Performs a relative seek immediately.
      */
-    fun seekBy(offset: Int) {
+    fun seekBy(scope: CoroutineScope, offset: Int) {
         if (offset == 0) return
         
         scope.launch(Dispatchers.IO) {

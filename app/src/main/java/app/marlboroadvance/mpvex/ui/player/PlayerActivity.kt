@@ -85,7 +85,8 @@ import java.io.File
 @Suppress("TooManyFunctions", "LargeClass")
 class PlayerActivity :
   AppCompatActivity(),
-  PlayerHost {
+  PlayerHost,
+  MediaPlaybackService.ServiceListener {
   // ==================== ViewModels and Bindings ====================
 
   /**
@@ -2924,12 +2925,14 @@ class PlayerActivity :
       ) {
         val binder = service as? MediaPlaybackService.MediaPlaybackBinder ?: return
         mediaPlaybackService = binder.getService()
+        mediaPlaybackService?.setListener(this@PlayerActivity)
         serviceBound = true
         Log.d(TAG, "Service connected")
       }
 
       override fun onServiceDisconnected(name: ComponentName?) {
         Log.d(TAG, "Service disconnected")
+        mediaPlaybackService?.setListener(null)
         mediaPlaybackService = null
         serviceBound = false
       }
@@ -3055,6 +3058,16 @@ class PlayerActivity :
     set(value) {
       requestedOrientation = value
     }
+
+  // ==================== ServiceListener ====================
+
+  override fun onNextRequested() {
+    viewModel.playNext()
+  }
+
+  override fun onPreviousRequested() {
+    viewModel.playPrevious()
+  }
 
   // ==================== Playlist Management ====================
 

@@ -27,6 +27,7 @@ import `is`.xyz.mpv.MPVNode
 import app.marlboroadvance.mpvex.preferences.PlayerPreferences
 import app.marlboroadvance.mpvex.preferences.GesturePreferences
 import app.marlboroadvance.mpvex.ui.player.SingleActionGesture
+import kotlinx.coroutines.cancel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -70,6 +71,9 @@ class MediaPlaybackService :
   private lateinit var mediaSession: MediaSessionCompat
   private val playerPreferences: PlayerPreferences by inject()
   private val gesturePreferences: GesturePreferences by inject()
+  private val playbackManager: PlaybackManager by inject()
+
+  private val serviceScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main)
 
   private var mediaTitle = ""
   private var mediaArtist = ""
@@ -227,11 +231,7 @@ class MediaPlaybackService :
                   }
                 }
                 SingleActionGesture.Seek -> {
-                  // Use precise seeking for videos shorter than 2 minutes (120 seconds) or if preference is enabled
-                  val duration = MPVLib.getPropertyInt("duration") ?: 0
-                  val shouldUsePreciseSeeking = playerPreferences.usePreciseSeeking.get() || duration < 120
-                  val seekMode = if (shouldUsePreciseSeeking) "relative+exact" else "relative+keyframes"
-                  MPVLib.command("seek", "10", seekMode)
+                  playbackManager.seekBy(serviceScope, 10)
                 }
                 else -> { /* Handle other gestures if needed */ }
               }
@@ -247,11 +247,7 @@ class MediaPlaybackService :
                   }
                 }
                 SingleActionGesture.Seek -> {
-                  // Use precise seeking for videos shorter than 2 minutes (120 seconds) or if preference is enabled
-                  val duration = MPVLib.getPropertyInt("duration") ?: 0
-                  val shouldUsePreciseSeeking = playerPreferences.usePreciseSeeking.get() || duration < 120
-                  val seekMode = if (shouldUsePreciseSeeking) "relative+exact" else "relative+keyframes"
-                  MPVLib.command("seek", "-10", seekMode)
+                  playbackManager.seekBy(serviceScope, -10)
                 }
                 else -> { /* Handle other gestures if needed */ }
               }
@@ -471,7 +467,10 @@ class MediaPlaybackService :
       Log.d(TAG, "Service destroyed")
 
       isServiceRunning = false
-      
+
+      // Cancel coroutine scope
+      serviceScope.cancel()
+
       // Remove MPV observer safely
       try {
         MPVLib.removeObserver(this)

@@ -137,10 +137,7 @@ class PlayerViewModel(
   /**
    * Manager for playback operations (seeking, speed).
    */
-  private val _playbackManager = PlaybackManager(
-    playerPreferences = playerPreferences,
-    scope = viewModelScope
-  )
+  private val _playbackManager: PlaybackManager by inject()
   val playbackManager: PlaybackManager get() = _playbackManager
 
   // Subtitle state delegates
@@ -719,11 +716,11 @@ class PlayerViewModel(
   // ==================== Seeking ====================
 
   fun seekBy(offset: Int) {
-    _playbackManager.seekBy(offset)
+    _playbackManager.seekBy(viewModelScope, offset)
   }
 
   fun seekTo(position: Int) {
-    _playbackManager.seekTo(position, _abLoopA.value, _abLoopB.value)
+    _playbackManager.seekTo(viewModelScope, position, _abLoopA.value, _abLoopB.value)
   }
 
   fun setPlaybackSpeed(speed: Float) {
@@ -1070,84 +1067,57 @@ class PlayerViewModel(
 
   // ==================== Gesture Handling ====================
 
-  fun handleLeftDoubleTap() {
-    when (gesturePreferences.leftSingleActionGesture.get()) {
-      SingleActionGesture.Seek -> leftSeek()
-      SingleActionGesture.SubSeek -> leftSubSeek()
-      SingleActionGesture.PlayPause -> pauseUnpause()
-      SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
-        MPVLib.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
+  private fun executeGestureAction(
+    action: SingleActionGesture,
+    isLeft: Boolean = false,
+    isRight: Boolean = false,
+  ) {
+    when (action) {
+      SingleActionGesture.Seek -> {
+        if (isLeft) leftSeek() else if (isRight) rightSeek()
       }
-      SingleActionGesture.PlaylistNext -> MPVLib.command("playlist-next")
-      SingleActionGesture.PlaylistPrev -> MPVLib.command("playlist-prev")
+      SingleActionGesture.SubSeek -> {
+        if (isLeft) leftSubSeek() else if (isRight) rightSubSeek()
+      }
+      SingleActionGesture.PlayPause -> pauseUnpause()
+      SingleActionGesture.Custom -> {
+        viewModelScope.launch(Dispatchers.IO) {
+          val keyCode = when {
+            isLeft -> CustomKeyCodes.DoubleTapLeft.keyCode
+            isRight -> CustomKeyCodes.DoubleTapRight.keyCode
+            else -> CustomKeyCodes.DoubleTapCenter.keyCode
+          }
+          MPVLib.command("keypress", keyCode)
+        }
+      }
+      SingleActionGesture.PlaylistNext -> playNext()
+      SingleActionGesture.PlaylistPrev -> playPrevious()
       SingleActionGesture.None -> {}
     }
+  }
+
+  fun handleLeftDoubleTap() {
+    executeGestureAction(gesturePreferences.leftSingleActionGesture.get(), isLeft = true)
   }
 
   fun handleCenterDoubleTap() {
-    when (gesturePreferences.centerSingleActionGesture.get()) {
-      SingleActionGesture.PlayPause -> pauseUnpause()
-      SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
-        MPVLib.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
-      }
-      SingleActionGesture.PlaylistNext -> MPVLib.command("playlist-next")
-      SingleActionGesture.PlaylistPrev -> MPVLib.command("playlist-prev")
-      SingleActionGesture.Seek, SingleActionGesture.SubSeek, SingleActionGesture.None -> {}
-    }
+    executeGestureAction(gesturePreferences.centerSingleActionGesture.get())
   }
 
   fun handleCenterSingleTap() {
-    when (gesturePreferences.centerSingleActionGesture.get()) {
-      SingleActionGesture.PlayPause -> pauseUnpause()
-      SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
-        MPVLib.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
-      }
-      SingleActionGesture.PlaylistNext -> MPVLib.command("playlist-next")
-      SingleActionGesture.PlaylistPrev -> MPVLib.command("playlist-prev")
-      SingleActionGesture.Seek, SingleActionGesture.SubSeek, SingleActionGesture.None -> {}
-    }
+    executeGestureAction(gesturePreferences.centerSingleActionGesture.get())
   }
 
   fun handleLeftSingleTap() {
-    when (gesturePreferences.leftSingleActionGesture.get()) {
-      SingleActionGesture.Seek -> leftSeek()
-      SingleActionGesture.SubSeek -> leftSubSeek()
-      SingleActionGesture.PlayPause -> pauseUnpause()
-      SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
-        MPVLib.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
-      }
-      SingleActionGesture.PlaylistNext -> MPVLib.command("playlist-next")
-      SingleActionGesture.PlaylistPrev -> MPVLib.command("playlist-prev")
-      SingleActionGesture.None -> {}
-    }
+    executeGestureAction(gesturePreferences.leftSingleActionGesture.get(), isLeft = true)
   }
 
   fun handleRightSingleTap() {
-    when (gesturePreferences.rightSingleActionGesture.get()) {
-      SingleActionGesture.Seek -> rightSeek()
-      SingleActionGesture.SubSeek -> rightSubSeek()
-      SingleActionGesture.PlayPause -> pauseUnpause()
-      SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
-        MPVLib.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
-      }
-      SingleActionGesture.PlaylistNext -> MPVLib.command("playlist-next")
-      SingleActionGesture.PlaylistPrev -> MPVLib.command("playlist-prev")
-      SingleActionGesture.None -> {}
-    }
+    executeGestureAction(gesturePreferences.rightSingleActionGesture.get(), isRight = true)
   }
 
   fun handleRightDoubleTap() {
-    when (gesturePreferences.rightSingleActionGesture.get()) {
-      SingleActionGesture.Seek -> rightSeek()
-      SingleActionGesture.SubSeek -> rightSubSeek()
-      SingleActionGesture.PlayPause -> pauseUnpause()
-      SingleActionGesture.Custom -> viewModelScope.launch(Dispatchers.IO) {
-        MPVLib.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
-      }
-      SingleActionGesture.PlaylistNext -> MPVLib.command("playlist-next")
-      SingleActionGesture.PlaylistPrev -> MPVLib.command("playlist-prev")
-      SingleActionGesture.None -> {}
-    }
+    executeGestureAction(gesturePreferences.rightSingleActionGesture.get(), isRight = true)
   }
 
   // ==================== Video Zoom ====================

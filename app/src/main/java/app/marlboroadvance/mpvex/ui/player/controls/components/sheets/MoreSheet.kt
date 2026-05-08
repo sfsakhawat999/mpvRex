@@ -1,5 +1,7 @@
 package app.marlboroadvance.mpvex.ui.player.controls.components.sheets
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import android.text.format.DateUtils
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -122,7 +125,9 @@ fun MoreSheet(
     modifier,
   ) {
     Column(
-      modifier = Modifier.fillMaxWidth()
+      modifier = Modifier
+        .fillMaxWidth()
+        .animateContentSize(animationSpec = tween(durationMillis = 300))
     ) {
       PrimaryTabRow(
         selectedTabIndex = pagerState.currentPage,
@@ -157,8 +162,11 @@ fun MoreSheet(
 
       HorizontalPager(
         state = pagerState,
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 350.dp),
+        verticalAlignment = Alignment.Top,
+        beyondViewportPageCount = 1
       ) { page ->
         when (page) {
           0 -> ControlsTab(

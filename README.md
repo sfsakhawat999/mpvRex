@@ -19,6 +19,25 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 
 ---
 
+## Showcase
+
+<p align="center">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/player.png" width="92%">
+</p>
+
+<p align="center">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/videoscreen.png" width="31%">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/pip.png" width="31%">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/about.png" width="31%">
+</p>
+
+<p align="center">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/playlistwindow.png" width="48%">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/moresheet.png" width="48%">
+</p>
+
+---
+
 ## Origin and Acknowledgments
 
 mpvRex is a fork of **[mpvEx](https://github.com/marlboro-advance/mpvEx)**, which is based on **[mpv-android](https://github.com/mpv-android/mpv-android)**. This project aims to extend the core functionality of these upstream repositories with specialized features and aesthetic refinements.

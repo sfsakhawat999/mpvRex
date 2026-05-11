@@ -55,6 +55,8 @@ Based on mpvEx, with additional enhancements and optimizations built on top.
 *   **Modular Architecture:** Robust Ops/Manager-driven file browser with a unified discovery engine.
 *   **Unified UI:** Standardized media cards featuring reactive "NEW" badges and recursive file/folder counts.
 *   **Enhanced Navigation:** Auto-scrolling synchronized chapters and support for relative seeking.
+*   **Centralized "More Sheet":** Quick access to all player buttons and custom controls.
+*   **In-Player Interaction:** Real-time toggling of over 10+ player settings (gestures, PiP, UI behavior) without leaving playback.
 *   **Subtitle Management:** Visual indicators for primary tracks and integrated online search.
 
 ---

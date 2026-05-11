@@ -44,7 +44,11 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 *   **Refined Tap Logic:** Enhanced single-tap response with exclusion zones and reverse double-tap options.
 *   **Accidental Seek Prevention:** Optional ignore-single-tap on seekbar to prevent mistakes.
 *   **Smart Orientation:** Persistent per-video orientation preferences with intelligent fallback.
-*   **Modern Aesthetics:** Seamless transitions, custom branding, and "Always Dark Mode" for controls.
+*   **Themed Player Controls:** Adaptive controls that dynamically match your theme or accent color.
+*   **Shorts Mode:** Optimized playback experience for vertical "Shorts" and Reels-style content.
+*   **Audio Support:** Comprehensive audio playback capability integrated into the unified media engine.
+*   **Thumbnail Generation:** Customizable options for high-quality media thumbnail previews.
+*   **Modern Aesthetics:** Seamless transitions, custom branding, and specialized "Always Dark Mode".
 *   **Modular Architecture:** Robust Ops/Manager-driven file browser with a unified discovery engine.
 *   **Unified UI:** Standardized media cards featuring reactive "NEW" badges and recursive folder counts.
 *   **Enhanced Navigation:** Auto-scrolling synchronized chapters and support for relative seeking.

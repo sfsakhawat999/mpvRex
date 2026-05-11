@@ -46,6 +46,7 @@ Based on mpvEx, with additional enhancements and optimizations built on top.
 *   **Refined Tap Logic:** Enhanced single-tap response with exclusion zones and reverse double-tap options.
 *   **Accidental Seek Prevention:** Optional ignore-single-tap on seekbar to prevent mistakes.
 *   **Smart Orientation:** Persistent per-video orientation preferences with intelligent fallback.
+*   **Enhanced Background Playback:** Optimized battery-saving mode with seamless, stutter-free transitions.
 *   **Themed Player Controls:** Adaptive controls that dynamically match your app theme or system accent (Material You).
 *   **Shorts Mode:** Optimized vertical playback experience with auto-swipe support for "Shorts" and Reels.
 *   **Audio Support:** Integrated capability to play audio files directly within the media engine.

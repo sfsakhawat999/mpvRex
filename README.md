@@ -21,20 +21,20 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 
 ## Showcase
 
-<p align="center">
+<div class="image-row" align="center">
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/player.png" width="92%">
-</p>
+</div>
 
-<p align="center">
+<div class="image-row" align="center">
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/videoscreen.png" width="31%">
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/pip.png" width="31%">
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/about.png" width="31%">
-</p>
+</div>
 
-<p align="center">
+<div class="image-row" align="center">
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/playlistwindow.png" width="48%">
   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/moresheet.png" width="48%">
-</p>
+</div>
 
 ---
 

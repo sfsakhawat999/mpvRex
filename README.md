@@ -40,7 +40,7 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 
 ## Features
 
-Built on top of upstream mpvEx, mpvRex extends its full feature set with targeted optimizations and new capabilities.
+Based on mpvEx, with additional enhancements and optimizations built on top.
 
 *   **Subtitle Swipe Seeking:** Intuitive gestures to jump between subtitle lines.
 *   **Refined Tap Logic:** Enhanced single-tap response with exclusion zones and reverse double-tap options.

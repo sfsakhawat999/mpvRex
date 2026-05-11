@@ -66,6 +66,23 @@ For a detailed list of exclusive improvements and technical commits, see **[FEAT
 
 ---
 
+## Installation
+
+<div class="image-row" align="center">
+  <a href="https://github.com/sfsakhawat999/mpvRex/releases">
+    <img src="https://img.shields.io/badge/Download-Stable_Release-blue?style=for-the-badge&logo=github" alt="Stable Release">
+  </a>
+  <a href="https://sfsakhawat999.github.io/mpvRex">
+    <img src="https://img.shields.io/badge/Download-Preview_Build-orange?style=for-the-badge&logo=github" alt="Preview Release">
+  </a>
+</div>
+
+<div align="center">
+  <i>Note: Previews may be unstable and are intended for testing purposes only.</i>
+</div>
+
+---
+
 ## Credits
 
 mpvRex is a fork of **[mpvEx](https://github.com/marlboro-advance/mpvEx)** (based on **[mpv-android](https://github.com/mpv-android/mpv-android)**). Special thanks for the foundation and inspiration:

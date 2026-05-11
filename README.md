@@ -40,29 +40,15 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 
 ## Features
 
-For a detailed list of exclusive improvements and technical commits, see **[FEATURES_REX.md](FEATURES_REX.md)**.
-
-### Advanced Gesture Controls
-*   **Subtitle Swipe Seeking:** Intuitive swipe gestures to jump between subtitle lines.
-*   **Instant Single Tap Logic:** Improved single tap response with exclusion zones and refined behavior.
-*   **Reverse Double Tap Gestures:** Option to reverse left/right seek directions to match your preference.
-*   **Accidental Tap Prevention:** Preference to ignore single taps on the seekbar to prevent accidental seeks.
-
-### UI & Aesthetics
-*   **Smart Orientation Mode:** Per-video persistence of orientation preferences with intelligent fallback logic.
-*   **Enhanced Transitions:** Seamless fade-in when opening videos and elimination of white flashes on player exit.
-*   **Custom Branding & Themes:** Dedicated theme, custom icons, and an "Always Dark Mode" option for controls.
-*   **Layout Customization:** Option to place playback controls below the seekbar and adjust gradient opacity.
-
-### Standardized File Browser
-*   **Modern Architecture:** Refactored to a modular **Ops/Manager-driven architecture** for better reliability and performance.
-*   **Unified UI Elements:** All media cards follow a standard design with reactive "NEW" badges and recursive folder counts.
-*   **Centralized Discovery:** Uses a unified media engine for consistent local and network file scanning.
-
-### Core Player Improvements
-*   **Chapter Navigation:** Auto-scrolling chapter lists that stay synchronized with current playback.
-*   **Seekbar Enhancements:** Increased bottom margins to prevent overlap and support for relative seeking.
-*   **Primary Subtitle Indicator:** Visual indicator in the track menu showing the active primary subtitle.
+*   **Subtitle Swipe Seeking:** Intuitive gestures to jump between subtitle lines.
+*   **Refined Tap Logic:** Enhanced single-tap response with exclusion zones and reverse double-tap options.
+*   **Accidental Seek Prevention:** Optional ignore-single-tap on seekbar to prevent mistakes.
+*   **Smart Orientation:** Persistent per-video orientation preferences with intelligent fallback.
+*   **Modern Aesthetics:** Seamless transitions, custom branding, and "Always Dark Mode" for controls.
+*   **Modular Architecture:** Robust Ops/Manager-driven file browser with a unified discovery engine.
+*   **Unified UI:** Standardized media cards featuring reactive "NEW" badges and recursive folder counts.
+*   **Enhanced Navigation:** Auto-scrolling synchronized chapters and support for relative seeking.
+*   **Subtitle Management:** Visual indicators for primary tracks and integrated online search.
 
 ---
 

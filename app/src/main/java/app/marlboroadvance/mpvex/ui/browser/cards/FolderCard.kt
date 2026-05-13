@@ -95,7 +95,7 @@ fun FolderCard(
     gridColumns = gridColumns,
     maxTitleLines = maxLines,
     overlayContent = {
-      if (newVideoCount > 0) {
+      if (uiSettings.showUnplayedOldVideoLabel && newVideoCount > 0) {
         Box(
           modifier = Modifier
             .align(Alignment.TopEnd)

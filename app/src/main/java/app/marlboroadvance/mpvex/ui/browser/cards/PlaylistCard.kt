@@ -150,6 +150,7 @@ fun PlaylistCard(
     uiSettings = uiSettings,
     isSelected = isSelected,
     isRecentlyPlayed = false,
+    isWatched = false,
     onClick = onClick,
     onLongClick = onLongClick,
     onThumbClick = onThumbClick,

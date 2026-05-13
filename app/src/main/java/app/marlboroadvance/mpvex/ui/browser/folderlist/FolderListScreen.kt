@@ -833,6 +833,7 @@ private fun GridContent(
           isSelected = selectionManager.isSelected(folder),
           isRecentlyPlayed = isRecentlyPlayed,
           isNeverPlayed = isNeverPlayed,
+          isWatched = folder.videoCount > 0 && folder.unwatchedVideoCount == 0,
           onClick = { onFolderClick(folder) },
           onLongClick = { onFolderLongClick(folder) },
           onThumbClick = if (tapThumbnailToSelect) {
@@ -907,6 +908,7 @@ private fun ListContent(
           isSelected = selectionManager.isSelected(folder),
           isRecentlyPlayed = isRecentlyPlayed,
           isNeverPlayed = isNeverPlayed,
+          isWatched = folder.videoCount > 0 && folder.unwatchedVideoCount == 0,
           onClick = { onFolderClick(folder) },
           onLongClick = { onFolderLongClick(folder) },
           onThumbClick = if (tapThumbnailToSelect) {
@@ -1146,6 +1148,7 @@ private fun SearchResultsContent(
             uiSettings = uiSettings,
             isSelected = false,
             isRecentlyPlayed = false,
+            isWatched = folder.videoCount > 0 && folder.unwatchedVideoCount == 0,
             onClick = { onFolderClick(folder) },
             onLongClick = {},
             onThumbClick = { onFolderClick(folder) },
@@ -1184,6 +1187,7 @@ private fun SearchResultsContent(
             uiSettings = uiSettings,
             isSelected = false,
             isRecentlyPlayed = false,
+            isWatched = folder.videoCount > 0 && folder.unwatchedVideoCount == 0,
             onClick = { onFolderClick(folder) },
             onLongClick = {},
             onThumbClick = { onFolderClick(folder) },

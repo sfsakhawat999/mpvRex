@@ -55,7 +55,8 @@ object MediaMetadataOps {
                             totalSize = folder.totalSize,
                             totalDuration = folder.totalDuration,
                             lastModified = folder.lastModified,
-                            newCount = folder.newCount
+                            newCount = folder.newCount,
+                            unwatchedVideoCount = folder.unwatchedVideoCount
                         )
                     }
             } catch (e: Exception) {

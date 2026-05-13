@@ -43,6 +43,7 @@ object CoreMediaScanner {
         val directVideoCount: Int = 0,
         val directAudioCount: Int = 0,
         val directNewCount: Int = 0,
+        val directUnwatchedCount: Int = 0,
         val directSize: Long = 0L,
         val directDuration: Long = 0L,
         val lastModified: Long = 0L,
@@ -52,6 +53,7 @@ object CoreMediaScanner {
         var recursiveVideoCount: Int = 0,
         var recursiveAudioCount: Int = 0,
         var recursiveNewCount: Int = 0,
+        var recursiveUnwatchedCount: Int = 0,
         var recursiveSize: Long = 0L,
         var recursiveDuration: Long = 0L,
         var latestModified: Long = 0L
@@ -94,7 +96,8 @@ object CoreMediaScanner {
                     lastModified = node.lastModified,
                     hasSubfolders = node.hasDirectSubfolders,
                     isRecursive = false,
-                    newCount = node.directNewCount
+                    newCount = node.directNewCount,
+                    unwatchedVideoCount = node.directUnwatchedCount
                 )
             }.sortedBy { it.name.lowercase(Locale.getDefault()) }
     }
@@ -125,7 +128,8 @@ object CoreMediaScanner {
                     lastModified = node.latestModified,
                     hasSubfolders = node.hasDirectSubfolders,
                     isRecursive = true,
-                    newCount = node.recursiveNewCount
+                    newCount = node.recursiveNewCount,
+                    unwatchedVideoCount = node.recursiveUnwatchedCount
                 )
             }.sortedBy { it.name.lowercase(Locale.getDefault()) }
     }
@@ -221,6 +225,10 @@ object CoreMediaScanner {
 
         val currentTime = System.currentTimeMillis()
         val thresholdMillis = thresholdDays * 24 * 60 * 60 * 1000L
+        
+        // Get watched threshold from preferences
+        val browserPreferences = org.koin.core.context.GlobalContext.get().get<app.marlboroadvance.mpvex.preferences.BrowserPreferences>()
+        val watchedThreshold = browserPreferences.watchedThreshold.get()
 
         // Step 3: Build Nodes for folders with direct media
         for ((folderPath, items) in rawMediaByFolder) {
@@ -230,6 +238,7 @@ object CoreMediaScanner {
             var videoCount = 0
             var audioCount = 0
             var newCount = 0
+            var unwatchedCount = 0
             var totalSize = 0L
             var totalDuration = 0L
             var latestModified = 0L
@@ -239,13 +248,38 @@ object CoreMediaScanner {
                     totalSize += item.size
                     totalDuration += item.duration
                     if (item.dateModified > latestModified) latestModified = item.dateModified
-                    if (item.isAudio) audioCount++ else videoCount++
+                    
+                    if (item.isAudio) {
+                        audioCount++
+                    } else {
+                        videoCount++
+                        
+                        // Calculate unwatched status for videos
+                        val playbackState = playbackStates.find { it.mediaTitle == item.name }
+                        var isWatched = false
+                        
+                        if (playbackState != null) {
+                            if (playbackState.hasBeenWatched) {
+                                isWatched = true
+                            } else if (item.duration > 0) {
+                                val durationSeconds = item.duration / 1000
+                                val watched = durationSeconds - playbackState.timeRemaining.toLong()
+                                val progressValue = (watched.toFloat() / durationSeconds.toFloat()).coerceIn(0f, 1f)
+                                if (progressValue >= (watchedThreshold / 100f)) {
+                                    isWatched = true
+                                }
+                            }
+                        }
+                        
+                        if (!isWatched) {
+                            unwatchedCount++
+                        }
 
-                    // Calculate NEW status
-                    val playbackState = playbackStates.find { it.mediaTitle == item.name }
-                    val videoAge = currentTime - (item.dateModified * 1000)
-                    if (playbackState == null && videoAge <= thresholdMillis) {
-                        newCount++
+                        // Calculate NEW status
+                        val videoAge = currentTime - (item.dateModified * 1000)
+                        if (playbackState == null && videoAge <= thresholdMillis) {
+                            newCount++
+                        }
                     }
                 }
             }
@@ -256,6 +290,7 @@ object CoreMediaScanner {
                 directVideoCount = videoCount,
                 directAudioCount = audioCount,
                 directNewCount = newCount,
+                directUnwatchedCount = unwatchedCount,
                 directSize = totalSize,
                 directDuration = totalDuration,
                 lastModified = latestModified
@@ -408,6 +443,7 @@ object CoreMediaScanner {
             node.recursiveVideoCount = node.directVideoCount
             node.recursiveAudioCount = node.directAudioCount
             node.recursiveNewCount = node.directNewCount
+            node.recursiveUnwatchedCount = node.directUnwatchedCount
             node.recursiveSize = node.directSize
             node.recursiveDuration = node.directDuration
             node.latestModified = node.lastModified
@@ -420,6 +456,7 @@ object CoreMediaScanner {
                     node.recursiveVideoCount += otherNode.recursiveVideoCount
                     node.recursiveAudioCount += otherNode.recursiveAudioCount
                     node.recursiveNewCount += otherNode.recursiveNewCount
+                    node.recursiveUnwatchedCount += otherNode.recursiveUnwatchedCount
                     node.recursiveSize += otherNode.recursiveSize
                     node.recursiveDuration += otherNode.recursiveDuration
                     if (otherNode.latestModified > node.latestModified) {

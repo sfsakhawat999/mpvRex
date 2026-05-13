@@ -20,6 +20,7 @@ sealed class FileSystemItem {
     val totalDuration: Long = 0L,
     val hasSubfolders: Boolean = false,
     val newCount: Int = 0,
+    val unwatchedVideoCount: Int = 0,
   ) : FileSystemItem()
 
 

@@ -1361,7 +1361,7 @@ private fun FileSystemBrowserContent(
                 uiSettings = uiSettings,
                 isSelected = folderSelectionManager.isSelected(folder),
                 newVideoCount = folder.newCount,
-
+                isWatched = folder.videoCount > 0 && folder.unwatchedVideoCount == 0,
                 isRecentlyPlayed = recentlyPlayedFilePath?.let { it.startsWith(folder.path + "/") && folder.path != "/" } ?: false,
                 onClick = { onFolderClick(folder) },
                 onLongClick = { onFolderLongClick(folder) },
@@ -1552,6 +1552,7 @@ private fun FileSystemSearchContent(
                 uiSettings = uiSettings,
                 isSelected = false,
                 isRecentlyPlayed = false,
+                isWatched = folder.videoCount > 0 && folder.unwatchedVideoCount == 0,
                 newVideoCount = folder.newCount,
                 onClick = { onFolderClick(folder) },
                 onLongClick = { },

@@ -1,22 +1,31 @@
 package app.marlboroadvance.mpvex.ui.player.controls.components.sheets
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.marlboroadvance.mpvex.R
 import app.marlboroadvance.mpvex.repository.wyzie.WyzieSubtitle
@@ -78,6 +87,7 @@ fun OnlineSubtitleSearchSheet(
       val keyboardController = LocalSoftwareKeyboardController.current
       val mediaInfo = remember(mediaTitle) { MediaInfoParser.parse(mediaTitle) }
       var searchQuery by remember { mutableStateOf(mediaInfo.title) }
+      var showAutocomplete by remember { mutableStateOf(false) }
 
       // Build the detected info string for display
       val detectedInfo = remember(mediaInfo) {
@@ -98,39 +108,42 @@ fun OnlineSubtitleSearchSheet(
           onSearchMedia(mediaInfo.title)
         }
       }
-      
+
       Column(
-        modifier = Modifier.padding(top = MaterialTheme.spacing.medium)
-      ) {
-        // Detected info chip
+        modifier = Modifier
+            .padding(top = MaterialTheme.spacing.medium)
+            .fillMaxWidth()
+    ) {
         if (detectedInfo.isNotBlank() && mediaInfo.title.isNotBlank()) {
           Row(
             modifier = Modifier
-              .fillMaxWidth()
-              .padding(horizontal = MaterialTheme.spacing.medium)
-              .padding(bottom = 4.dp),
+              .padding(horizontal = MaterialTheme.spacing.medium, vertical = 4.dp)
+              .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
+              .padding(horizontal = 12.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
           ) {
             Icon(
               Icons.Default.AutoFixHigh,
               contentDescription = null,
-              modifier = Modifier.size(14.dp),
-              tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+              modifier = Modifier.size(12.dp),
+              tint = MaterialTheme.colorScheme.primary
             )
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(6.dp))
             Text(
               text = detectedInfo,
               style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
               maxLines = 1,
               modifier = Modifier.basicMarquee()
             )
           }
         }
-        OutlinedTextField(
+
+        TextField(
           value = searchQuery,
           onValueChange = { 
             searchQuery = it
+            showAutocomplete = true
           },
           modifier = Modifier
             .fillMaxWidth()
@@ -139,29 +152,33 @@ fun OnlineSubtitleSearchSheet(
           leadingIcon = {
             IconButton(onClick = { 
               searchQuery = mediaInfo.title
+              showAutocomplete = false 
               onSearchMedia(mediaInfo.title)
+              keyboardController?.hide()
             }) {
-              Icon(Icons.Default.AutoFixHigh, null, tint = MaterialTheme.colorScheme.primary)
+              Icon(Icons.Default.Refresh, contentDescription = "Reset Search", tint = MaterialTheme.colorScheme.primary)
             }
           },
           trailingIcon = {
             Row(verticalAlignment = Alignment.CenterVertically) {
+              if (isSearching || isDownloading || isSearchingMedia) {
+                  CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                  Spacer(Modifier.width(8.dp))
+              }
               if (searchQuery.isNotEmpty()) {
                 IconButton(onClick = { 
                   searchQuery = ""
+                  showAutocomplete = false
                   onClearMediaSelection()
                 }) {
                   Icon(Icons.Default.Close, null)
                 }
               }
-              if (isSearching || isDownloading || isSearchingMedia) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                Spacer(Modifier.width(8.dp))
-              }
-              IconButton(onClick = {
-                val q = if (searchQuery.isNotBlank()) searchQuery else mediaInfo.title
+              IconButton(onClick = { 
+                val q = searchQuery.ifBlank { mediaInfo.title }
                 searchQuery = q
                 onSearchMedia(q)
+                showAutocomplete = false
                 keyboardController?.hide()
               }) {
                 Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.primary)
@@ -171,38 +188,46 @@ fun OnlineSubtitleSearchSheet(
           singleLine = true,
           keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
           keyboardActions = KeyboardActions(onSearch = {
-            val q = if (searchQuery.isNotBlank()) searchQuery else mediaInfo.title
+            val q = searchQuery.ifBlank { mediaInfo.title }
             searchQuery = q
             onSearchMedia(q)
+            showAutocomplete = false
             keyboardController?.hide()
           }),
-          shape = RoundedCornerShape(12.dp),
+          shape = RoundedCornerShape(24.dp),
           colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-            unfocusedIndicatorColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
           )
         )
 
         // Autocomplete Results
-        if (mediaSearchResults.isNotEmpty()) {
+        AnimatedVisibility(
+          visible = showAutocomplete && mediaSearchResults.isNotEmpty(),
+          enter = expandVertically(),
+          exit = shrinkVertically()
+      ) {
           Card(
             modifier = Modifier
               .fillMaxWidth()
               .padding(horizontal = MaterialTheme.spacing.medium)
-              .heightIn(max = 200.dp),
-            shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-          ) {
-            androidx.compose.foundation.lazy.LazyColumn {
-              items(mediaSearchResults.size) { index ->
-                val result = mediaSearchResults[index]
+              .padding(bottom = 8.dp)
+              .heightIn(max = 190.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {                        
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                mediaSearchResults.forEachIndexed { index, result ->
                 TmdbResultRow(
                   result = result,
                   onClick = { 
                     searchQuery = result.title
                     onSelectMedia(result)
+                    showAutocomplete = false
                     keyboardController?.hide()
                   }
                 )
@@ -227,13 +252,15 @@ fun OnlineSubtitleSearchSheet(
             onSelectEpisode = onSelectEpisode,
             onClose = onClearMediaSelection
           )
+            
+            Spacer(modifier = Modifier.height(16.dp)) 
+       }
+        if (isSearching) {
+          LinearProgressIndicator(
+            modifier = Modifier.fillMaxWidth().height(2.dp),
+            color = MaterialTheme.colorScheme.primary
+          )
         }
-      }
-      if (isSearching) {
-        LinearProgressIndicator(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = MaterialTheme.spacing.medium).height(2.dp),
-          color = MaterialTheme.colorScheme.primary
-        )
       }
     },
     track = { item ->
@@ -241,8 +268,7 @@ fun OnlineSubtitleSearchSheet(
         is OnlineSubtitleItem.OnlineTrack -> {
             WyzieSubtitleRow(
                 subtitle = item.subtitle,
-                onDownload = { onDownloadOnline(item.subtitle) },
-                modifier = Modifier.padding(horizontal = MaterialTheme.spacing.small, vertical = 2.dp)
+                onDownload = { onDownloadOnline(item.subtitle) }
             )
         }
         is OnlineSubtitleItem.Header -> {
@@ -251,13 +277,13 @@ fun OnlineSubtitleSearchSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .then(if (isOnlineHeader) Modifier.clickable { onToggleOnlineSection() } else Modifier)
-                    .padding(horizontal = MaterialTheme.spacing.medium, vertical = MaterialTheme.spacing.extraSmall),
+                    .padding(horizontal = MaterialTheme.spacing.medium, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = item.title,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                 )
@@ -272,10 +298,7 @@ fun OnlineSubtitleSearchSheet(
             }
         }
         OnlineSubtitleItem.Divider -> {
-            HorizontalDivider(
-              modifier = Modifier.padding(horizontal = MaterialTheme.spacing.medium, vertical = MaterialTheme.spacing.small),
-              color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
         }
       }
     },
@@ -289,33 +312,68 @@ fun WyzieSubtitleRow(
     onDownload: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth().clickable { onDownload() },
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+    Row(
+        modifier = modifier
+          .fillMaxWidth()
+          .clickable { onDownload() }
+          .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+      // Language Badge
+      Box(
+        modifier = Modifier
+          .size(40.dp)
+          .clip(RoundedCornerShape(8.dp))
+          .background(MaterialTheme.colorScheme.secondaryContainer),
+          contentAlignment = Alignment.Center
+      ) {
+        Text(
+          text = subtitle.displayLanguage.take(2).uppercase(),
+          style = MaterialTheme.typography.labelLarge,
+          fontWeight = FontWeight.Bold,
+          color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+      }
+
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          text = subtitle.displayName,
+          style = MaterialTheme.typography.bodyMedium,
+          fontWeight = FontWeight.SemiBold,
+          color = MaterialTheme.colorScheme.onSurface,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis
+        )
+        Spacer(modifier = Modifier.height(2.dp))
         Row(
-            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = subtitle.displayName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = subtitle.displayLanguage, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
-                    subtitle.source?.let { Text(text = " • $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline) }
-                    subtitle.format?.let { Text(text = " • ${it.uppercase()}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline) }
-                }
-            }
-            IconButton(onClick = onDownload) {
-                Icon(imageVector = Icons.Default.Download, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            }
+          Text(text = subtitle.displayLanguage, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+          subtitle.source?.let {
+          Text(text = "•", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+          Text(text = it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+        subtitle.format?.let {
+            Text(text = "•", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+            Text(text = it.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+          }
+        }
+      }
+      
+      IconButton(
+        onClick = onDownload,
+        modifier = Modifier.size(36.dp),
+        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+      ) {
+        Icon(
+          imageVector = Icons.Default.Download, 
+          contentDescription = null, 
+          tint = MaterialTheme.colorScheme.onPrimaryContainer,
+          modifier = Modifier.size(18.dp)
+        )
+      }
     }
 }
 
@@ -329,19 +387,19 @@ fun TmdbResultRow(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(16.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
             Text(
-                text = result.title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold
+              text = result.title,
+              style = MaterialTheme.typography.bodyMedium,
+              fontWeight = FontWeight.SemiBold,
+              color = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "${result.mediaType.uppercase()} ${result.releaseYear ?: ""}".trim(),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -360,138 +418,126 @@ fun SeriesDetailsSection(
     onSelectEpisode: (app.marlboroadvance.mpvex.repository.wyzie.WyzieEpisode) -> Unit,
     onClose: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = MaterialTheme.spacing.medium)
-            .padding(bottom = MaterialTheme.spacing.small),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+    Surface(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = MaterialTheme.spacing.medium)
+        .padding(bottom = MaterialTheme.spacing.small),
+      shape = RoundedCornerShape(16.dp),
+      color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+      Row(
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        Text(
+          text = tvShow.name,
+          style = MaterialTheme.typography.bodyMedium,
+          fontWeight = FontWeight.Bold,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          modifier = Modifier.weight(1f)
+        )
+
+        // Season Dropdown styled as a minimal chip
+        val seasonDropdownExpanded = remember { mutableStateOf(false) }
+        Box {
+            Surface(
+              onClick = { seasonDropdownExpanded.value = true },
+              shape = CircleShape,
+              color = MaterialTheme.colorScheme.surface,
+              modifier = Modifier.height(32.dp)
             ) {
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 10.dp)
+              ) {
                 Text(
-                    text = tvShow.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
+                  text = selectedSeason?.let { "S${it.season_number}" } ?: "Season",
+                  style = MaterialTheme.typography.labelMedium,
+                  fontWeight = FontWeight.Bold
                 )
-
-                // Season Dropdown
-                val seasonDropdownExpanded = remember { mutableStateOf(false) }
-                Box {
-                  FilledTonalButton(
-                      onClick = { seasonDropdownExpanded.value = true },
-                      contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                      modifier = Modifier.height(38.dp),
-                      shape = RoundedCornerShape(8.dp)
-                  ) {
-                      Text(
-                          text = selectedSeason?.let { "S${it.season_number}" } ?: "Season",
-                          style = MaterialTheme.typography.labelLarge,
-                          fontWeight = FontWeight.Bold,
-                          maxLines = 1
-                      )
-                      Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(20.dp))
-                  }
-                  DropdownMenu(
-                      expanded = seasonDropdownExpanded.value,
-                      onDismissRequest = { seasonDropdownExpanded.value = false },
-                      modifier = Modifier.heightIn(max = 300.dp),
-                      shape = RoundedCornerShape(12.dp),
-                      containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                  ) {
-                      tvShow.seasons.forEach { season ->
-                          DropdownMenuItem(
-                              text = { 
-                                Text(
-                                  "Season ${season.season_number}",
-                                  style = MaterialTheme.typography.bodyLarge
-                                ) 
-                              },
-                              onClick = {
-                                  onSelectSeason(season)
-                                  seasonDropdownExpanded.value = false
-                              }
-                          )
-                      }
-                  }
-                }
-
-                // Episode Dropdown
-                val episodeDropdownExpanded = remember { mutableStateOf(false) }
-                Box {
-                  FilledTonalButton(
-                      onClick = { episodeDropdownExpanded.value = true },
-                      enabled = selectedSeason != null && !isFetchingEpisodes,
-                      contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                      modifier = Modifier.height(38.dp),
-                      shape = RoundedCornerShape(8.dp)
-                  ) {
-                      if (isFetchingEpisodes) {
-                          CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp), 
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.primary
-                          )
-                          Spacer(Modifier.width(6.dp))
-                      }
-                      Text(
-                          text = selectedEpisode?.let { "E${it.episode_number}" } ?: "Ep",
-                          style = MaterialTheme.typography.labelLarge,
-                          fontWeight = FontWeight.Bold,
-                          maxLines = 1
-                      )
-                      Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(20.dp))
-                  }
-                  DropdownMenu(
-                      expanded = episodeDropdownExpanded.value,
-                      onDismissRequest = { episodeDropdownExpanded.value = false },
-                      modifier = Modifier.heightIn(max = 300.dp).widthIn(min = 200.dp),
-                      shape = RoundedCornerShape(12.dp),
-                      containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                  ) {
-                      episodes.forEach { episode ->
-                          DropdownMenuItem(
-                              text = { 
-                                Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                                  Text(
-                                    "Ep ${episode.episode_number}", 
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold
-                                  )
-                                  episode.name?.let { 
-                                    Text(
-                                      it, 
-                                      style = MaterialTheme.typography.bodySmall,
-                                      color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                      maxLines = 1,
-                                      modifier = Modifier.basicMarquee()
-                                    ) 
-                                  }
-                                }
-                              },
-                              onClick = {
-                                  onSelectEpisode(episode)
-                                  episodeDropdownExpanded.value = false
-                              }
-                          )
-                      }
-                  }
-                }
-
-                IconButton(
-                    onClick = onClose,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(Icons.Default.Close, null, modifier = Modifier.size(16.dp))
-                }
+                Icon(Icons.Default.ArrowDropDown, null, modifier = Modifier.size(16.dp))
+              }
             }
+            DropdownMenu(
+              expanded = seasonDropdownExpanded.value,
+              onDismissRequest = { seasonDropdownExpanded.value = false },
+              modifier = Modifier.heightIn(max = 250.dp)
+            ) {
+              tvShow.seasons.forEach { season ->
+                DropdownMenuItem(
+                  text = { Text("Season ${season.season_number}", style = MaterialTheme.typography.bodyMedium) },
+                onClick = {
+                  onSelectSeason(season)
+                  seasonDropdownExpanded.value = false
+                }
+              )
+            }
+          }
         }
-    }
+
+          // Episode Dropdown styled as a minimal chip
+          val episodeDropdownExpanded = remember { mutableStateOf(false) }
+          Box {
+              Surface(
+                onClick = { episodeDropdownExpanded.value = true },
+                enabled = selectedSeason != null && !isFetchingEpisodes,
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.height(32.dp)
+              ) {
+                  Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                  ) {
+                    if (isFetchingEpisodes) {
+                      CircularProgressIndicator(modifier = Modifier.size(12.dp), strokeWidth = 2.dp)
+                      Spacer(Modifier.width(4.dp))
+                    }
+                    Text(
+                      text = selectedEpisode?.let { "E${it.episode_number}" } ?: "Ep",
+                      style = MaterialTheme.typography.labelMedium,
+                      fontWeight = FontWeight.Bold
+                    )
+                    Icon(Icons.Default.ArrowDropDown, null, modifier = Modifier.size(16.dp))
+                }
+              }
+              DropdownMenu(
+                expanded = episodeDropdownExpanded.value,
+                onDismissRequest = { episodeDropdownExpanded.value = false },
+                modifier = Modifier.heightIn(max = 250.dp).widthIn(min = 180.dp)
+              ) {
+                  episodes.forEach { episode ->
+                    DropdownMenuItem(
+                        text = {
+                          Column {
+                            Text("Ep ${episode.episode_number}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
+                            episode.name?.let {
+                              Text(it, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                              }
+                            }
+                          },
+                          onClick = {
+                            onSelectEpisode(episode)
+                            episodeDropdownExpanded.value = false
+                          }
+                      )
+                  }
+              }
+          }
+
+          IconButton(
+            onClick = onClose,
+            modifier = Modifier.size(24.dp)
+          ) {
+            Icon(
+              Icons.Default.Close, null,
+              modifier = Modifier.size(16.dp),
+              tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+          }
+      }
+  }
 }

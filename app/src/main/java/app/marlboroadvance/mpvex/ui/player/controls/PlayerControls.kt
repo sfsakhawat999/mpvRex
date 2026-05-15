@@ -1106,7 +1106,8 @@ fun PlayerControls(
                   val navBarPadding = WindowInsets.navigationBars.asPaddingValues()
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr)
+                    end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+                    bottom = navBarPadding.calculateBottomPadding()
                   )
                 } else {
                   Modifier
@@ -1216,7 +1217,8 @@ fun PlayerControls(
                   val navBarPadding = WindowInsets.navigationBars.asPaddingValues()
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr)
+                    end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+                    bottom = navBarPadding.calculateBottomPadding()
                   )
                 } else {
                   Modifier
@@ -1283,7 +1285,8 @@ fun PlayerControls(
                   val navBarPadding = WindowInsets.navigationBars.asPaddingValues()
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr)
+                    end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+                    bottom = navBarPadding.calculateBottomPadding()
                   )
                 } else {
                   Modifier
@@ -1336,7 +1339,8 @@ fun PlayerControls(
                   val navBarPadding = WindowInsets.navigationBars.asPaddingValues()
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr)
+                    end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+                    bottom = navBarPadding.calculateBottomPadding()
                   )
                 } else {
                   Modifier
@@ -1423,7 +1427,8 @@ fun PlayerControls(
                   val navBarPadding = WindowInsets.navigationBars.asPaddingValues()
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr)
+                    end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+                    bottom = navBarPadding.calculateBottomPadding()
                   )
                 } else {
                   Modifier

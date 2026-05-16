@@ -113,14 +113,14 @@ fun SortDialog(
         if (viewModeSelector != null || layoutModeSelector != null) {
           Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.Top,
           ) {
             if (viewModeSelector != null) {
               MultiViewModeSelectorComponent(
                 selector = viewModeSelector,
                 enabled = enableViewModeOptions,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(3f),
               )
             }
 
@@ -135,7 +135,7 @@ fun SortDialog(
               ViewModeSelectorComponent(
                 viewModeSelector = layoutModeSelector,
                 enabled = enableLayoutModeOptions,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(2f),
               )
             }
           }
@@ -237,7 +237,7 @@ private fun SortTypeSelector(
           Box(
             modifier =
               Modifier
-                .size(56.dp)
+                .size(48.dp)
                 .clip(shape)
                 .background(
                   color =
@@ -361,7 +361,7 @@ private fun MultiViewModeSelectorComponent(
 
         Column(
           horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(6.dp),
+          verticalArrangement = Arrangement.spacedBy(4.dp),
           modifier = Modifier
             .clip(shape)
             .background(
@@ -373,11 +373,11 @@ private fun MultiViewModeSelectorComponent(
                 option.onClick()
               }
             }
-            .padding(8.dp),
+            .padding(4.dp),
         ) {
           Box(
             modifier = Modifier
-              .size(44.dp)
+              .size(36.dp)
               .clip(shape)
               .background(
                 color = if (selected && enabled) {
@@ -393,7 +393,7 @@ private fun MultiViewModeSelectorComponent(
             Icon(
               imageVector = option.icon,
               contentDescription = null,
-              modifier = Modifier.size(24.dp),
+              modifier = Modifier.size(18.dp),
               tint = if (selected && enabled) {
                 MaterialTheme.colorScheme.onPrimaryContainer
               } else if (enabled) {
@@ -457,7 +457,7 @@ private fun ViewModeSelectorComponent(
 
         Column(
           horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(6.dp),
+          verticalArrangement = Arrangement.spacedBy(4.dp),
           modifier = Modifier
             .clip(shape)
             .background(
@@ -469,11 +469,11 @@ private fun ViewModeSelectorComponent(
                 viewModeSelector.onViewModeChange(index == 0)
               }
             }
-            .padding(8.dp),
+            .padding(4.dp),
         ) {
           Box(
             modifier = Modifier
-              .size(44.dp)
+              .size(36.dp)
               .clip(shape)
               .background(
                 color = if (selected && enabled) {
@@ -496,7 +496,7 @@ private fun ViewModeSelectorComponent(
               } else {
                 MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
               },
-              modifier = Modifier.size(20.dp),
+              modifier = Modifier.size(18.dp),
             )
           }
 

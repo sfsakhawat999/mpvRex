@@ -9,16 +9,24 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
@@ -38,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -62,7 +71,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MediaLibraryContent() {
   val context = LocalContext.current
@@ -115,6 +124,10 @@ fun MediaLibraryContent() {
   val deleteDialogOpen = rememberSaveable { mutableStateOf(false) }
   val renameDialogOpen = rememberSaveable { mutableStateOf(false) }
 
+  // Search state
+  var searchQuery by rememberSaveable { mutableStateOf("") }
+  var isSearching by rememberSaveable { mutableStateOf(false) }
+
   // FAB visibility state
   val isFabVisible = remember { mutableStateOf(true) }
 
@@ -126,8 +139,15 @@ fun MediaLibraryContent() {
     showFloatingBottomBar = selectionManager.isInSelectionMode
   }
 
-  BackHandler(enabled = selectionManager.isInSelectionMode) {
-    selectionManager.clear()
+  val shouldHandleBack = selectionManager.isInSelectionMode || isSearching
+  BackHandler(enabled = shouldHandleBack) {
+    when {
+      selectionManager.isInSelectionMode -> selectionManager.clear()
+      isSearching -> {
+        isSearching = false
+        searchQuery = ""
+      }
+    }
   }
 
   DisposableEffect(lifecycleOwner) {
@@ -144,45 +164,67 @@ fun MediaLibraryContent() {
 
   Scaffold(
     topBar = {
-      BrowserTopBar(
-        title = "Media Library",
-        isInSelectionMode = selectionManager.isInSelectionMode,
-        selectedCount = selectionManager.selectedCount,
-        totalCount = sortedVideosWithInfo.size,
-        onBackClick = {
-          if (selectionManager.isInSelectionMode) {
-            selectionManager.clear()
-          } else {
-            backstack.removeLastOrNull()
-          }
-        },
-        onCancelSelection = { selectionManager.clear() },
-        onSortClick = { sortDialogOpen.value = true },
-        onSettingsClick = {
-          backstack.add(app.marlboroadvance.mpvex.ui.preferences.PreferencesScreen)
-        },
-        isSingleSelection = selectionManager.isSingleSelection,
-        onInfoClick = {
-          if (selectionManager.isSingleSelection) {
-            val video = selectionManager.getSelectedItems().firstOrNull()
-            if (video != null) {
-              val intent = Intent(context, app.marlboroadvance.mpvex.ui.mediainfo.MediaInfoActivity::class.java)
-              intent.action = Intent.ACTION_VIEW
-              intent.data = video.uri
-              context.startActivity(intent)
-              selectionManager.clear()
+      if (isSearching) {
+        SearchBar(
+          inputField = {
+            SearchBarDefaults.InputField(
+              query = searchQuery,
+              onQueryChange = { searchQuery = it },
+              onSearch = { },
+              expanded = false,
+              onExpandedChange = { },
+              placeholder = { Text("Search all videos...") },
+              leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
+              trailingIcon = {
+                IconButton(onClick = { isSearching = false; searchQuery = "" }) {
+                  Icon(Icons.Filled.Close, contentDescription = "Cancel")
+                }
+              },
+            )
+          },
+          expanded = false,
+          onExpandedChange = { },
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+          shape = RoundedCornerShape(28.dp),
+          tonalElevation = 6.dp,
+        ) { }
+      } else {
+        BrowserTopBar(
+          title = stringResource(app.marlboroadvance.mpvex.R.string.app_name),
+          isInSelectionMode = selectionManager.isInSelectionMode,
+          selectedCount = selectionManager.selectedCount,
+          totalCount = sortedVideosWithInfo.size,
+          onBackClick = null, // Unified header: no back button at root
+          onCancelSelection = { selectionManager.clear() },
+          onSortClick = { sortDialogOpen.value = true },
+          onSearchClick = { isSearching = true },
+          onSettingsClick = {
+            backstack.add(app.marlboroadvance.mpvex.ui.preferences.PreferencesScreen)
+          },
+          onDeleteClick = { deleteDialogOpen.value = true },
+          isSingleSelection = selectionManager.isSingleSelection,
+          onInfoClick = {
+            if (selectionManager.isSingleSelection) {
+              val video = selectionManager.getSelectedItems().firstOrNull()
+              if (video != null) {
+                val intent = Intent(context, app.marlboroadvance.mpvex.ui.mediainfo.MediaInfoActivity::class.java)
+                intent.action = Intent.ACTION_VIEW
+                intent.data = video.uri
+                context.startActivity(intent)
+                selectionManager.clear()
+              }
             }
-          }
-        },
-        onShareClick = { selectionManager.shareSelected() },
-        onPlayClick = { selectionManager.playSelected() },
-        onSelectAll = { selectionManager.selectAll() },
-        onInvertSelection = { selectionManager.invertSelection() },
-        onDeselectAll = { selectionManager.clear() },
-      )
+          },
+          onShareClick = { selectionManager.shareSelected() },
+          onPlayClick = { selectionManager.playSelected() },
+          onSelectAll = { selectionManager.selectAll() },
+          onInvertSelection = { selectionManager.invertSelection() },
+          onDeselectAll = { selectionManager.clear() },
+        )
+      }
     },
     floatingActionButton = {
-      if (sortedVideosWithInfo.isNotEmpty()) {
+      if (!selectionManager.isInSelectionMode && isFabVisible.value && sortedVideosWithInfo.isNotEmpty()) {
         TooltipBox(
           positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
           tooltip = { PlainTooltip { Text("Play recently played or first video") } },
@@ -193,7 +235,7 @@ fun MediaLibraryContent() {
               .windowInsetsPadding(WindowInsets.systemBars)
               .padding(bottom = navigationBarHeight)
               .animateFloatingActionButton(
-                visible = !selectionManager.isInSelectionMode && isFabVisible.value,
+                visible = true,
                 alignment = Alignment.BottomEnd,
               ),
             onClick = {
@@ -218,10 +260,18 @@ fun MediaLibraryContent() {
     val autoScrollToLastPlayed by browserPreferences.autoScrollToLastPlayed.collectAsState()
     val videosWereDeletedOrMoved = false
 
+    val displayVideos = if (searchQuery.isBlank()) {
+      sortedVideosWithInfo
+    } else {
+      sortedVideosWithInfo.filter { 
+        it.video.displayName.contains(searchQuery, ignoreCase = true) 
+      }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
       VideoListContent(
         folderId = "media_library",
-        videosWithInfo = sortedVideosWithInfo,
+        videosWithInfo = displayVideos,
         isLoading = isLoading && videos.isEmpty(),
         uiSettings = uiSettings,
         isRefreshing = isRefreshing,
@@ -264,6 +314,9 @@ fun MediaLibraryContent() {
           onRenameClick = { renameDialogOpen.value = true },
           onDeleteClick = { deleteDialogOpen.value = true },
           onAddToPlaylistClick = { /* N/A */ },
+          showCopy = false,
+          showMove = false,
+          showAddToPlaylist = false,
           modifier = Modifier.padding(bottom = navigationBarHeight + 16.dp)
         )
       }

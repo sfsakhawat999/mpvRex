@@ -306,7 +306,7 @@ object PlaylistScreen : Screen {
               }
             },
             onPlaylistLongClick = { playlistWithCount ->
-              selectionManager.toggle(playlistWithCount)
+              selectionManager.handleLongClick(playlistWithCount)
             },
             modifier = Modifier.padding(paddingValues),
             isInSelectionMode = selectionManager.isInSelectionMode,

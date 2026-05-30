@@ -687,7 +687,7 @@ object FolderListScreen : Screen {
                 }
               },
               onFolderLongClick = { folder ->
-                selectionManager.toggle(folder)
+                selectionManager.handleLongClick(folder)
               },
             )
             }

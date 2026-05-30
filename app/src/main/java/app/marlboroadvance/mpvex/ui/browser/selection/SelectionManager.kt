@@ -50,6 +50,27 @@ class SelectionManager<T, ID>(
   }
 
   /**
+   * Perform range selection from the last selected item to the specified item
+   */
+  fun toggleRange(item: T) {
+    val allIds = items().map(getId)
+    state = state.selectRange(getId(item), allIds)
+  }
+
+  /**
+   * Handle long-click event on an item.
+   * If in selection mode, triggers range selection.
+   * Otherwise, starts selection mode by toggling the item.
+   */
+  fun handleLongClick(item: T) {
+    if (isInSelectionMode) {
+      toggleRange(item)
+    } else {
+      toggle(item)
+    }
+  }
+
+  /**
    * Clear all selections
    */
   fun clear() {

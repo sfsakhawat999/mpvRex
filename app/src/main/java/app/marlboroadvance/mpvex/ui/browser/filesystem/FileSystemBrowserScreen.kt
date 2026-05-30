@@ -886,7 +886,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                   }
                 },
                 onFolderLongClick = { folder ->
-                  folderSelectionManager.toggle(folder)
+                  folderSelectionManager.handleLongClick(folder)
                 },
                 onVideoClick = { video ->
                   if (isInSelectionMode) {
@@ -898,7 +898,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                   }
                 },
                 onVideoLongClick = { video ->
-                  videoSelectionManager.toggle(video)
+                  videoSelectionManager.handleLongClick(video)
                 },
                 onBreadcrumbClick = { component ->
                   // Navigate to the breadcrumb by popping until we reach it

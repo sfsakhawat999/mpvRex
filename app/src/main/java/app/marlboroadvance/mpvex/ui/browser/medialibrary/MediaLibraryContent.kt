@@ -303,7 +303,7 @@ fun MediaLibraryContent() {
             MediaUtils.playFile(video, context, "media_library_list")
           }
         },
-        onVideoLongClick = { video -> selectionManager.toggle(video) },
+        onVideoLongClick = { video -> selectionManager.handleLongClick(video) },
         isFabVisible = isFabVisible,
         modifier = Modifier.padding(padding),
         showFloatingBottomBar = showFloatingBottomBar,

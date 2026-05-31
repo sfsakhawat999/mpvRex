@@ -100,6 +100,7 @@ import app.marlboroadvance.mpvex.ui.browser.cards.FolderCard
 import app.marlboroadvance.mpvex.ui.browser.cards.VideoCard
 import app.marlboroadvance.mpvex.ui.browser.components.BrowserBottomBar
 import app.marlboroadvance.mpvex.ui.browser.components.BrowserTopBar
+import app.marlboroadvance.mpvex.ui.browser.components.UnifiedExplorerContent
 import app.marlboroadvance.mpvex.ui.browser.components.SelectionOverflowAction
 import app.marlboroadvance.mpvex.ui.browser.dialogs.AddToPlaylistDialog
 import app.marlboroadvance.mpvex.ui.browser.dialogs.DeleteConfirmationDialog
@@ -1320,13 +1321,11 @@ private fun FileSystemBrowserContent(
   modifier: Modifier = Modifier,
   isInSelectionMode: Boolean = false,
 ) {
-  val gesturePreferences = koinInject<GesturePreferences>()
-  val browserPreferences = koinInject<BrowserPreferences>()
   val thumbnailRepository = koinInject<app.marlboroadvance.mpvex.domain.thumbnail.ThumbnailRepository>()
-  val tapThumbnailToSelect by gesturePreferences.tapThumbnailToSelect.collectAsState()
+  val browserPreferences = koinInject<BrowserPreferences>()
   val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
 
-  // Calculate thumbnail dimensions for list mode
+  // Calculate thumbnail dimensions
   val thumbWidthDp = 160.dp
   val density = androidx.compose.ui.platform.LocalDensity.current
   val aspect = 16f / 9f
@@ -1336,7 +1335,6 @@ private fun FileSystemBrowserContent(
   val folders = items.filterIsInstance<FileSystemItem.Folder>()
   val videos = items.filterIsInstance<FileSystemItem.VideoFile>().map { it.video }
 
-  // Create a unique folderId based on the current directories
   val folderId = remember(folders, isAtRoot, breadcrumbs) {
     if (isAtRoot && breadcrumbs.isEmpty()) {
       "filesystem_root"
@@ -1357,180 +1355,42 @@ private fun FileSystemBrowserContent(
     }
   }
 
-  when {
-    isLoading -> {
-      Box(
-        modifier = modifier
-          .fillMaxSize()
-          .padding(bottom = 80.dp), // Account for bottom navigation bar
-        contentAlignment = Alignment.Center,
-      ) {
-        CircularProgressIndicator(
-          modifier = Modifier.size(48.dp),
-          color = MaterialTheme.colorScheme.primary,
-        )
-      }
-    }
-
-    error != null -> {
-      Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-      ) {
-        EmptyState(
-          icon = Icons.Filled.Folder,
-          title = "Error loading directory",
-          message = error,
-        )
-      }
-    }
-
-    items.isEmpty() && itemsWereDeletedOrMoved && !isAtRoot -> {
-      Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-      ) {
-        EmptyState(
-          icon = Icons.Filled.FolderOpen,
-          title = "Empty folder",
-          message = "This folder contains no videos or subfolders",
-        )
-      }
-    }
-
-    else -> {
-      // Check if at top of list to hide scrollbar during pull-to-refresh
-      val isAtTop by remember {
-        derivedStateOf {
-          listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
-        }
-      }
-
-      // Only show scrollbar if list has more than 20 items
-      val hasEnoughItems = items.size > 20
-
-      // Animate scrollbar alpha
-      val scrollbarAlpha by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (isAtTop || !hasEnoughItems) 0f else 1f,
-        animationSpec = tween(durationMillis = 200),
-        label = "scrollbarAlpha",
+  Column(modifier = modifier.fillMaxSize()) {
+    // Breadcrumb navigation (if not at root)
+    if (!isAtRoot && breadcrumbs.isNotEmpty()) {
+      app.marlboroadvance.mpvex.ui.browser.filesystem.BreadcrumbNavigation(
+        breadcrumbs = breadcrumbs,
+        onBreadcrumbClick = onBreadcrumbClick,
       )
-
-      PullRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = onRefresh,
-        listState = listState,
-        modifier = modifier.fillMaxSize(),
-      ) {
-        Box(
-          modifier = Modifier.fillMaxSize()
-        ) {
-          LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-              start = 8.dp,
-              end = 8.dp,
-              bottom = navigationBarHeight
-            ),
-          ) {
-            // Breadcrumb navigation (if not at root)
-            if (!isAtRoot && breadcrumbs.isNotEmpty()) {
-              item {
-                app.marlboroadvance.mpvex.ui.browser.filesystem.BreadcrumbNavigation(
-                  breadcrumbs = breadcrumbs,
-                  onBreadcrumbClick = onBreadcrumbClick,
-                )
-              }
-            }
-
-            // Folders first
-            items(
-              items = items.filterIsInstance<FileSystemItem.Folder>(),
-              key = { it.path },
-            ) { folder ->
-              val folderModel = app.marlboroadvance.mpvex.domain.media.model.VideoFolder(
-                bucketId = folder.path,
-                name = folder.name,
-                path = folder.path,
-                videoCount = folder.videoCount,
-                audioCount = folder.audioCount,
-                totalSize = folder.totalSize,
-                totalDuration = folder.totalDuration,
-                lastModified = folder.lastModified / 1000,
-                newCount = folder.newCount,
-                unwatchedVideoCount = folder.unwatchedVideoCount,
-              )
-
-              FolderCard(
-                folder = folderModel,
-                uiSettings = uiSettings,
-                isSelected = folderSelectionManager.isSelected(folder),
-                newVideoCount = folder.newCount,
-                isWatched = (folder.videoCount > 0 || folder.audioCount > 0) && folder.unwatchedVideoCount == 0,
-                isRecentlyPlayed = recentlyPlayedFilePath?.let { it.startsWith(folder.path + "/") && folder.path != "/" } ?: false,
-                onClick = { onFolderClick(folder) },
-                onLongClick = { onFolderLongClick(folder) },
-                onThumbClick = if (tapThumbnailToSelect) {
-                  { onFolderLongClick(folder) }
-                } else {
-                  { onFolderClick(folder) }
-                },
-                isGridMode = false,
-              )
-            }
-
-            // Videos second
-            items(
-              items = items.filterIsInstance<FileSystemItem.VideoFile>(),
-              key = { "${it.video.id}_${it.video.path}" },
-            ) { videoFile ->
-              val isRecentlyPlayed = recentlyPlayedFilePath?.let { 
-                videoFile.video.path == it || videoFile.video.uri.toString() == it 
-              } ?: false
-
-              VideoCard(
-                video = videoFile.video,
-                uiSettings = uiSettings,
-                progressPercentage = videoFilesWithPlayback[videoFile.video.id],
-                isOldAndUnplayed = newVideoIds.contains(videoFile.video.id),
-                isWatched = watchedVideoIds.contains(videoFile.video.id),
-                isRecentlyPlayed = isRecentlyPlayed,
-                isNeverPlayed = videoFilesWithPlayback[videoFile.video.id] == null,
-                isSelected = videoSelectionManager.isSelected(videoFile.video),
-                onClick = { onVideoClick(videoFile.video) },
-                onLongClick = { onVideoLongClick(videoFile.video) },
-                onThumbClick = if (tapThumbnailToSelect) {
-                  { onVideoLongClick(videoFile.video) }
-                } else {
-                  { onVideoClick(videoFile.video) }
-                },
-                isGridMode = false,
-                showSubtitleIndicator = showSubtitleIndicator,
-                useFolderNameStyle = false,
-              )
-            }
-          }
-          
-          // Scrollbar with bottom padding to avoid overlap with navigation
-          Box(
-            modifier = Modifier
-              .fillMaxSize()
-              .padding(bottom = navigationBarHeight)
-          ) {
-            LazyColumnScrollbar(
-              state = listState,
-              settings = ScrollbarSettings(
-                thumbUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f * scrollbarAlpha),
-                thumbSelectedColor = MaterialTheme.colorScheme.primary.copy(alpha = scrollbarAlpha),
-              ),
-            ) {
-              // Empty content - scrollbar only
-            }
-          }
-        }
-      }
     }
+
+    UnifiedExplorerContent(
+      items = items,
+      isLoading = isLoading,
+      uiSettings = uiSettings,
+      isSelected = { item ->
+        when (item) {
+          is FileSystemItem.Folder -> folderSelectionManager.isSelected(item)
+          is FileSystemItem.VideoFile -> videoSelectionManager.isSelected(item.video)
+          else -> false
+        }
+      },
+      onClick = { item ->
+        when (item) {
+          is FileSystemItem.Folder -> onFolderClick(item)
+          is FileSystemItem.VideoFile -> onVideoClick(item.video)
+        }
+      },
+      onLongClick = { item ->
+        when (item) {
+          is FileSystemItem.Folder -> onFolderLongClick(item)
+          is FileSystemItem.VideoFile -> onVideoLongClick(item.video)
+        }
+      },
+      modifier = Modifier.weight(1f),
+      emptyTitle = "Empty folder",
+      emptyMessage = "This folder contains no videos or subfolders"
+    )
   }
 }
 

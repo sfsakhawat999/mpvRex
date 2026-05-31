@@ -70,6 +70,7 @@ import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.presentation.components.pullrefresh.PullRefreshBox
 import app.marlboroadvance.mpvex.ui.browser.cards.PlaylistCard
 import app.marlboroadvance.mpvex.ui.browser.components.BrowserTopBar
+import app.marlboroadvance.mpvex.ui.browser.components.UnifiedExplorerContent
 import app.marlboroadvance.mpvex.ui.browser.dialogs.DeleteConfirmationDialog
 import app.marlboroadvance.mpvex.ui.browser.selection.rememberSelectionManager
 import app.marlboroadvance.mpvex.ui.browser.sheets.PlaylistActionSheet
@@ -397,132 +398,15 @@ object PlaylistScreen : Screen {
     modifier: Modifier = Modifier,
     isInSelectionMode: Boolean = false,
   ) {
-    val browserPreferences = koinInject<app.marlboroadvance.mpvex.preferences.BrowserPreferences>()
-    val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
-    val folderGridColumnsPortrait by browserPreferences.folderGridColumnsPortrait.collectAsState()
-  val folderGridColumnsLandscape by browserPreferences.folderGridColumnsLandscape.collectAsState()
-  val configuration = androidx.compose.ui.platform.LocalConfiguration.current
-  val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-  val folderGridColumns = if (isLandscape) folderGridColumnsLandscape else folderGridColumnsPortrait
-
-    val isGridMode = mediaLayoutMode == MediaLayoutMode.GRID
-
-    // Check if at top of list to hide scrollbar during pull-to-refresh
-    val isAtTop by remember {
-      derivedStateOf {
-        if (isGridMode) {
-          gridState.firstVisibleItemIndex == 0 && gridState.firstVisibleItemScrollOffset == 0
-        } else {
-          listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
-        }
-      }
-    }
-
-    // Only show scrollbar if list has more than 20 items
-    val hasEnoughItems = playlistsWithCount.size > 20
-
-    // Animate scrollbar alpha
-    val scrollbarAlpha by androidx.compose.animation.core.animateFloatAsState(
-      targetValue = if (isAtTop || !hasEnoughItems) 0f else 1f,
-      animationSpec = androidx.compose.animation.core.tween(durationMillis = 200),
-      label = "scrollbarAlpha",
+    UnifiedExplorerContent(
+      items = playlistsWithCount,
+      isLoading = false,
+      uiSettings = uiSettings,
+      isSelected = { selectionManager.isSelected(it) },
+      onClick = onPlaylistClick,
+      onLongClick = onPlaylistLongClick,
+      modifier = modifier,
+      emptyTitle = "No playlists found",
+      emptyMessage = "Create a playlist to see it listed here"
     )
-
-    PullRefreshBox(
-      isRefreshing = isRefreshing,
-      onRefresh = onRefresh,
-      listState = listState,
-      modifier = modifier.fillMaxSize(),
-    ) {
-      if (isGridMode) {
-        // Grid layout
-        val navigationBarHeight = app.marlboroadvance.mpvex.ui.browser.LocalNavigationBarHeight.current
-        Box(
-          modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = navigationBarHeight)
-        ) {
-          LazyVerticalGridScrollbar(
-            state = gridState,
-            settings = ScrollbarSettings(
-              thumbUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f * scrollbarAlpha),
-              thumbSelectedColor = MaterialTheme.colorScheme.primary.copy(alpha = scrollbarAlpha),
-            ),
-          ) {
-            LazyVerticalGrid(
-              columns = GridCells.Fixed(folderGridColumns),
-              state = gridState,
-              modifier = Modifier.fillMaxSize(),
-              contentPadding = PaddingValues(
-                start = if (folderGridColumns == 1) 20.dp else 8.dp,
-                end = if (folderGridColumns == 1) 20.dp else 8.dp,
-                top = if (folderGridColumns == 1) 20.dp else 8.dp,
-              ),
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
-              verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-              items(
-                count = playlistsWithCount.size,
-                key = { playlistsWithCount[it].playlist.id },
-              ) { index ->
-                val playlistWithCount = playlistsWithCount[index]
-                PlaylistCard(
-                  playlist = playlistWithCount.playlist,
-                  itemCount = playlistWithCount.itemCount,
-                  uiSettings = uiSettings,
-
-                  isSelected = selectionManager.isSelected(playlistWithCount),
-                  onClick = { onPlaylistClick(playlistWithCount) },
-                  onLongClick = { onPlaylistLongClick(playlistWithCount) },
-                  onThumbClick = { onPlaylistClick(playlistWithCount) },
-                  isGridMode = true,
-                  gridColumns = folderGridColumns,
-                )
-              }
-            }
-          }
-        }
-      } else {
-        // List layout
-        val navigationBarHeight = app.marlboroadvance.mpvex.ui.browser.LocalNavigationBarHeight.current
-        Box(
-          modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = navigationBarHeight)
-        ) {
-          LazyColumnScrollbar(
-            state = listState,
-            settings = ScrollbarSettings(
-              thumbUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f * scrollbarAlpha),
-              thumbSelectedColor = MaterialTheme.colorScheme.primary.copy(alpha = scrollbarAlpha),
-            ),
-          ) {
-            LazyColumn(
-              state = listState,
-              modifier = Modifier.fillMaxSize(),
-              contentPadding = PaddingValues(
-                start = 8.dp,
-                end = 8.dp,
-              ),
-              verticalArrangement = Arrangement.spacedBy(0.dp),
-            ) {
-              items(playlistsWithCount, key = { it.playlist.id }) { playlistWithCount ->
-                PlaylistCard(
-                  playlist = playlistWithCount.playlist,
-                  itemCount = playlistWithCount.itemCount,
-                  uiSettings = uiSettings,
-
-                  isSelected = selectionManager.isSelected(playlistWithCount),
-                  onClick = { onPlaylistClick(playlistWithCount) },
-                  onLongClick = { onPlaylistLongClick(playlistWithCount) },
-                  onThumbClick = { onPlaylistClick(playlistWithCount) },
-                  isGridMode = false,
-                )
-              }
-            }
-          }
-        }
-      }
-    }
   }
-

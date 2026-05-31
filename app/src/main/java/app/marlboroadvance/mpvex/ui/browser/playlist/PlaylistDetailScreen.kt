@@ -70,6 +70,7 @@ import app.marlboroadvance.mpvex.presentation.components.pullrefresh.PullRefresh
 import app.marlboroadvance.mpvex.ui.browser.cards.M3UVideoCard
 import app.marlboroadvance.mpvex.ui.browser.cards.VideoCard
 import app.marlboroadvance.mpvex.ui.browser.components.BrowserTopBar
+import app.marlboroadvance.mpvex.ui.browser.components.UnifiedExplorerContent
 import app.marlboroadvance.mpvex.ui.browser.components.SelectionOverflowAction
 import app.marlboroadvance.mpvex.ui.browser.selection.rememberSelectionManager
 import app.marlboroadvance.mpvex.ui.player.PlayerActivity
@@ -562,158 +563,17 @@ private fun PlaylistVideoListContent(
   modifier: Modifier = Modifier,
   isM3uPlaylist: Boolean = false,
 ) {
-  val gesturePreferences = koinInject<GesturePreferences>()
-  val browserPreferences = koinInject<app.marlboroadvance.mpvex.preferences.BrowserPreferences>()
-  val tapThumbnailToSelect by gesturePreferences.tapThumbnailToSelect.collectAsState()
-  val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
-
-  // Find the most recently played video (highest lastPlayedAt timestamp)
-  val mostRecentlyPlayedItem = remember(videoItems) {
-    videoItems.filter { it.playlistItem.lastPlayedAt > 0 }
-      .maxByOrNull { it.playlistItem.lastPlayedAt }
-  }
-
-  when {
-    isLoading -> {
-      Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-      ) {
-        CircularProgressIndicator(
-          modifier = Modifier.size(48.dp),
-          color = MaterialTheme.colorScheme.primary,
-        )
-      }
-    }
-
-    videoItems.isEmpty() -> {
-      Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-      ) {
-        androidx.compose.foundation.layout.Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
-        ) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Outlined.PlaylistAdd,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-          Text(
-            text = "No videos in playlist",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-          Text(
-            text = "Add videos to get started",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-        }
-      }
-    }
-
-    else -> {
-      // Only show scrollbar if list has more than 20 items
-      val hasEnoughItems = videoItems.size > 20
-
-      // Animate scrollbar alpha
-      val scrollbarAlpha by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (!hasEnoughItems) 0f else 1f,
-        animationSpec = androidx.compose.animation.core.tween(durationMillis = 200),
-        label = "scrollbarAlpha",
-      )
-
-      // Reorderable state
-      val reorderableLazyListState = rememberReorderableLazyListState(listState) { from, to ->
-        if (isReorderMode) {
-          onReorder(from.index, to.index)
-        }
-      }
-
-      LazyColumnScrollbar(
-        state = listState,
-        settings = ScrollbarSettings(
-          thumbUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f * scrollbarAlpha),
-          thumbSelectedColor = MaterialTheme.colorScheme.primary.copy(alpha = scrollbarAlpha),
-        ),
-        modifier = modifier.fillMaxSize(),
-      ) {
-        LazyColumn(
-          state = listState,
-          modifier = Modifier.fillMaxSize(),
-          contentPadding = PaddingValues(start = 8.dp, end = 8.dp),
-        ) {
-          items(
-            count = videoItems.size,
-            key = { index -> videoItems[index].playlistItem.id },
-          ) { index ->
-            ReorderableItem(reorderableLazyListState, key = videoItems[index].playlistItem.id) {
-              val item = videoItems[index]
-
-              val progressPercentage = if (item.playlistItem.lastPosition > 0 && item.video.duration > 0) {
-                item.playlistItem.lastPosition.toFloat() / item.video.duration.toFloat() * 100f
-              } else null
-
-              Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-              ) {
-                // Use M3UVideoCard for streaming URLs, VideoCard for local files
-                if (isM3uPlaylist) {
-                  M3UVideoCard(
-                    title = item.video.displayName,
-                    url = item.video.path,
-                    uiSettings = uiSettings,
-                    onClick = { onVideoItemClick(item) },
-                    onLongClick = { onVideoItemLongClick(item) },
-                    isSelected = selectionManager.isSelected(item),
-                    isRecentlyPlayed = item.playlistItem.id == mostRecentlyPlayedItem?.playlistItem?.id,
-                    modifier = Modifier.weight(1f),
-                  )
-                } else {
-                  VideoCard(
-                    video = item.video,
-                    uiSettings = uiSettings,
-                    progressPercentage = progressPercentage,
-                    isRecentlyPlayed = item.playlistItem.id == mostRecentlyPlayedItem?.playlistItem?.id,
-                    isSelected = selectionManager.isSelected(item),
-                    onClick = { onVideoItemClick(item) },
-                    onLongClick = { onVideoItemLongClick(item) },
-                    onThumbClick = if (tapThumbnailToSelect) {
-                      { onVideoItemLongClick(item) }
-                    } else {
-                      { onVideoItemClick(item) }
-                    },
-                    showSubtitleIndicator = showSubtitleIndicator,
-                    modifier = Modifier.weight(1f),
-                  )
-                }
-
-                // Drag handle - only show when in reorder mode, positioned at the end
-                if (isReorderMode) {
-                  IconButton(
-                    onClick = { },
-                    modifier = Modifier
-                      .size(48.dp)
-                      .draggableHandle(),
-                  ) {
-                    Icon(
-                      imageVector = Icons.Filled.DragHandle,
-                      contentDescription = "Drag to reorder",
-                      tint = MaterialTheme.colorScheme.primary,
-                    )
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  UnifiedExplorerContent(
+    items = videoItems,
+    isLoading = isLoading,
+    uiSettings = uiSettings,
+    isSelected = { selectionManager.isSelected(it) },
+    onClick = onVideoItemClick,
+    onLongClick = onVideoItemLongClick,
+    modifier = modifier,
+    emptyTitle = "No videos in this playlist",
+    emptyMessage = "Add videos from the browser to build your playlist"
+  )
 }
 
 @Composable

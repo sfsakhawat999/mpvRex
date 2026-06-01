@@ -690,6 +690,7 @@ object FolderListScreen : Screen {
               onFolderLongClick = { folder ->
                 selectionManager.handleLongClick(folder)
               },
+              scrollTriggerKey = "${folderSortType.name}:${folderSortOrder.name}",
             )
             }
           }
@@ -919,6 +920,7 @@ private fun FolderListContent(
   onRefresh: suspend () -> Unit,
   onFolderClick: (VideoFolder) -> Unit,
   onFolderLongClick: (VideoFolder) -> Unit,
+  scrollTriggerKey: Any? = null,
 ) {
   val showLoading = isLoading && !hasCompletedInitialLoad
 
@@ -936,7 +938,8 @@ private fun FolderListContent(
     onRefresh = onRefresh,
     isInSelectionMode = selectionManager.isInSelectionMode,
     recentlyPlayedFilePath = recentlyPlayedFilePath,
-    playedFolderPaths = playedFolderPaths
+    playedFolderPaths = playedFolderPaths,
+    scrollTriggerKey = scrollTriggerKey,
   )
 }
 

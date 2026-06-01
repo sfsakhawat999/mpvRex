@@ -910,6 +910,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 videoSelectionManager = videoSelectionManager,
                 modifier = Modifier,
                 isInSelectionMode = isInSelectionMode,
+                scrollTriggerKey = "${sortType.name}:${sortOrder.name}",
               )
             }
           }
@@ -1320,6 +1321,7 @@ private fun FileSystemBrowserContent(
   videoSelectionManager: app.marlboroadvance.mpvex.ui.browser.selection.SelectionManager<app.marlboroadvance.mpvex.domain.media.model.Video, Long>,
   modifier: Modifier = Modifier,
   isInSelectionMode: Boolean = false,
+  scrollTriggerKey: Any? = null,
 ) {
   val thumbnailRepository = koinInject<app.marlboroadvance.mpvex.domain.thumbnail.ThumbnailRepository>()
   val browserPreferences = koinInject<BrowserPreferences>()
@@ -1401,7 +1403,8 @@ private fun FileSystemBrowserContent(
       isInSelectionMode = isInSelectionMode,
       recentlyPlayedFilePath = recentlyPlayedFilePath,
       newVideoIds = newVideoIds,
-      watchedVideoIds = watchedVideoIds
+      watchedVideoIds = watchedVideoIds,
+      scrollTriggerKey = scrollTriggerKey,
     )
   }
 }

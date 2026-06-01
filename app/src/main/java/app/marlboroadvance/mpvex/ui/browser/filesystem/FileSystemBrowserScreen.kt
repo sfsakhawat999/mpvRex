@@ -15,6 +15,10 @@ import androidx.compose.animation.slideOutVertically
 import app.marlboroadvance.mpvex.utils.media.OpenDocumentTreeContract
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -81,6 +85,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -90,6 +95,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.marlboroadvance.mpvex.BuildConfig
 import app.marlboroadvance.mpvex.domain.browser.FileSystemItem
+import app.marlboroadvance.mpvex.domain.media.model.VideoFolder
 import app.marlboroadvance.mpvex.preferences.BrowserPreferences
 import app.marlboroadvance.mpvex.preferences.GesturePreferences
 import app.marlboroadvance.mpvex.preferences.MediaLayoutMode
@@ -1288,10 +1294,24 @@ private fun playVideosAsPlaylist(
   if (videos.size == 1) {
     // Single video - play normally
     MediaUtils.playFile(videos.first(), context)
-  } else {
-    // Multiple videos - play as playlist
-    MediaUtils.playPlaylist(videos, 0, context)
-  }}
+    } else {
+      // Multiple videos - play as playlist
+      MediaUtils.playPlaylist(videos, 0, context)
+    }
+  }
+
+@Composable
+private fun SectionHeader(title: String, modifier: Modifier = Modifier) {
+  Text(
+    text = title,
+    style = MaterialTheme.typography.titleMedium,
+    color = MaterialTheme.colorScheme.primary,
+    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+    modifier = modifier
+      .fillMaxWidth()
+      .padding(horizontal = 8.dp, vertical = 12.dp)
+  )
+}
 
 @Composable
 private fun FileSystemBrowserContent(
@@ -1325,6 +1345,7 @@ private fun FileSystemBrowserContent(
 ) {
   val thumbnailRepository = koinInject<app.marlboroadvance.mpvex.domain.thumbnail.ThumbnailRepository>()
   val browserPreferences = koinInject<BrowserPreferences>()
+  val gesturePreferences = koinInject<GesturePreferences>()
   val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
 
   // Calculate thumbnail dimensions
@@ -1357,6 +1378,19 @@ private fun FileSystemBrowserContent(
     }
   }
 
+  val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
+  val folderGridColumnsPortrait by browserPreferences.folderGridColumnsPortrait.collectAsState()
+  val folderGridColumnsLandscape by browserPreferences.folderGridColumnsLandscape.collectAsState()
+  val videoGridColumnsPortrait by browserPreferences.videoGridColumnsPortrait.collectAsState()
+  val videoGridColumnsLandscape by browserPreferences.videoGridColumnsLandscape.collectAsState()
+
+  val configuration = LocalConfiguration.current
+  val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+  val folderGridColumns = if (isLandscape) folderGridColumnsLandscape else folderGridColumnsPortrait
+  val videoGridColumns = if (isLandscape) videoGridColumnsLandscape else videoGridColumnsPortrait
+
+  val tapThumbnailToSelect by gesturePreferences.tapThumbnailToSelect.collectAsState()
+
   Column(modifier = modifier.fillMaxSize()) {
     // Breadcrumb navigation (if not at root)
     if (!isAtRoot && breadcrumbs.isNotEmpty()) {
@@ -1366,46 +1400,294 @@ private fun FileSystemBrowserContent(
       )
     }
 
-    UnifiedExplorerContent(
-      items = items,
-      isLoading = isLoading,
-      uiSettings = uiSettings,
-      isSelected = { item ->
-        when (item) {
-          is FileSystemItem.Folder -> folderSelectionManager.isSelected(item)
-          is FileSystemItem.VideoFile -> videoSelectionManager.isSelected(item.video)
-          else -> false
+    val contentBlock: @Composable BoxScope.() -> Unit = {
+      if (isLoading && items.isEmpty()) {
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 80.dp),
+          contentAlignment = Alignment.Center,
+        ) {
+          CircularProgressIndicator(
+            modifier = Modifier.size(48.dp),
+            color = MaterialTheme.colorScheme.primary,
+          )
         }
-      },
-      onClick = { item ->
-        when (item) {
-          is FileSystemItem.Folder -> onFolderClick(item)
-          is FileSystemItem.VideoFile -> onVideoClick(item.video)
+      } else if (items.isEmpty()) {
+        Box(
+          modifier = Modifier.fillMaxSize(),
+          contentAlignment = Alignment.Center,
+        ) {
+          EmptyState(
+            icon = Icons.Filled.VideoLibrary,
+            title = "Empty folder",
+            message = "This folder contains no videos or subfolders",
+          )
         }
-      },
-      onLongClick = { item ->
-        when (item) {
-          is FileSystemItem.Folder -> onFolderLongClick(item)
-          is FileSystemItem.VideoFile -> onVideoLongClick(item.video)
+      } else {
+        val folderItems = items.filterIsInstance<FileSystemItem.Folder>()
+        val videoItems = items.filterIsInstance<FileSystemItem.VideoFile>()
+
+        LazyColumnScrollbar(
+          state = listState,
+          settings = ScrollbarSettings(
+            thumbUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+            thumbSelectedColor = MaterialTheme.colorScheme.primary,
+          )
+        ) {
+          LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+              start = 8.dp,
+              end = 8.dp,
+              top = 8.dp,
+              bottom = navigationBarHeight + 8.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+          ) {
+            // --- FOLDERS SECTION ---
+            if (folderItems.isNotEmpty()) {
+              item(key = "folders_header") {
+                SectionHeader(title = "Folders (${folderItems.size})")
+              }
+
+              if (mediaLayoutMode == MediaLayoutMode.GRID) {
+                val chunkedFolders = folderItems.chunked(folderGridColumns)
+                items(
+                  items = chunkedFolders,
+                  key = { chunk -> "folder_row_${chunk.first().path}" }
+                ) { rowItems ->
+                  Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                  ) {
+                    for (folderItem in rowItems) {
+                      Box(modifier = Modifier.weight(1f)) {
+                        val folderModel = app.marlboroadvance.mpvex.domain.media.model.VideoFolder(
+                          bucketId = folderItem.path,
+                          name = folderItem.name,
+                          path = folderItem.path,
+                          videoCount = folderItem.videoCount,
+                          audioCount = folderItem.audioCount,
+                          totalSize = folderItem.totalSize,
+                          totalDuration = folderItem.totalDuration,
+                          lastModified = folderItem.lastModified / 1000,
+                          newCount = folderItem.newCount,
+                          unwatchedVideoCount = folderItem.unwatchedVideoCount,
+                        )
+                        val isRecentlyPlayed = recentlyPlayedFilePath?.let {
+                          File(it).parent == folderItem.path
+                        } ?: false
+                        val isWatched = (folderItem.videoCount > 0 || folderItem.audioCount > 0) && folderItem.unwatchedVideoCount == 0
+
+                        FolderCard(
+                          folder = folderModel,
+                          uiSettings = uiSettings,
+                          isSelected = folderSelectionManager.isSelected(folderItem),
+                          isRecentlyPlayed = isRecentlyPlayed,
+                          isNeverPlayed = false,
+                          isWatched = isWatched,
+                          onClick = {
+                            if (isInSelectionMode) {
+                              folderSelectionManager.toggle(folderItem)
+                            } else {
+                              onFolderClick(folderItem)
+                            }
+                          },
+                          onLongClick = { onFolderLongClick(folderItem) },
+                          onThumbClick = {
+                            if (isInSelectionMode) {
+                              folderSelectionManager.toggle(folderItem)
+                            } else {
+                              onFolderClick(folderItem)
+                            }
+                          },
+                          isGridMode = true,
+                          gridColumns = folderGridColumns,
+                          newVideoCount = folderItem.newCount
+                        )
+                      }
+                    }
+                    val emptySlots = folderGridColumns - rowItems.size
+                    repeat(emptySlots) {
+                      Spacer(modifier = Modifier.weight(1f))
+                    }
+                  }
+                }
+              } else {
+                // List Mode
+                items(
+                  items = folderItems,
+                  key = { "folder_${it.path}" }
+                ) { folderItem ->
+                  val folderModel = app.marlboroadvance.mpvex.domain.media.model.VideoFolder(
+                    bucketId = folderItem.path,
+                    name = folderItem.name,
+                    path = folderItem.path,
+                    videoCount = folderItem.videoCount,
+                    audioCount = folderItem.audioCount,
+                    totalSize = folderItem.totalSize,
+                    totalDuration = folderItem.totalDuration,
+                    lastModified = folderItem.lastModified / 1000,
+                    newCount = folderItem.newCount,
+                    unwatchedVideoCount = folderItem.unwatchedVideoCount,
+                  )
+                  val isRecentlyPlayed = recentlyPlayedFilePath?.let {
+                    File(it).parent == folderItem.path
+                  } ?: false
+                  val isWatched = (folderItem.videoCount > 0 || folderItem.audioCount > 0) && folderItem.unwatchedVideoCount == 0
+
+                  FolderCard(
+                    folder = folderModel,
+                    uiSettings = uiSettings,
+                    isSelected = folderSelectionManager.isSelected(folderItem),
+                    isRecentlyPlayed = isRecentlyPlayed,
+                    isNeverPlayed = false,
+                    isWatched = isWatched,
+                    onClick = {
+                      if (isInSelectionMode) {
+                        folderSelectionManager.toggle(folderItem)
+                      } else {
+                        onFolderClick(folderItem)
+                      }
+                    },
+                    onLongClick = { onFolderLongClick(folderItem) },
+                    onThumbClick = {
+                      if (isInSelectionMode) {
+                        folderSelectionManager.toggle(folderItem)
+                      } else {
+                        onFolderClick(folderItem)
+                      }
+                    },
+                    isGridMode = false,
+                    gridColumns = 1,
+                    newVideoCount = folderItem.newCount
+                  )
+                }
+              }
+            }
+
+            // Divider spacer
+            if (folderItems.isNotEmpty() && videoItems.isNotEmpty()) {
+              item(key = "section_divider") {
+                Spacer(modifier = Modifier.height(8.dp))
+              }
+            }
+
+            // --- MEDIA SECTION ---
+            if (videoItems.isNotEmpty()) {
+              item(key = "media_header") {
+                SectionHeader(title = "Media (${videoItems.size})")
+              }
+
+              if (mediaLayoutMode == MediaLayoutMode.GRID) {
+                val chunkedVideos = videoItems.chunked(videoGridColumns)
+                items(
+                  items = chunkedVideos,
+                  key = { chunk -> "video_row_${chunk.first().video.id}" }
+                ) { rowItems ->
+                  Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                  ) {
+                    for (videoItem in rowItems) {
+                      Box(modifier = Modifier.weight(1f)) {
+                        val isOldAndUnplayed = newVideoIds.contains(videoItem.video.id)
+                        val isWatched = watchedVideoIds.contains(videoItem.video.id)
+                        val isRecentlyPlayed = recentlyPlayedFilePath == videoItem.video.path
+
+                        VideoCard(
+                          video = videoItem.video,
+                          uiSettings = uiSettings,
+                          isSelected = videoSelectionManager.isSelected(videoItem.video),
+                          onClick = {
+                            if (isInSelectionMode) {
+                              videoSelectionManager.toggle(videoItem.video)
+                            } else {
+                              onVideoClick(videoItem.video)
+                            }
+                          },
+                          onLongClick = { onVideoLongClick(videoItem.video) },
+                          onThumbClick = {
+                            if (isInSelectionMode) {
+                              videoSelectionManager.toggle(videoItem.video)
+                            } else if (tapThumbnailToSelect) {
+                              videoSelectionManager.toggle(videoItem.video)
+                            } else {
+                              onVideoClick(videoItem.video)
+                            }
+                          },
+                          isGridMode = true,
+                          gridColumns = videoGridColumns,
+                          showSubtitleIndicator = showSubtitleIndicator,
+                          isOldAndUnplayed = isOldAndUnplayed,
+                          isWatched = isWatched,
+                          isRecentlyPlayed = isRecentlyPlayed
+                        )
+                      }
+                    }
+                    val emptySlots = videoGridColumns - rowItems.size
+                    repeat(emptySlots) {
+                      Spacer(modifier = Modifier.weight(1f))
+                    }
+                  }
+                }
+              } else {
+                // List Mode
+                items(
+                  items = videoItems,
+                  key = { "video_${it.video.id}" }
+                ) { videoItem ->
+                  val isOldAndUnplayed = newVideoIds.contains(videoItem.video.id)
+                  val isWatched = watchedVideoIds.contains(videoItem.video.id)
+                  val isRecentlyPlayed = recentlyPlayedFilePath == videoItem.video.path
+
+                  VideoCard(
+                    video = videoItem.video,
+                    uiSettings = uiSettings,
+                    isSelected = videoSelectionManager.isSelected(videoItem.video),
+                    onClick = {
+                      if (isInSelectionMode) {
+                        videoSelectionManager.toggle(videoItem.video)
+                      } else {
+                        onVideoClick(videoItem.video)
+                      }
+                    },
+                    onLongClick = { onVideoLongClick(videoItem.video) },
+                    onThumbClick = {
+                      if (isInSelectionMode) {
+                        videoSelectionManager.toggle(videoItem.video)
+                      } else if (tapThumbnailToSelect) {
+                        videoSelectionManager.toggle(videoItem.video)
+                      } else {
+                        onVideoClick(videoItem.video)
+                      }
+                    },
+                    isGridMode = false,
+                    gridColumns = 1,
+                    showSubtitleIndicator = showSubtitleIndicator,
+                    isOldAndUnplayed = isOldAndUnplayed,
+                    isWatched = isWatched,
+                    isRecentlyPlayed = isRecentlyPlayed
+                  )
+                }
+              }
+            }
+          }
         }
-      },
-      onToggleSelection = { item ->
-        when (item) {
-          is FileSystemItem.Folder -> folderSelectionManager.toggle(item)
-          is FileSystemItem.VideoFile -> videoSelectionManager.toggle(item.video)
-        }
-      },
-      modifier = Modifier.weight(1f),
-      emptyTitle = "Empty folder",
-      emptyMessage = "This folder contains no videos or subfolders",
-      isRefreshing = isRefreshing,
-      onRefresh = onRefresh,
-      isInSelectionMode = isInSelectionMode,
-      recentlyPlayedFilePath = recentlyPlayedFilePath,
-      newVideoIds = newVideoIds,
-      watchedVideoIds = watchedVideoIds,
-      scrollTriggerKey = scrollTriggerKey,
-    )
+      }
+    }
+
+    Box(modifier = Modifier.weight(1f)) {
+      PullRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        modifier = Modifier.fillMaxSize(),
+        listState = listState,
+        content = contentBlock
+      )
+    }
   }
 }
 

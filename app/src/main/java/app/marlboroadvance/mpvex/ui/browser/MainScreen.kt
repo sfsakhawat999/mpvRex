@@ -372,8 +372,12 @@ object MainScreen : Screen {
           },
           label = "tab_animation"
         ) { targetTab ->
+          val shortsIdx = visibleTabs.indexOfFirst { it.id == "shorts" }
+          val isShortsTabActive = isShortsEnabled && shortsIdx != -1 && selectedTab == shortsIdx
+          val isNavBarVisible = !hideNavigationBar.value && !isShortsTabActive && visibleTabs.size > 1
+          
           CompositionLocalProvider(
-            LocalNavigationBarHeight provides if (visibleTabs.size == 1) 0.dp else fabBottomPadding
+            LocalNavigationBarHeight provides if (isNavBarVisible) fabBottomPadding else 0.dp
           ) {
             if (targetTab in visibleTabs.indices) {
               visibleTabs[targetTab].content()

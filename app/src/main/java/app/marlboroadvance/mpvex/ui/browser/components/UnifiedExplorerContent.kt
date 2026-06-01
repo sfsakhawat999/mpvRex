@@ -34,6 +34,7 @@ import app.marlboroadvance.mpvex.preferences.MediaLayoutMode
 import app.marlboroadvance.mpvex.ui.browser.states.EmptyState
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.components.pullrefresh.PullRefreshBox
+import app.marlboroadvance.mpvex.ui.browser.LocalNavigationBarHeight
 
 @Composable
 fun <T> UnifiedExplorerContent(
@@ -70,6 +71,7 @@ fun <T> UnifiedExplorerContent(
 
   val tapThumbnailToSelect by gesturePreferences.tapThumbnailToSelect.collectAsState()
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
+  val navigationBarHeight = LocalNavigationBarHeight.current
 
   if (isLoading && items.isEmpty()) {
     Box(
@@ -127,7 +129,12 @@ fun <T> UnifiedExplorerContent(
           columns = GridCells.Fixed(columns),
           state = gridState,
           modifier = Modifier.fillMaxSize(),
-          contentPadding = PaddingValues(8.dp),
+          contentPadding = PaddingValues(
+            start = 8.dp,
+            end = 8.dp,
+            top = 8.dp,
+            bottom = navigationBarHeight + 8.dp
+          ),
           horizontalArrangement = Arrangement.spacedBy(8.dp),
           verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -175,7 +182,12 @@ fun <T> UnifiedExplorerContent(
         LazyColumn(
           state = listState,
           modifier = Modifier.fillMaxSize(),
-          contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+          contentPadding = PaddingValues(
+            start = 8.dp,
+            end = 8.dp,
+            top = 8.dp,
+            bottom = navigationBarHeight + 8.dp
+          ),
           verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
           items(
@@ -287,12 +299,14 @@ private fun <T> ExplorerItemCard(
         onLongClick = onLongClick,
         onThumbClick = onThumbClick,
         isGridMode = isGridMode,
-        gridColumns = columns
+        gridColumns = columns,
+        newVideoCount = item.newCount
       )
     }
     is Video -> {
       val isOldAndUnplayed = newVideoIds.contains(item.id)
       val isWatched = watchedVideoIds.contains(item.id)
+      val isRecentlyPlayed = recentlyPlayedFilePath == item.path
 
       VideoCard(
         video = item,
@@ -305,7 +319,8 @@ private fun <T> ExplorerItemCard(
         gridColumns = columns,
         showSubtitleIndicator = showSubtitleIndicator,
         isOldAndUnplayed = isOldAndUnplayed,
-        isWatched = isWatched
+        isWatched = isWatched,
+        isRecentlyPlayed = isRecentlyPlayed
       )
     }
     is VideoWithPlaybackInfo -> {
@@ -398,12 +413,14 @@ private fun <T> ExplorerItemCard(
         onLongClick = onLongClick,
         onThumbClick = onThumbClick,
         isGridMode = isGridMode,
-        gridColumns = columns
+        gridColumns = columns,
+        newVideoCount = item.newCount
       )
     }
     is FileSystemItem.VideoFile -> {
       val isOldAndUnplayed = newVideoIds.contains(item.video.id)
       val isWatched = watchedVideoIds.contains(item.video.id)
+      val isRecentlyPlayed = recentlyPlayedFilePath == item.video.path
 
       VideoCard(
         video = item.video,
@@ -416,7 +433,8 @@ private fun <T> ExplorerItemCard(
         gridColumns = columns,
         showSubtitleIndicator = showSubtitleIndicator,
         isOldAndUnplayed = isOldAndUnplayed,
-        isWatched = isWatched
+        isWatched = isWatched,
+        isRecentlyPlayed = isRecentlyPlayed
       )
     }
     is PlaylistVideoItem -> {

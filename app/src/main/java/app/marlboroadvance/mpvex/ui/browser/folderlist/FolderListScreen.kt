@@ -87,6 +87,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import android.widget.Toast
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material.icons.filled.ContentCopy
 import app.marlboroadvance.mpvex.R
 import androidx.compose.ui.unit.dp
@@ -322,6 +323,14 @@ object FolderListScreen : Screen {
       }
     }
 
+    // Auto-focus search input when search is opened
+    LaunchedEffect(isSearching) {
+      if (isSearching) {
+        focusRequester.requestFocus()
+        keyboardController?.show()
+      }
+    }
+
     // FAB state
     val isFabVisible = remember { mutableStateOf(true) }
     val isFabExpanded = remember { mutableStateOf(false) }
@@ -435,7 +444,7 @@ object FolderListScreen : Screen {
                 onSearch = { },
                 expanded = false,
                 onExpandedChange = { },
-                placeholder = { Text("Search folders and videos...") },
+                placeholder = { Text("Search folders and videos...", maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 leadingIcon = {
                   Icon(
                     imageVector = Icons.Filled.Search,
@@ -653,8 +662,9 @@ object FolderListScreen : Screen {
                 },
                 onLongClick = {},
                 onToggleSelection = {},
-                emptyTitle = "No results found",
-                emptyMessage = "No folders or videos match your search query",
+                emptyTitle = if (searchQuery.isBlank()) stringResource(R.string.search_empty_title) else stringResource(R.string.search_no_results_title),
+                emptyMessage = if (searchQuery.isBlank()) stringResource(R.string.search_empty_message) else stringResource(R.string.search_no_results_message),
+                emptyIcon = Icons.Filled.Search,
                 showSections = true,
               )
             } else {

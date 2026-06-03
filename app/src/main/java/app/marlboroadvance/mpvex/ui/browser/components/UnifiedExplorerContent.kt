@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.VideoLibrary
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -50,6 +51,7 @@ fun <T> UnifiedExplorerContent(
   modifier: Modifier = Modifier,
   emptyTitle: String = "No items",
   emptyMessage: String = "This folder is empty",
+  emptyIcon: androidx.compose.ui.graphics.vector.ImageVector = Icons.Filled.VideoLibrary,
   onThumbClick: ((T) -> Unit)? = null,
   isRefreshing: MutableState<Boolean>? = null,
   onRefresh: (suspend () -> Unit)? = null,
@@ -113,7 +115,7 @@ fun <T> UnifiedExplorerContent(
       contentAlignment = Alignment.Center,
     ) {
       EmptyState(
-        icon = Icons.Filled.VideoLibrary,
+        icon = emptyIcon,
         title = emptyTitle,
         message = emptyMessage,
       )

@@ -129,6 +129,7 @@ import app.marlboroadvance.mpvex.ui.browser.states.PermissionDeniedState
 import app.marlboroadvance.mpvex.ui.utils.LocalBackStack
 import app.marlboroadvance.mpvex.utils.media.CopyPasteOps
 import app.marlboroadvance.mpvex.utils.media.MediaUtils
+import androidx.compose.ui.text.style.TextOverflow
 import app.marlboroadvance.mpvex.utils.permission.PermissionUtils
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
@@ -546,11 +547,13 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 onExpandedChange = { },
                 placeholder = {
                   Text(
-                    if (isAtRoot) {
+                    text = if (isAtRoot) {
                       "Search in all storage volumes..."
                     } else {
                       "Search in ${breadcrumbs.lastOrNull()?.name ?: "folder"}..."
-                    }
+                    },
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                   )
                 },
                 leadingIcon = {
@@ -1521,15 +1524,15 @@ private fun FileSystemSearchContent(
         }
       }
 
-      searchResults.isEmpty() && searchQuery.isNotBlank() -> {
+      searchResults.isEmpty() -> {
         Box(
           modifier = Modifier.fillMaxSize(),
           contentAlignment = Alignment.Center,
         ) {
           EmptyState(
             icon = Icons.Filled.Search,
-            title = "No results found",
-            message = "No files or folders match \"$searchQuery\"",
+            title = if (searchQuery.isBlank()) stringResource(R.string.search_empty_title) else stringResource(R.string.search_no_results_title),
+            message = if (searchQuery.isBlank()) stringResource(R.string.search_empty_message) else stringResource(R.string.search_no_results_message),
           )
         }
       }

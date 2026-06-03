@@ -574,6 +574,10 @@
     <string name="search_videos">Search videos…</string>
     <string name="search_folders_and_videos">Search folders and videos…</string>
     <string name="search_playlists">Search playlists…</string>
+    <string name="search_no_results_title">No results found</string>
+    <string name="search_no_results_message">No files or folders match your search query</string>
+    <string name="search_empty_title">Search</string>
+    <string name="search_empty_message">Type to search files and folders</string>
     <string name="play_recently_played_or_first">Play recently played or first video</string>
     <string name="toggle_menu">Toggle menu</string>
     <string name="close">Close</string>

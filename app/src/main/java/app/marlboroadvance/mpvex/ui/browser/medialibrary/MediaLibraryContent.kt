@@ -49,6 +49,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -56,6 +59,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import app.marlboroadvance.mpvex.domain.media.model.Video
 import app.marlboroadvance.mpvex.preferences.BrowserPreferences
 import app.marlboroadvance.mpvex.preferences.PlayerPreferences
+import androidx.compose.ui.text.style.TextOverflow
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.ui.browser.components.BrowserBottomBar
 import app.marlboroadvance.mpvex.ui.browser.components.BrowserTopBar
@@ -136,6 +140,17 @@ fun MediaLibraryContent() {
   var searchQuery by rememberSaveable { mutableStateOf("") }
   var isSearching by rememberSaveable { mutableStateOf(false) }
 
+  val keyboardController = LocalSoftwareKeyboardController.current
+  val focusRequester = remember { FocusRequester() }
+
+  // Auto-focus search input when search is opened
+  LaunchedEffect(isSearching) {
+    if (isSearching) {
+      focusRequester.requestFocus()
+      keyboardController?.show()
+    }
+  }
+
   // FAB visibility state
   val isFabVisible = remember { mutableStateOf(true) }
 
@@ -182,13 +197,14 @@ fun MediaLibraryContent() {
               onSearch = { },
               expanded = false,
               onExpandedChange = { },
-              placeholder = { Text("Search all videos...") },
+              placeholder = { Text("Search all videos...", maxLines = 1, overflow = TextOverflow.Ellipsis) },
               leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
               trailingIcon = {
                 IconButton(onClick = { isSearching = false; searchQuery = "" }) {
                   Icon(Icons.Filled.Close, contentDescription = "Cancel")
                 }
               },
+              modifier = Modifier.focusRequester(focusRequester),
             )
           },
           expanded = false,
@@ -276,12 +292,16 @@ fun MediaLibraryContent() {
     val autoScrollToLastPlayed by browserPreferences.autoScrollToLastPlayed.collectAsState()
     val videosWereDeletedOrMoved = false
 
-    val displayVideos = if (searchQuery.isBlank()) {
-      sortedVideosWithInfo
-    } else {
-      sortedVideosWithInfo.filter { 
-        it.video.displayName.contains(searchQuery, ignoreCase = true) 
+    val displayVideos = if (isSearching) {
+      if (searchQuery.isBlank()) {
+        emptyList()
+      } else {
+        sortedVideosWithInfo.filter { 
+          it.video.displayName.contains(searchQuery, ignoreCase = true) 
+        }
       }
+    } else {
+      sortedVideosWithInfo
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -309,6 +329,7 @@ fun MediaLibraryContent() {
         showFloatingBottomBar = showFloatingBottomBar,
         sortType = videoSortType,
         sortOrder = videoSortOrder,
+        searchQuery = if (isSearching) searchQuery else null,
       )
 
       AnimatedVisibility(

@@ -72,6 +72,8 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import android.widget.Toast
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.VideoLibrary
 import app.marlboroadvance.mpvex.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -630,6 +632,7 @@ fun VideoListContent(
   showFloatingBottomBar: Boolean = false,
   sortType: VideoSortType = VideoSortType.Title,
   sortOrder: SortOrder = SortOrder.Ascending,
+  searchQuery: String? = null,
 ) {
   val thumbnailRepository = koinInject<ThumbnailRepository>()
   val browserPreferences = koinInject<BrowserPreferences>()
@@ -661,8 +664,17 @@ fun VideoListContent(
     onLongClick = { onVideoLongClick(it.video) },
     onToggleSelection = { selectionManager.toggle(it.video) },
     modifier = modifier,
-    emptyTitle = "No videos in this folder",
-    emptyMessage = "Videos you add to this folder will appear here",
+    emptyTitle = if (searchQuery != null) {
+      if (searchQuery.isBlank()) stringResource(R.string.search_empty_title) else stringResource(R.string.search_no_results_title)
+    } else {
+      "No videos in this folder"
+    },
+    emptyMessage = if (searchQuery != null) {
+      if (searchQuery.isBlank()) stringResource(R.string.search_empty_message) else stringResource(R.string.search_no_results_message)
+    } else {
+      "Videos you add to this folder will appear here"
+    },
+    emptyIcon = if (searchQuery != null) Icons.Filled.Search else Icons.Filled.VideoLibrary,
     isRefreshing = isRefreshing,
     onRefresh = onRefresh,
     isInSelectionMode = selectionManager.isInSelectionMode,

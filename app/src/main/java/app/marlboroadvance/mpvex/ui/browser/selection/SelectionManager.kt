@@ -1,5 +1,7 @@
 package app.marlboroadvance.mpvex.ui.browser.selection
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -11,11 +13,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import app.marlboroadvance.mpvex.R
 import app.marlboroadvance.mpvex.domain.media.model.Video
 import app.marlboroadvance.mpvex.ui.player.PlayerActivity
 import app.marlboroadvance.mpvex.utils.media.MediaUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * Manager for handling item selection and operations in browser screens
@@ -158,6 +162,36 @@ class SelectionManager<T, ID>(
     @Suppress("UNCHECKED_CAST")
     val videos = selected as List<Video>
     MediaUtils.shareVideos(context, videos)
+  }
+
+  /**
+   * Copy the file path(s) of the selected videos to the clipboard
+   */
+  fun copyFilePathSelected() {
+    val selected = getSelectedItems()
+    if (selected.isEmpty() || selected.first() !is Video) return
+
+    @Suppress("UNCHECKED_CAST")
+    val videos = selected as List<Video>
+    val text = videos.joinToString("\n") { it.path }
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    clipboard.setPrimaryClip(ClipData.newPlainText("File Path", text))
+    Toast.makeText(context, R.string.copy_path_toast_copied_file, Toast.LENGTH_SHORT).show()
+  }
+
+  /**
+   * Copy the parent folder path(s) of the selected videos to the clipboard
+   */
+  fun copyFolderPathSelected() {
+    val selected = getSelectedItems()
+    if (selected.isEmpty() || selected.first() !is Video) return
+
+    @Suppress("UNCHECKED_CAST")
+    val videos = selected as List<Video>
+    val text = videos.mapNotNull { File(it.path).parent }.distinct().joinToString("\n")
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    clipboard.setPrimaryClip(ClipData.newPlainText("Folder Path", text))
+    Toast.makeText(context, R.string.copy_path_toast_copied_folder, Toast.LENGTH_SHORT).show()
   }
 
   /**

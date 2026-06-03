@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.FolderCopy
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
@@ -53,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
+import app.marlboroadvance.mpvex.R
 import app.marlboroadvance.mpvex.domain.media.model.Video
 import app.marlboroadvance.mpvex.preferences.BrowserPreferences
 import app.marlboroadvance.mpvex.preferences.PlayerPreferences
@@ -231,6 +234,16 @@ fun MediaLibraryContent() {
               icon = Icons.Filled.Share,
               label = "Share",
               onClick = { selectionManager.shareSelected() },
+            ),
+            SelectionOverflowAction(
+              icon = Icons.Filled.ContentCopy,
+              label = context.getString(R.string.copy_file_path),
+              onClick = { selectionManager.copyFilePathSelected() },
+            ),
+            SelectionOverflowAction(
+              icon = Icons.Filled.FolderCopy,
+              label = context.getString(R.string.copy_folder_path),
+              onClick = { selectionManager.copyFolderPathSelected() },
             ),
           ),
           onSelectAll = { selectionManager.selectAll() },

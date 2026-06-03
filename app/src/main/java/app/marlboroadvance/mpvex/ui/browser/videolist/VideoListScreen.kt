@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import app.marlboroadvance.mpvex.R
 import app.marlboroadvance.mpvex.utils.media.OpenDocumentTreeContract
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -32,6 +33,8 @@ import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.FolderCopy
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
@@ -308,6 +311,16 @@ data class VideoListScreen(
               icon = Icons.Filled.Share,
               label = "Share",
               onClick = { selectionManager.shareSelected() },
+            ),
+            SelectionOverflowAction(
+              icon = Icons.Filled.ContentCopy,
+              label = context.getString(R.string.copy_file_path),
+              onClick = { selectionManager.copyFilePathSelected() },
+            ),
+            SelectionOverflowAction(
+              icon = Icons.Filled.FolderCopy,
+              label = context.getString(R.string.copy_folder_path),
+              onClick = { selectionManager.copyFolderPathSelected() },
             ),
           ),
           onSelectAll = { selectionManager.selectAll() },

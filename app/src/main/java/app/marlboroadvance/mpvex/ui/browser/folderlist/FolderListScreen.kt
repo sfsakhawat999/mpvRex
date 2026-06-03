@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.FolderCopy
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
@@ -521,6 +522,24 @@ object FolderListScreen : Screen {
                     if (allVideos.isNotEmpty()) {
                       MediaUtils.shareVideos(context, allVideos)
                     }
+                  }
+                },
+              ),
+              SelectionOverflowAction(
+                icon = Icons.Filled.FolderCopy,
+                label = context.getString(app.marlboroadvance.mpvex.R.string.copy_folder_path),
+                onClick = {
+                  val folders = selectionManager.getSelectedItems()
+                  if (folders.isNotEmpty()) {
+                    val text = folders.map { it.path }.distinct().joinToString("\n")
+                    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                      as android.content.ClipboardManager
+                    clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Folder Path", text))
+                    android.widget.Toast.makeText(
+                      context,
+                      app.marlboroadvance.mpvex.R.string.copy_path_toast_copied_folder,
+                      android.widget.Toast.LENGTH_SHORT,
+                    ).show()
                   }
                 },
               ),

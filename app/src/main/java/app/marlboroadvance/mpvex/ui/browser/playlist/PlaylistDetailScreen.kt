@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.outlined.PlaylistAdd
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.FolderCopy
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
@@ -284,6 +285,43 @@ data class PlaylistDetailScreen(val playlistId: Int) : Screen {
                   onClick = {
                     val videosToShare = selectionManager.getSelectedItems().map { it.video }
                     MediaUtils.shareVideos(context, videosToShare)
+                  },
+                ))
+                add(SelectionOverflowAction(
+                  icon = Icons.Filled.ContentCopy,
+                  label = context.getString(app.marlboroadvance.mpvex.R.string.copy_file_path),
+                  onClick = {
+                    val items = selectionManager.getSelectedItems()
+                    if (items.isNotEmpty()) {
+                      val text = items.joinToString("\n") { it.video.path }
+                      val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                        as android.content.ClipboardManager
+                      clipboard.setPrimaryClip(android.content.ClipData.newPlainText("File Path", text))
+                      android.widget.Toast.makeText(
+                        context,
+                        app.marlboroadvance.mpvex.R.string.copy_path_toast_copied_file,
+                        android.widget.Toast.LENGTH_SHORT,
+                      ).show()
+                    }
+                  },
+                ))
+                add(SelectionOverflowAction(
+                  icon = Icons.Filled.FolderCopy,
+                  label = context.getString(app.marlboroadvance.mpvex.R.string.copy_folder_path),
+                  onClick = {
+                    val items = selectionManager.getSelectedItems()
+                    if (items.isNotEmpty()) {
+                      val text = items.mapNotNull { java.io.File(it.video.path).parent }
+                        .distinct().joinToString("\n")
+                      val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                        as android.content.ClipboardManager
+                      clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Folder Path", text))
+                      android.widget.Toast.makeText(
+                        context,
+                        app.marlboroadvance.mpvex.R.string.copy_path_toast_copied_folder,
+                        android.widget.Toast.LENGTH_SHORT,
+                      ).show()
+                    }
                   },
                 ))
               }

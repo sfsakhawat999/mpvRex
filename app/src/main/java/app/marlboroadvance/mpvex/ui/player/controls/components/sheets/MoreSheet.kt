@@ -2,9 +2,15 @@ package app.marlboroadvance.mpvex.ui.player.controls.components.sheets
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.text.format.DateUtils
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -27,6 +33,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.FolderCopy
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Tune
@@ -62,6 +70,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -72,6 +82,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.marlboroadvance.mpvex.R
+import java.io.File
 import app.marlboroadvance.mpvex.domain.anime4k.Anime4KManager
 import app.marlboroadvance.mpvex.preferences.AdvancedPreferences
 import app.marlboroadvance.mpvex.preferences.AppearancePreferences
@@ -521,6 +532,24 @@ fun ControlsTab(
       }
   }
 
+  // Styling for the dedicated copy-path buttons (match the more-sheet button look, background forced)
+  val matchTheme by appearancePreferences.matchPlayerControlsToTheme.collectAsState()
+  val copyButtonSurfaceColor = if (matchTheme) {
+      MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
+  } else {
+      MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.55f)
+  }
+  val copyButtonContentColor = if (matchTheme) {
+      MaterialTheme.colorScheme.onPrimaryContainer
+  } else {
+      MaterialTheme.colorScheme.onSurface
+  }
+  val copyButtonBorder = BorderStroke(
+      1.dp,
+      if (matchTheme) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+      else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+  )
+
   Column(
       modifier = Modifier
           .fillMaxWidth()
@@ -566,6 +595,83 @@ fun ControlsTab(
                   isMoreSheet = true
               )
           }
+
+          // Dedicated copy-path actions (always available from the player More sheet)
+          MoreSheetCopyButton(
+              icon = Icons.Filled.ContentCopy,
+              label = stringResource(R.string.copy_file_path),
+              buttonSize = 40.dp,
+              surfaceColor = copyButtonSurfaceColor,
+              contentColor = copyButtonContentColor,
+              border = copyButtonBorder,
+          ) {
+              val path = MPVLib.getPropertyString("path")
+              if (path != null) {
+                  val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                  clipboard.setPrimaryClip(ClipData.newPlainText("File Path", path))
+                  Toast.makeText(activity, R.string.copy_path_toast_copied_file, Toast.LENGTH_SHORT).show()
+              } else {
+                  Toast.makeText(activity, R.string.copy_path_toast_no_path, Toast.LENGTH_SHORT).show()
+              }
+          }
+
+          MoreSheetCopyButton(
+              icon = Icons.Filled.FolderCopy,
+              label = stringResource(R.string.copy_folder_path),
+              buttonSize = 40.dp,
+              surfaceColor = copyButtonSurfaceColor,
+              contentColor = copyButtonContentColor,
+              border = copyButtonBorder,
+          ) {
+              val path = MPVLib.getPropertyString("path")
+              if (path != null) {
+                  val folderPath = File(path).parent ?: path
+                  val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                  clipboard.setPrimaryClip(ClipData.newPlainText("Folder Path", folderPath))
+                  Toast.makeText(activity, R.string.copy_path_toast_copied_folder, Toast.LENGTH_SHORT).show()
+              } else {
+                  Toast.makeText(activity, R.string.copy_path_toast_no_path, Toast.LENGTH_SHORT).show()
+              }
+          }
+      }
+  }
+}
+
+@Composable
+private fun MoreSheetCopyButton(
+  icon: androidx.compose.ui.graphics.vector.ImageVector,
+  label: String,
+  buttonSize: androidx.compose.ui.unit.Dp,
+  surfaceColor: Color,
+  contentColor: Color,
+  border: BorderStroke,
+  onClick: () -> Unit,
+) {
+  Surface(
+      shape = CircleShape,
+      color = surfaceColor,
+      contentColor = contentColor,
+      border = border,
+      modifier = Modifier
+          .height(buttonSize)
+          .clip(CircleShape)
+          .clickable { onClick() },
+  ) {
+      Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
+          modifier = Modifier.padding(horizontal = MaterialTheme.spacing.smaller),
+      ) {
+          Icon(
+              imageVector = icon,
+              contentDescription = null,
+              modifier = Modifier.size(24.dp),
+          )
+          Text(
+              text = label,
+              style = MaterialTheme.typography.bodyMedium,
+              maxLines = 1,
+          )
       }
   }
 }

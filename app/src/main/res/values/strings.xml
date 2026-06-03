@@ -558,6 +558,12 @@
     <string name="playlist_refresh_error">Failed to refresh playlist: %s</string>
     <string name="playlist_m3u_badge">M3U</string>
 
+    <string name="copy_file_path">Copy File Path</string>
+    <string name="copy_folder_path">Copy Folder Path</string>
+    <string name="copy_path_toast_copied_file">File path copied</string>
+    <string name="copy_path_toast_copied_folder">Folder path copied</string>
+    <string name="copy_path_toast_no_path">No file path available</string>
+
     <string name="open_file">Open file</string>
     <string name="recently_played">Recently played</string>
     <string name="open_link">Open link</string>

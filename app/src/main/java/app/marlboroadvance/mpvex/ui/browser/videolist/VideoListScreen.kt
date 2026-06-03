@@ -68,6 +68,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import android.widget.Toast
+import androidx.compose.material.icons.filled.ContentCopy
+import app.marlboroadvance.mpvex.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -139,6 +145,7 @@ data class VideoListScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val backstack = LocalBackStack.current
+    val clipboardManager = LocalClipboardManager.current
     val browserPreferences = koinInject<BrowserPreferences>()
     val playerPreferences = koinInject<PlayerPreferences>()
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
@@ -303,12 +310,41 @@ data class VideoListScreen(
             }
           },
           onPlayClick = { selectionManager.playSelected() },
-          selectionOverflowActions = listOf(
+          selectionOverflowActions = buildList {
+            add(
+              SelectionOverflowAction(
+                icon = Icons.Filled.Share,
+                label = "Share",
+                onClick = { selectionManager.shareSelected() },
+              )
+            )
+            val selectedVideos = selectionManager.getSelectedItems()
+            if (selectedVideos.isNotEmpty()) {
+              add(
+                SelectionOverflowAction(
+                  icon = Icons.Filled.ContentCopy,
+                  label = stringResource(R.string.copy_video_path),
+                  onClick = {
+                    val paths = selectedVideos.joinToString("\n") { it.path }
+                    clipboardManager.setText(AnnotatedString(paths))
+                    Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+                  }
+                )
+              )
+            }
+          },
+          normalOverflowActions = listOf(
             SelectionOverflowAction(
-              icon = Icons.Filled.Share,
-              label = "Share",
-              onClick = { selectionManager.shareSelected() },
-            ),
+              icon = Icons.Filled.ContentCopy,
+              label = stringResource(R.string.copy_folder_path),
+              onClick = {
+                val folderPath = sortedVideosWithInfo.firstOrNull()?.video?.path?.let { File(it).parent } ?: ""
+                if (folderPath.isNotEmpty()) {
+                  clipboardManager.setText(AnnotatedString(folderPath))
+                  Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+                }
+              }
+            )
           ),
           onSelectAll = { selectionManager.selectAll() },
           onInvertSelection = { selectionManager.invertSelection() },

@@ -84,6 +84,11 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import android.widget.Toast
+import androidx.compose.material.icons.filled.ContentCopy
+import app.marlboroadvance.mpvex.R
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -178,6 +183,7 @@ object FolderListScreen : Screen {
     val context = LocalContext.current
     val backstack = LocalBackStack.current
     val coroutineScope = rememberCoroutineScope()
+    val clipboardManager = LocalClipboardManager.current
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 
     // ViewModels and preferences
@@ -542,6 +548,18 @@ object FolderListScreen : Screen {
                     ).show()
                   }
                 },
+              ),
+              SelectionOverflowAction(
+                icon = Icons.Filled.ContentCopy,
+                label = stringResource(R.string.copy_folder_path),
+                onClick = {
+                  val selectedFolders = selectionManager.getSelectedItems()
+                  if (selectedFolders.isNotEmpty()) {
+                    val pathsString = selectedFolders.joinToString("\n") { it.path }
+                    clipboardManager.setText(AnnotatedString(pathsString))
+                    Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+                  }
+                }
               ),
             ),
           )

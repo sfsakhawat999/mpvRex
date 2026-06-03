@@ -88,6 +88,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import android.widget.Toast
+import androidx.compose.material.icons.filled.ContentCopy
+import app.marlboroadvance.mpvex.R
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -176,6 +181,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
   val context = LocalContext.current
   val backstack = LocalBackStack.current
   val coroutineScope = rememberCoroutineScope()
+  val clipboardManager = LocalClipboardManager.current
   val browserPreferences = koinInject<BrowserPreferences>()
   val playerPreferences = koinInject<app.marlboroadvance.mpvex.preferences.PlayerPreferences>()
   val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
@@ -756,6 +762,49 @@ fun FileSystemBrowserScreen(path: String? = null) {
                   },
                 ))
               }
+              val selectedVideos = videoSelectionManager.getSelectedItems()
+              val selectedFolders = folderSelectionManager.getSelectedItems()
+              val hasSelection = selectedVideos.isNotEmpty() || selectedFolders.isNotEmpty()
+              if (hasSelection) {
+                add(SelectionOverflowAction(
+                  icon = Icons.Filled.ContentCopy,
+                  label = if (selectedVideos.isNotEmpty() && selectedFolders.isEmpty()) {
+                    stringResource(R.string.copy_video_path)
+                  } else if (selectedFolders.isNotEmpty() && selectedVideos.isEmpty()) {
+                    stringResource(R.string.copy_folder_path)
+                  } else {
+                    stringResource(R.string.copy_path)
+                  },
+                  onClick = {
+                    val paths = mutableListOf<String>()
+                    selectedFolders.forEach { paths.add(it.path) }
+                    selectedVideos.forEach { paths.add(it.path) }
+                    
+                    if (paths.isNotEmpty()) {
+                      val pathsString = paths.joinToString("\n")
+                      clipboardManager.setText(AnnotatedString(pathsString))
+                      Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+                    }
+                  }
+                ))
+              }
+            },
+            normalOverflowActions = if (!isAtRoot && breadcrumbs.isNotEmpty()) {
+              listOf(
+                SelectionOverflowAction(
+                  icon = Icons.Filled.ContentCopy,
+                  label = stringResource(R.string.copy_folder_path),
+                  onClick = {
+                    val currentFolderPath = breadcrumbs.lastOrNull()?.fullPath ?: ""
+                    if (currentFolderPath.isNotEmpty()) {
+                      clipboardManager.setText(AnnotatedString(currentFolderPath))
+                      Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+                    }
+                  }
+                )
+              )
+            } else {
+              emptyList()
             },
           )
         }

@@ -102,6 +102,7 @@ fun BrowserTopBar(
   onInvertSelection: (() -> Unit)? = null,
   onDeselectAll: (() -> Unit)? = null,
   selectionOverflowActions: List<SelectionOverflowAction> = emptyList(),
+  normalOverflowActions: List<SelectionOverflowAction> = emptyList(),
   additionalActions: @Composable RowScope.() -> Unit = { },
   onTitleLongPress: (() -> Unit)? = null,
   useRemoveIcon: Boolean = false,
@@ -132,6 +133,7 @@ fun BrowserTopBar(
       onSortClick = onSortClick,
       onSearchClick = onSearchClick,
       onSettingsClick = onSettingsClick,
+      normalOverflowActions = normalOverflowActions,
       additionalActions = additionalActions,
       modifier = modifier,
       onTitleLongPress = onTitleLongPress,
@@ -150,6 +152,7 @@ private fun NormalTopBar(
   onSortClick: (() -> Unit)?,
   onSearchClick: (() -> Unit)?,
   onSettingsClick: (() -> Unit)?,
+  normalOverflowActions: List<SelectionOverflowAction>,
   additionalActions: @Composable RowScope.() -> Unit,
   modifier: Modifier = Modifier,
   onTitleLongPress: (() -> Unit)?,
@@ -298,6 +301,43 @@ private fun NormalTopBar(
         }
       }
       additionalActions()
+      if (normalOverflowActions.isNotEmpty()) {
+        var showNormalOverflowMenu by remember { mutableStateOf(false) }
+        Box(modifier = Modifier.padding(start = 0.dp, end = 4.dp)) {
+          IconButton(
+            onClick = { showNormalOverflowMenu = true },
+          ) {
+            Icon(
+              Icons.Filled.MoreVert,
+              contentDescription = "More options",
+              modifier = Modifier.size(24.dp),
+              tint = MaterialTheme.colorScheme.secondary,
+            )
+          }
+          DropdownMenu(
+            expanded = showNormalOverflowMenu,
+            onDismissRequest = { showNormalOverflowMenu = false },
+          ) {
+            normalOverflowActions.forEach { action ->
+              DropdownMenuItem(
+                leadingIcon = {
+                  Icon(
+                    imageVector = action.icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                  )
+                },
+                text = { Text(action.label) },
+                onClick = {
+                  action.onClick()
+                  showNormalOverflowMenu = false
+                },
+              )
+            }
+          }
+        }
+      }
     },
     modifier = modifier,
   )

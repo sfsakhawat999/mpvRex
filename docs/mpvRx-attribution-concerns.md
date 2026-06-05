@@ -20,6 +20,7 @@ Multiple features and UI improvements appear in mpvRex commits that predate corr
 | :--- | :--- | :--- | :--- | :--- |
 | **Swipe Subtitles to Seek** | [`cc4a629`](https://github.com/sfsakhawat999/mpvRex/commit/cc4a629) (Mar 10, 2026)<br>Author: `estiaksoyeb` | [`f014ca2`](https://github.com/Riteshp2001/mpvRx/commit/f014ca2) (Jun 1, 2026)<br>Author: `Arnab Sadhukhan` | ~83 days later | **Logic & Concept Similarity** |
 | **Unified Media Library View** | [`4f2e04c`](https://github.com/sfsakhawat999/mpvRex/commit/4f2e04c) (May 15, 2026)<br>Author: `estiaksoyeb` | [`239b1bc`](https://github.com/Riteshp2001/mpvRx/commit/239b1bc) (May 31, 2026)<br>Author: `Riteshp2001` | 16 days later | **High Code Similarity** |
+| **Custom Switch Preference** | [`8a7ed05`](https://github.com/sfsakhawat999/mpvRex/commit/8a7ed05) (May 27, 2026)<br>Author: `Farhan Hossain` | [`239b1bc`](https://github.com/Riteshp2001/mpvRx/commit/239b1bc) (May 31, 2026)<br>Author: `Riteshp2001` | 4 days later | **Near-Identical Code Structure** |
 | **Multi-Select Range Selection** | [`da5dbd7`](https://github.com/sfsakhawat999/mpvRex/commit/da5dbd7) (May 31, 2026, 00:14)<br>Author: `estiaksoyeb` | [`f9bcba7`](https://github.com/Riteshp2001/mpvRx/commit/f9bcba7) (May 31, 2026, 10:05)<br>Author: `Riteshp2001` | **10 hours, 21 minutes later** | **Near-Identical Code Structure** |
 | **Delete Button Selection Topbar Fix** | [`099c8d7`](https://github.com/sfsakhawat999/mpvRex/commit/099c8d7) (Jun 1, 2026, 02:40)<br>Author: `estiaksoyeb` | [`7108d6e`](https://github.com/Riteshp2001/mpvRx/commit/7108d6e) (Jun 2, 2026, 14:03)<br>Author: `Arnab Sadhukhan` | **~35 hours later** | **Similar UI Modification** |
 | **Sort/View Dialog Centralization** | [`9e46b6d`](https://github.com/sfsakhawat999/mpvRex/commit/9e46b6d) (Jun 3, 2026, 14:13)<br>Author: `estiaksoyeb` | [`b5693d0`](https://github.com/Riteshp2001/mpvRx/commit/b5693d0) (Jun 3, 2026, 15:23)<br>Author: `Arnab Sadhukhan` | **1 hour, 40 minutes later** | **High Code Similarity** |
@@ -50,7 +51,17 @@ This observation is limited to the commits and files examined in this report.
 
 ---
 
-### Case 2: Multi-Select Range Selection
+### Case 2: Custom Switch Preference Widget
+* **mpvRex Commit:** [`8a7ed05`](https://github.com/sfsakhawat999/mpvRex/commit/8a7ed056a9893871da8a991d82337929af40fe15) (Wed May 27, 2026, 03:08 +0600)
+* **mpvRx Commit:** [`239b1bc`](https://github.com/Riteshp2001/mpvRx/commit/239b1bc) (Sun May 31, 2026)
+
+#### Observed Similarities:
+- **`SwitchPreference.kt` Code Structure:** The custom switch preference widget with a `Crossfade` animation changing the toggle icon (`Icons.Filled.Check` and `Icons.Filled.Close` inside the `thumbContent` block of the `Switch` component) was introduced in both repositories.
+- **Implementation Detail:** The implementation in `SwitchPreference.kt` matches the original code line-for-line, with the exception of package namespaces and importing custom `Icon` wrappers rather than using standard material icons directly.
+
+---
+
+### Case 3: Multi-Select Range Selection
 * **mpvRex Commit:** [`da5dbd7`](https://github.com/sfsakhawat999/mpvRex/commit/da5dbd7) (Sun May 31, 2026, 00:14 +0600 — `May 30, 18:14 UTC`)
 * **mpvRx Commit:** [`f9bcba7`](https://github.com/Riteshp2001/mpvRx/commit/f9bcba7) (Sun May 31, 2026, 10:05 +0530 — `May 31, 04:35 UTC`)
 * **Time Difference:** **10 hours and 21 minutes**
@@ -87,7 +98,7 @@ This observation is limited to the commits and files examined in this report.
 
 ---
 
-### Case 3: Sort & View Dialog Centralization
+### Case 4: Sort & View Dialog Centralization
 * **mpvRex Commit:** [`9e46b6d`](https://github.com/sfsakhawat999/mpvRex/commit/9e46b6d) (Wed Jun 3, 2026, 14:13 +0600 — `Jun 3, 08:13 UTC`)
 * **mpvRx Commit:** [`b5693d0`](https://github.com/Riteshp2001/mpvRx/commit/b5693d0) (Wed Jun 3, 2026, 15:23 +0530 — `Jun 3, 09:53 UTC`)
 * **Time Difference:** **1 hour and 40 minutes**
@@ -97,7 +108,7 @@ The refactoring pattern to unify specific sorting dialogs (Folder, Video, FileSy
 
 ---
 
-### Case 4: Subtitle Dialog Seek Gesture (Horizontal Swipe)
+### Case 5: Subtitle Dialog Seek Gesture (Horizontal Swipe)
 * **mpvRex Commit:** [`cc4a629`](https://github.com/sfsakhawat999/mpvRex/commit/cc4a629) (Mar 10, 2026)
 * **mpvRx Commit:** [`f014ca2`](https://github.com/Riteshp2001/mpvRx/commit/f014ca2) (Jun 1, 2026)
 
@@ -106,7 +117,7 @@ Both projects implemented a horizontal swipe gesture targeting subtitles to trig
 
 ---
 
-### Case 5: Removal of Delete Button from Selection Topbar
+### Case 6: Removal of Delete Button from Selection Topbar
 * **mpvRex Commit:** [`099c8d7`](https://github.com/sfsakhawat999/mpvRex/commit/099c8d7) (Jun 1, 2026, 02:40 +0600)
 * **mpvRx Commit:** [`7108d6e`](https://github.com/Riteshp2001/mpvRx/commit/7108d6e) (Jun 2, 2026, 14:03 +0530)
 

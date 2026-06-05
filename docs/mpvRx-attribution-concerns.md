@@ -10,7 +10,7 @@ This document is not intended as a legal accusation. Its purpose is to preserve 
 
 ## Executive Summary
 
-Multiple features and UI improvements first appeared in the mpvRex codebase and were subsequently implemented in the mpvRx repository. Several cases involve highly similar code structures, naming conventions, and runtime behaviors. This report documents these similarities, matching files, and their relative release timelines based on public git commits.
+Multiple features and UI improvements first appeared in the mpvRex codebase and subsequently appeared in the mpvRx repository. Several cases involve near-identical code structures, naming conventions, and runtime behaviors. This report documents these similarities, matching files, and their relative release timelines based on public git commits.
 
 ---
 
@@ -20,9 +20,20 @@ Multiple features and UI improvements first appeared in the mpvRex codebase and 
 | :--- | :--- | :--- | :--- | :--- |
 | **Swipe Subtitles to Seek** | `cc4a629` (Mar 10, 2026)<br>Author: `estiaksoyeb` | `f014ca2` (Jun 1, 2026)<br>Author: `Arnab Sadhukhan` | ~83 days later | **Logic & Concept Similarity** |
 | **Unified Media Library View** | `4f2e04c` (May 15, 2026)<br>Author: `estiaksoyeb` | `239b1bc` (May 31, 2026)<br>Author: `Riteshp2001` | 16 days later | **High Code Similarity** |
-| **Multi-Select Range Selection** | `da5dbd7` (May 31, 2026, 00:14)<br>Author: `estiaksoyeb` | `f9bcba7` (May 31, 2026, 10:05)<br>Author: `Riteshp2001` | **10 hours, 21 minutes later** | **Identical Code Structure** |
+| **Multi-Select Range Selection** | `da5dbd7` (May 31, 2026, 00:14)<br>Author: `estiaksoyeb` | `f9bcba7` (May 31, 2026, 10:05)<br>Author: `Riteshp2001` | **10 hours, 21 minutes later** | **Near-Identical Code Structure** |
 | **Delete Button Selection Topbar Fix** | `099c8d7` (Jun 1, 2026, 02:40)<br>Author: `estiaksoyeb` | `7108d6e` (Jun 2, 2026, 14:03)<br>Author: `Arnab Sadhukhan` | **~35 hours later** | **Similar UI Modification** |
 | **Sort/View Dialog Centralization** | `9e46b6d` (Jun 3, 2026, 14:13)<br>Author: `estiaksoyeb` | `b5693d0` (Jun 3, 2026, 15:23)<br>Author: `Arnab Sadhukhan` | **1 hour, 40 minutes later** | **High Code Similarity** |
+
+---
+
+## Attribution Review
+
+As of the date of this report:
+- No references to the corresponding mpvRex commits were found in the examined mpvRx commits.
+- No commit messages referencing the original mpvRex implementations were observed.
+- No in-code comments attributing the compared implementations to mpvRex were identified.
+
+This observation is limited to the commits and files examined in this report.
 
 ---
 
@@ -43,8 +54,12 @@ Multiple features and UI improvements first appeared in the mpvRex codebase and 
 * **mpvRx Commit:** `f9bcba7` (Sun May 31, 2026, 10:05 +0530 — `May 31, 04:35 UTC`)
 * **Time Difference:** **10 hours and 21 minutes**
 
+#### Observed Code Similarities:
+- **Identifiers:** Match on function names (`selectRange`, `selectRangeTo`), parameter names (`targetId`, `allIds`), and local variable names (`anchor`, `startIndex`, `endIndex`, `idsInRange`).
+- **Control Flow:** Matching bounds checking and fallback behavior (returning early on missing anchor).
+- **Strategy:** Identical approach of finding minimum/maximum indices and slicing the list via `subList` to resolve the selected range.
+
 #### Technical Code Comparison (`SelectionState.kt`):
-Both implementations add an identical algorithm to slice the index range of selected item IDs:
 ```kotlin
   fun selectRange(targetId: ID, allIds: List<ID>): SelectionState<ID> {
     val anchor = lastSelectedId
@@ -68,7 +83,6 @@ Both implementations add an identical algorithm to slice the index range of sele
     )
   }
 ```
-In `SelectionManager.kt`, the method structure and name for range calculation (`selectRangeTo`) are also identical.
 
 ---
 

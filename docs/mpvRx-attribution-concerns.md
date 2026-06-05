@@ -1,16 +1,16 @@
-# Implementation Comparison and Attribution Analysis: mpvRx vs. mpvRex
+# Feature Origin and Implementation Comparison: mpvRx vs. mpvRex
 
 ---
 
 ## Purpose of This Document
 
-This document is not intended as a legal accusation. Its purpose is to preserve a historical record of feature origins and implementation timelines across the two projects. The core concern addressed here is the repeated appearance of highly similar implementations in the mpvRx project without acknowledgment of the original source commits in mpvRex. This report exists for transparency and attribution purposes, documenting technical similarities for the community.
+This document is not intended as a legal accusation. Its purpose is to preserve a historical record of feature origins and implementation timelines across the two projects. The core concern addressed here is the repeated appearance of highly similar implementations in the mpvRx project. An additional observation is the absence of references to the corresponding mpvRex commits within the examined commits and files. This report exists for transparency and attribution purposes, documenting technical similarities for the community.
 
 ---
 
 ## Executive Summary
 
-Multiple features and UI improvements first appeared in the mpvRex codebase and subsequently appeared in the mpvRx repository. Several cases involve near-identical code structures, naming conventions, and runtime behaviors. This report documents these similarities, matching files, and their relative release timelines based on public git commits.
+Multiple features and UI improvements appear in mpvRex commits that predate corresponding implementations observed in mpvRx. Several cases involve near-identical code structures, naming conventions, and runtime behaviors. This report documents these similarities, matching files, and their relative release timelines based on public git commits.
 
 ---
 
@@ -32,6 +32,7 @@ As of the date of this report:
 - No references to the corresponding mpvRex commits were found in the examined mpvRx commits.
 - No commit messages referencing the original mpvRex implementations were observed.
 - No in-code comments attributing the compared implementations to mpvRex were identified.
+- No references to the mpvRex repository or commits were identified in the examined commit messages, code comments, or pull request descriptions associated with the compared implementations.
 
 This observation is limited to the commits and files examined in this report.
 

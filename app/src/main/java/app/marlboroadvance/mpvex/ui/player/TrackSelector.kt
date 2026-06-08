@@ -218,6 +218,12 @@ class TrackSelector(
 
   private suspend fun ensureSubtitleTrackSelected(tracks: List<Track>, hasState: Boolean) {
     try {
+      // If user has disabled subtitles by default, don't auto-select any subtitle track
+      if (subtitlesPreferences.disableSubtitlesByDefault.get()) {
+        Log.d(TAG, "Smart Sub: Subtitles disabled by default (user preference). Skipping selection.")
+        return
+      }
+
       val currentSid = MPVLib.getPropertyInt("sid") ?: 0
 
       // Respect manual "Subtitles Off" state

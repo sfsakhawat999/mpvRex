@@ -1,4 +1,4 @@
-﻿package app.marlboroadvance.mpvex.ui.player
+package app.marlboroadvance.mpvex.ui.player
 
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -2062,7 +2062,7 @@ class PlayerActivity :
 
     viewModel.unpause()
 
-    if (subtitlesPreferences.autoloadMatchingSubtitles.get()) {
+    if (subtitlesPreferences.autoloadMatchingSubtitles.get() && !subtitlesPreferences.disableSubtitlesByDefault.get()) {
       lifecycleScope.launch {
         // For network files played via proxy (SMB/WebDAV/FTP), use the original network file path
         val networkFilePath = intent.getStringExtra("network_file_path")

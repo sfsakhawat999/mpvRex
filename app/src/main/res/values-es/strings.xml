@@ -260,8 +260,6 @@
     <string name="pref_custom_lua_summary">Gestionar botones personalizados del reproductor con código Lua</string>
     <string name="pref_preferred_languages">Idiomas preferidos</string>
     <string name="pref_subtitles_fonts_dir">Directorio de fuentes</string>
-    <string name="pref_subtitles_disable_by_default_title">Desactivar subtítulos por defecto</string>
-    <string name="pref_subtitles_disable_by_default_summary">Los subtítulos no aparecerán a menos que los habilites manualmente durante la reproducción.</string>
     <string name="pref_subtitles_autoload_title">Cargar subtítulos automáticamente</string>
     <string name="pref_subtitles_autoload_summary">Cargar automáticamente subtítulos externos con el mismo nombre.</string>
     <string name="pref_subtitles_open_at_video_location_title">Abrir en la ubicación del video</string>

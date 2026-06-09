@@ -2062,7 +2062,7 @@ class PlayerActivity :
 
     viewModel.unpause()
 
-    if (subtitlesPreferences.autoloadMatchingSubtitles.get() && !subtitlesPreferences.disableSubtitlesByDefault.get()) {
+    if (subtitlesPreferences.autoloadMatchingSubtitles.get()) {
       lifecycleScope.launch {
         // For network files played via proxy (SMB/WebDAV/FTP), use the original network file path
         val networkFilePath = intent.getStringExtra("network_file_path")
@@ -2404,12 +2404,12 @@ class PlayerActivity :
 
     // Always restore subtitle and audio tracks from saved state
     // User's manual selection has highest priority
-    if (state.sid > 0) {
+    if (state.sid > 0 || state.sid == -1) {
       player.sid = state.sid
       Log.d(TAG, "Restored primary subtitle track: ${state.sid} (user selection)")
     }
 
-    if (state.secondarySid > 0) {
+    if (state.secondarySid > 0 || state.secondarySid == -1) {
       player.secondarySid = state.secondarySid
       Log.d(TAG, "Restored secondary subtitle track: ${state.secondarySid} (user selection)")
     }

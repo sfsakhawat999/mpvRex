@@ -1,6 +1,7 @@
 package app.marlboroadvance.mpvex.utils.media
 
 import android.util.Log
+import app.marlboroadvance.mpvex.preferences.SubtitlesPreferences
 import app.marlboroadvance.mpvex.repository.NetworkRepository
 import app.marlboroadvance.mpvex.ui.browser.networkstreaming.proxy.NetworkStreamingProxy
 import `is`.xyz.mpv.MPVLib
@@ -18,6 +19,7 @@ import java.util.Locale
 object SubtitleOps : KoinComponent {
   private const val TAG = "SubtitleOps"
   private val networkRepository: NetworkRepository by inject()
+  private val subtitlesPreferences: SubtitlesPreferences by inject()
 
   private fun shouldSkipNetworkSubtitleAutoload(videoFilePath: String, videoFileName: String): Boolean {
     val p = videoFilePath.lowercase(Locale.getDefault())
@@ -158,8 +160,9 @@ object SubtitleOps : KoinComponent {
           // Get current subtitle track count before adding
           val trackCountBefore = MPVLib.getPropertyInt("track-list/count") ?: 0
 
-          // Use "select" for the first subtitle, "auto" for others
-          val flag = if (index == 0) "select" else "auto"
+          // Use "select" for the first subtitle unless disabled by default, "auto" for others
+          val disableByDefault = subtitlesPreferences.disableSubtitlesByDefault.get()
+          val flag = if (index == 0 && !disableByDefault) "select" else "auto"
           MPVLib.command("sub-add", proxyUrl, flag)
 
           // Set the title for the newly added subtitle track
@@ -201,8 +204,9 @@ object SubtitleOps : KoinComponent {
       withContext(Dispatchers.Main) {
         subtitles.forEachIndexed { index, subtitle ->
           // MPV command format: sub-add <url> [<flags> [<title>]]
-          // Use "select" for the first autoloaded subtitle so it is enabled by default
-          val flag = if (index == 0) "select" else "auto"
+          // Use "select" for the first autoloaded subtitle unless disabled by default
+          val disableByDefault = subtitlesPreferences.disableSubtitlesByDefault.get()
+          val flag = if (index == 0 && !disableByDefault) "select" else "auto"
           MPVLib.command("sub-add", subtitle.absolutePath, flag, subtitle.name)
           Log.d(TAG, "Loaded local subtitle: ${subtitle.name} (flag=$flag)")
         }
@@ -233,8 +237,9 @@ object SubtitleOps : KoinComponent {
       try {
         // Try to add the subtitle - MPV will handle if it doesn't exist
         // Use "auto" flag so MPV doesn't select it if it's not found
-        // Only use "select" for the first one (.srt)
-        val flag = if (index == 0) "select" else "auto"
+        // Only use "select" for the first one (.srt) unless disabled by default
+        val disableByDefault = subtitlesPreferences.disableSubtitlesByDefault.get()
+        val flag = if (index == 0 && !disableByDefault) "select" else "auto"
         MPVLib.command("sub-add", subtitleUrl, flag, "$baseName.$ext")
         Log.d(TAG, "Attempting to load network subtitle: $subtitleUrl (flag=$flag)")
       } catch (e: Exception) {

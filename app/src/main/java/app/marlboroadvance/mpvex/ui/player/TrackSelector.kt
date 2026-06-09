@@ -218,9 +218,14 @@ class TrackSelector(
 
   private suspend fun ensureSubtitleTrackSelected(tracks: List<Track>, hasState: Boolean) {
     try {
-      // If user has disabled subtitles by default, don't auto-select any subtitle track
+      // If user has disabled subtitles by default, turn off subtitles unless we are restoring state
       if (subtitlesPreferences.disableSubtitlesByDefault.get()) {
-        Log.d(TAG, "Smart Sub: Subtitles disabled by default (user preference). Skipping selection.")
+        if (!hasState) {
+          Log.d(TAG, "Smart Sub: Subtitles disabled by default (user preference). Disabling subtitle track.")
+          MPVLib.setPropertyString("sid", "no")
+        } else {
+          Log.d(TAG, "Smart Sub: Subtitles disabled by default, but respecting saved playback state.")
+        }
         return
       }
 

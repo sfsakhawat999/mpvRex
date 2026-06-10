@@ -412,39 +412,33 @@ private fun MultiViewModeSelectorComponent(
 
         Column(
           horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(4.dp),
-          modifier = Modifier
-            .clip(shape)
-            .background(
-              if (selected && enabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
-              else Color.Transparent
-            )
-            .clickable(enabled = enabled) {
-              if (enabled) {
-                option.onClick()
-              }
-            }
-            .padding(4.dp),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
           Box(
             modifier = Modifier
-              .size(36.dp)
+              .size(48.dp)
               .clip(shape)
               .background(
                 color = if (selected && enabled) {
                   MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                 } else if (enabled) {
-                  MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.4f)
+                  MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.3f)
                 } else {
                   MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.2f)
-                }
+                },
+              )
+              .clickable(
+                enabled = enabled,
+                onClick = { option.onClick() },
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(bounded = true),
               ),
             contentAlignment = Alignment.Center,
           ) {
             Icon(
               imageVector = option.icon,
               contentDescription = null,
-              modifier = Modifier.size(18.dp),
+              modifier = Modifier.size(24.dp),
               tint = if (selected && enabled) {
                 MaterialTheme.colorScheme.primary
               } else if (enabled) {
@@ -509,32 +503,26 @@ private fun ViewModeSelectorComponent(
 
         Column(
           horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(4.dp),
-          modifier = Modifier
-            .clip(shape)
-            .background(
-              if (selected && enabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
-              else Color.Transparent
-            )
-            .clickable(enabled = enabled) { 
-              if (enabled) {
-                viewModeSelector.onViewModeChange(index == 0)
-              }
-            }
-            .padding(4.dp),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
           Box(
             modifier = Modifier
-              .size(36.dp)
+              .size(48.dp)
               .clip(shape)
               .background(
                 color = if (selected && enabled) {
                   MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                 } else if (enabled) {
-                  MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.4f)
+                  MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.3f)
                 } else {
                   MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.2f)
                 },
+              )
+              .clickable(
+                enabled = enabled,
+                onClick = { viewModeSelector.onViewModeChange(index == 0) },
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(bounded = true),
               ),
             contentAlignment = Alignment.Center,
           ) {
@@ -548,13 +536,13 @@ private fun ViewModeSelectorComponent(
               } else {
                 MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
               },
-              modifier = Modifier.size(18.dp),
+              modifier = Modifier.size(24.dp),
             )
           }
 
           Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelMedium,
             fontWeight = if (selected && enabled) FontWeight.Bold else FontWeight.Normal,
             color = if (selected && enabled) {
               MaterialTheme.colorScheme.primary

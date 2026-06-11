@@ -150,8 +150,20 @@ fun <T> UnifiedExplorerContent(
           is VideoWithPlaybackInfo -> item.video.path == recentlyPlayedFilePath
           is RecentlyPlayedItem.VideoItem -> item.video.path == recentlyPlayedFilePath
           is FileSystemItem.VideoFile -> item.video.path == recentlyPlayedFilePath
-          is VideoFolder -> recentlyPlayedFilePath.startsWith(item.path + "/") || recentlyPlayedFilePath == item.path || java.io.File(recentlyPlayedFilePath).parent == item.path
-          is FileSystemItem.Folder -> recentlyPlayedFilePath.startsWith(item.path + "/") || recentlyPlayedFilePath == item.path || java.io.File(recentlyPlayedFilePath).parent == item.path
+          is VideoFolder -> {
+            if (showSections) {
+              recentlyPlayedFilePath.startsWith(item.path + "/") || recentlyPlayedFilePath == item.path || java.io.File(recentlyPlayedFilePath).parent == item.path
+            } else {
+              java.io.File(recentlyPlayedFilePath).parent == item.path
+            }
+          }
+          is FileSystemItem.Folder -> {
+            if (showSections) {
+              recentlyPlayedFilePath.startsWith(item.path + "/") || recentlyPlayedFilePath == item.path || java.io.File(recentlyPlayedFilePath).parent == item.path
+            } else {
+              java.io.File(recentlyPlayedFilePath).parent == item.path
+            }
+          }
           else -> false
         }
       }

@@ -2,10 +2,10 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "main" ] # Change to your default branch name if it isn't main
+    branches: [ "main" ] # Adjust to your main branch name if different
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch: # Allows you to trigger the build manually from the GitHub Actions tab
+  workflow_dispatch:
 
 jobs:
   build:
@@ -21,7 +21,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # --- SPEED OPTIMIZATION: CACHE GRADLE DEPENDENCIES & BUILD FILES ---
+    # Speed Optimization: Cache Gradle Packages & Cache Build Objects
     - name: Cache Gradle Packages & Build Cache
       uses: actions/cache@v4
       with:
@@ -36,15 +36,15 @@ jobs:
     - name: Grant Execute Permission to Gradlew
       run: chmod +x gradlew
 
-    # --- SPEED OPTIMIZATION: RUN GRADLE WITH INCREMENTAL BUILD FLAGS ---
-    # --build-cache enables Gradle to reuse local build outputs from the cached directory.
-    # --configuration-cache reuses the build configuration step if build scripts haven't changed.
+    # Speed Optimization: Run Gradle with Incremental Flags
     - name: Build Debug APK
       run: ./gradlew assembleDebug --build-cache --configuration-cache --parallel
 
-    - name: Upload APK Artifact
+    # FIX: Locate and find the generated APK path automatically
+    - name: Upload Universal APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: MPVPLAY-debug-apk
-        path: app/build/outputs/apk/debug/app-debug.apk
+        name: MPVPLAY-universal-debug-apk
+        path: |
+          app/build/outputs/apk/**/*.apk
         retention-days: 7

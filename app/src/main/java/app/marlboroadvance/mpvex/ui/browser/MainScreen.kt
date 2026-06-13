@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -53,6 +54,12 @@ import app.marlboroadvance.mpvex.ui.browser.playlist.PlaylistScreen
 import app.marlboroadvance.mpvex.ui.browser.recentlyplayed.RecentlyPlayedScreen
 import app.marlboroadvance.mpvex.ui.browser.shorts.ShortsScreen
 import app.marlboroadvance.mpvex.ui.browser.selection.SelectionManager
+import app.marlboroadvance.mpvex.cinehub.ui.CineHubScreen
+import app.marlboroadvance.mpvex.cinehub.data.NfoScanner
+import app.marlboroadvance.mpvex.ui.player.PlayerActivity
+import android.content.Intent
+import android.net.Uri
+import java.io.File
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -162,6 +169,30 @@ object MainScreen : Screen {
         add(
           VisibleTab("home", "Home", Icons.Filled.Home) {
             FolderListScreen.Content()
+          }
+        )
+        // CineHub Integration directly into core tabs collection
+        add(
+          VisibleTab("cinehub", "CineHub", Icons.Filled.Movie) {
+            val moviesData = remember {
+              try {
+                NfoScanner.scanDirectoryForMovies(
+                  android.os.Environment.getExternalStorageDirectory()
+                )
+              } catch (e: Exception) {
+                emptyList()
+              }
+            }
+            CineHubScreen(
+              moviesList = moviesData,
+              onMovieClick = { filePath ->
+                val intent = Intent(context, PlayerActivity::class.java).apply {
+                  action = Intent.ACTION_VIEW
+                  data = Uri.fromFile(File(filePath))
+                }
+                context.startActivity(intent)
+              }
+            )
           }
         )
         if (isShortsEnabled) {

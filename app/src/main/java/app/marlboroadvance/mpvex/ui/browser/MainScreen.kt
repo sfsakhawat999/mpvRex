@@ -171,30 +171,43 @@ object MainScreen : Screen {
             FolderListScreen.Content()
           }
         )
-        // CineHub Integration directly into core tabs collection
+        
+        // --- UPDATED: CineHub Integration with both Movies and TV Shows scanning ---
         add(
           VisibleTab("cinehub", "CineHub", Icons.Filled.Movie) {
+            val rootDir = remember { android.os.Environment.getExternalStorageDirectory() }
             val moviesData = remember {
               try {
-                NfoScanner.scanDirectoryForMovies(
-                  android.os.Environment.getExternalStorageDirectory()
-                )
+                NfoScanner.scanDirectoryForMovies(rootDir)
               } catch (e: Exception) {
                 emptyList()
               }
             }
+            val tvShowsData = remember {
+              try {
+                NfoScanner.scanDirectoryForTvShows(rootDir)
+              } catch (e: Exception) {
+                emptyList()
+              }
+            }
+            
             CineHubScreen(
               moviesList = moviesData,
-              onMovieClick = { filePath ->
+              tvShowsList = tvShowsData,
+              onPlayRequested = { filePath, cleanTitle ->
                 val intent = Intent(context, PlayerActivity::class.java).apply {
                   action = Intent.ACTION_VIEW
                   data = Uri.fromFile(File(filePath))
+                  // Passes clean titles to avoid showing raw filename.mkv inside the player
+                  putExtra("title", cleanTitle)
+                  putExtra("force_title", cleanTitle)
                 }
                 context.startActivity(intent)
               }
             )
           }
         )
+        
         if (isShortsEnabled) {
           add(
             VisibleTab("shorts", "Shorts", Icons.Filled.VideoLibrary) {

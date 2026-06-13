@@ -211,6 +211,9 @@ dependencies {
   implementation(libs.lazycolumnscrollbar)
   implementation(libs.reorderable)
   implementation(libs.compose.markdown)
+
+  // --- ADDED FOR CINEHUB POSTER CARD RENDERING ---
+  implementation("io.coil-kt:coil-compose:2.6.0")
 }
 
 /* ---------------- Git helpers ---------------- */

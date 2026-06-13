@@ -1,5 +1,6 @@
 package app.marlboroadvance.mpvex.cinehub.ui
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -39,19 +41,31 @@ fun CineHubScreen(
     var selectedMovie by remember { mutableStateOf<MovieItem?>(null) }
     var selectedTvShow by remember { mutableStateOf<TvShowItem?>(null) }
 
-    // Fixes the layout going behind status bar
+    // Dynamic grid layout response matching device orientation state
+    val configuration = LocalConfiguration.current
+    val gridColumnCount = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 6 else 3
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding(), 
         topBar = {
-            TabRow(selectedTabIndex = tabIndex) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = tabIndex == index,
-                        onClick = { tabIndex = index },
-                        text = { Text(title, style = MaterialTheme.typography.titleSmall) }
-                    )
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 2.dp
+            ) {
+                TabRow(
+                    selectedTabIndex = tabIndex,
+                    containerColor = Color.Transparent,
+                    divider = {}
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = tabIndex == index,
+                            onClick = { tabIndex = index },
+                            text = { Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
+                        )
+                    }
                 }
             }
         }
@@ -65,14 +79,14 @@ fun CineHubScreen(
                 0 -> {
                     if (moviesList.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("No local movies discovered.")
+                            Text("No local movies discovered.", style = MaterialTheme.typography.bodyMedium)
                         }
                     } else {
                         LazyVerticalGrid(
-                            columns = GridCells.Fixed(3),
+                            columns = GridCells.Fixed(gridColumnCount),
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(6.dp),
-                            horizontalArrangement = Arrangement.Center
+                            contentPadding = PaddingValues(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             items(moviesList) { movie ->
                                 CineHubGridCard(
@@ -89,14 +103,14 @@ fun CineHubScreen(
                 1 -> {
                     if (tvShowsList.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("No local TV series discovered.")
+                            Text("No local TV series discovered.", style = MaterialTheme.typography.bodyMedium)
                         }
                     } else {
                         LazyVerticalGrid(
-                            columns = GridCells.Fixed(3),
+                            columns = GridCells.Fixed(gridColumnCount),
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(6.dp),
-                            horizontalArrangement = Arrangement.Center
+                            contentPadding = PaddingValues(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             items(tvShowsList) { show ->
                                 CineHubGridCard(
@@ -116,12 +130,12 @@ fun CineHubScreen(
             selectedMovie?.let { movie ->
                 ModalBottomSheet(
                     onDismissRequest = { selectedMovie = null },
-                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
                 ) {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(horizontal = 20.dp, vertical = 12.dp)
                     ) {
                         item {
                             Row(modifier = Modifier.fillMaxWidth()) {
@@ -129,40 +143,42 @@ fun CineHubScreen(
                                     model = movie.posterPath ?: android.R.drawable.ic_menu_gallery,
                                     contentDescription = movie.title,
                                     modifier = Modifier
-                                        .width(110.dp)
+                                        .width(115.dp)
                                         .aspectRatio(2f / 3f)
-                                        .background(Color.Gray, RoundedCornerShape(6.dp)),
+                                        .background(Color.Gray, RoundedCornerShape(8.dp)),
                                     contentScale = ContentScale.Crop
                                 )
-                                Spacer(modifier = Modifier.width(16.dp))
+                                Spacer(modifier = Modifier.width(18.dp))
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(movie.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                                    Text(movie.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                                     if (movie.originalTitle.isNotEmpty() && movie.originalTitle != movie.title) {
                                         Text(movie.originalTitle, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                                     }
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text("Rating: ★ ${movie.userRating} | Premiered: ${movie.premiered}", style = MaterialTheme.typography.bodySmall)
-                                    Text("Genre: ${movie.genre}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text("Rating: ★ ${movie.userRating} | Year: ${movie.premiered}", style = MaterialTheme.typography.bodyMedium)
+                                    Text("Genre: ${movie.genre}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
                                 }
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(20.dp))
                             Button(
                                 onClick = {
                                     selectedMovie = null
-                                    onPlayRequested(movie.videoFilePath, movie.title) // Passes clean title to player intent
+                                    onPlayRequested(movie.videoFilePath, movie.title)
                                 },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp)
                             ) {
                                 Icon(Icons.Default.PlayArrow, contentDescription = "Play")
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Play Movie")
+                                Text("Play Movie", style = MaterialTheme.typography.titleMedium)
                             }
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
                             Text("Plot Overview", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                             Text(
                                 movie.plot.ifEmpty { "No description available." },
                                 style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(vertical = 6.dp)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }
                     }
@@ -177,58 +193,68 @@ fun CineHubScreen(
 
                 ModalBottomSheet(
                     onDismissRequest = { selectedTvShow = null },
-                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
                 ) {
-                    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                        Text(show.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text("Studio: ${show.studio} | Genre: ${show.genre}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
+                        Text(show.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                        Text("Studio: ${show.studio} | Genre: ${show.genre}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                        Spacer(modifier = Modifier.height(12.dp))
                         
                         if (seasons.keys.size > 1) {
                             ScrollableTabRow(
                                 selectedTabIndex = seasons.keys.indexOf(selectedSeasonTab).coerceAtLeast(0),
-                                edgePadding = 0.dp
+                                edgePadding = 0.dp,
+                                divider = {}
                             ) {
                                 seasons.keys.forEach { seasonNum ->
                                     Tab(
                                         selected = selectedSeasonTab == seasonNum,
                                         onClick = { selectedSeasonTab = seasonNum },
-                                        text = { Text("Season $seasonNum") }
+                                        text = { Text("Season $seasonNum", fontWeight = FontWeight.Medium) }
                                     )
                                 }
                             }
                         }
 
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f, fill = false)) {
                             items(seasons[selectedSeasonTab] ?: emptyList()) { episode ->
                                 Card(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                                    shape = RoundedCornerShape(10.dp),
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
                                 ) {
                                     Row(
-                                        modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                                        modifier = Modifier.padding(14.dp).fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                "E${episode.episode}: ${episode.title}",
+                                                "Episode ${episode.episode}: ${episode.title}",
                                                 style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.SemiBold
+                                                fontWeight = FontWeight.Bold
                                             )
                                             if (episode.plot.isNotEmpty()) {
+                                                Spacer(modifier = Modifier.height(4.dp))
                                                 Text(
                                                     episode.plot,
                                                     style = MaterialTheme.typography.bodySmall,
                                                     maxLines = 2,
-                                                    overflow = TextOverflow.Ellipsis
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
                                         }
-                                        IconButton(onClick = {
-                                            selectedTvShow = null
-                                            onPlayRequested(episode.videoFilePath, "${show.title} - S${episode.season}E${episode.episode}")
-                                        }) {
-                                            Icon(Icons.Default.PlayArrow, contentDescription = "Play Episode", tint = MaterialTheme.colorScheme.primary)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        IconButton(
+                                            onClick = {
+                                                selectedTvShow = null
+                                                onPlayRequested(episode.videoFilePath, "${show.title} - S${episode.season}E${episode.episode}")
+                                            },
+                                            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                                        ) {
+                                            Icon(Icons.Default.PlayArrow, contentDescription = "Play Episode", tint = MaterialTheme.colorScheme.onPrimaryContainer)
                                         }
                                     }
                                 }

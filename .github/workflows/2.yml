@@ -24,12 +24,9 @@ jobs:
     - name: Grant Execute Permission to Gradlew
       run: chmod +x gradlew
 
-    # Clean & Fresh Compilation: Runs a complete clean and forces Gradle to fetch everything from scratch
-    # Injected --no-build-cache to guarantee no old assets or icons are carried over
-     Tarika: Clean Build Debug APK
+    - name: Clean Build Debug APK
       run: ./gradlew clean assembleDebug --no-build-cache --parallel
 
-    # Automatically locates and grabs the freshly baked universal debug binary
     - name: Upload Universal APK Artifact
       uses: actions/upload-artifact@v4
       with:

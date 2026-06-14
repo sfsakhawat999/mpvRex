@@ -1,0 +1,39 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Grant Execute Permission to Gradlew
+      run: chmod +x gradlew
+
+    # Clean & Fresh Compilation: Runs a complete clean and forces Gradle to fetch everything from scratch
+    # Injected --no-build-cache to guarantee no old assets or icons are carried over
+     Tarika: Clean Build Debug APK
+      run: ./gradlew clean assembleDebug --no-build-cache --parallel
+
+    # Automatically locates and grabs the freshly baked universal debug binary
+    - name: Upload Universal APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: MPVPLAY-universal-debug-apk
+        path: |
+          app/build/outputs/apk/**/*.apk
+        retention-days: 7

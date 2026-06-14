@@ -98,7 +98,6 @@ data class ShortsScreen(
         var selectedSourceTab by remember { mutableIntStateOf(0) } 
         var onlineShortsList by remember { mutableStateOf<List<YoutubeVideo>>(emptyList()) }
         var isOnlineLoading by remember { mutableStateOf(false) }
-        val scope = rememberCoroutineScope()
 
         val view = LocalView.current
         val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
@@ -135,13 +134,17 @@ data class ShortsScreen(
                 } else if (shorts.isEmpty() && totalShortsCount > 0) {
                     FinishedPageItem(onBack = {
                         viewModel.clearSessionHistory()
-                        if (backstack.size > 1) backstack.removeLastOrNull() else MainScreen.requestPreviousTab()
+                        try {
+                            backstack.removeLastOrNull()
+                        } catch (e: Exception) {
+                            MainScreen.requestPreviousTab()
+                        }
                     })
                 } else if (shorts.isEmpty()) {
                     Text(text = if (blockedOnly) "No blocked videos found" else "No vertical videos found", color = Color.White, modifier = Modifier.align(Alignment.Center))
                 } else {
                     val localPagerState = rememberPagerState(pageCount = { if (isExhausted) shorts.size + 1 else shorts.size })
-                    RenderLocalShortsContainer(shorts, localPagerState, lovedPaths, blockedPaths, isExhausted, autoSwipe, currentSpeed, viewModel, backstack)
+                    RenderLocalShortsContainer(shorts, localPagerState, lovedPaths, blockedPaths, isExhausted, autoSwipe, currentSpeed, viewModel)
                 }
             } else {
                 if (isOnlineLoading) {
@@ -150,7 +153,7 @@ data class ShortsScreen(
                     Text(text = "Failed to load network streams.", color = Color.White, modifier = Modifier.align(Alignment.Center))
                 } else {
                     val onlinePagerState = rememberPagerState(pageCount = { onlineShortsList.size })
-                    RenderOnlineShortsContainer(onlineShortsList, onlinePagerState, autoSwipe, currentSpeed)
+                    RenderOnlineShortsContainer(onlineShortsList, onlinePagerState, autoSwipe)
                 }
             }
 
@@ -196,14 +199,14 @@ data class ShortsScreen(
         isExhausted: Boolean,
         autoSwipe: Boolean,
         currentSpeed: Double,
-        viewModel: ShortsViewModel,
-        backstack: app.marlboroadvance.mpvex.ui.utils.BackStack<Screen>
+        viewModel: ShortsViewModel
     ) {
         var mpvView by remember { mutableStateOf<MPVView?>(null) }
         var isPlayerReady by remember { mutableStateOf(false) }
         var playingPageIndex by remember { mutableIntStateOf(0) }
         val density = LocalDensity.current
         val lifecycleOwner = LocalLifecycleOwner.current
+        val backstack = LocalBackStack.current
 
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val containerHeight = this.maxHeight
@@ -263,7 +266,11 @@ data class ShortsScreen(
 
             ShortsPager(shorts = shorts, pagerState = pagerState, lovedPaths = lovedPaths, blockedPaths = blockedPaths, isPlayerReady = isPlayerReady, isExhausted = isExhausted, currentSpeed = currentSpeed, playingPageIndex = playingPageIndex, viewModel = viewModel, onBack = {
                 if (isExhausted && pagerState.currentPage >= shorts.size - 1) viewModel.clearSessionHistory()
-                if (backstack.size > 1) backstack.removeLastOrNull() else MainScreen.requestPreviousTab()
+                try {
+                    backstack.removeLastOrNull()
+                } catch (e: Exception) {
+                    MainScreen.requestPreviousTab()
+                }
             }, onLove = { viewModel.toggleLove(it) }, onBlock = { viewModel.toggleBlock(it) })
         }
     }
@@ -272,8 +279,7 @@ data class ShortsScreen(
     private fun RenderOnlineShortsContainer(
         onlineShorts: List<YoutubeVideo>,
         pagerState: PagerState,
-        autoSwipe: Boolean,
-        currentSpeed: Double
+        autoSwipe: Boolean
     ) {
         var mpvView by remember { mutableStateOf<MPVView?>(null) }
         var isPlayerReady by remember { mutableStateOf(false) }

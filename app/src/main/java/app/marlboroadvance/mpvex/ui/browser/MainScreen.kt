@@ -120,6 +120,9 @@ object MainScreen : Screen {
     val enableTabRecents by browserPreferences.enableTabRecents.collectAsState()
     val enableTabPlaylists by browserPreferences.enableTabPlaylists.collectAsState()
     val enableTabNetwork by browserPreferences.enableTabNetwork.collectAsState()
+    
+    // Live collecting toggle state value from data layer preferences configuration mapping
+    val enableCineHub by browserPreferences.enableCineHub.collectAsState()
 
     // Persistent storage states to keep metadata memory footprints minimal and instant
     var cachedMovies by remember { mutableStateOf<List<MovieItem>>(emptyList()) }
@@ -142,7 +145,7 @@ object MainScreen : Screen {
       }
     }
 
-    val visibleTabs = remember(isShortsEnabled, enableTabRecents, enableTabPlaylists, enableTabNetwork, cachedMovies, cachedTvShows) {
+    val visibleTabs = remember(isShortsEnabled, enableTabRecents, enableTabPlaylists, enableTabNetwork, enableCineHub, cachedMovies, cachedTvShows) {
       buildList {
         add(
           VisibleTab("home", "Home", Icons.Filled.Home) {
@@ -150,24 +153,26 @@ object MainScreen : Screen {
           }
         )
         
-        // Dynamic payload passing using cached background references
-        add(
-          VisibleTab("cinehub", "CineHub", Icons.Filled.Movie) {
-            CineHubScreen(
-              moviesList = cachedMovies,
-              tvShowsList = cachedTvShows,
-              onPlayRequested = { filePath, cleanTitle ->
-                val intent = Intent(context, PlayerActivity::class.java).apply {
-                  action = Intent.ACTION_VIEW
-                  data = Uri.fromFile(File(filePath))
-                  putExtra("title", cleanTitle)
-                  putExtra("force_title", cleanTitle)
+        // --- UPDATED: CineHub tab wrapping bounded via conditional global state key checks ---
+        if (enableCineHub) {
+          add(
+            VisibleTab("cinehub", "CineHub", Icons.Filled.Movie) {
+              CineHubScreen(
+                moviesList = cachedMovies,
+                tvShowsList = cachedTvShows,
+                onPlayRequested = { filePath, cleanTitle ->
+                  val intent = Intent(context, PlayerActivity::class.java).apply {
+                    action = Intent.ACTION_VIEW
+                    data = Uri.fromFile(File(filePath))
+                    putExtra("title", cleanTitle)
+                    putExtra("force_title", cleanTitle)
+                  }
+                  context.startActivity(intent)
                 }
-                context.startActivity(intent)
-              }
-            )
-          }
-        )
+              )
+            }
+          )
+        }
         
         if (isShortsEnabled) {
           add(VisibleTab("shorts", "Shorts", Icons.Filled.VideoLibrary) { ShortsScreen().Content() })

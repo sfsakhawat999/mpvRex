@@ -95,11 +95,9 @@ data class ShortsScreen(
         val autoSwipe by viewModel.autoSwipe.collectAsState()
         val currentSpeed by viewModel.currentSpeed.collectAsState()
 
-        // Core states to handle online vs local configuration swaps
         var selectedSourceTab by remember { mutableIntStateOf(0) } 
         var onlineShortsList by remember { mutableStateOf<List<YoutubeVideo>>(emptyList()) }
         var isOnlineLoading by remember { mutableStateOf(false) }
-        val scope = rememberCoroutineScope()
 
         val view = LocalView.current
         val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
@@ -159,7 +157,6 @@ data class ShortsScreen(
                 }
             }
 
-            // --- HIGH VISIBILITY TOP TAB SOURCE CONTROLLER ROW ---
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -363,7 +360,7 @@ private val textWithStroke = TextStyle(
 )
 
 @Composable
-private fun FinishedPageItem(onBack: () -> Unit) {
+private fun FinishedPageItem(onBack = { }) {
     Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(imageVector = Icons.Default.Info, contentDescription = null, tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(64.dp))
@@ -399,7 +396,7 @@ private fun ShortsPager(
             val video = shorts[page]
             ShortPageItem(video = video, isCurrent = page == pagerState.currentPage, isSettled = page == pagerState.settledPage, isPlaying = page == playingPageIndex, isPlayerReady = isPlayerReady, isLoved = lovedPaths.contains(video.path), isBlocked = blockedPaths.contains(video.path), currentSpeed = currentSpeed, viewModel = viewModel, onBack = onBack, onLove = { onLove(video) }, onBlock = { onBlock(video) })
         } else if (isExhausted) {
-            FinishedPageItem(onBack = house -> onBack())
+            FinishedPageItem(onBack = onBack)
         }
     }
 }
@@ -527,7 +524,6 @@ private fun ShortPageItem(
             })
         }
 
-        // Left sidebar icon safe-zone alignment offset fixed here (80.dp pushes it cleanly under the header)
         IconButton(onClick = onBack, modifier = Modifier.align(Alignment.TopStart).padding(top = 80.dp, start = 24.dp)) {
             Box {
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black, modifier = Modifier.size(28.dp).graphicsLayer { translationX = 2f; translationY = 2f })

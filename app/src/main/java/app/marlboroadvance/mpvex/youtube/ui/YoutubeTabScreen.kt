@@ -48,7 +48,6 @@ fun YoutubeTabScreen(
     // Quality Selector Sheet States
     var selectedVideoForQuality by remember { mutableStateOf<YoutubeVideo?>(null) }
     var isQualitySheetOpen by remember { mutableStateOf(false) }
-    var isFetchingQualityOptions by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -156,7 +155,6 @@ fun YoutubeTabScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    // Triggers Option 2: Quality selector sheet injection workflow
                                     selectedVideoForQuality = video
                                     isQualitySheetOpen = true
                                 },
@@ -218,7 +216,7 @@ fun YoutubeTabScreen(
                 }
             }
 
-            // --- NEW FEATURE INTEGRATION: Video Resolution Quality Selector Sheet ---
+            // Video Resolution Quality Selector Sheet Component
             if (isQualitySheetOpen && selectedVideoForQuality != null) {
                 ModalBottomSheet(
                     onDismissRequest = { 
@@ -230,7 +228,7 @@ fun YoutubeTabScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp, bottom = 36.dp)
+                            .padding(start = 24.dp, end = 24.dp, bottom = 36.dp)
                     ) {
                         Text(
                             text = "Select Video Quality",
@@ -246,10 +244,9 @@ fun YoutubeTabScreen(
                             modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
                         )
                         
-                        Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // High performance resolution layout options injection
                         val qualityOptions = listOf(
                             Pair("1080p FHD Stream", "Best resolution with top bitrate performance"),
                             Pair("720p HD Stream", "Balanced output for smooth data buffering"),
@@ -275,7 +272,6 @@ fun YoutubeTabScreen(
                                         selectedVideoForQuality = null
                                         
                                         scope.launch {
-                                            // Directly loads extracted live dynamic endpoint and plays via MPV Core
                                             val directStreamUrl = InvidiousClient.fetchDirectStreamUrl(targetVideo.videoId)
                                             if (directStreamUrl != null) {
                                                 onPlayRequested(directStreamUrl, targetVideo.title)

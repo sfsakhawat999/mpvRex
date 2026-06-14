@@ -85,7 +85,7 @@ fun YoutubeTabScreen(
                         onValueChange = { searchQuery = it },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, bottom = 12.dp),
+                            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
                         placeholder = { Text("Search videos, anime, movies...") },
                         leadingIcon = {
                             Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
@@ -187,7 +187,7 @@ fun YoutubeTabScreen(
                                                 text = String.format("%d:%02d", minutes, seconds),
                                                 color = Color.White,
                                                 fontSize = 11.sp,
-                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                                modifier = Modifier.padding(start = 6.dp, top = 2.dp, end = 6.dp, bottom = 2.dp),
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
@@ -228,7 +228,7 @@ fun YoutubeTabScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 24.dp, end = 24.dp, bottom = 36.dp)
+                            .padding(start = 24.dp, top = 0.dp, end = 24.dp, bottom = 36.dp)
                     ) {
                         Text(
                             text = "Select Video Quality",

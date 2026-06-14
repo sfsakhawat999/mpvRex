@@ -360,7 +360,7 @@ private val textWithStroke = TextStyle(
 )
 
 @Composable
-private fun FinishedPageItem(onBack = { }) {
+private fun FinishedPageItem(onBack: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(imageVector = Icons.Default.Info, contentDescription = null, tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(64.dp))

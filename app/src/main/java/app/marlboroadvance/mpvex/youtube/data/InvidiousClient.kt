@@ -72,4 +72,36 @@ object InvidiousClient {
             return@withContext null
         }
     }
+
+    /**
+     * --- NEW: Integrated Search Pipeline Engine ---
+     * Searches global YouTube index database through Invidious query processing engines
+     */
+    suspend fun fetchSearchVideos(query: String): List<YoutubeVideo> = withContext(Dispatchers.IO) {
+        val url = try {
+            val encodedQuery = java.net.URLEncoder.encode(query, "UTF-8")
+            "$INSTANCE_URL/api/v1/search?q=$encodedQuery&type=video"
+        } catch (e: Exception) {
+            "$INSTANCE_URL/api/v1/search?q=$query&type=video"
+        }
+        
+        val request = Request.Builder()
+            .url(url)
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            .build()
+        
+        try {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    android.util.Log.e("InvidiousClient", "HTTP Search verification failure with code: ${response.code}")
+                    return@withContext emptyList()
+                }
+                val responseBody = response.body?.string() ?: return@withContext emptyList()
+                return@withContext jsonParser.decodeFromString<List<YoutubeVideo>>(responseBody)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("InvidiousClient", "Analytical search endpoint transmission failure", e)
+            return@withContext emptyList()
+        }
+    }
 }

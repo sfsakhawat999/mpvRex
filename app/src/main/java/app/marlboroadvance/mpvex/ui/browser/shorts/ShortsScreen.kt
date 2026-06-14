@@ -95,9 +95,11 @@ data class ShortsScreen(
         val autoSwipe by viewModel.autoSwipe.collectAsState()
         val currentSpeed by viewModel.currentSpeed.collectAsState()
 
+        // Core states to handle online vs local configuration swaps
         var selectedSourceTab by remember { mutableIntStateOf(0) } 
         var onlineShortsList by remember { mutableStateOf<List<YoutubeVideo>>(emptyList()) }
         var isOnlineLoading by remember { mutableStateOf(false) }
+        val scope = rememberCoroutineScope()
 
         val view = LocalView.current
         val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
@@ -157,31 +159,41 @@ data class ShortsScreen(
                 }
             }
 
-            Row(
+            // --- HIGH VISIBILITY TOP TAB SOURCE CONTROLLER ROW ---
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.85f), Color.Transparent)))
                     .statusBarsPadding()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.Center
+                    .padding(vertical = 14.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Surface(
-                    color = Color.Black.copy(alpha = 0.4f),
+                    color = Color.White.copy(alpha = 0.15f),
                     shape = RoundedCornerShape(24.dp),
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    Row {
-                        listOf("Local", "YouTube").forEachIndexed { index, title ->
+                    Row(modifier = Modifier.padding(4.dp)) {
+                        listOf("Local Shorts", "YouTube Online").forEachIndexed { index, title ->
+                            val isSelected = selectedSourceTab == index
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(24.dp))
-                                    .background(if (selectedSourceTab == index) MaterialTheme.colorScheme.primary else Color.Transparent)
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(if (isSelected) Color.White else Color.Transparent)
                                     .clickable { 
                                         MPVLib.command("stop")
                                         selectedSourceTab = index 
                                     }
-                                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                                    .padding(horizontal = 18.dp, vertical = 8.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Text(text = title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                Text(
+                                    text = title, 
+                                    color = if (isSelected) Color.Black else Color.White, 
+                                    fontWeight = FontWeight.ExtraBold, 
+                                    fontSize = 13.sp
+                                )
                             }
                         }
                     }
@@ -387,7 +399,7 @@ private fun ShortsPager(
             val video = shorts[page]
             ShortPageItem(video = video, isCurrent = page == pagerState.currentPage, isSettled = page == pagerState.settledPage, isPlaying = page == playingPageIndex, isPlayerReady = isPlayerReady, isLoved = lovedPaths.contains(video.path), isBlocked = blockedPaths.contains(video.path), currentSpeed = currentSpeed, viewModel = viewModel, onBack = onBack, onLove = { onLove(video) }, onBlock = { onBlock(video) })
         } else if (isExhausted) {
-            FinishedPageItem(onBack = onBack)
+            FinishedPageItem(onBack = house -> onBack())
         }
     }
 }
@@ -515,7 +527,8 @@ private fun ShortPageItem(
             })
         }
 
-        IconButton(onClick = onBack, modifier = Modifier.align(Alignment.TopStart).padding(top = 48.dp, start = 24.dp)) {
+        // Left sidebar icon safe-zone alignment offset fixed here (80.dp pushes it cleanly under the header)
+        IconButton(onClick = onBack, modifier = Modifier.align(Alignment.TopStart).padding(top = 80.dp, start = 24.dp)) {
             Box {
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black, modifier = Modifier.size(28.dp).graphicsLayer { translationX = 2f; translationY = 2f })
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White, modifier = Modifier.size(28.dp))
@@ -625,4 +638,5 @@ private fun ActionButton(icon: androidx.compose.ui.graphics.vector.ImageVector, 
         }
         Text(text = label, color = Color.White, fontSize = 11.sp, style = textWithStroke)
     }
+}
 }

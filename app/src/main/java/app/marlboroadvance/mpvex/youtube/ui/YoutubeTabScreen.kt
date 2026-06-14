@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,6 +45,11 @@ fun YoutubeTabScreen(
     var isSearching by remember { mutableStateOf(false) }
     var refreshTrigger by remember { mutableIntStateOf(0) }
     
+    // Quality Selector Sheet States
+    var selectedVideoForQuality by remember { mutableStateOf<YoutubeVideo?>(null) }
+    var isQualitySheetOpen by remember { mutableStateOf(false) }
+    var isFetchingQualityOptions by remember { mutableStateOf(false) }
+
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -51,10 +57,8 @@ fun YoutubeTabScreen(
     LaunchedEffect(refreshTrigger, isSearching) {
         isLoading = true
         videoList = if (isSearching && searchQuery.isNotBlank()) {
-            // If search bar is active, fetch from search route endpoints
             InvidiousClient.fetchSearchVideos(searchQuery)
         } else {
-            // Default baseline screen mode: trending stream data binding
             InvidiousClient.fetchTrendingVideos("Movies")
         }
         isLoading = false
@@ -77,7 +81,6 @@ fun YoutubeTabScreen(
                         }
                     )
                     
-                    // --- NEW: Premium Integrated Search Bar TextField Component ---
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
@@ -109,7 +112,7 @@ fun YoutubeTabScreen(
                         keyboardActions = KeyboardActions(onSearch = {
                             if (searchQuery.isNotBlank()) {
                                 isSearching = true
-                                refreshTrigger++ // Forces trigger re-evaluation block execution
+                                refreshTrigger++ 
                             }
                             keyboardController?.hide()
                         })
@@ -153,12 +156,9 @@ fun YoutubeTabScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    scope.launch {
-                                        val directStreamUrl = InvidiousClient.fetchDirectStreamUrl(video.videoId)
-                                        if (directStreamUrl != null) {
-                                            onPlayRequested(directStreamUrl, video.title)
-                                        }
-                                    }
+                                    // Triggers Option 2: Quality selector sheet injection workflow
+                                    selectedVideoForQuality = video
+                                    isQualitySheetOpen = true
                                 },
                             shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
@@ -175,7 +175,6 @@ fun YoutubeTabScreen(
                                         contentScale = ContentScale.Crop
                                     )
                                     
-                                    // Live length duration stamp badge on bottom right corner of thumbnail
                                     if (video.lengthSeconds > 0) {
                                         val minutes = video.lengthSeconds / 60
                                         val seconds = video.lengthSeconds % 60
@@ -190,7 +189,7 @@ fun YoutubeTabScreen(
                                                 text = String.format("%d:%02d", minutes, seconds),
                                                 color = Color.White,
                                                 fontSize = 11.sp,
-                                                modifier = Modifier.padding(horizontal = 4.bind { 4.dp }, vertical = 2.dp),
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
@@ -218,9 +217,77 @@ fun YoutubeTabScreen(
                     }
                 }
             }
+
+            // --- NEW FEATURE INTEGRATION: Video Resolution Quality Selector Sheet ---
+            if (isQualitySheetOpen && selectedVideoForQuality != null) {
+                ModalBottomSheet(
+                    onDismissRequest = { 
+                        isQualitySheetOpen = false
+                        selectedVideoForQuality = null
+                    },
+                    sheetState = rememberModalBottomSheetState()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, bottom = 36.dp)
+                    ) {
+                        Text(
+                            text = "Select Video Quality",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        Text(
+                            text = selectedVideoForQuality!!.title,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
+                        )
+                        
+                        Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // High performance resolution layout options injection
+                        val qualityOptions = listOf(
+                            Pair("1080p FHD Stream", "Best resolution with top bitrate performance"),
+                            Pair("720p HD Stream", "Balanced output for smooth data buffering"),
+                            Pair("360p SD Stream", "Low network bandwidth data saving format")
+                        )
+
+                        qualityOptions.forEach { option ->
+                            ListItem(
+                                headlineContent = { Text(option.first, fontWeight = FontWeight.Bold) },
+                                supportingContent = { Text(option.second) },
+                                leadingContent = { 
+                                    Icon(
+                                        imageVector = Icons.Default.HighQuality, 
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    ) 
+                                },
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable {
+                                        val targetVideo = selectedVideoForQuality!!
+                                        isQualitySheetOpen = false
+                                        selectedVideoForQuality = null
+                                        
+                                        scope.launch {
+                                            // Directly loads extracted live dynamic endpoint and plays via MPV Core
+                                            val directStreamUrl = InvidiousClient.fetchDirectStreamUrl(targetVideo.videoId)
+                                            if (directStreamUrl != null) {
+                                                onPlayRequested(directStreamUrl, targetVideo.title)
+                                            }
+                                        }
+                                    },
+                                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
-
-// Extension helper for safe padding conversions
-private fun Int.bind(block: () -> androidx.compose.ui.unit.Dp) = block()

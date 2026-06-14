@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -64,6 +65,7 @@ import app.marlboroadvance.mpvex.ui.utils.LocalBackStack
 import `is`.xyz.mpv.MPVLib
 import app.marlboroadvance.mpvex.youtube.data.InvidiousClient
 import app.marlboroadvance.mpvex.youtube.model.YoutubeVideo
+import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -93,8 +95,7 @@ data class ShortsScreen(
         val autoSwipe by viewModel.autoSwipe.collectAsState()
         val currentSpeed by viewModel.currentSpeed.collectAsState()
 
-        // --- NEW: Online YouTube State Management Parameters ---
-        var selectedSourceTab by remember { mutableIntStateOf(0) } // 0 = Local, 1 = YouTube
+        var selectedSourceTab by remember { mutableIntStateOf(0) } 
         var onlineShortsList by remember { mutableStateOf<List<YoutubeVideo>>(emptyList()) }
         var isOnlineLoading by remember { mutableStateOf(false) }
         val scope = rememberCoroutineScope()
@@ -115,24 +116,20 @@ data class ShortsScreen(
             }
         }
 
-        // Fetch local database shorts references
         LaunchedEffect(Unit) {
             viewModel.loadShorts(initialVideoPath, blockedOnly)
         }
 
-        // --- NEW: Live Online Streams Trigger Mechanism ---
         LaunchedEffect(selectedSourceTab) {
             if (selectedSourceTab == 1 && onlineShortsList.isEmpty()) {
                 isOnlineLoading = true
-                onlineShortsList = InvidiousClient.fetchTrendingVideos("Anime") // Optimized high-tempo target stream tags
+                onlineShortsList = InvidiousClient.fetchTrendingVideos("Anime")
                 isOnlineLoading = false
             }
         }
 
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-            // Check active content pipelines conditionally based on chosen layout context switches
             if (selectedSourceTab == 0) {
-                // --- ORIGINAL RENDER LOGIC FOR OFFLINE STORAGE ---
                 if (isLoading && shorts.isEmpty()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else if (shorts.isEmpty() && totalShortsCount > 0) {
@@ -143,20 +140,20 @@ data class ShortsScreen(
                 } else if (shorts.isEmpty()) {
                     Text(text = if (blockedOnly) "No blocked videos found" else "No vertical videos found", color = Color.White, modifier = Modifier.align(Alignment.Center))
                 } else {
-                    RenderLocalShortsContainer(shorts, pagerState = rememberPagerState(pageCount = { if (isExhausted) shorts.size + 1 else shorts.size }), lovedPaths, blockedPaths, isExhausted, autoSwipe, currentSpeed, viewModel, backstack)
+                    val localPagerState = rememberPagerState(pageCount = { if (isExhausted) shorts.size + 1 else shorts.size })
+                    RenderLocalShortsContainer(shorts, localPagerState, lovedPaths, blockedPaths, isExhausted, autoSwipe, currentSpeed, viewModel, backstack)
                 }
             } else {
-                // --- NEW: RENDER PIPELINE INTEGRATION FOR ONLINE INVIDIOUS YOUTUBE STREAMS ---
                 if (isOnlineLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else if (onlineShortsList.isEmpty()) {
                     Text(text = "Failed to load network streams.", color = Color.White, modifier = Modifier.align(Alignment.Center))
                 } else {
-                    RenderOnlineShortsContainer(onlineShortsList, rememberPagerState(pageCount = { onlineShortsList.size }), autoSwipe, currentSpeed, backstack)
+                    val onlinePagerState = rememberPagerState(pageCount = { onlineShortsList.size })
+                    RenderOnlineShortsContainer(onlineShortsList, onlinePagerState, autoSwipe, currentSpeed)
                 }
             }
 
-            // --- NEW: Translucent Context Swapping Overlay Tabs on Header Baseline ---
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -208,8 +205,9 @@ data class ShortsScreen(
         val density = LocalDensity.current
         val lifecycleOwner = LocalLifecycleOwner.current
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            val heightPx = with(density) { maxHeight.toPx() }
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val containerHeight = this.maxHeight
+            val heightPx = with(density) { containerHeight.toPx() }
             val totalScroll = pagerState.currentPage + pagerState.currentPageOffsetFraction
             val scrollOffset = totalScroll * heightPx
             
@@ -249,7 +247,6 @@ data class ShortsScreen(
                 }
             }
 
-            // Auto Swipe runtime processor loop
             LaunchedEffect(isPlayerReady, autoSwipe, pagerState.settledPage) {
                 if (isPlayerReady && autoSwipe) {
                     while (isActive) {
@@ -276,8 +273,7 @@ data class ShortsScreen(
         onlineShorts: List<YoutubeVideo>,
         pagerState: PagerState,
         autoSwipe: Boolean,
-        currentSpeed: Double,
-        backstack: app.marlboroadvance.mpvex.ui.utils.BackStack<Screen>
+        currentSpeed: Double
     ) {
         var mpvView by remember { mutableStateOf<MPVView?>(null) }
         var isPlayerReady by remember { mutableStateOf(false) }
@@ -285,8 +281,9 @@ data class ShortsScreen(
         val density = LocalDensity.current
         val scope = rememberCoroutineScope()
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            val heightPx = with(density) { maxHeight.toPx() }
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val containerHeight = this.maxHeight
+            val heightPx = with(density) { containerHeight.toPx() }
             val scrollOffset = (pagerState.currentPage + pagerState.currentPageOffsetFraction) * heightPx
             
             Box(modifier = Modifier.fillMaxSize().background(Color.Black).graphicsLayer {
@@ -327,7 +324,6 @@ data class ShortsScreen(
                         )
                     }
                     
-                    // Transparent dynamic title detail overlay card at bottom base layout
                     Column(modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)))).padding(24.dp)) {
                         Text(text = video.title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 2)
                         Text(text = "@${video.author}", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 4.dp))

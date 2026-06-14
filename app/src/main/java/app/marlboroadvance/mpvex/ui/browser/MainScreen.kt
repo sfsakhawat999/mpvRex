@@ -153,7 +153,7 @@ object MainScreen : Screen {
           }
         )
         
-        // --- UPDATED: CineHub tab wrapping bounded via conditional global state key checks ---
+        // --- CineHub tab wrapping bounded via conditional global state key checks ---
         if (enableCineHub) {
           add(
             VisibleTab("cinehub", "CineHub", Icons.Filled.Movie) {
@@ -173,6 +173,24 @@ object MainScreen : Screen {
             }
           )
         }
+
+        // --- NEW: Online YouTube Invidious Stream Client Tab Registration ---
+        add(
+          VisibleTab("youtube", "YouTube", Icons.Filled.Language) {
+            app.marlboroadvance.mpvex.youtube.ui.YoutubeTabScreen(
+              onPlayRequested = { streamUrl, videoTitle ->
+                // Directly pipes remote streaming video tokens right into MPV internal video pipeline
+                val intent = Intent(context, PlayerActivity::class.java).apply {
+                  action = Intent.ACTION_VIEW
+                  data = Uri.parse(streamUrl)
+                  putExtra("title", videoTitle)
+                  putExtra("force_title", videoTitle)
+                }
+                context.startActivity(intent)
+              }
+            )
+          }
+        )
         
         if (isShortsEnabled) {
           add(VisibleTab("shorts", "Shorts", Icons.Filled.VideoLibrary) { ShortsScreen().Content() })

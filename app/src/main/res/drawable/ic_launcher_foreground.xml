@@ -2,26 +2,35 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="512"
-    android:viewportHeight="512">
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
 
-    <!-- Outer Purple Circle -->
-    <path
-        android:fillColor="#8B5CF6"
-        android:pathData="M256,40
-                          A216,216 0 1,1 255.9,40 Z" />
+    <group
+        android:scaleX="0.7"
+        android:scaleY="0.7"
+        android:translateX="153.6"
+        android:translateY="153.6">
 
-    <!-- Inner White Circle -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M256,140
-                          A116,116 0 1,1 255.9,140 Z" />
+        <!-- Outer Circle -->
+        <path
+            android:fillColor="#8B5CF6"
+            android:pathData="M512,102
+                              A410,410 0 1,1 511.9,102 Z"/>
 
-    <!-- Play Triangle -->
-    <path
-        android:fillColor="#8B5CF6"
-        android:pathData="M225,200
-                          L225,312
-                          L320,256
-                          Z" />
+        <!-- Inner Circle -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M512,307
+                              A205,205 0 1,1 511.9,307 Z"/>
+
+        <!-- Play Icon -->
+        <path
+            android:fillColor="#8B5CF6"
+            android:pathData="M455,405
+                              L455,619
+                              L640,512
+                              Z"/>
+
+    </group>
+
 </vector>

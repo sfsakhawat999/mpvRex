@@ -361,4 +361,36 @@ fun CineHubScreen(
                                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
-                                            
+                                            if (episode.plot.isNotEmpty()) {
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text(
+                                                    episode.plot,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    maxLines = 2,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        IconButton(
+                                            onClick = {
+                                                selectedTvShow = null
+                                                onPlayRequested(episode.videoFilePath, "${show.title} - S${episode.season}E${episode.episode}")
+                                            },
+                                            colors = IconButtonDefaults.iconButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+                                            )
+                                        ) {
+                                            Icon(Icons.Default.PlayArrow, contentDescription = "Play Episode", tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

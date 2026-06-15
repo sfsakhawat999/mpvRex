@@ -2,7 +2,11 @@ package app.marlboroadvance.mpvex.utils.update
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.os.Build
+import android.provider.Settings
+import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -247,10 +251,51 @@ class UpdateManager(
         if (!BuildConfig.ENABLE_UPDATE_FEATURE) {
             return
         }
-        
-         context.externalCacheDir?.listFiles()?.forEach { 
+
+         context.externalCacheDir?.listFiles()?.forEach {
              if (it.name.endsWith(".apk")) it.delete()
          }
+    }
+
+    /**
+     * Whether the app is allowed to install APKs. On Android 8+ the user must grant the
+     * "Install unknown apps" permission to this app specifically before an install can succeed.
+     */
+    fun canInstallPackages(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.packageManager.canRequestPackageInstalls()
+        } else {
+            true
+        }
+    }
+
+    /**
+     * Sends the user to the system "Install unknown apps" settings screen for this app so they
+     * can grant the permission, then return and retry the install.
+     */
+    fun requestInstallPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        Toast.makeText(
+            context,
+            "Allow installing apps from mpvRex, then tap Install again",
+            Toast.LENGTH_LONG
+        ).show()
+        val intent = Intent(
+            Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+            "package:${context.packageName}".toUri()
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
+
+    /**
+     * Whether the active network is metered (mobile data, metered hotspot). Used to warn the user
+     * before downloading a large APK over cellular.
+     */
+    fun isMeteredConnection(): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+                ?: return false
+        return connectivityManager.isActiveNetworkMetered
     }
 }
 
@@ -268,6 +313,11 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
     
     private val _isDownloading = MutableStateFlow(false)
     val isDownloading: StateFlow<Boolean> = _isDownloading.asStateFlow()
+
+    // Set to the pending release when a download is requested on a metered (mobile data)
+    // connection, so the UI can ask the user to confirm before spending their data.
+    private val _meteredWarningRelease = MutableStateFlow<Release?>(null)
+    val meteredWarningRelease: StateFlow<Release?> = _meteredWarningRelease.asStateFlow()
 
     private val prefs = application.getSharedPreferences("mpvEx_prefs", Context.MODE_PRIVATE)
     private val _isAutoUpdateEnabled = MutableStateFlow(
@@ -337,12 +387,39 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    /**
+     * Entry point for the "Download" action. Warns first if on a metered connection, otherwise
+     * starts the download immediately.
+     */
+    fun requestDownload(release: Release) {
+        if (!BuildConfig.ENABLE_UPDATE_FEATURE) {
+            return
+        }
+        if (updateManager.isMeteredConnection()) {
+            _meteredWarningRelease.value = release
+        } else {
+            downloadUpdate(release)
+        }
+    }
+
+    /** User confirmed they want to download over a metered connection. */
+    fun confirmMeteredDownload() {
+        val release = _meteredWarningRelease.value ?: return
+        _meteredWarningRelease.value = null
+        downloadUpdate(release)
+    }
+
+    /** User declined to download over a metered connection. */
+    fun cancelMeteredDownload() {
+        _meteredWarningRelease.value = null
+    }
+
     fun downloadUpdate(release: Release) {
         // No-op if update feature is disabled
         if (!BuildConfig.ENABLE_UPDATE_FEATURE) {
             return
         }
-        
+
         viewModelScope.launch {
             _isDownloading.value = true
             try {
@@ -365,6 +442,13 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
             return
         }
         
+        // On Android 8+ the app needs the "Install unknown apps" permission. If it isn't granted,
+        // send the user to grant it; they return and tap Install again. State stays ReadyToInstall.
+        if (!updateManager.canInstallPackages()) {
+            updateManager.requestInstallPermission()
+            return
+        }
+
         val file = updateManager.getApkFile(release) ?: return
         val context = getApplication<Application>()
         val uri = FileProvider.getUriForFile(
@@ -496,6 +580,42 @@ fun UpdateDialog(
                         Text("Cancel")
                     }
                 }
+            }
+        }
+    )
+}
+
+@Composable
+fun MeteredDownloadDialog(
+    sizeBytes: Long,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Filled.CloudDownload,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
+        },
+        title = { Text(text = "Download on mobile data?") },
+        text = {
+            Text(
+                text = "You're on a metered connection. Downloading the update " +
+                    "(${MediaFormatter.formatFileSize(sizeBytes)}) may use your mobile data.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text("Download")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
             }
         }
     )

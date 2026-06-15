@@ -2,8 +2,6 @@ package app.marlboroadvance.mpvex
 
 import android.os.Bundle
 import android.util.Log
-import android.content.Intent
-import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -39,6 +37,7 @@ import app.marlboroadvance.mpvex.preferences.AppearancePreferences
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.repository.NetworkRepository
+import app.marlboroadvance.mpvex.utils.update.MeteredDownloadDialog
 import app.marlboroadvance.mpvex.utils.update.UpdateDialog
 import app.marlboroadvance.mpvex.utils.update.UpdateViewModel
 import app.marlboroadvance.mpvex.ui.browser.MainScreen
@@ -221,6 +220,8 @@ class MainActivity : ComponentActivity() {
 
       // Display Update Dialog when appropriate (only if update feature is enabled)
       if (BuildConfig.ENABLE_UPDATE_FEATURE && updateViewModel != null) {
+        val meteredWarningRelease by updateViewModel.meteredWarningRelease.collectAsState()
+
         when (updateState) {
           is UpdateViewModel.UpdateState.Available -> {
             val release = (updateState as UpdateViewModel.UpdateState.Available).release
@@ -231,16 +232,8 @@ class MainActivity : ComponentActivity() {
               actionLabel = if (isDownloading) "Downloading..." else "Download",
               currentVersion = currentVersion,
               onDismiss = { updateViewModel.dismiss() },
-              onAction = { 
-                // Redirect to GitHub releases page as requested by user
-                context.startActivity(
-                  Intent(
-                    Intent.ACTION_VIEW, 
-                    (release.htmlUrl ?: "https://github.com/sfsakhawat999/mpvRex/releases/latest").toUri()
-                  )
-                )
-                // updateViewModel.downloadUpdate(release) // Kept in code but disabled for now
-              },
+              // Download the architecture-matched APK in-app (warns first on mobile data).
+              onAction = { updateViewModel.requestDownload(release) },
               onIgnore = { updateViewModel.ignoreVersion(release.tagName.removePrefix("v")) }
             )
           }
@@ -253,20 +246,21 @@ class MainActivity : ComponentActivity() {
               actionLabel = "Install",
               currentVersion = currentVersion,
               onDismiss = { updateViewModel.dismiss() },
-              onAction = { 
-                // Redirect to GitHub releases page as requested by user
-                context.startActivity(
-                  Intent(
-                    Intent.ACTION_VIEW, 
-                    (release.htmlUrl ?: "https://github.com/sfsakhawat999/mpvRex/releases/latest").toUri()
-                  )
-                )
-                // updateViewModel.installUpdate(release) // Kept in code but disabled for now
-              },
+              // Launch the system installer (asks for "install unknown apps" first if needed).
+              onAction = { updateViewModel.installUpdate(release) },
               onIgnore = { updateViewModel.ignoreVersion(release.tagName.removePrefix("v")) }
             )
           }
           else -> {}
+        }
+
+        // Confirm before downloading a large APK over a metered (mobile data) connection.
+        meteredWarningRelease?.let { release ->
+          MeteredDownloadDialog(
+            sizeBytes = release.assets.firstOrNull { it.name.endsWith(".apk") }?.size ?: 0L,
+            onConfirm = { updateViewModel.confirmMeteredDownload() },
+            onDismiss = { updateViewModel.cancelMeteredDownload() }
+          )
         }
       }
     }

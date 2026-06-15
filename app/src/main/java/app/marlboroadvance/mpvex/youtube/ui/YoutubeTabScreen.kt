@@ -14,7 +14,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.marlboroadvance.mpvex.youtube.data.InvidiousClient
 import app.marlboroadvance.mpvex.youtube.model.YoutubeVideo
+import app.marlboroadvance.mpvex.ui.browser.components.BrowserTopBar
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 
@@ -43,6 +43,7 @@ fun YoutubeTabScreen(
     var isLoading by remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") }
     var isSearching by remember { mutableStateOf(false) }
+    var isSearchBarVisible by remember { mutableStateOf(false) } // Controls top panel visibility toggle
     var refreshTrigger by remember { mutableIntStateOf(0) }
     
     // Quality Selector Sheet States
@@ -65,57 +66,68 @@ fun YoutubeTabScreen(
 
     Scaffold(
         topBar = {
-            Surface(
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-                tonalElevation = 8.dp
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = if (isSearching) "Search Results" else "YouTube Live Stream",
-                                fontWeight = FontWeight.ExtraBold,
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                        }
-                    )
-                    
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
-                        placeholder = { Text("Search videos, anime, movies...") },
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
-                        },
-                        trailingIcon = {
-                            if (searchQuery.isNotEmpty() || isSearching) {
-                                IconButton(onClick = {
-                                    searchQuery = ""
-                                    isSearching = false
-                                    keyboardController?.hide()
-                                }) {
-                                    Icon(imageVector = Icons.Default.Close, contentDescription = "Clear")
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // --- INTEGRATED UNIFIED BROWSER TOP BAR COMPONENT ---
+                BrowserTopBar(
+                    title = if (isSearching) "Search Results" else "YouTube Live Stream",
+                    isInSelectionMode = false,
+                    selectedCount = 0,
+                    totalCount = videoList.size,
+                    onCancelSelection = {},
+                    isHomeScreen = true, // Enables matching circular theme transitions natively
+                    onSearchClick = {
+                        // Toggles search panel slide overlay smoothly
+                        isSearchBarVisible = !isSearchBarVisible
+                    }
+                )
+
+                // Inline Expandable Search Panel triggered via Custom Header Action Button
+                AnimatedVisibility(
+                    visible = isSearchBarVisible,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        tonalElevation = 1.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 8.dp),
+                            placeholder = { Text("Search videos popular in India...") },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty() || isSearching) {
+                                    IconButton(onClick = {
+                                        searchQuery = ""
+                                        isSearching = false
+                                        isSearchBarVisible = false
+                                        keyboardController?.hide()
+                                        refreshTrigger++
+                                    }) {
+                                        Icon(imageVector = Icons.Default.Close, contentDescription = "Clear")
+                                    }
                                 }
-                            }
-                        },
-                        singleLine = true,
-                        shape = RoundedCornerShape(24.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                        ),
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(onSearch = {
-                            if (searchQuery.isNotBlank()) {
-                                isSearching = true
-                                refreshTrigger++ 
-                            }
-                            keyboardController?.hide()
-                        })
-                    )
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(24.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                            ),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = {
+                                if (searchQuery.isNotBlank()) {
+                                    isSearching = true
+                                    refreshTrigger++ 
+                                }
+                                keyboardController?.hide()
+                            })
+                        )
+                    }
                 }
             }
         }
@@ -133,7 +145,7 @@ fun YoutubeTabScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = if (isSearching) "No search results found." else "Network timeout or instance down.",
+                        text = if (isSearching) "No search results found for India." else "Network timeout or instance down.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.outline
                     )

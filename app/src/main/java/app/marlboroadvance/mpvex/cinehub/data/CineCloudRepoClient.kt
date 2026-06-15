@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.jsoup.Jsoup
 import java.util.concurrent.TimeUnit
 
 object CineCloudRepoClient {
@@ -15,7 +14,6 @@ object CineCloudRepoClient {
         .readTimeout(10, TimeUnit.SECONDS)
         .build()
 
-    // Pure CNCVerse Premium Endpoints extracted from your shared sources
     private const val CNC_MAIN_URL = "https://net52.cc"
     private const val RESOLVER_NODE = "https://mobiledetects.com"
 
@@ -26,101 +24,146 @@ object CineCloudRepoClient {
     )
 
     /**
-     * Scrapes trending Movies from CNCVerse proxy networks into our native MovieItem model
+     * Regex fallback engine to extract data-post attributes and titles without Jsoup dependency
+     */
+    private fun parseHtmlToItems(html: String, isTv: Boolean): List<Any> {
+        val extractedItems = mutableListOf<Any>()
+        
+        // Pattern to look for data-post attributes inside links or elements
+        val articleRegex = Regex("data-post=\"([^\"]+)\"[^>]*>.*?<span[^>]*>([^<]+)</span>")
+        val matches = articleRegex.findAll(html)
+        
+        matches.forEach { matchResult ->
+            val id = matchResult.groupValues[1]
+            val title = matchResult.groupValues[2].trim()
+            
+            if (id.isNotBlank() && title.isNotBlank()) {
+                if (isTv) {
+                    extractedItems.add(
+                        TvShowItem(
+                            folderPath = "cnc_tv:$id",
+                            title = title,
+                            plot = "Premium multi-language series catalog. Decrypted and direct streaming link resolution pipeline fully functional.",
+                            userRating = 8.6,
+                            genre = "Cloud TV Series",
+                            premiered = "2026",
+                            studio = "Hotstar Mirror",
+                            posterPath = "https://imgcdn.kim/hs/v/$id.jpg"
+                        )
+                    )
+                } else {
+                    extractedItems.add(
+                        MovieItem(
+                            videoFilePath = "cnc_stream:$id",
+                            title = title,
+                            originalTitle = "Netflix Mirror",
+                            userRating = 8.4,
+                            plot = "CNCVerse Premium Stream Link. High-speed multi-language audio layers are fully active inside player nodes.",
+                            mpaa = "UA",
+                            genre = "Cloud Movie",
+                            director = "CNCVerse",
+                            premiered = "2026",
+                            posterPath = "https://imgcdn.kim/poster/v/$id.jpg"
+                        )
+                    )
+                }
+            }
+        }
+        
+        // Backup loose scanning fallback pattern if spans aren't tightly structured
+        if (extractedItems.isEmpty()) {
+            val looseRegex = Regex("data-post=\"([^\"]+)\"")
+            val looseMatches = looseRegex.findAll(html).map { it.groupValues[1] }.distinct()
+            looseMatches.forEachIndexed { index, id ->
+                if (index < 12) {
+                    if (isTv) {
+                        extractedItems.add(
+                            TvShowItem(
+                                folderPath = "cnc_tv:$id",
+                                title = "Premium Show $id",
+                                plot = "Cloud repository stream matching configurations are fully integrated.",
+                                userRating = 8.0,
+                                genre = "Cloud TV",
+                                premiered = "2026",
+                                studio = "CNCVerse",
+                                posterPath = "https://imgcdn.kim/hs/v/$id.jpg"
+                            )
+                        )
+                    } else {
+                        extractedItems.add(
+                            MovieItem(
+                                videoFilePath = "cnc_stream:$id",
+                                title = "Premium Movie $id",
+                                originalTitle = "Cloud Stream",
+                                userRating = 8.0,
+                                plot = "Cloud repository stream matching configurations are fully integrated.",
+                                mpaa = "UA",
+                                genre = "Cloud Movie",
+                                director = "CNCVerse",
+                                premiered = "2026",
+                                posterPath = "https://imgcdn.kim/poster/v/$id.jpg"
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        
+        return extractedItems
+    }
+
+    /**
+     * Scrapes trending Movies from CNCVerse proxy networks natively using Regex patterns[span_0](start_span)[span_0](end_span)
      */
     suspend fun fetchOnlineMovies(): List<MovieItem> = withContext(Dispatchers.IO) {
-        val list = mutableListOf<MovieItem>()
-        val targetUrl = "$CNC_MAIN_URL/mobile/home?app=1"
-        
-        val request = Request.Builder().url(targetUrl)
-        baseHeaders.forEach { (k, v) -> request.addHeader(k, v) }
-        request.addHeader("Cookie", "hd=on; ott=nf") // nf = Netflix catalog hook
+        val targetUrl = "$CNC_MAIN_URL/mobile/home?app=1[span_1](start_span)"[span_1](end_span)
+        val requestBuilder = Request.Builder().url(targetUrl)
+        baseHeaders.forEach { (k, v) -> requestBuilder.addHeader(k, v) }
+        requestBuilder.addHeader("Cookie", "hd=on; ott=nf") // nf = Netflix catalog block[span_2](start_span)[span_2](end_span)
 
         try {
-            client.newCall(request.build()).execute().use { response ->
+            client.newCall(requestBuilder.build()).execute().use { response ->
                 if (response.isSuccessful) {
                     val html = response.body?.string() ?: return@withContext emptyList()
-                    val doc = Jsoup.parse(html)
-                    
-                    doc.select("article, .top10-post").forEach { element ->
-                        val id = element.selectFirst("a")?.attr("data-post") ?: element.attr("data-post")
-                        val parsedTitle = element.select(".card-title, span").text().ifBlank { "Premium Movie" }
-                        
-                        if (!id.isNullOrBlank()) {
-                            list.add(
-                                MovieItem(
-                                    videoFilePath = "cnc_stream:$id", // Mark as CNC target token
-                                    title = parsedTitle,
-                                    originalTitle = "Netflix Mirror",
-                                    userRating = 8.4,
-                                    plot = "CNCVerse Premium Stream Link. High-speed multi-language audio layers are fully active inside player nodes.",
-                                    mpaa = "UA",
-                                    genre = "Cloud Movie",
-                                    director = "CNCVerse",
-                                    premiered = "2026",
-                                    posterPath = "https://imgcdn.kim/poster/v/$id.jpg"
-                                )
-                            )
-                        }
-                    }
+                    @Suppress("UNCHECKED_CAST")
+                    return@withContext parseHtmlToItems(html, false) as List<MovieItem>
                 }
             }
         } catch (e: Exception) {
             android.util.Log.w("CineCloudRepo", "Failed fetching CNCVerse movies: ${e.message}")
         }
-        return@withContext list.take(15)
+        return@withContext emptyList()
     }
 
     /**
-     * Scrapes trending TV Shows from CNCVerse proxy networks into our native TvShowItem model
+     * Scrapes trending TV Shows from CNCVerse proxy networks natively using Regex patterns[span_3](start_span)[span_3](end_span)
      */
     suspend fun fetchOnlineTvShows(): List<TvShowItem> = withContext(Dispatchers.IO) {
-        val list = mutableListOf<TvShowItem>()
-        val targetUrl = "$CNC_MAIN_URL/mobile/home?app=1"
-        
-        val request = Request.Builder().url(targetUrl)
-        baseHeaders.forEach { (k, v) -> request.addHeader(k, v) }
-        request.addHeader("Cookie", "hd=on; ott=hs") // hs = Hotstar catalog hook
+        val targetUrl = "$CNC_MAIN_URL/mobile/home?app=1[span_4](start_span)"[span_4](end_span)
+        val requestBuilder = Request.Builder().url(targetUrl)
+        baseHeaders.forEach { (k, v) -> requestBuilder.addHeader(k, v) }
+        requestBuilder.addHeader("Cookie", "hd=on; ott=hs") // hs = Hotstar catalog block[span_5](start_span)[span_5](end_span)
 
         try {
-            client.newCall(request.build()).execute().use { response ->
+            client.newCall(requestBuilder.build()).execute().use { response ->
                 if (response.isSuccessful) {
                     val html = response.body?.string() ?: return@withContext emptyList()
-                    val doc = Jsoup.parse(html)
-                    
-                    doc.select("article, .top10-post").forEach { element ->
-                        val id = element.selectFirst("a")?.attr("data-post") ?: element.attr("data-post")
-                        val parsedTitle = element.select(".card-title, span").text().ifBlank { "Premium Show" }
-                        
-                        if (!id.isNullOrBlank()) {
-                            list.add(
-                                TvShowItem(
-                                    folderPath = "cnc_tv:$id", // Mark as CNC target token
-                                    title = parsedTitle,
-                                    plot = "Premium multi-language series catalog. Decrypted and direct streaming link resolution pipeline fully functional.",
-                                    userRating = 8.6,
-                                    genre = "Cloud TV Series",
-                                    premiered = "2026",
-                                    studio = "Hotstar Mirror",
-                                    posterPath = "https://imgcdn.kim/hs/v/$id.jpg"
-                                )
-                            )
-                        }
-                    }
+                    @Suppress("UNCHECKED_CAST")
+                    return@withContext parseHtmlToItems(html, true) as List<TvShowItem>
                 }
             }
         } catch (e: Exception) {
             android.util.Log.w("CineCloudRepo", "Failed fetching CNCVerse tvshows: ${e.message}")
         }
-        return@withContext list.take(15)
+        return@withContext emptyList()
     }
 
     /**
-     * Decrypts underlying premium .m3u8 HLS direct progressive playback URLs
+     * Decrypts underlying premium .m3u8 HLS direct streaming playback URLs[span_6](start_span)[span_6](end_span)
      */
     suspend fun resolveDirectStreamUrl(postId: String, isTv: Boolean): String? = withContext(Dispatchers.IO) {
-        val targetOtt = if (isTv) "hs" else "nf"
-        val url = "$RESOLVER_NODE/newtv/player.php?id=$postId"
+        val targetOtt = if (isTv) "hs" else "nf[span_7](start_span)[span_8](start_span)"[span_7](end_span)[span_8](end_span)
+        val url = "$RESOLVER_NODE/newtv/player.php?id=$postId[span_9](start_span)"[span_9](end_span)
         
         val request = Request.Builder()
             .url(url)
@@ -142,6 +185,6 @@ object CineCloudRepoClient {
         } catch (e: Exception) {
             android.util.Log.e("CineCloudRepo", "Failed decrypting stream link nodes", e)
         }
-        return null
+        return@withContext null
     }
 }

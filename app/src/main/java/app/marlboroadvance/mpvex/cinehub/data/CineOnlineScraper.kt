@@ -6,6 +6,39 @@ import okhttp3.Request
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
+// --- DATA CONTAINERS MATCHING KOTLINX SERIALIZATION RULES ---
+@kotlinx.serialization.Serializable
+data class TMDBMovieNode(
+    val title: String? = null, 
+    val overview: String? = null, 
+    val poster_path: String? = null, 
+    val vote_average: Double = 0.0, 
+    val release_date: String? = null
+)
+
+@kotlinx.serialization.Serializable
+data class TMDBMovieSearchWrapper(val results: List<TMDBMovieNode>)
+
+@kotlinx.serialization.Serializable
+data class TMDBTvNode(
+    val name: String? = null, 
+    val overview: String? = null, 
+    val poster_path: String? = null, 
+    val vote_average: Double = 0.0, 
+    val first_air_date: String? = null
+)
+
+@kotlinx.serialization.Serializable
+data class TMDBTvSearchWrapper(val results: List<TMDBTvNode>)
+
+data class OnlineMediaMetadata(
+    val title: String, 
+    val plot: String, 
+    val rating: Double, 
+    val posterPath: String?, 
+    val premiered: String
+)
+
 object CineOnlineScraper {
     private val client = OkHttpClient.Builder()
         .connectTimeout(8, TimeUnit.SECONDS)
@@ -61,7 +94,7 @@ object CineOnlineScraper {
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.w("CineOnlineScraper", "Movie backup parser failure: ${e.message}")
+            android.util.Log.w("CineOnlineScraper", "Movie online metadata bypass failed: ${e.message}")
         }
         return null
     }
@@ -93,7 +126,7 @@ object CineOnlineScraper {
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.w("CineOnlineScraper", "TV online parser failure: ${e.message}")
+            android.util.Log.w("CineOnlineScraper", "TV online metadata bypass failed: ${e.message}")
         }
         return null
     }

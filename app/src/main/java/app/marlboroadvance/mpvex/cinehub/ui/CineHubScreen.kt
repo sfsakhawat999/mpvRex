@@ -26,6 +26,7 @@ import app.marlboroadvance.mpvex.cinehub.model.MovieItem
 import app.marlboroadvance.mpvex.cinehub.model.TvShowItem
 import app.marlboroadvance.mpvex.cinehub.model.EpisodeItem
 import app.marlboroadvance.mpvex.cinehub.data.NfoScanner
+import app.marlboroadvance.mpvex.ui.browser.components.BrowserTopBar
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,25 +47,37 @@ fun CineHubScreen(
     val gridColumnCount = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 6 else 3
 
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding(), 
+        modifier = Modifier.fillMaxSize(), 
         topBar = {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 2.dp
-            ) {
-                TabRow(
-                    selectedTabIndex = tabIndex,
-                    containerColor = Color.Transparent,
-                    divider = {}
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // --- INTEGRATED UNIFIED BROWSER TOP BAR COMPONENT ---
+                BrowserTopBar(
+                    title = "CineHub",
+                    isInSelectionMode = false,
+                    selectedCount = 0,
+                    totalCount = moviesList.size + tvShowsList.size,
+                    onCancelSelection = {},
+                    isHomeScreen = true, // Enables matching circular theme transition effects
+                    onSearchClick = {}
+                )
+
+                // Sub-tab row navigation perfectly nested under the unified header design
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    tonalElevation = 1.dp
                 ) {
-                    tabs.forEachIndexed { index, title ->
-                        Tab(
-                            selected = tabIndex == index,
-                            onClick = { tabIndex = index },
-                            text = { Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
-                        )
+                    TabRow(
+                        selectedTabIndex = tabIndex,
+                        containerColor = Color.Transparent,
+                        divider = {}
+                    ) {
+                        tabs.forEachIndexed { index, title ->
+                            Tab(
+                                selected = tabIndex == index,
+                                onClick = { tabIndex = index },
+                                text = { Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+                            )
+                        }
                     }
                 }
             }
@@ -135,7 +148,7 @@ fun CineHubScreen(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 12.dp)
+                            .padding(start = 20.dp, end = 20.dp, bottom = 36.dp, top = 8.dp)
                     ) {
                         item {
                             Row(modifier = Modifier.fillMaxWidth()) {
@@ -189,13 +202,13 @@ fun CineHubScreen(
             selectedTvShow?.let { show ->
                 val episodes = remember(show) { NfoScanner.scanTvShowEpisodes(File(show.folderPath)) }
                 val seasons = remember(episodes) { episodes.groupBy { it.season }.toSortedMap() }
-                var selectedSeasonTab by remember { mutableIntStateOf(seasons.keys.firstOrNull() ?: 1) }
+                var selectedSeasonTab by remember { mutableStateOf(seasons.keys.firstOrNull() ?: 1) }
 
                 ModalBottomSheet(
                     onDismissRequest = { selectedTvShow = null },
                     shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
                 ) {
-                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 36.dp, top = 8.dp)) {
                         Text(show.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                         Text("Studio: ${show.studio} | Genre: ${show.genre}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         Spacer(modifier = Modifier.height(12.dp))

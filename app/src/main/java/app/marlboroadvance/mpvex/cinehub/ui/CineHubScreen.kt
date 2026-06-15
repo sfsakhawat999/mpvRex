@@ -132,28 +132,51 @@ fun CineHubScreen(
             }
 
             item {
-                val currentLocalSource = if (tabIndex == 0) moviesList else tvShowsList
-                if (currentLocalSource.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxWidth().height(110.dp), contentAlignment = Alignment.Center) {
-                        Text("No local files found inside target folders.", fontSize = 13.sp, color = Color.Gray)
+                if (tabIndex == 0) {
+                    if (moviesList.isEmpty()) {
+                        Box(modifier = Modifier.fillMaxWidth().height(110.dp), contentAlignment = Alignment.Center) {
+                            Text("No local files found inside target folders.", fontSize = 13.sp, color = Color.Gray)
+                        }
+                    } else {
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(moviesList) { movie ->
+                                Box(modifier = Modifier.width(135.dp)) {
+                                    CineHubGridCard(
+                                        title = movie.title,
+                                        genre = movie.genre,
+                                        rating = movie.userRating,
+                                        posterPath = movie.posterPath,
+                                        onClick = { selectedMovie = movie }
+                                    )
+                                }
+                            }
+                        }
                     }
                 } else {
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(currentLocalSource) { mediaItem ->
-                            Box(modifier = Modifier.width(135.dp)) {
-                                CineHubGridCard(
-                                    title = mediaItem.title,
-                                    genre = if (tabIndex == 0) (mediaItem as MovieItem).genre else (mediaItem as TvShowItem).genre,
-                                    rating = if (tabIndex == 0) (mediaItem as MovieItem).userRating else (mediaItem as TvShowItem).userRating,
-                                    posterPath = if (tabIndex == 0) (mediaItem as MovieItem).posterPath else (mediaItem as TvShowItem).posterPath,
-                                    onClick = {
-                                        if (tabIndex == 0) selectedMovie = mediaItem as MovieItem else selectedTvShow = mediaItem as TvShowItem
-                                    }
-                                )
+                    if (tvShowsList.isEmpty()) {
+                        Box(modifier = Modifier.fillMaxWidth().height(110.dp), contentAlignment = Alignment.Center) {
+                            Text("No local files found inside target folders.", fontSize = 13.sp, color = Color.Gray)
+                        }
+                    } else {
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(tvShowsList) { show ->
+                                Box(modifier = Modifier.width(135.dp)) {
+                                    CineHubGridCard(
+                                        title = show.title,
+                                        genre = show.genre,
+                                        rating = show.userRating,
+                                        posterPath = show.posterPath,
+                                        onClick = { selectedTvShow = show }
+                                    )
+                                }
                             }
                         }
                     }
@@ -178,54 +201,99 @@ fun CineHubScreen(
                     }
                 }
             } else {
-                val currentOnlineSource = if (tabIndex == 0) onlineMovies else onlineTvShows
-                if (currentOnlineSource.isEmpty()) {
-                    item {
-                        Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                            Text("Repository proxy streams loading or offline...", fontSize = 13.sp, color = Color.Gray)
+                if (tabIndex == 0) {
+                    if (onlineMovies.isEmpty()) {
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                                Text("Repository proxy streams loading or offline...", fontSize = 13.sp, color = Color.Gray)
+                            }
+                        }
+                    } else {
+                        val chunkedMovies = onlineMovies.chunked(gridColumnCount)
+                        item {
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                for (rowItems in chunkedMovies) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        for (movie in rowItems) {
+                                            Box(modifier = Modifier.weight(1f)) {
+                                                CineHubGridCard(
+                                                    title = movie.title,
+                                                    genre = movie.genre,
+                                                    rating = movie.userRating,
+                                                    posterPath = movie.posterPath,
+                                                    onClick = {
+                                                        scope.launch {
+                                                            val rawPostId = movie.videoFilePath.substringAfter("cnc_stream:")
+                                                            val decryptedM3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(rawPostId, isTv = false)
+                                                            if (!decryptedM3u8Url.isNullOrBlank()) {
+                                                                onPlayRequested(decryptedM3u8Url, movie.title)
+                                                            } else {
+                                                                onPlayRequested("https://net52.cc/mobile/player.php?id=$rawPostId", movie.title)
+                                                            }
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                        }
+                                        val residualSlots = gridColumnCount - rowItems.size
+                                        if (residualSlots > 0) {
+                                            repeat(residualSlots) { Spacer(modifier = Modifier.weight(1f)) }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 } else {
-                    val chunkedOnlineRows = currentOnlineSource.chunked(gridColumnCount)
-                    item {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            for (rowItems in chunkedOnlineRows) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    for (onlineItem in rowItems) {
-                                        Box(modifier = Modifier.weight(1f)) {
-                                            CineHubGridCard(
-                                                title = onlineItem.title,
-                                                genre = if (tabIndex == 0) (onlineItem as MovieItem).genre else (onlineItem as TvShowItem).genre,
-                                                rating = if (tabIndex == 0) (onlineItem as MovieItem).userRating else (onlineItem as TvShowItem).userRating,
-                                                posterPath = if (tabIndex == 0) (onlineItem as MovieItem).posterPath else (onlineItem as TvShowItem).posterPath,
-                                                onClick = {
-                                                    scope.launch {
-                                                        val rawPostId = if (tabIndex == 0) {
-                                                            (onlineItem as MovieItem).videoFilePath.substringAfter("cnc_stream:")
-                                                        } else {
-                                                            (onlineItem as TvShowItem).folderPath.substringAfter("cnc_tv:")
-                                                        }
-                                                        
-                                                        val decryptedM3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(rawPostId, isTv = (tabIndex == 1))
-                                                        if (!decryptedM3u8Url.isNullOrBlank()) {
-                                                            onPlayRequested(decryptedM3u8Url, onlineItem.title)
-                                                        } else {
-                                                            onPlayRequested("https://net52.cc/mobile/player.php?id=$rawPostId", onlineItem.title)
+                    if (onlineTvShows.isEmpty()) {
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                                Text("Repository proxy streams loading or offline...", fontSize = 13.sp, color = Color.Gray)
+                            }
+                        }
+                    } else {
+                        val chunkedTvShows = onlineTvShows.chunked(gridColumnCount)
+                        item {
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                for (rowItems in chunkedTvShows) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        for (show in rowItems) {
+                                            Box(modifier = Modifier.weight(1f)) {
+                                                CineHubGridCard(
+                                                    title = show.title,
+                                                    genre = show.genre,
+                                                    rating = show.userRating,
+                                                    posterPath = show.posterPath,
+                                                    onClick = {
+                                                        scope.launch {
+                                                            val rawPostId = show.folderPath.substringAfter("cnc_tv:")
+                                                            val decryptedM3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(rawPostId, isTv = true)
+                                                            if (!decryptedM3u8Url.isNullOrBlank()) {
+                                                                onPlayRequested(decryptedM3u8Url, show.title)
+                                                            } else {
+                                                                onPlayRequested("https://net52.cc/mobile/player.php?id=$rawPostId", show.title)
+                                                            }
                                                         }
                                                     }
-                                                }
-                                            )
+                                                )
+                                            }
                                         }
-                                    }
-                                    val residualSlots = gridColumnCount - rowItems.size
-                                    if (residualSlots > 0) {
-                                        repeat(residualSlots) { Spacer(modifier = Modifier.weight(1f)) }
+                                        val residualSlots = gridColumnCount - rowItems.size
+                                        if (residualSlots > 0) {
+                                            repeat(residualSlots) { Spacer(modifier = Modifier.weight(1f)) }
+                                        }
                                     }
                                 }
                             }

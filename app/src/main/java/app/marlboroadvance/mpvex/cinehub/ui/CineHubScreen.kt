@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,28 +51,29 @@ fun CineHubScreen(
     onPlayRequested: (filePath: String, cleanTitle: String) -> Unit
 ) {
     var tabIndex by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Movies", "TV Shows")
+    val tabs = listOf("Movies", "TV Shows") [cite: 1]
     
-    var selectedMovie by remember { mutableStateOf<MovieItem?>(null) }
-    var selectedTvShow by remember { mutableStateOf<TvShowItem?>(null) }
+    var selectedMovie by remember { mutableStateOf<MovieItem?>(null) } [cite: 1]
+    var selectedTvShow by remember { mutableStateOf<TvShowItem?>(null) } [cite: 2]
 
     var onlineMovies by remember { mutableStateOf<List<MovieItem>>(emptyList()) }
     var onlineTvShows by remember { mutableStateOf<List<TvShowItem>>(emptyList()) }
     var isOnlineLoading by remember { mutableStateOf(false) }
 
-    val scope = rememberCoroutineScope()
-    val configuration = LocalConfiguration.current
-    val gridColumnCount = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 6 else 3
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope() [cite: 2]
+    val configuration = LocalConfiguration.current [cite: 2]
+    val gridColumnCount = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 6 else 3 [cite: 2]
 
     LaunchedEffect(tabIndex) {
         if (onlineMovies.isEmpty() || onlineTvShows.isEmpty()) {
             isOnlineLoading = true
             scope.launch {
                 try {
-                    onlineMovies = CineCloudRepoClient.fetchOnlineMovies()
-                    onlineTvShows = CineCloudRepoClient.fetchOnlineTvShows()
+                    onlineMovies = CineCloudRepoClient.fetchOnlineMovies(context)
+                    onlineTvShows = CineCloudRepoClient.fetchOnlineTvShows(context)
                 } catch (e: Exception) {
-                    android.util.Log.e("CineHubUI", "Network integration error: " + e.message)
+                    android.util.Log.e("CineHubUI", "Network aggregation fault: " + e.message)
                 } finally {
                     isOnlineLoading = false
                 }
@@ -80,33 +82,33 @@ fun CineHubScreen(
     }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(), [cite: 2]
         topBar = {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.fillMaxWidth()) { [cite: 2]
                 BrowserTopBar(
-                    title = "CineHub",
-                    isInSelectionMode = false,
-                    selectedCount = 0,
-                    totalCount = moviesList.size + tvShowsList.size,
-                    onCancelSelection = {},
-                    isHomeScreen = true,
-                    onSearchClick = {}
+                    title = "CineHub", [cite: 3]
+                    isInSelectionMode = false, [cite: 3]
+                    selectedCount = 0, [cite: 3]
+                    totalCount = moviesList.size + tvShowsList.size, [cite: 3]
+                    onCancelSelection = {}, [cite: 4]
+                    isHomeScreen = true, [cite: 4]
+                    onSearchClick = {} [cite: 4]
                 )
 
                 Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    tonalElevation = 1.dp
+                    color = MaterialTheme.colorScheme.surfaceContainerLow, [cite: 4]
+                    tonalElevation = 1.dp [cite: 5]
                 ) {
                     TabRow(
-                        selectedTabIndex = tabIndex,
-                        containerColor = Color.Transparent,
-                        divider = {}
+                        selectedTabIndex = tabIndex, [cite: 5]
+                        containerColor = Color.Transparent, [cite: 6]
+                        divider = {} [cite: 6]
                     ) {
-                        tabs.forEachIndexed { index, title ->
+                        tabs.forEachIndexed { index, title -> [cite: 6]
                             Tab(
-                                selected = tabIndex == index,
-                                onClick = { tabIndex = index },
-                                text = { Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+                                selected = tabIndex == index, [cite: 7]
+                                onClick = { tabIndex = index }, [cite: 7]
+                                text = { Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) } [cite: 8]
                             )
                         }
                     }
@@ -120,7 +122,7 @@ fun CineHubScreen(
                 .padding(innerPadding),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            // ================= SECTION 1: NATIVE LOCAL MEDIA SLIDER =================
+            // ================= SECTION 1: NATIVE LOCAL MEDIA ROW SLIDER =================
             item {
                 Text(
                     text = if (tabIndex == 0) "My Local Movies" else "My Local TV Series",
@@ -134,8 +136,8 @@ fun CineHubScreen(
             item {
                 if (tabIndex == 0) {
                     if (moviesList.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxWidth().height(90.dp), contentAlignment = Alignment.Center) {
-                            Text("No target files found inside CineRex folders.", fontSize = 13.sp, color = Color.Gray)
+                        Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+                            Text("No local files found inside target folders.", fontSize = 13.sp, color = Color.Gray)
                         }
                     } else {
                         LazyRow(
@@ -146,11 +148,11 @@ fun CineHubScreen(
                             items(moviesList) { movie ->
                                 Box(modifier = Modifier.width(135.dp)) {
                                     CineHubGridCard(
-                                        title = movie.title,
-                                        genre = movie.genre,
-                                        rating = movie.userRating,
-                                        posterPath = movie.posterPath,
-                                        onClick = { selectedMovie = movie }
+                                        title = movie.title, [cite: 14]
+                                        genre = movie.genre, [cite: 14]
+                                        rating = movie.userRating, [cite: 15]
+                                        posterPath = movie.posterPath, [cite: 15]
+                                        onClick = { selectedMovie = movie } [cite: 15]
                                     )
                                 }
                             }
@@ -158,8 +160,8 @@ fun CineHubScreen(
                     }
                 } else {
                     if (tvShowsList.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxWidth().height(90.dp), contentAlignment = Alignment.Center) {
-                            Text("No target files found inside CineRex folders.", fontSize = 13.sp, color = Color.Gray)
+                        Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+                            Text("No local files found inside target folders.", fontSize = 13.sp, color = Color.Gray)
                         }
                     } else {
                         LazyRow(
@@ -170,11 +172,11 @@ fun CineHubScreen(
                             items(tvShowsList) { show ->
                                 Box(modifier = Modifier.width(135.dp)) {
                                     CineHubGridCard(
-                                        title = show.title,
-                                        genre = show.genre,
-                                        rating = show.userRating,
-                                        posterPath = show.posterPath,
-                                        onClick = { selectedTvShow = show }
+                                        title = show.title, [cite: 21]
+                                        genre = show.genre, [cite: 21]
+                                        rating = show.userRating, [cite: 22]
+                                        posterPath = show.posterPath, [cite: 22]
+                                        onClick = { selectedTvShow = show } [cite: 22]
                                     )
                                 }
                             }
@@ -183,7 +185,7 @@ fun CineHubScreen(
                 }
             }
 
-            // ================= SECTION 2: REDESIGNED TRENDING ONLIN RELEASES GRID =================
+            // ================= SECTION 2: MATERIAL YOU GLASSMORPHISM GRIDS =================
             item {
                 Text(
                     text = "Trending Online Releases",
@@ -205,7 +207,7 @@ fun CineHubScreen(
                     if (onlineMovies.isEmpty()) {
                         item {
                             Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                                Text("No online movie data fetched. Checking configurations...", fontSize = 13.sp, color = Color.Gray)
+                                Text("Syncing secure server metadata networks...", fontSize = 13.sp, color = Color.Gray)
                             }
                         }
                     } else {
@@ -229,13 +231,11 @@ fun CineHubScreen(
                                                     posterPath = movieItem.posterPath,
                                                     onClick = {
                                                         scope.launch {
-                                                            // Logic safely separates base Post ID from embedded OTT code markers
                                                             val rawId = movieItem.videoFilePath.substringAfter("cnc_stream:").substringBefore(":")
-                                                            val ottPlatform = movieItem.videoFilePath.substringAfterLast(":")
-                                                            
-                                                            val directM3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(rawId, ottPlatform)
-                                                            if (!directM3u8Url.isNullOrBlank()) {
-                                                                onPlayRequested(directM3u8Url, movieItem.title)
+                                                            val platformCode = movieItem.videoFilePath.substringAfterLast(":")
+                                                            val directM3u8 = CineCloudRepoClient.resolveDirectStreamUrl(rawId, platformCode)
+                                                            if (!directM3u8.isNullOrBlank()) {
+                                                                onPlayRequested(directM3u8, movieItem.title)
                                                             } else {
                                                                 onPlayRequested("https://net52.cc/mobile/player.php?id=$rawId", movieItem.title)
                                                             }
@@ -257,7 +257,7 @@ fun CineHubScreen(
                     if (onlineTvShows.isEmpty()) {
                         item {
                             Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                                Text("No online TV data fetched. Checking configurations...", fontSize = 13.sp, color = Color.Gray)
+                                Text("Syncing secure server metadata networks...", fontSize = 13.sp, color = Color.Gray)
                             }
                         }
                     } else {
@@ -282,11 +282,10 @@ fun CineHubScreen(
                                                     onClick = {
                                                         scope.launch {
                                                             val rawId = tvShowItem.folderPath.substringAfter("cnc_tv:").substringBefore(":")
-                                                            val ottPlatform = tvShowItem.folderPath.substringAfterLast(":")
-                                                            
-                                                            val directM3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(rawId, ottPlatform)
-                                                            if (!directM3u8Url.isNullOrBlank()) {
-                                                                onPlayRequested(directM3u8Url, tvShowItem.title)
+                                                            val platformCode = tvShowItem.folderPath.substringAfterLast(":")
+                                                            val directM3u8 = CineCloudRepoClient.resolveDirectStreamUrl(rawId, platformCode)
+                                                            if (!directM3u8.isNullOrBlank()) {
+                                                                onPlayRequested(directM3u8, tvShowItem.title)
                                                             } else {
                                                                 onPlayRequested("https://net52.cc/mobile/player.php?id=$rawId", tvShowItem.title)
                                                             }
@@ -308,144 +307,144 @@ fun CineHubScreen(
             }
         }
 
-        // --- MOVIES DETAIL METADATA SHEET OVERLAY ---
+        // --- MOVIES DETAIL BOTTOM SHEET ---
         selectedMovie?.let { movie ->
             if (!movie.videoFilePath.startsWith("cnc_stream:")) {
-                var trailerVideo by remember { mutableStateOf<YoutubeVideo?>(null) }
+                var trailerVideo by remember { mutableStateOf<YoutubeVideo?>(null) } [cite: 24]
                 
-                LaunchedEffect(movie) {
-                    scope.launch {
-                        val searchResults = InvidiousClient.fetchSearchVideos("${movie.title} official trailer")
-                        if (searchResults.isNotEmpty()) {
-                            trailerVideo = searchResults.first()
+                LaunchedEffect(movie) { [cite: 25]
+                    scope.launch { [cite: 25]
+                        val searchResults = InvidiousClient.fetchSearchVideos("${movie.title} official trailer") [cite: 25]
+                        if (searchResults.isNotEmpty()) { [cite: 25]
+                            trailerVideo = searchResults.first() [cite: 26]
                         }
                     }
                 }
 
                 ModalBottomSheet(
-                    onDismissRequest = { selectedMovie = null },
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                    onDismissRequest = { selectedMovie = null }, [cite: 27]
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp) [cite: 27]
                 ) {
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 20.dp, end = 20.dp, bottom = 36.dp, top = 8.dp)
+                        modifier = Modifier [cite: 27]
+                            .fillMaxWidth() [cite: 28]
+                            .padding(start = 20.dp, end = 20.dp, bottom = 36.dp, top = 8.dp) [cite: 28]
                     ) {
                         item {
-                            val infiniteTransition = rememberInfiniteTransition(label = "GradientAnim")
-                            val offset by infiniteTransition.animateFloat(
-                                initialValue = 0f,
-                                targetValue = 1000f,
-                                animationSpec = infiniteRepeatable(
-                                    animation = tween(durationMillis = 3500, easing = LinearEasing),
-                                    repeatMode = RepeatMode.Restart
+                            val infiniteTransition = rememberInfiniteTransition(label = "GradientAnim") [cite: 29]
+                            val offset by infiniteTransition.animateFloat( [cite: 30]
+                                initialValue = 0f, [cite: 30]
+                                targetValue = 1000f, [cite: 30]
+                                animationSpec = infiniteRepeatable( [cite: 31]
+                                    animation = tween(durationMillis = 3500, easing = LinearEasing), [cite: 31]
+                                    repeatMode = RepeatMode.Restart [cite: 32]
                                 ),
-                                label = "Offset"
+                                label = "Offset" [cite: 32]
                             )
                             
                             val animatedGradient = Brush.linearGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f),
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                colors = listOf( [cite: 34]
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f), [cite: 34]
+                                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f), [cite: 35]
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) [cite: 35]
                                 )
                             )
 
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(16f / 9f)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color.Black)
-                                    .border(BorderStroke(1.5.dp, animatedGradient), RoundedCornerShape(16.dp))
-                                    .clickable {
-                                        trailerVideo?.let { ytVideo ->
-                                            scope.launch {
-                                                val directUrl = InvidiousClient.fetchDirectStreamUrl(ytVideo.videoId)
-                                                if (directUrl != null) {
-                                                    onPlayRequested(directUrl, "${movie.title} - Trailer")
+                                    .fillMaxWidth() [cite: 37]
+                                    .aspectRatio(16f / 9f) [cite: 37]
+                                    .clip(RoundedCornerShape(16.dp)) [cite: 37]
+                                    .background(Color.Black) [cite: 38]
+                                    .border(BorderStroke(1.5.dp, animatedGradient), RoundedCornerShape(16.dp)) [cite: 38]
+                                    .clickable { [cite: 38]
+                                        trailerVideo?.let { ytVideo -> [cite: 39]
+                                            scope.launch { [cite: 39]
+                                                val directUrl = InvidiousClient.fetchDirectStreamUrl(ytVideo.videoId) [cite: 40]
+                                                if (directUrl != null) { [cite: 40]
+                                                    onPlayRequested(directUrl, "${movie.title} - Trailer") [cite: 41]
                                                 }
                                             }
                                         }
                                     }
                             ) {
-                                if (trailerVideo != null) {
+                                if (trailerVideo != null) { [cite: 43]
                                     AsyncImage(
-                                        model = trailerVideo!!.getBestThumbnailUrl(),
-                                        contentDescription = "Trailer Thumbnail",
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize()
+                                        model = trailerVideo!!.getBestThumbnailUrl(), [cite: 44]
+                                        contentDescription = "Trailer Thumbnail", [cite: 44]
+                                        contentScale = ContentScale.Crop, [cite: 45]
+                                        modifier = Modifier.fillMaxSize() [cite: 45]
                                     )
-                                    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f)))
+                                    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f))) [cite: 46]
                                     
                                     Surface(
-                                        color = Color.Black.copy(alpha = 0.7f),
-                                        shape = RoundedCornerShape(20.dp),
-                                        modifier = Modifier.align(Alignment.Center)
+                                        color = Color.Black.copy(alpha = 0.7f), [cite: 47]
+                                        shape = RoundedCornerShape(20.dp), [cite: 48]
+                                        modifier = Modifier.align(Alignment.Center) [cite: 48]
                                     ) {
                                         Row(
-                                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
+                                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp), [cite: 49]
+                                            verticalAlignment = Alignment.CenterVertically [cite: 50]
                                         ) {
-                                            Icon(Icons.Default.PlayArrow, contentDescription = "Play Trailer", tint = Color.White)
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text("Autoplay Trailer", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                            Icon(Icons.Default.PlayArrow, contentDescription = "Play Trailer", tint = Color.White) [cite: 51]
+                                            Spacer(modifier = Modifier.width(6.dp)) [cite: 51]
+                                            Text("Autoplay Trailer", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp) [cite: 52]
                                         }
                                     }
                                 } else {
                                     Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(Color.DarkGray.copy(alpha = 0.2f)),
-                                        contentAlignment = Alignment.Center
+                                        modifier = Modifier [cite: 53]
+                                            .fillMaxSize() [cite: 54]
+                                            .background(Color.DarkGray.copy(alpha = 0.2f)), [cite: 54]
+                                        contentAlignment = Alignment.Center [cite: 55]
                                     ) {
-                                        CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(24.dp))
+                                        CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(24.dp)) [cite: 56]
                                     }
                                 }
                             }
-                            Spacer(modifier = Modifier.height(20.dp))
+                            Spacer(modifier = Modifier.height(20.dp)) [cite: 57]
                         }
 
                         item {
-                            Row(modifier = Modifier.fillMaxWidth()) {
+                            Row(modifier = Modifier.fillMaxWidth()) { [cite: 58]
                                 AsyncImage(
-                                    model = movie.posterPath ?: android.R.drawable.ic_menu_gallery,
-                                    contentDescription = movie.title,
+                                    model = movie.posterPath ?: android.R.drawable.ic_menu_gallery, [cite: 58]
+                                    contentDescription = movie.title, [cite: 59]
                                     modifier = Modifier
-                                        .width(100.dp)
-                                        .aspectRatio(2f / 3f)
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(Color.Gray),
-                                    contentScale = ContentScale.Crop
+                                        .width(100.dp) [cite: 60]
+                                        .aspectRatio(2f / 3f) [cite: 60]
+                                        .clip(RoundedCornerShape(10.dp)) [cite: 60]
+                                        .background(Color.Gray), [cite: 61]
+                                    contentScale = ContentScale.Crop [cite: 61]
                                 )
-                                Spacer(modifier = Modifier.width(18.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(movie.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text("Rating: ★ ${movie.userRating} | Year: ${movie.premiered}", style = MaterialTheme.typography.bodyMedium)
-                                    Text("Genre: ${movie.genre}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                Spacer(modifier = Modifier.width(18.dp)) [cite: 62]
+                                Column(modifier = Modifier.weight(1f)) { [cite: 62]
+                                    Text(movie.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold) [cite: 63]
+                                    Spacer(modifier = Modifier.height(4.dp)) [cite: 63]
+                                    Text("Rating: ★ ${movie.userRating} | Year: ${movie.premiered}", style = MaterialTheme.typography.bodyMedium) [cite: 63, 64]
+                                    Text("Genre: ${movie.genre}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold) [cite: 64]
                                 }
                             }
-                            Spacer(modifier = Modifier.height(20.dp))
+                            Spacer(modifier = Modifier.height(20.dp)) [cite: 65]
                             Button(
-                                onClick = {
-                                    selectedMovie = null
-                                    onPlayRequested(movie.videoFilePath, movie.title)
+                                onClick = { [cite: 66]
+                                    selectedMovie = null [cite: 66]
+                                    onPlayRequested(movie.videoFilePath, movie.title) [cite: 66]
                                 },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(14.dp)
+                                modifier = Modifier.fillMaxWidth(), [cite: 67]
+                                shape = RoundedCornerShape(14.dp) [cite: 67]
                             ) {
-                                Icon(Icons.Default.PlayArrow, contentDescription = "Play")
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Play Full Movie", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                Icon(Icons.Default.PlayArrow, contentDescription = "Play") [cite: 68]
+                                Spacer(modifier = Modifier.width(8.dp)) [cite: 68]
+                                Text("Play Full Movie", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) [cite: 69]
                             }
-                            Spacer(modifier = Modifier.height(18.dp))
-                            Text("Plot Overview", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(18.dp)) [cite: 69]
+                            Text("Plot Overview", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) [cite: 70]
                             Text(
-                                movie.plot.ifEmpty { "No description available." },
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(vertical = 6.dp)
+                                movie.plot.ifEmpty { "No description available." }, [cite: 70]
+                                style = MaterialTheme.typography.bodyMedium, [cite: 71]
+                                color = MaterialTheme.colorScheme.onSurfaceVariant, [cite: 71]
+                                modifier = Modifier.padding(vertical = 6.dp) [cite: 71]
                             )
                         }
                     }
@@ -456,85 +455,85 @@ fun CineHubScreen(
         // --- TV SHOW DETAIL OVERLAY WITH MATERIAL YOU GLASSMORPHISM ---
         selectedTvShow?.let { show ->
             if (!show.folderPath.startsWith("cnc_tv:")) {
-                val episodes = remember(show) {
-                    NfoScanner.scanTvShowEpisodes(File(show.folderPath))
-                        .sortedBy { it.episode }
+                val episodes = remember(show) { [cite: 73]
+                    NfoScanner.scanTvShowEpisodes(File(show.folderPath)) [cite: 73]
+                        .sortedBy { it.episode } [cite: 73]
                 }
-                val seasons = remember(episodes) { episodes.groupBy { it.season }.toSortedMap() }
-                var selectedSeasonTab by remember { mutableStateOf(seasons.keys.firstOrNull() ?: 1) }
+                val seasons = remember(episodes) { episodes.groupBy { it.season }.toSortedMap() } [cite: 74]
+                var selectedSeasonTab by remember { mutableStateOf(seasons.keys.firstOrNull() ?: 1) } [cite: 74]
 
                 ModalBottomSheet(
-                    onDismissRequest = { selectedTvShow = null },
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                    onDismissRequest = { selectedTvShow = null }, [cite: 74]
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp) [cite: 75]
                 ) {
-                    Column(modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 36.dp, top = 8.dp)) {
-                        Text(show.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
-                        Text("Studio: ${show.studio} | Genre: ${show.genre}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-                        Spacer(modifier = Modifier.height(14.dp))
+                    Column(modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 36.dp, top = 8.dp)) { [cite: 75]
+                        Text(show.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold) [cite: 75, 76]
+                        Text("Studio: ${show.studio} | Genre: ${show.genre}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray) [cite: 76, 77]
+                        Spacer(modifier = Modifier.height(14.dp)) [cite: 77]
                         
-                        if (seasons.keys.size > 1) {
+                        if (seasons.keys.size > 1) { [cite: 77]
                             ScrollableTabRow(
-                                selectedTabIndex = seasons.keys.indexOf(selectedSeasonTab).coerceAtLeast(0),
-                                edgePadding = 0.dp,
-                                divider = {}
+                                selectedTabIndex = seasons.keys.indexOf(selectedSeasonTab).coerceAtLeast(0), [cite: 78]
+                                edgePadding = 0.dp, [cite: 78]
+                                divider = {} [cite: 79]
                             ) {
-                                seasons.keys.forEach { seasonNum ->
+                                seasons.keys.forEach { seasonNum -> [cite: 79]
                                     Tab(
-                                        selected = selectedSeasonTab == seasonNum,
-                                        onClick = { selectedSeasonTab = seasonNum },
+                                        selected = selectedSeasonTab == seasonNum, [cite: 80]
+                                        onClick = { selectedSeasonTab = seasonNum }, [cite: 81]
                                         text = { Text("Season $seasonNum", fontWeight = FontWeight.Bold) }
                                     )
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(10.dp)) [cite: 82]
 
-                        LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f, fill = false)) {
-                            items(seasons[selectedSeasonTab] ?: emptyList()) { episode ->
+                        LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f, fill = false)) { [cite: 83]
+                            items(seasons[selectedSeasonTab] ?: emptyList()) { episode -> [cite: 83]
                                 Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 6.dp)
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                                        .border(
-                                            BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f)),
-                                            RoundedCornerShape(16.dp)
+                                    modifier = Modifier [cite: 83]
+                                        .fillMaxWidth() [cite: 84]
+                                        .padding(vertical = 6.dp) [cite: 85]
+                                        .clip(RoundedCornerShape(16.dp)) [cite: 85]
+                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)) [cite: 85]
+                                        .border( [cite: 85]
+                                            BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f)), [cite: 86]
+                                            RoundedCornerShape(16.dp) [cite: 87]
                                         )
                                 ) {
                                     Row(
-                                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        modifier = Modifier.padding(16.dp).fillMaxWidth(), [cite: 88]
+                                        verticalAlignment = Alignment.CenterVertically [cite: 89]
                                     ) {
-                                        Column(modifier = Modifier.weight(1f)) {
+                                        Column(modifier = Modifier.weight(1f)) { [cite: 89]
                                             Text(
-                                                "Episode ${episode.episode}: ${episode.title}",
-                                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                                color = MaterialTheme.colorScheme.onSurface
+                                                "Episode ${episode.episode}: ${episode.title}", [cite: 90]
+                                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), [cite: 91]
+                                                color = MaterialTheme.colorScheme.onSurface [cite: 91]
                                             )
-                                            if (episode.plot.isNotEmpty()) {
-                                                Spacer(modifier = Modifier.height(4.dp))
+                                            if (episode.plot.isNotEmpty()) { [cite: 92]
+                                                Spacer(modifier = Modifier.height(4.dp)) [cite: 93]
                                                 Text(
-                                                    episode.plot,
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    maxLines = 2,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
+                                                    episode.plot, [cite: 94]
+                                                    style = MaterialTheme.typography.bodySmall, [cite: 94]
+                                                    maxLines = 2, [cite: 95]
+                                                    overflow = TextOverflow.Ellipsis, [cite: 95]
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f) [cite: 96]
                                                 )
                                             }
                                         }
-                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Spacer(modifier = Modifier.width(12.dp)) [cite: 98]
                                         IconButton(
-                                            onClick = {
-                                                selectedTvShow = null
-                                                onPlayRequested(episode.videoFilePath, "${show.title} - S${episode.season}E${episode.episode}")
+                                            onClick = { [cite: 99]
+                                                selectedTvShow = null [cite: 99]
+                                                onPlayRequested(episode.videoFilePath, "${show.title} - S${episode.season}E${episode.episode}") [cite: 100]
                                             },
-                                            colors = IconButtonDefaults.iconButtonColors(
-                                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+                                            colors = IconButtonDefaults.iconButtonColors( [cite: 101]
+                                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f) [cite: 101]
                                             )
                                         ) {
-                                            Icon(Icons.Default.PlayArrow, contentDescription = "Play Episode", tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                                            Icon(Icons.Default.PlayArrow, contentDescription = "Play Episode", tint = MaterialTheme.colorScheme.onPrimaryContainer) [cite: 102]
                                         }
                                     }
                                 }

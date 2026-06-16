@@ -1,5 +1,6 @@
 package app.marlboroadvance.mpvex.cinehub.data
 
+import android.content.Context
 import app.marlboroadvance.mpvex.cinehub.model.MovieItem
 import app.marlboroadvance.mpvex.cinehub.model.TvShowItem
 import kotlinx.coroutines.Dispatchers
@@ -49,8 +50,6 @@ object CineCloudRepoClient {
     )
 
     @Volatile private var workingDomain: String = "https://net52.cc"
-    @Volatile private var activeSessionCookie: String = ""
-    @Volatile private var lastBypassTime: Long = 0L
     @Volatile private var resolvedApiUrl: String = ""
 
     private val standardHeaders = mapOf(
@@ -114,13 +113,20 @@ object CineCloudRepoClient {
                         return
                     }
                 }
-            } catch (e: Exception) { /* Continue scanning pool */ }
+            } catch (e: Exception) { /* Skip node failovers */ }
         }
     }
 
-    private suspend fun ensureValidSession() = withContext(Dispatchers.IO) {
+    /**
+     * Context-aware session synchronization to store cookies inside SharedPreferences
+     */
+    private suspend fun ensureValidSession(context: Context) = withContext(Dispatchers.IO) {
+        val prefs = context.getSharedPreferences("NetflixMirrorPrefs", Context.MODE_PRIVATE)
+        val savedCookie = prefs.getString("nf_cookie", "")
+        val savedTimestamp = prefs.getLong("nf_cookie_timestamp", 0L)
         val currentTime = System.currentTimeMillis()
-        if (activeSessionCookie.isNotEmpty() && (currentTime - lastBypassTime < 54_000_000)) {
+
+        if (!savedCookie.isNullOrEmpty() && (currentTime - savedTimestamp < 54_000_000)) {
             return@withContext
         }
 
@@ -152,12 +158,15 @@ object CineCloudRepoClient {
                 val cookiesList = response.headers("Set-Cookie")
                 val targetCookie = cookiesList.firstOrNull { it.startsWith("t_hash_t=") }
                 if (targetCookie != null) {
-                    activeSessionCookie = targetCookie.substringAfter("t_hash_t=").substringBefore(";")
-                    lastBypassTime = currentTime
+                    val extractedCookie = targetCookie.substringAfter("t_hash_t=").substringBefore(";")
+                    prefs.edit()
+                        .putString("nf_cookie", extractedCookie)
+                        .putLong("nf_cookie_timestamp", currentTime)
+                        .apply()
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("CineCloudRepo", "Bypass failure: " + e.message)
+            android.util.Log.e("CineCloudRepo", "Session bypass failure: " + e.message)
         }
     }
 
@@ -210,8 +219,11 @@ object CineCloudRepoClient {
         return extractedItems
     }
 
-    private suspend fun fetchPlatformRawHtml(ottCode: String): String {
-        ensureValidSession()
+    private suspend fun fetchPlatformRawHtml(context: Context, ottCode: String): String {
+        ensureValidSession(context)
+        val prefs = context.getSharedPreferences("NetflixMirrorPrefs", Context.MODE_PRIVATE)
+        val activeSessionCookie = prefs.getString("nf_cookie", "") ?: ""
+
         val requestBuilder = Request.Builder().url("$workingDomain/mobile/home?app=1")
         for (headerEntry in standardHeaders) {
             requestBuilder.addHeader(headerEntry.key, headerEntry.value)
@@ -225,35 +237,30 @@ object CineCloudRepoClient {
         } catch (e: Exception) { "" }
     }
 
-    // --- STREAM AGGREGATION SYSTEM ---
-    suspend fun fetchOnlineMovies(): List<MovieItem> = withContext(Dispatchers.IO) {
+    suspend fun fetchOnlineMovies(context: Context): List<MovieItem> = withContext(Dispatchers.IO) {
         val aggregatedMovies = mutableListOf<MovieItem>()
-        
-        // Fetch both Netflix (nf) and Prime Video (pv) paths dynamically
-        val netflixHtml = fetchPlatformRawHtml("nf")
-        val primeHtml = fetchPlatformRawHtml("pv")
+        val netflixHtml = fetchPlatformRawHtml(context, "nf")
+        val primeHtml = fetchPlatformRawHtml(context, "pv")
 
         @Suppress("UNCHECKED_CAST")
         aggregatedMovies.addAll(parseHtmlToItems(netflixHtml, "nf") as List<MovieItem>)
         @Suppress("UNCHECKED_CAST")
         aggregatedMovies.addAll(parseHtmlToItems(primeHtml, "pv") as List<MovieItem>)
 
-        return@withContext aggregatedMovies.distinctBy { it.videoFilePath }.take(24)
+        return@withContext aggregatedMovies.distinctBy { it.videoFilePath }.take(30)
     }
 
-    suspend fun fetchOnlineTvShows(): List<TvShowItem> = withContext(Dispatchers.IO) {
+    suspend fun fetchOnlineTvShows(context: Context): List<TvShowItem> = withContext(Dispatchers.IO) {
         val aggregatedTv = mutableListOf<TvShowItem>()
-
-        // Fetch both Hotstar (hs) and Disney+ (dp) paths dynamically
-        val hotstarHtml = fetchPlatformRawHtml("hs")
-        val disneyHtml = fetchPlatformRawHtml("dp")
+        val hotstarHtml = fetchPlatformRawHtml(context, "hs")
+        val disneyHtml = fetchPlatformRawHtml(context, "dp")
 
         @Suppress("UNCHECKED_CAST")
         aggregatedTv.addAll(parseHtmlToItems(hotstarHtml, "hs") as List<TvShowItem>)
         @Suppress("UNCHECKED_CAST")
         aggregatedTv.addAll(parseHtmlToItems(disneyHtml, "dp") as List<TvShowItem>)
 
-        return@withContext aggregatedTv.distinctBy { it.folderPath }.take(24)
+        return@withContext aggregatedTv.distinctBy { it.folderPath }.take(30)
     }
 
     suspend fun resolveDirectStreamUrl(postId: String, platformCode: String): String? = withContext(Dispatchers.IO) {
@@ -278,7 +285,7 @@ object CineCloudRepoClient {
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("CineCloudRepo", "Decryption logs crash: " + e.message)
+            android.util.Log.e("CineCloudRepo", "Decryption logs failure: " + e.message)
         }
         return@withContext null
     }

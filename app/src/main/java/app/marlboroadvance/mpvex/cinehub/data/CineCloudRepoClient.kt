@@ -19,10 +19,8 @@ object CineCloudRepoClient {
         .followSslRedirects(false)
         .build()
 
-    // Dynamic failover layout endpoints rolling network matrix[span_3](start_span)[span_3](end_span)[span_4](start_span)[span_4](end_span)[span_5](start_span)[span_5](end_span)
     private val domainsPool = listOf("https://net52.cc", "https://net11.cc", "https://hianime.lol")
     
-    // Encrypted API validation endpoints matched verbatim from extension sources[span_6](start_span)[span_6](end_span)
     private val newTvDomains = listOf(
         "aHR0cHM6Ly9tb2JpbGVkZXRlY3RzLmNvbQ==",
         "aHR0cHM6Ly9tb2JpbGVkZXRlY3QuYXBw",
@@ -68,9 +66,6 @@ object CineCloudRepoClient {
         } catch (e: Exception) { "" }
     }
 
-    /**
-     * Natively loops through base64 validation domains to locate the live tracking player token endpoint[span_7](start_span)[span_7](end_span)
-     */
     private suspend fun fetchLiveApiUrl(): String = withContext(Dispatchers.IO) {
         if (resolvedApiUrl.isNotBlank()) return@withContext resolvedApiUrl
         
@@ -81,14 +76,16 @@ object CineCloudRepoClient {
             "X-Requested-With" to "NetmirrorNewTV v1.0",
             "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0 /OS.GatuNewTV v1.0",
             "Accept" to "application/json, text/plain, */*"
-        )[span_8](start_span)[span_8](end_span)
+        )
 
         for (encodedNode in newTvDomains) {
             val decodedBase = decodeBase64(encodedNode).trimEnd('/')
             if (decodedBase.isBlank()) continue
             try {
                 val reqBuilder = Request.Builder().url("$decodedBase/checknewtv.php")
-                verificationHeaders.forEach { (k, v) -> reqBuilder.addHeader(k, v) }
+                for (headerEntry in verificationHeaders) {
+                    reqBuilder.addHeader(headerEntry.key, headerEntry.value)
+                }
                 
                 client.newCall(reqBuilder.build()).execute().use { response ->
                     if (response.isSuccessful) {
@@ -102,16 +99,11 @@ object CineCloudRepoClient {
                         }
                     }
                 }
-            } catch (_: Exception) {
-                // Check next failover node inside pool
-            }
+            } catch (_: Exception) {}
         }
-        return@withContext "https://mobiledetects.com" // Default structural backup link if mapping loop times out
+        return@withContext "https://mobiledetects.com"
     }
 
-    /**
-     * Finds a functional domain node from the rolling pool to prevent dead endpoints from breaking loading states
-     */
     private suspend fun findWorkingDomain() {
         for (domain in domainsPool) {
             try {
@@ -122,26 +114,19 @@ object CineCloudRepoClient {
                         return
                     }
                 }
-            } catch (e: Exception) {
-                // Continue scanning fallback candidates
-            }
+            } catch (e: Exception) { /* Continue validation pool */ }
         }
     }
 
-    /**
-     * Emulates CNCVerse verification engine to bypass reCAPTCHA filters and extract 't_hash_t' security cookies
-     */
     private suspend fun ensureValidSession() = withContext(Dispatchers.IO) {
         val currentTime = System.currentTimeMillis()
-        // Cache cookie for 15 hours max to minimize network roundtrips[span_9](start_span)[span_9](end_span)
         if (activeSessionCookie.isNotEmpty() && (currentTime - lastBypassTime < 54_000_000)) {
             return@withContext
         }
 
-        findWorkingDomain() // Dynamically calibrate source node targets
+        findWorkingDomain()
 
         try {
-            // Strict security validation headers required by verify.php backend configurations[span_10](start_span)[span_10](end_span)
             val bypassHeaders = mapOf(
                 "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
                 "Accept-Encoding" to "gzip, deflate, br, zstd",
@@ -152,35 +137,33 @@ object CineCloudRepoClient {
                 "Origin" to "https://net22.cc",
                 "Referer" to "https://net22.cc/verify2",
                 "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
-            )[span_11](start_span)[span_11](end_span)
+            )
 
             val formBody = FormBody.Builder()
                 .add("g-recaptcha-response", UUID.randomUUID().toString())
-                .build()[span_12](start_span)[span_12](end_span)
+                .build()
 
             val requestBuilder = Request.Builder().url("$workingDomain/verify.php").post(formBody)
-            bypassHeaders.forEach { (key, value) -> requestBuilder.addHeader(key, value) }
+            for (headerEntry in bypassHeaders) {
+                requestBuilder.addHeader(headerEntry.key, headerEntry.value)
+            }
 
             client.newCall(requestBuilder.build()).execute().use { response ->
                 val cookiesList = response.headers("Set-Cookie")
                 val targetCookie = cookiesList.firstOrNull { it.startsWith("t_hash_t=") }
                 if (targetCookie != null) {
-                    activeSessionCookie = targetCookie.substringAfter("t_hash_t=").substringBefore(";")[span_13](start_span)[span_13](end_span)
+                    activeSessionCookie = targetCookie.substringAfter("t_hash_t=").substringBefore(";")
                     lastBypassTime = currentTime
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("CineCloudRepo", "Bypass sequence interrupted: " + e.message)
+            android.util.Log.e("CineCloudRepo", "Bypass sequence failure: " + e.message)
         }
     }
 
-    /**
-     * Regex fallback engine to capture element payloads and attributes natively without external Jsoup dependencies
-     */
     private fun parseHtmlToItems(html: String, isTv: Boolean): List<Any> {
         val extractedItems = mutableListOf<Any>()
         
-        // Match structure: captures custom data-post tokens along with text configurations safely[span_14](start_span)[span_14](end_span)[span_15](start_span)[span_15](end_span)
         val containerRegex = Regex("data-post=\"(\\d+)\"[^>]*>.*?<span[^>]*>([^<]+)</span>")
         var matches = containerRegex.findAll(html).toList()
         
@@ -204,7 +187,7 @@ object CineCloudRepoClient {
                             genre = "Hotstar Live",
                             premiered = "2026",
                             studio = "Hotstar Mirror",
-                            posterPath = "https://imgcdn.kim/hs/v/$id.jpg" // CNCVerse dynamic image proxy cache endpoint[span_16](start_span)[span_16](end_span)[span_17](start_span)[span_17](end_span)
+                            posterPath = "https://imgcdn.kim/hs/v/$id.jpg"
                         )
                     )
                 } else {
@@ -219,14 +202,13 @@ object CineCloudRepoClient {
                             genre = "Netflix Live",
                             director = "CNCVerse",
                             premiered = "2026",
-                            posterPath = "https://imgcdn.kim/poster/v/$id.jpg" // Netflix poster resolution nodes[span_18](start_span)[span_18](end_span)
+                            posterPath = "https://imgcdn.kim/poster/v/$id.jpg"
                         )
                     )
                 }
             }
         }
         
-        // Complete absolute rescue mapping fallback if dynamic tray components use strict line encryption
         if (extractedItems.isEmpty()) {
             val dynamicPostIdRegex = Regex("data-post=\"(\\d+)\"")
             val rawDistinctIds = dynamicPostIdRegex.findAll(html).map { it.groupValues[1] }.distinct().toList()
@@ -265,22 +247,18 @@ object CineCloudRepoClient {
                 }
             }
         }
-        
         return extractedItems
     }
 
-    /**
-     * Scrapes premium Movies from active CNCVerse configurations utilizing verified verification layers
-     */
     val fetchedMoviesCache = mutableListOf<MovieItem>()
 
     suspend fun fetchOnlineMovies(): List<MovieItem> = withContext(Dispatchers.IO) {
-        ensureValidSession() // Confirm cookie token status before hitting catalogs
+        ensureValidSession()
         
         val requestBuilder = Request.Builder().url("$workingDomain/mobile/home?app=1")
-        standardHeaders.forEach { (k, v) -> requestBuilder.addHeader(k, v) }
-        
-        // Pass essential security parameters inside layout request headers[span_19](start_span)[span_19](end_span)
+        for (headerEntry in standardHeaders) {
+            requestBuilder.addHeader(headerEntry.key, headerEntry.value)
+        }
         requestBuilder.addHeader("Cookie", "t_hash_t=$activeSessionCookie; hd=on; ott=nf")
 
         try {
@@ -297,22 +275,21 @@ object CineCloudRepoClient {
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("CineCloudRepo", "Movie channel fetch execution breakdown: " + e.message)
+            android.util.Log.e("CineCloudRepo", "Movie channel fetch breakdown: " + e.message)
         }
         return@withContext fetchedMoviesCache.ifEmpty { emptyList() }
     }
 
-    /**
-     * Scrapes premium TV Shows from active CNCVerse configurations utilizing verified verification layers
-     */
     val fetchedTvShowsCache = mutableListOf<TvShowItem>()
 
     suspend fun fetchOnlineTvShows(): List<TvShowItem> = withContext(Dispatchers.IO) {
         ensureValidSession()
         
         val requestBuilder = Request.Builder().url("$workingDomain/mobile/home?app=1")
-        standardHeaders.forEach { (k, v) -> requestBuilder.addHeader(k, v) }
-        requestBuilder.addHeader("Cookie", "t_hash_t=$activeSessionCookie; hd=on; ott=hs") // hs = Hotstar Tray target lock[span_20](start_span)[span_20](end_span)
+        for (headerEntry in standardHeaders) {
+            requestBuilder.addHeader(headerEntry.key, headerEntry.value)
+        }
+        requestBuilder.addHeader("Cookie", "t_hash_t=$activeSessionCookie; hd=on; ott=hs")
 
         try {
             client.newCall(requestBuilder.build()).execute().use { response ->
@@ -328,17 +305,14 @@ object CineCloudRepoClient {
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("CineCloudRepo", "TV channel fetch execution breakdown: " + e.message)
+            android.util.Log.e("CineCloudRepo", "TV channel fetch breakdown: " + e.message)
         }
         return@withContext fetchedTvShowsCache.ifEmpty { emptyList() }
     }
 
-    /**
-     * Decrypts underlying premium HLS (.m3u8) progressive direct playback links
-     */
     suspend fun resolveDirectStreamUrl(postId: String, isTv: Boolean): String? = withContext(Dispatchers.IO) {
         val targetOtt = if (isTv) "hs" else "nf"
-        val activeResolverNode = fetchLiveApiUrl() // Decodes actual active player network URL from Base64 matrix[span_21](start_span)[span_21](end_span)
+        val activeResolverNode = fetchLiveApiUrl()
         val playerUrl = "$activeResolverNode/newtv/player.php?id=$postId"
         
         val request = Request.Builder()
@@ -354,12 +328,12 @@ object CineCloudRepoClient {
                     val body = response.body?.string() ?: return@withContext null
                     if (body.contains("\"video_link\":\"")) {
                         val decryptedPath = body.substringAfter("\"video_link\":\"").substringBefore("\"")
-                        return@withContext decryptedPath.replace("\\/", "/") // Clean layout slash escaping artifacts safely
+                        return@withContext decryptedPath.replace("\\/", "/")
                     }
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("CineCloudRepo", "Decryption track log sequence interrupted: " + e.message)
+            android.util.Log.e("CineCloudRepo", "Decryption trace logs failure: " + e.message)
         }
         return@withContext null
     }

@@ -71,7 +71,7 @@ fun CineHubScreen(
                     onlineMovies = CineCloudRepoClient.fetchOnlineMovies()
                     onlineTvShows = CineCloudRepoClient.fetchOnlineTvShows()
                 } catch (e: Exception) {
-                    android.util.Log.e("CineHubUI", "Error mapping networks: " + e.message)
+                    android.util.Log.e("CineHubUI", "Network integration error: " + e.message)
                 } finally {
                     isOnlineLoading = false
                 }
@@ -120,10 +120,10 @@ fun CineHubScreen(
                 .padding(innerPadding),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            // ================= SECTION 1: LOCAL MEDIA IN SLIDER LAYOUT =================
+            // ================= SECTION 1: NATIVE LOCAL MEDIA SLIDER =================
             item {
                 Text(
-                    text = if (tabIndex == 0) "Local Storage Movies" else "Local Storage TV Shows",
+                    text = if (tabIndex == 0) "My Local Movies" else "My Local TV Series",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
                     color = MaterialTheme.colorScheme.primary,
@@ -134,8 +134,8 @@ fun CineHubScreen(
             item {
                 if (tabIndex == 0) {
                     if (moviesList.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxWidth().height(110.dp), contentAlignment = Alignment.Center) {
-                            Text("No local files found inside target folders.", fontSize = 13.sp, color = Color.Gray)
+                        Box(modifier = Modifier.fillMaxWidth().height(90.dp), contentAlignment = Alignment.Center) {
+                            Text("No target files found inside CineRex folders.", fontSize = 13.sp, color = Color.Gray)
                         }
                     } else {
                         LazyRow(
@@ -158,8 +158,8 @@ fun CineHubScreen(
                     }
                 } else {
                     if (tvShowsList.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxWidth().height(110.dp), contentAlignment = Alignment.Center) {
-                            Text("No local files found inside target folders.", fontSize = 13.sp, color = Color.Gray)
+                        Box(modifier = Modifier.fillMaxWidth().height(90.dp), contentAlignment = Alignment.Center) {
+                            Text("No target files found inside CineRex folders.", fontSize = 13.sp, color = Color.Gray)
                         }
                     } else {
                         LazyRow(
@@ -183,10 +183,10 @@ fun CineHubScreen(
                 }
             }
 
-            // ================= SECTION 2: CLOUD MEDIA IN GRID LAYOUT =================
+            // ================= SECTION 2: REDESIGNED TRENDING ONLIN RELEASES GRID =================
             item {
                 Text(
-                    text = if (tabIndex == 0) "Cloud Stream Extensions (Netflix/Prime)" else "Cloud Stream Extensions (Hotstar)",
+                    text = "Trending Online Releases",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
                     color = MaterialTheme.colorScheme.secondary,
@@ -205,7 +205,7 @@ fun CineHubScreen(
                     if (onlineMovies.isEmpty()) {
                         item {
                             Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                                Text("Repository proxy streams loading or offline...", fontSize = 13.sp, color = Color.Gray)
+                                Text("No online movie data fetched. Checking configurations...", fontSize = 13.sp, color = Color.Gray)
                             }
                         }
                     } else {
@@ -220,21 +220,24 @@ fun CineHubScreen(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
-                                        for (movie in rowItems) {
+                                        for (movieItem in rowItems) {
                                             Box(modifier = Modifier.weight(1f)) {
                                                 CineHubGridCard(
-                                                    title = movie.title,
-                                                    genre = movie.genre,
-                                                    rating = movie.userRating,
-                                                    posterPath = movie.posterPath,
+                                                    title = movieItem.title,
+                                                    genre = movieItem.genre,
+                                                    rating = movieItem.userRating,
+                                                    posterPath = movieItem.posterPath,
                                                     onClick = {
                                                         scope.launch {
-                                                            val rawPostId = movie.videoFilePath.substringAfter("cnc_stream:")
-                                                            val decryptedM3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(rawPostId, isTv = false)
-                                                            if (!decryptedM3u8Url.isNullOrBlank()) {
-                                                                onPlayRequested(decryptedM3u8Url, movie.title)
+                                                            // Logic safely separates base Post ID from embedded OTT code markers
+                                                            val rawId = movieItem.videoFilePath.substringAfter("cnc_stream:").substringBefore(":")
+                                                            val ottPlatform = movieItem.videoFilePath.substringAfterLast(":")
+                                                            
+                                                            val directM3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(rawId, ottPlatform)
+                                                            if (!directM3u8Url.isNullOrBlank()) {
+                                                                onPlayRequested(directM3u8Url, movieItem.title)
                                                             } else {
-                                                                onPlayRequested("https://net52.cc/mobile/player.php?id=$rawPostId", movie.title)
+                                                                onPlayRequested("https://net52.cc/mobile/player.php?id=$rawId", movieItem.title)
                                                             }
                                                         }
                                                     }
@@ -254,7 +257,7 @@ fun CineHubScreen(
                     if (onlineTvShows.isEmpty()) {
                         item {
                             Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                                Text("Repository proxy streams loading or offline...", fontSize = 13.sp, color = Color.Gray)
+                                Text("No online TV data fetched. Checking configurations...", fontSize = 13.sp, color = Color.Gray)
                             }
                         }
                     } else {
@@ -269,21 +272,23 @@ fun CineHubScreen(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
-                                        for (show in rowItems) {
+                                        for (tvShowItem in rowItems) {
                                             Box(modifier = Modifier.weight(1f)) {
                                                 CineHubGridCard(
-                                                    title = show.title,
-                                                    genre = show.genre,
-                                                    rating = show.userRating,
-                                                    posterPath = show.posterPath,
+                                                    title = tvShowItem.title,
+                                                    genre = tvShowItem.genre,
+                                                    rating = tvShowItem.userRating,
+                                                    posterPath = tvShowItem.posterPath,
                                                     onClick = {
                                                         scope.launch {
-                                                            val rawPostId = show.folderPath.substringAfter("cnc_tv:")
-                                                            val decryptedM3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(rawPostId, isTv = true)
-                                                            if (!decryptedM3u8Url.isNullOrBlank()) {
-                                                                onPlayRequested(decryptedM3u8Url, show.title)
+                                                            val rawId = tvShowItem.folderPath.substringAfter("cnc_tv:").substringBefore(":")
+                                                            val ottPlatform = tvShowItem.folderPath.substringAfterLast(":")
+                                                            
+                                                            val directM3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(rawId, ottPlatform)
+                                                            if (!directM3u8Url.isNullOrBlank()) {
+                                                                onPlayRequested(directM3u8Url, tvShowItem.title)
                                                             } else {
-                                                                onPlayRequested("https://net52.cc/mobile/player.php?id=$rawPostId", show.title)
+                                                                onPlayRequested("https://net52.cc/mobile/player.php?id=$rawId", tvShowItem.title)
                                                             }
                                                         }
                                                     }
@@ -303,7 +308,7 @@ fun CineHubScreen(
             }
         }
 
-        // --- MOVIES DETAIL BOTTOM SHEET ---
+        // --- MOVIES DETAIL METADATA SHEET OVERLAY ---
         selectedMovie?.let { movie ->
             if (!movie.videoFilePath.startsWith("cnc_stream:")) {
                 var trailerVideo by remember { mutableStateOf<YoutubeVideo?>(null) }

@@ -517,16 +517,26 @@ fun GestureHandler(
                           viewModel.isVerticalGestureActive.value = true
                           haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         } else if ((brightnessGesture || volumeGesture) && !isLongPressing) {
-                          isVerticalGestureActive = true
-                          viewModel.isVerticalGestureActive.value = true
-                          startingY = 0f
-                          mpvVolumeStartingY = 0f
-                          originalVolume = currentVolume
-                          originalMPVVolume = currentMPVVolume
-                          originalBrightness = currentBrightness
-                          lastVolumeValue = currentVolume
-                          lastMPVVolumeValue = currentMPVVolume ?: 100
-                          lastBrightnessValue = currentBrightness
+                          // Exclude system gestures from edges for volume and brightness adjustments
+                          val edgeExcludePx = 24.dp.toPx()
+                          val isNearEdge = startPosition.x < edgeExcludePx ||
+                                           startPosition.x > size.width - edgeExcludePx ||
+                                           startPosition.y < edgeExcludePx ||
+                                           startPosition.y > size.height - edgeExcludePx
+                          if (isNearEdge) {
+                            gestureType = "ignored_edge"
+                          } else {
+                            isVerticalGestureActive = true
+                            viewModel.isVerticalGestureActive.value = true
+                            startingY = 0f
+                            mpvVolumeStartingY = 0f
+                            originalVolume = currentVolume
+                            originalMPVVolume = currentMPVVolume
+                            originalBrightness = currentBrightness
+                            lastVolumeValue = currentVolume
+                            lastMPVVolumeValue = currentMPVVolume ?: 100
+                            lastBrightnessValue = currentBrightness
+                          }
                         }
                       }
                     }

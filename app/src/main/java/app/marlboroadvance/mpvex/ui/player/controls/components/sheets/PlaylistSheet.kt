@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import android.provider.MediaStore.Video.Thumbnails
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -240,7 +242,6 @@ fun PlaylistSheet(
       ) {
         val currentItem = playlist.find { it.isPlaying }
 
-        // ================= OVERLAY LAYER: CINEMATIC MOVIE INFO TRANSPARENT CARD =================
         if (currentItem != null && !isM3UPlaylist) {
           val currentFile = File(currentItem.path)
           val parentFolder = currentFile.parentFile
@@ -349,7 +350,6 @@ fun PlaylistSheet(
         if (isListMode) {
           LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyListState) {
             items(playlist) { item ->
-              // Dynamic Title Extraction from companion NFO file models mapping
               var explicitTitle by remember { mutableStateOf(item.title) }
               if (!isM3UPlaylist && item.path.isNotEmpty()) {
                 val currentFile = File(item.path)

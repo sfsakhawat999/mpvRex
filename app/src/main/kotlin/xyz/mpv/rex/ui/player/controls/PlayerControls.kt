@@ -189,6 +189,9 @@ fun PlayerControls(
   val showSeekTime by playerPreferences.showSeekTimeWhileSeeking.collectAsState()
   val hideOsdText by playerPreferences.hideOsdText.collectAsState()
   var isSeeking by remember { mutableStateOf(false) }
+  var dragStartValue by remember { mutableStateOf(-1f) }
+  var isCloseToStart by remember { mutableStateOf(false) }
+  var changeCount by remember { mutableStateOf(0) }
   var resetControlsTimestamp by remember { mutableStateOf(0L) }
   val seekText by viewModel.seekText.collectAsState()
   val currentChapter by MPVLib.propInt["chapter"].collectAsState()
@@ -1159,14 +1162,40 @@ fun PlayerControls(
           SeekbarWithTimers(
             position = { precisePosition },
             duration = if (preciseDuration > 0) preciseDuration else duration?.toFloat() ?: 0f,
-            onValueChange = {
+            onValueChange = { newValue ->
+              if (dragStartValue == -1f) {
+                dragStartValue = precisePosition
+                changeCount = 0
+              }
+              changeCount++
               isSeeking = true
               resetControlsTimestamp = System.currentTimeMillis()
-              viewModel.seekTo(it.toInt())
+
+              val durationFloat = if (preciseDuration > 0) preciseDuration else duration?.toFloat() ?: 0f
+              val threshold = (durationFloat * 0.08f).coerceIn(15f, 400f)
+              val close = changeCount > 1 && abs(newValue - dragStartValue) < threshold
+
+              if (close) {
+                isCloseToStart = true
+                viewModel.playerUpdate.value = PlayerUpdates.ShowText("Release to cancel")
+              } else {
+                if (isCloseToStart) {
+                  isCloseToStart = false
+                  viewModel.playerUpdate.value = PlayerUpdates.None
+                }
+              }
+              viewModel.seekTo(newValue.toInt())
               viewModel.autoHideControls()
             },
             onValueChangeFinished = {
+              if (isCloseToStart) {
+                viewModel.seekTo(dragStartValue.toInt())
+                viewModel.playerUpdate.value = PlayerUpdates.None
+              }
               isSeeking = false
+              dragStartValue = -1f
+              isCloseToStart = false
+              changeCount = 0
               resetControlsTimestamp = System.currentTimeMillis()
               viewModel.showControls()
             },
@@ -1182,7 +1211,8 @@ fun PlayerControls(
             seekbarStyle = seekbarStyle,
             loopStart = abLoopA?.toFloat(),
             loopEnd = abLoopB?.toFloat(),
-            isGestureSeeking = isGestureSeeking
+            isGestureSeeking = isGestureSeeking,
+            isCancelActive = isCloseToStart
           )
         }
 

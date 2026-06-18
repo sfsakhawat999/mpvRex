@@ -219,9 +219,6 @@ object CineCloudRepoClient {
         } catch (e: Exception) { "" }
     }
 
-    /**
-     * Highly accurate stable production posters using TMDB CDN assets fallback mapping
-     */
     private fun generateVidSrcMovieFallback(): List<MovieItem> {
         return listOf(
             MovieItem("vidsrc_movie:tt15354916:vidsrc", "Jawan", "IMDB: tt15354916", 8.0, "Failproof secondary cloud core backup cluster active.", "UA", "Action", "Indian Cinema", "2023", "https://image.tmdb.org/t/p/w500/z0g27g67g09uS7wA7R24gvewOAn.jpg"),

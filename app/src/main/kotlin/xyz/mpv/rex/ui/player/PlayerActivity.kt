@@ -628,6 +628,13 @@ class PlayerActivity :
     // Enter PIP mode when user presses home button if auto PIP is enabled
     if (playerPreferences.autoPiPOnNavigation.get() && isReady && !isFinishing) {
       pipHelper.enterPipMode()
+    } else if (isReady && !isFinishing) {
+      val isEnding = isUserFinishing || isFinishing
+      val shouldAllowBackgroundPlayback = isManualBackgroundPlayback || 
+                                          (audioPreferences.automaticBackgroundPlayback.get() && !isEnding)
+      if (shouldAllowBackgroundPlayback) {
+        startBackgroundPlayback()
+      }
     }
   }
 
@@ -745,6 +752,7 @@ class PlayerActivity :
           viewModel.pause()
         } else {
           // Background playback is active - disable video decoding to save battery
+          startBackgroundPlayback()
           disableVideoForBackground()
         }
       }
@@ -835,9 +843,12 @@ class PlayerActivity :
           endBackgroundPlayback()
           finish()
         }
-      } else if (!isInBackgroundPlayback) {
-        // Ensure video is disabled when hidden, even if it wasn't handled in onPause (e.g. multi-window)
-        disableVideoForBackground()
+      } else {
+        startBackgroundPlayback()
+        if (!isInBackgroundPlayback) {
+          // Ensure video is disabled when hidden, even if it wasn't handled in onPause (e.g. multi-window)
+          disableVideoForBackground()
+        }
       }
     }.onFailure { e ->
       Log.e(TAG, "Error during onStop", e)
@@ -1990,8 +2001,8 @@ class PlayerActivity :
       mediaIdentifier = getMediaIdentifier(intent, fileName)
     }
 
-    // Start media notification service (like YouTube - always show notification)
-    startBackgroundPlayback()
+    // Start media notification service only when going to background (like stock mpv-android)
+    // startBackgroundPlayback() is now deferred to backgrounding lifecycle events
 
     // If we are currently in background playback, disable video for the new file too
     if (isInBackgroundPlayback) {
@@ -3152,6 +3163,9 @@ class PlayerActivity :
     
     // Set flag to enable background playback (same logic as automatic)
     isManualBackgroundPlayback = true
+    
+    // Start background playback service
+    startBackgroundPlayback()
     
     // Restore system UI before going to background
     restoreSystemUI()

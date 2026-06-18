@@ -318,6 +318,7 @@ fun CineHubScreen(
         selectedMovie?.let { movie ->
             if (!movie.videoFilePath.startsWith("cnc_stream:")) {
                 var trailerVideo by remember { mutableStateOf<YoutubeVideo?>(null) }
+                val movieActors = remember(movie) { NfoScanner.parseActorsFromNfo(NfoScanner.getXmlDocument(File(movie.videoFilePath.replace(File(movie.videoFilePath).name, "movie.nfo"))) ?: return@remember emptyList()) }
                 
                 LaunchedEffect(movie) {
                     scope.launch {
@@ -465,7 +466,6 @@ fun CineHubScreen(
                             Button(
                                 onClick = {
                                     selectedMovie = null
-                                    // Strictly bypassed directly into MPVrex native last played positioning memory loop
                                     onPlayRequested(movie.videoFilePath, movie.title)
                                 },
                                 modifier = Modifier.fillMaxWidth(),
@@ -589,7 +589,6 @@ fun CineHubScreen(
                                             IconButton(
                                                 onClick = {
                                                     selectedTvShow = null
-                                                    // Bypassed directly to target video file path matching player resume caching hooks
                                                     onPlayRequested(episode.videoFilePath, "${show.title} - S${episode.season}E${episode.episode}")
                                                 },
                                                 colors = IconButtonDefaults.iconButtonColors(
@@ -622,7 +621,7 @@ fun CineHubScreen(
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(3),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalGridArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp), // FIXED PARAMETER NAME HERE
                         modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
                     ) {
                         items(actorMovies) { movie ->

@@ -44,6 +44,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -61,30 +62,30 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.geometry.Offset
 import app.marlboroadvance.mpvex.presentation.components.PlayerSheet
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.ui.theme.spacing
+import app.marlboroadvance.mpvex.cinehub.data.NfoScanner
+import coil.compose.AsyncImage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 data class PlaylistItem(
   val uri: Uri,
   val title: String,
   val index: Int,
   val isPlaying: Boolean,
-  val progressPercent: Float = 0f, // 0-100, progress of video watched
-  val isWatched: Boolean = false,  // True if video is fully watched (100%)
-  val path: String = "", // Video path for thumbnail loading
-  val duration: String = "", // Duration in formatted string (e.g., "10:30")
-  val resolution: String = "", // Resolution (e.g., "1920x1080")
+  val progressPercent: Float = 0f, 
+  val isWatched: Boolean = false,  
+  val path: String = "", 
+  val duration: String = "", 
+  val resolution: String = "", 
 )
 
-/**
- * LRU (Least Recently Used) cache for Bitmap thumbnails with a maximum size limit.
- * This prevents memory issues when dealing with large playlists (100+ videos).
- */
 class LRUBitmapCache(private val maxSize: Int) {
   private val cache = LinkedHashMap<String, Bitmap?>(maxSize + 1, 1f, true)
 
@@ -93,54 +94,33 @@ class LRUBitmapCache(private val maxSize: Int) {
   operator fun set(key: String, value: Bitmap?) = synchronized(this) {
     cache[key] = value
     if (cache.size > maxSize) {
-      // Remove the least recently used item
       cache.remove(cache.keys.firstOrNull())
     }
   }
 
   fun containsKey(key: String): Boolean = synchronized(this) { cache.containsKey(key) }
-
   fun clear() = synchronized(this) { cache.clear() }
 }
 
-/**
- * Loads a thumbnail from MediaStore cache (much faster than generating new thumbnails).
- * Uses the modern loadThumbnail API on Android Q+ for better performance.
- * Falls back to null if no cached thumbnail exists (in which case a placeholder will be shown).
- */
 private suspend fun loadMediaStoreThumbnail(context: Context, uri: Uri): Bitmap? {
   return withContext(Dispatchers.IO) {
     try {
       when (uri.scheme) {
-        // For content:// URIs, we need to find the video ID first
         "content" -> {
           val videoId = extractVideoId(uri, context)
           if (videoId != null) {
-            // Use modern API on Android Q+
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
               val contentUri = android.content.ContentUris.withAppendedId(
                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 videoId
               )
-              context.contentResolver.loadThumbnail(
-                contentUri,
-                android.util.Size(512, 512),
-                null
-              )
+              context.contentResolver.loadThumbnail(contentUri, android.util.Size(512, 512), null)
             } else {
               @Suppress("DEPRECATION")
-              Thumbnails.getThumbnail(
-                context.contentResolver,
-                videoId,
-                Thumbnails.MINI_KIND,
-                null
-              )
+              Thumbnails.getThumbnail(context.contentResolver, videoId, Thumbnails.MINI_KIND, null)
             }
-          } else {
-            null
-          }
+          } else null
         }
-        // For file:// URIs, try to find the corresponding MediaStore entry
         "file" -> {
           val filePath = uri.path ?: return@withContext null
           val projection = arrayOf(MediaStore.Video.Media._ID)
@@ -148,82 +128,50 @@ private suspend fun loadMediaStoreThumbnail(context: Context, uri: Uri): Bitmap?
           val selectionArgs = arrayOf(filePath)
 
           context.contentResolver.query(
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            selection,
-            selectionArgs,
-            null
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, selection, selectionArgs, null
           )?.use { cursor ->
             if (cursor.moveToFirst()) {
               val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
               val videoId = cursor.getLong(idColumn)
-              
-              // Use modern API on Android Q+
               if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                 val contentUri = android.content.ContentUris.withAppendedId(
-                  MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                  videoId
+                  MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videoId
                 )
-                context.contentResolver.loadThumbnail(
-                  contentUri,
-                  android.util.Size(512, 512),
-                  null
-                )
+                context.contentResolver.loadThumbnail(contentUri, android.util.Size(512, 512), null)
               } else {
                 @Suppress("DEPRECATION")
-                Thumbnails.getThumbnail(
-                  context.contentResolver,
-                  videoId,
-                  Thumbnails.MINI_KIND,
-                  null
-                )
+                Thumbnails.getThumbnail(context.contentResolver, videoId, Thumbnails.MINI_KIND, null)
               }
-            } else {
-              null
-            }
+            } else null
           }
         }
         else -> null
       }
     } catch (e: Exception) {
-      // Fallback with placeholder if thumbnail loading fails
       android.util.Log.w("PlaylistSheet", "Failed to load MediaStore thumbnail for $uri", e)
       null
     }
   }
 }
 
-/**
- * Extracts the video ID from a content:// URI.
- */
 private fun extractVideoId(uri: Uri, context: Context): Long? {
   return try {
     val path = uri.path ?: return null
-    // Extract ID from path like /external/video/media/123
     val idString = path.substringAfterLast('/').toLongOrNull() ?: return null
 
-    // Verify this ID exists in MediaStore
     val projection = arrayOf(MediaStore.Video.Media._ID)
     val selection = "${MediaStore.Video.Media._ID} = ?"
     val selectionArgs = arrayOf(idString.toString())
 
     context.contentResolver.query(
-      MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-      projection,
-      selection,
-      selectionArgs,
-      null
+      MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, selection, selectionArgs, null
     )?.use { cursor ->
       if (cursor.moveToFirst()) {
         val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
         cursor.getLong(idColumn)
-      } else {
-        null
-      }
+      } else null
     }
-  } catch (e: Exception) {
-    null
-  }
+  } catch (e: Exception) { null }
 }
 
 @Composable
@@ -238,13 +186,9 @@ fun PlaylistSheet(
 ) {
   val context = LocalContext.current
   val configuration = LocalConfiguration.current
-
   val accentColor = MaterialTheme.colorScheme.primary
-
-  // Check portrait mode
   val isPortrait = configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
 
-  // Portrait mode => list mode
   val isListModePreference by playerPreferences.playlistViewMode.collectAsState()
   var isListMode by remember { mutableStateOf(if (isPortrait) true else isListModePreference) }
 
@@ -254,29 +198,17 @@ fun PlaylistSheet(
     }
   }
 
-  // Update preference when view mode changes (only in landscape)
   LaunchedEffect(isListMode) {
     if (!isPortrait && isListMode != isListModePreference) {
       playerPreferences.playlistViewMode.set(isListMode)
     }
   }
 
-  // Thumbnail cache with LRU eviction - limited size to prevent memory issues with large playlists
-  val thumbnailCache by remember {
-    mutableStateOf(LRUBitmapCache(maxSize = 50))
-  }
-
-  // Scroll state for the playlist
+  val thumbnailCache by remember { mutableStateOf(LRUBitmapCache(maxSize = 50)) }
   val lazyListState = rememberLazyListState()
 
-  // Find the currently playing item index - tracks changes in playlist items
-  val playingItemIndex by remember {
-    derivedStateOf {
-      playlist.indexOfFirst { it.isPlaying }
-    }
-  }
+  val playingItemIndex by remember { derivedStateOf { playlist.indexOfFirst { it.isPlaying } } }
 
-  // Scroll to the currently playing item when the playing item changes or when sheet opens
   LaunchedEffect(playingItemIndex) {
     if (playingItemIndex >= 0) {
       lazyListState.animateScrollToItem(playingItemIndex)
@@ -285,14 +217,8 @@ fun PlaylistSheet(
 
   val screenWidth = LocalConfiguration.current.screenWidthDp.dp
   val sheetWidth = if (isListMode) {
-    if (LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
-      640.dp
-    } else {
-      420.dp
-    }
-  } else {
-    screenWidth * 0.85f
-  }
+    if (LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) 640.dp else 420.dp
+  } else screenWidth * 0.85f
 
   PlayerSheet(
     onDismissRequest = onDismissRequest,
@@ -303,12 +229,7 @@ fun PlaylistSheet(
     Surface(
       modifier = Modifier.fillMaxWidth(),
       color = Color.Transparent,
-      shape = RoundedCornerShape(
-        topStart = 16.dp,
-        topEnd = 16.dp,
-        bottomStart = 0.dp,
-        bottomEnd = 0.dp
-      ),
+      shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
       tonalElevation = 0.dp,
     ) {
       Column(
@@ -317,8 +238,78 @@ fun PlaylistSheet(
           horizontal = if (!isListMode) MaterialTheme.spacing.medium else 0.dp
         )
       ) {
-        // Header showing current playlist info with toggle button
         val currentItem = playlist.find { it.isPlaying }
+
+        // ================= OVERLAY LAYER: CINEMATIC MOVIE INFO TRANSPARENT CARD =================
+        if (currentItem != null && !isM3UPlaylist) {
+          val currentFile = File(currentItem.path)
+          val parentFolder = currentFile.parentFile
+          val isMovieType = currentFile.absolutePath.contains("/movies/", ignoreCase = true)
+
+          if (isMovieType && parentFolder != null) {
+            val movieNfo = File(parentFolder, "movie.nfo")
+            val localPoster = File(parentFolder, "poster.jpg").absolutePath
+            
+            var moviePlotText by remember { mutableStateOf("Premium fail-proof playback session track active.") }
+            var posterImageUri by remember { mutableStateOf<String?>(localPoster) }
+
+            LaunchedEffect(currentItem.path) {
+              if (movieNfo.exists()) {
+                withContext(Dispatchers.IO) {
+                  val xmlDoc = NfoScanner.getXmlDocument(movieNfo)
+                  if (xmlDoc != null) {
+                    val root = xmlDoc.documentElement
+                    moviePlotText = NfoScanner.getTagText(root, "plot").ifBlank { moviePlotText }
+                    val xmlPoster = NfoScanner.getTagText(root, "thumb")
+                    if (xmlPoster.startsWith("http")) {
+                      posterImageUri = xmlPoster
+                    }
+                  }
+                }
+              }
+            }
+
+            Box(
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))
+                .border(BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f)), RoundedCornerShape(16.dp))
+            ) {
+              Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                AsyncImage(
+                  model = posterImageUri ?: android.R.drawable.ic_menu_gallery,
+                  contentDescription = "Movie Poster",
+                  contentScale = ContentScale.Crop,
+                  modifier = Modifier
+                    .width(64.dp)
+                    .height(96.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.DarkGray)
+                )
+                Spacer(modifier = Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                  Text(
+                    text = currentItem.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                  )
+                  Spacer(modifier = Modifier.height(4.dp))
+                  Text(
+                    text = moviePlotText,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                  )
+                }
+              }
+            }
+          }
+        }
+
         Row(
           modifier = Modifier
             .fillMaxWidth()
@@ -337,29 +328,15 @@ fun PlaylistSheet(
             if (currentItem != null) {
               Text(
                 text = "Now Playing",
-                style = MaterialTheme.typography.titleSmall.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = accentColor,
-                ),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold, color = accentColor),
               )
-              Text(
-                text = "•",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-              )
+              Text(text = "•", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text(
-              text = "$totalCount items",
-              style = MaterialTheme.typography.bodyMedium,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Text(text = "$totalCount items", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
           }
 
-          // Toggle button for list/grid view (only in landscape)
           if (!isPortrait) {
-            IconButton(
-              onClick = { isListMode = !isListMode }
-            ) {
+            IconButton(onClick = { isListMode = !isListMode }) {
               Icon(
                 imageVector = if (isListMode) Icons.Default.GridView else Icons.Default.ViewList,
                 contentDescription = if (isListMode) "Switch to Grid View" else "Switch to List View",
@@ -369,16 +346,31 @@ fun PlaylistSheet(
           }
         }
 
-        // Conditional rendering based on view mode
         if (isListMode) {
-          // Vertical list mode (original implementation)
-          LazyColumn(
-            state = lazyListState,
-            modifier = Modifier.fillMaxWidth()
-          ) {
+          LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyListState) {
             items(playlist) { item ->
+              // Dynamic Title Extraction from companion NFO file models mapping
+              var explicitTitle by remember { mutableStateOf(item.title) }
+              if (!isM3UPlaylist && item.path.isNotEmpty()) {
+                val currentFile = File(item.path)
+                val targetNfoFile = File(currentFile.parentFile, "${currentFile.nameWithoutExtension}.nfo")
+                LaunchedEffect(item.path) {
+                  if (targetNfoFile.exists()) {
+                    withContext(Dispatchers.IO) {
+                      val xmlDoc = NfoScanner.getXmlDocument(targetNfoFile)
+                      if (xmlDoc != null) {
+                        val nfoTitle = NfoScanner.getTagText(xmlDoc.documentElement, "title")
+                        if (nfoTitle.isNotBlank()) {
+                          explicitTitle = "Episode ${item.index + 1}: $nfoTitle"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+
               PlaylistTrackListItem(
-                item = item,
+                item = item.copy(title = explicitTitle),
                 context = context,
                 thumbnailCache = thumbnailCache,
                 onClick = { onItemClick(item) },
@@ -388,7 +380,6 @@ fun PlaylistSheet(
             }
           }
         } else {
-          // Horizontal grid mode
           LazyRow(
             state = lazyListState,
             contentPadding = PaddingValues(
@@ -398,13 +389,30 @@ fun PlaylistSheet(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
           ) {
             items(playlist) { item ->
+              var explicitTitle by remember { mutableStateOf(item.title) }
+              if (!isM3UPlaylist && item.path.isNotEmpty()) {
+                val currentFile = File(item.path)
+                val targetNfoFile = File(currentFile.parentFile, "${currentFile.nameWithoutExtension}.nfo")
+                LaunchedEffect(item.path) {
+                  if (targetNfoFile.exists()) {
+                    withContext(Dispatchers.IO) {
+                      val xmlDoc = NfoScanner.getXmlDocument(targetNfoFile)
+                      if (xmlDoc != null) {
+                        val nfoTitle = NfoScanner.getTagText(xmlDoc.documentElement, "title")
+                        if (nfoTitle.isNotBlank()) {
+                          explicitTitle = "Episode ${item.index + 1}: $nfoTitle"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+
               PlaylistTrackGridItem(
-                item = item,
+                item = item.copy(title = explicitTitle),
                 context = context,
-                thumbnailCache = thumbnailCache as LRUBitmapCache,
-                onClick = {
-                  onItemClick(item)
-                },
+                thumbnailCache = thumbnailCache,
+                onClick = { onItemClick(item) },
                 skipThumbnail = isM3UPlaylist,
               )
             }
@@ -425,17 +433,10 @@ fun PlaylistTrackListItem(
   accentColor: Color,
   modifier: Modifier = Modifier,
 ) {
-  // Use theme colors dynamically
   val accentSecondary = MaterialTheme.colorScheme.tertiary
-
-  // Thumbnail state - uses cache to persist across recompositions
   val videoPath = item.path.ifBlank { item.uri.toString() }
-  var thumbnail by remember(videoPath) {
-    mutableStateOf(thumbnailCache[videoPath])
-  }
+  var thumbnail by remember(videoPath) { mutableStateOf(thumbnailCache[videoPath]) }
 
-  // Load thumbnail asynchronously
-  // Skip thumbnail loading for M3U playlists (network streams)
   LaunchedEffect(videoPath) {
     if (!skipThumbnail && !thumbnailCache.containsKey(videoPath)) {
       val bmp = loadMediaStoreThumbnail(context, item.uri)
@@ -450,25 +451,16 @@ fun PlaylistTrackListItem(
       brush = Brush.linearGradient(listOf(accentColor, accentSecondary)),
       shape = RoundedCornerShape(12.dp),
     )
-  } else {
-    Modifier
-  }
+  } else Modifier
 
   Surface(
     modifier = modifier
       .fillMaxWidth()
-      .padding(
-        horizontal = MaterialTheme.spacing.medium,
-        vertical = MaterialTheme.spacing.extraSmall,
-      )
+      .padding(horizontal = MaterialTheme.spacing.medium, vertical = MaterialTheme.spacing.extraSmall)
       .clip(RoundedCornerShape(12.dp))
       .then(borderModifier)
       .clickable(onClick = onClick),
-    color = if (item.isPlaying) {
-      MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
-    } else {
-      Color.Transparent
-    },
+    color = if (item.isPlaying) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f) else Color.Transparent,
     shape = RoundedCornerShape(12.dp),
   ) {
     Row(
@@ -478,7 +470,6 @@ fun PlaylistTrackListItem(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
     ) {
-      // Thumbnail with simple background, episode number, and progress
       Box(
         modifier = Modifier
           .width(100.dp)
@@ -487,7 +478,6 @@ fun PlaylistTrackListItem(
           .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         contentAlignment = Alignment.Center,
       ) {
-        // Show actual thumbnail or fallback icon
         thumbnail?.let { bmp ->
           Image(
             bitmap = bmp.asImageBitmap(),
@@ -496,7 +486,6 @@ fun PlaylistTrackListItem(
             contentScale = ContentScale.Crop,
           )
         } ?: run {
-          // Movie icon as fallback placeholder
           Icon(
             imageVector = Icons.Outlined.Movie,
             contentDescription = null,
@@ -505,54 +494,33 @@ fun PlaylistTrackListItem(
           )
         }
 
-        // Video number badge in top-left with better visibility
         Box(
           modifier = Modifier
             .align(Alignment.TopStart)
             .padding(6.dp)
-            .background(
-              color = Color.Black.copy(alpha = 0.7f),
-              shape = RoundedCornerShape(6.dp),
-            )
+            .background(color = Color.Black.copy(alpha = 0.7f), shape = RoundedCornerShape(6.dp))
             .padding(horizontal = 8.dp, vertical = 4.dp),
         ) {
           Text(
             text = "${item.index + 1}",
-            style = MaterialTheme.typography.labelMedium.copy(
-              fontWeight = FontWeight.Bold,
-              fontSize = 12.sp,
-            ),
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, fontSize = 12.sp),
             color = Color.White,
           )
         }
       }
 
-      // Title and info
-      Column(
-        modifier = Modifier.weight(1f),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
+      Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
           text = item.title,
           style = MaterialTheme.typography.bodyMedium.copy(
             fontWeight = if (item.isPlaying) FontWeight.Bold else FontWeight.Normal,
-            color = if (item.isPlaying) {
-              accentColor
-            } else if (item.isWatched) {
-              MaterialTheme.colorScheme.onSurfaceVariant
-            } else {
-              MaterialTheme.colorScheme.onSurface
-            },
+            color = if (item.isPlaying) accentColor else if (item.isWatched) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
           ),
           maxLines = 2,
           overflow = TextOverflow.Ellipsis,
         )
 
-        // Duration and resolution chips - always show with loading state if empty
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-          // Duration chip
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
           if (item.duration.isNotEmpty()) {
             Surface(
               color = if (item.isPlaying) accentColor.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
@@ -561,9 +529,7 @@ fun PlaylistTrackListItem(
               Text(
                 text = item.duration,
                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 10.sp,
-                ),
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                 color = if (item.isPlaying) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
               )
             }
@@ -571,7 +537,6 @@ fun PlaylistTrackListItem(
             LoadingChip(width = 40.dp)
           }
           
-          // Resolution chip
           if (item.resolution.isNotEmpty()) {
             Surface(
               color = if (item.isPlaying) accentColor.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
@@ -580,9 +545,7 @@ fun PlaylistTrackListItem(
               Text(
                 text = item.resolution,
                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 10.sp,
-                ),
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                 color = if (item.isPlaying) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
               )
             }
@@ -592,24 +555,14 @@ fun PlaylistTrackListItem(
         }
       }
 
-      // Status badges
-      when {
-        item.isPlaying -> {
-          Surface(
-            color = accentColor.copy(alpha = 0.15f),
-            shape = RoundedCornerShape(16.dp),
-          ) {
-            Text(
-              text = "Playing",
-              modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = accentColor,
-              ),
-            )
-          }
+      if (item.isPlaying) {
+        Surface(color = accentColor.copy(alpha = 0.15f), shape = RoundedCornerShape(16.dp)) {
+          Text(
+            text = "Playing",
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold, color = accentColor),
+          )
         }
-
       }
     }
   }
@@ -624,18 +577,11 @@ fun PlaylistTrackGridItem(
   skipThumbnail: Boolean = false,
   modifier: Modifier = Modifier,
 ) {
-  // Use theme colors dynamically
   val accentColor = MaterialTheme.colorScheme.primary
   val accentSecondary = MaterialTheme.colorScheme.tertiary
-
-  // Thumbnail state - uses cache to persist across recompositions
   val videoPath = item.path.ifBlank { item.uri.toString() }
-  var thumbnail by remember(videoPath) {
-    mutableStateOf(thumbnailCache[videoPath])
-  }
+  var thumbnail by remember(videoPath) { mutableStateOf(thumbnailCache[videoPath]) }
 
-  // Load thumbnail asynchronously
-  // Skip thumbnail loading for M3U playlists (network streams)
   LaunchedEffect(videoPath) {
     if (!skipThumbnail && !thumbnailCache.containsKey(videoPath)) {
       val bmp = loadMediaStoreThumbnail(context, item.uri)
@@ -650,11 +596,8 @@ fun PlaylistTrackGridItem(
       brush = Brush.linearGradient(listOf(accentColor, accentSecondary)),
       shape = RoundedCornerShape(12.dp),
     )
-  } else {
-    Modifier
-  }
+  } else Modifier
 
-  // YouTube-style vertical card
   Surface(
     modifier = modifier
       .width(200.dp)
@@ -664,11 +607,7 @@ fun PlaylistTrackGridItem(
     color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
     shape = RoundedCornerShape(12.dp),
   ) {
-    Column(
-      modifier = Modifier.padding(MaterialTheme.spacing.smaller),
-      verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
-    ) {
-      // Thumbnail with 16:9 aspect ratio
+    Column(modifier = Modifier.padding(MaterialTheme.spacing.smaller), verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller)) {
       Box(
         modifier = Modifier
           .fillMaxWidth()
@@ -677,7 +616,6 @@ fun PlaylistTrackGridItem(
           .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         contentAlignment = Alignment.Center,
       ) {
-        // Show actual thumbnail or fallback icon
         thumbnail?.let { bmp ->
           Image(
             bitmap = bmp.asImageBitmap(),
@@ -686,7 +624,6 @@ fun PlaylistTrackGridItem(
             contentScale = ContentScale.Crop,
           )
         } ?: run {
-          // Movie icon as fallback placeholder
           Icon(
             imageVector = Icons.Outlined.Movie,
             contentDescription = null,
@@ -695,104 +632,63 @@ fun PlaylistTrackGridItem(
           )
         }
 
-        // Video number badge in top-left
         Box(
           modifier = Modifier
             .align(Alignment.TopStart)
             .padding(6.dp)
-            .background(
-              color = Color.Black.copy(alpha = 0.7f),
-              shape = RoundedCornerShape(6.dp),
-            )
+            .background(color = Color.Black.copy(alpha = 0.7f), shape = RoundedCornerShape(6.dp))
             .padding(horizontal = 8.dp, vertical = 4.dp),
         ) {
           Text(
             text = "${item.index + 1}",
-            style = MaterialTheme.typography.labelMedium.copy(
-              fontWeight = FontWeight.Bold,
-              fontSize = 12.sp,
-            ),
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, fontSize = 12.sp),
             color = Color.White,
           )
         }
 
-        // Duration badge in bottom-right
         if (item.duration.isNotEmpty()) {
           Box(
             modifier = Modifier
               .align(Alignment.BottomEnd)
               .padding(6.dp)
-              .background(
-                color = Color.Black.copy(alpha = 0.8f),
-                shape = RoundedCornerShape(4.dp),
-              )
+              .background(color = Color.Black.copy(alpha = 0.8f), shape = RoundedCornerShape(4.dp))
               .padding(horizontal = 6.dp, vertical = 2.dp),
           ) {
             Text(
               text = item.duration,
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-              ),
+              style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium),
               color = Color.White,
             )
           }
         } else {
-          // Loading duration badge
-          Box(
-            modifier = Modifier
-              .align(Alignment.BottomEnd)
-              .padding(6.dp)
-          ) {
+          Box(modifier = Modifier.align(Alignment.BottomEnd).padding(6.dp)) {
             LoadingChip(width = 40.dp, height = 18.dp, isDark = true)
           }
         }
 
-        // Playing indicator overlay
         if (item.isPlaying) {
           Box(
             modifier = Modifier
               .matchParentSize()
-              .background(
-                brush = Brush.verticalGradient(
-                  colors = listOf(
-                    accentColor.copy(alpha = 0.3f),
-                    accentColor.copy(alpha = 0.1f),
-                  )
-                )
-              )
+              .background(brush = Brush.verticalGradient(colors = listOf(accentColor.copy(alpha = 0.3f), accentColor.copy(alpha = 0.1f))))
           )
         }
       }
 
-      // Title and metadata
-      Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
+      Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
           text = item.title,
           modifier = Modifier.height(44.dp),
           style = MaterialTheme.typography.bodyMedium.copy(
             fontWeight = if (item.isPlaying) FontWeight.Bold else FontWeight.Medium,
             fontSize = 14.sp,
-            color = if (item.isPlaying) {
-              accentColor
-            } else if (item.isWatched) {
-              MaterialTheme.colorScheme.onSurfaceVariant
-            } else {
-              MaterialTheme.colorScheme.onSurface
-            },
+            color = if (item.isPlaying) accentColor else if (item.isWatched) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
           ),
           maxLines = 2,
           overflow = TextOverflow.Ellipsis,
         )
 
-        // Resolution and status
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          // Resolution chip
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
           if (item.resolution.isNotEmpty()) {
             Surface(
               color = if (item.isPlaying) accentColor.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
@@ -801,9 +697,7 @@ fun PlaylistTrackGridItem(
               Text(
                 text = item.resolution,
                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 10.sp,
-                ),
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                 color = if (item.isPlaying) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
               )
             }
@@ -812,18 +706,11 @@ fun PlaylistTrackGridItem(
           }
 
           if (item.isPlaying) {
-            Surface(
-              color = accentColor.copy(alpha = 0.15f),
-              shape = RoundedCornerShape(4.dp),
-            ) {
+            Surface(color = accentColor.copy(alpha = 0.15f), shape = RoundedCornerShape(4.dp)) {
               Text(
                 text = "Playing",
                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 10.sp,
-                  fontWeight = FontWeight.SemiBold,
-                  color = accentColor,
-                ),
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = accentColor),
               )
             }
           }
@@ -832,7 +719,6 @@ fun PlaylistTrackGridItem(
     }
   }
 }
-
 
 @Composable
 fun LoadingChip(
@@ -852,17 +738,8 @@ fun LoadingChip(
     label = "shimmer"
   )
 
-  val baseColor = if (isDark) {
-    Color.White.copy(alpha = 0.1f)
-  } else {
-    MaterialTheme.colorScheme.surfaceContainerHighest
-  }
-  
-  val shimmerColor = if (isDark) {
-    Color.White.copy(alpha = 0.2f)
-  } else {
-    MaterialTheme.colorScheme.surfaceContainerHigh
-  }
+  val baseColor = if (isDark) Color.White.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceContainerHighest
+  val shimmerColor = if (isDark) Color.White.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceContainerHigh
 
   Box(
     modifier = modifier
@@ -871,11 +748,7 @@ fun LoadingChip(
       .clip(RoundedCornerShape(4.dp))
       .background(
         brush = Brush.linearGradient(
-          colors = listOf(
-            baseColor,
-            shimmerColor,
-            baseColor,
-          ),
+          colors = listOf(baseColor, shimmerColor, baseColor),
           start = Offset(shimmerTranslate.value - 200f, 0f),
           end = Offset(shimmerTranslate.value, 0f)
         )

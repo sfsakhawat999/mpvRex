@@ -41,6 +41,7 @@ import app.marlboroadvance.mpvex.cinehub.data.CineCloudRepoClient
 import app.marlboroadvance.mpvex.youtube.data.InvidiousClient
 import app.marlboroadvance.mpvex.youtube.model.YoutubeVideo
 import app.marlboroadvance.mpvex.ui.browser.components.BrowserTopBar
+import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -311,7 +312,7 @@ fun CineHubScreen(
             }
         }
 
-        // --- MOVIES DETAIL OVERELAY METADATA SHEET ---
+        // --- MOVIES DETAIL OVERLAY METADATA SHEET ---
         selectedMovie?.let { movie ->
             if (!movie.videoFilePath.startsWith("cnc_stream:")) {
                 var trailerVideo by remember { mutableStateOf<YoutubeVideo?>(null) }
@@ -431,7 +432,7 @@ fun CineHubScreen(
                                 }
                             }
                             
-                            // ================= MOVIE CAST MEMEBERS ROW SLIDER =================
+                            // ================= MOVIE CAST MEMBERS ROW SLIDER =================
                             if (movieActors.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text("Cast Members", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 6.dp))

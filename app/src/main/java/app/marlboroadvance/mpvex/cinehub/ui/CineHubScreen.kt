@@ -36,6 +36,7 @@ import coil.compose.AsyncImage
 import app.marlboroadvance.mpvex.cinehub.model.MovieItem
 import app.marlboroadvance.mpvex.cinehub.model.TvShowItem
 import app.marlboroadvance.mpvex.cinehub.model.EpisodeItem
+import app.marlboroadvance.mpvex.cinehub.model.ActorItem
 import app.marlboroadvance.mpvex.cinehub.data.NfoScanner
 import app.marlboroadvance.mpvex.cinehub.data.CineCloudRepoClient
 import app.marlboroadvance.mpvex.youtube.data.InvidiousClient
@@ -56,6 +57,7 @@ fun CineHubScreen(
     
     var selectedMovie by remember { mutableStateOf<MovieItem?>(null) }
     var selectedTvShow by remember { mutableStateOf<TvShowItem?>(null) }
+    var activeActorLookup by remember { mutableStateOf<String?>(null) }
 
     var onlineMovies by remember { mutableStateOf<List<MovieItem>>(emptyList()) }
     var onlineTvShows by remember { mutableStateOf<List<TvShowItem>>(emptyList()) }
@@ -316,7 +318,6 @@ fun CineHubScreen(
         selectedMovie?.let { movie ->
             if (!movie.videoFilePath.startsWith("cnc_stream:")) {
                 var trailerVideo by remember { mutableStateOf<YoutubeVideo?>(null) }
-                val movieActors = remember(movie) { NfoScanner.parseActorsFromNfo(File(movie.videoFilePath.replace(File(movie.videoFilePath).name, "movie.nfo"))) }
                 
                 LaunchedEffect(movie) {
                     scope.launch {
@@ -432,30 +433,29 @@ fun CineHubScreen(
                                 }
                             }
                             
-                            // ================= MOVIE CAST MEMBERS ROW SLIDER =================
-                            if (movieActors.isNotEmpty()) {
+                            // Elegant Actor Deck Layout
+                            if (movie.actors.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(16.dp))
-                                Text("Cast Members", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 6.dp))
+                                Text("Cast & Characters", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                                 LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.fillMaxWidth()
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                                 ) {
-                                    items(movieActors) { (name, imgUrl) ->
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
+                                    items(movie.actors) { actor ->
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
                                             modifier = Modifier
-                                                .clip(RoundedCornerShape(12.dp))
-                                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-                                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                                .width(76.dp)
+                                                .clickable { activeActorLookup = actor.name }
                                         ) {
                                             AsyncImage(
-                                                model = imgUrl,
-                                                contentDescription = name,
+                                                model = actor.thumbUrl,
+                                                contentDescription = actor.name,
                                                 contentScale = ContentScale.Crop,
-                                                modifier = Modifier.size(32.dp).clip(CircleShape).background(Color.Gray)
+                                                modifier = Modifier.size(58.dp).clip(CircleShape).background(Color.LightGray)
                                             )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text(name, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(actor.name, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Medium)
                                         }
                                     }
                                 }
@@ -465,6 +465,7 @@ fun CineHubScreen(
                             Button(
                                 onClick = {
                                     selectedMovie = null
+                                    // Strictly bypassed directly into MPVrex native last played positioning memory loop
                                     onPlayRequested(movie.videoFilePath, movie.title)
                                 },
                                 modifier = Modifier.fillMaxWidth(),
@@ -488,14 +489,12 @@ fun CineHubScreen(
             }
         }
 
-        // --- TV SHOWS DETAIL OVERLAY WITH SORTED EPISODES & MATERIAL YOU GLASSMORPHISM ---
+        // --- TV SHOWS DETAIL OVERLAY ---
         selectedTvShow?.let { show ->
             if (!show.folderPath.startsWith("cnc_tv:")) {
-                val showNfoFile = remember(show) { File(show.folderPath, "tvshow.nfo") }
                 val episodes = remember(show) { NfoScanner.scanTvShowEpisodes(File(show.folderPath)).sortedBy { it.episode } }
                 val seasons = remember(episodes) { episodes.groupBy { it.season }.toSortedMap() }
                 var selectedSeasonTab by remember { mutableStateOf(seasons.keys.firstOrNull() ?: 1) }
-                val tvActors = remember(show) { NfoScanner.parseActorsFromNfo(showNfoFile) }
 
                 ModalBottomSheet(
                     onDismissRequest = { selectedTvShow = null },
@@ -506,29 +505,28 @@ fun CineHubScreen(
                         Text("Studio: ${show.studio} | Genre: ${show.genre}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         Spacer(modifier = Modifier.height(12.dp))
                         
-                        // ================= TV SHOWS CAST MEMBERS ROW SLIDER =================
-                        if (tvActors.isNotEmpty()) {
-                            Text("Cast Members", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 6.dp))
+                        // Elegant Actor Deck Layout
+                        if (show.actors.isNotEmpty()) {
+                            Text("Cast & Characters", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                             LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp)
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                             ) {
-                                items(tvActors) { (name, portraitUrl) ->
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
+                                items(show.actors) { actor ->
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                            .width(76.dp)
+                                            .clickable { activeActorLookup = actor.name }
                                     ) {
                                         AsyncImage(
-                                            model = portraitUrl,
-                                            contentDescription = name,
+                                            model = actor.thumbUrl,
+                                            contentDescription = actor.name,
                                             contentScale = ContentScale.Crop,
-                                            modifier = Modifier.size(32.dp).clip(CircleShape).background(Color.Gray)
+                                            modifier = Modifier.size(58.dp).clip(CircleShape).background(Color.LightGray)
                                         )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text(name, fontSize = 12.sp, fontWeight = FontWeight.Medium, maxLines = 1)
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(actor.name, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Medium)
                                     }
                                 }
                             }
@@ -554,7 +552,6 @@ fun CineHubScreen(
 
                         LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f, fill = false)) {
                             items(seasons[selectedSeasonTab] ?: emptyList()) { episode ->
-                                val epNfoProgress = remember(episode) { NfoScanner.parseWatchProgress(File(episode.videoFilePath.replace(File(episode.videoFilePath).extension, "nfo"))) }
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -592,6 +589,7 @@ fun CineHubScreen(
                                             IconButton(
                                                 onClick = {
                                                     selectedTvShow = null
+                                                    // Bypassed directly to target video file path matching player resume caching hooks
                                                     onPlayRequested(episode.videoFilePath, "${show.title} - S${episode.season}E${episode.episode}")
                                                 },
                                                 colors = IconButtonDefaults.iconButtonColors(
@@ -601,18 +599,42 @@ fun CineHubScreen(
                                                 Icon(Icons.Default.PlayArrow, contentDescription = "Play Episode", tint = MaterialTheme.colorScheme.onPrimaryContainer)
                                             }
                                         }
-                                        
-                                        // --- INLINE EPISODE PROGRESS TRACKING BAR ---
-                                        if (epNfoProgress > 0f) {
-                                            LinearProgressIndicator(
-                                                progress = { epNfoProgress },
-                                                modifier = Modifier.fillMaxWidth().height(3.dp),
-                                                color = MaterialTheme.colorScheme.error,
-                                                trackColor = Color.Transparent
-                                            )
-                                        }
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- SUB-BOTTOM SHEET: SHARED FILMOGRAPHY LOOKUP FROM ACTOR CLICK ---
+        activeActorLookup?.let { actorName ->
+            val (actorMovies, actorShows) = remember(actorName) { NfoScanner.getSharedFilmography(actorName, moviesList, tvShowsList) }
+            ModalBottomSheet(
+                onDismissRequest = { activeActorLookup = null },
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
+                    Text(text = "Filmography: $actorName", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(3),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalGridArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
+                    ) {
+                        items(actorMovies) { movie ->
+                            CineHubGridCard(movie.title, movie.genre, movie.userRating, movie.posterPath, movie.watchProgress) {
+                                activeActorLookup = null
+                                selectedMovie = movie
+                            }
+                        }
+                        items(actorShows) { show ->
+                            CineHubGridCard(show.title, show.genre, show.userRating, show.posterPath, show.watchProgress) {
+                                activeActorLookup = null
+                                selectedTvShow = show
                             }
                         }
                     }

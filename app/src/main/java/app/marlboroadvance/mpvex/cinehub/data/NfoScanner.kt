@@ -5,6 +5,8 @@ import app.marlboroadvance.mpvex.cinehub.model.MovieItem
 import app.marlboroadvance.mpvex.cinehub.model.TvShowItem
 import app.marlboroadvance.mpvex.cinehub.model.EpisodeItem
 import org.w3c.dom.Document
+import org.w3c.dom.Element
+import org.w3c.dom.Node
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -85,12 +87,12 @@ object NfoScanner {
                         TvShowItem(
                             folderPath = directory.absolutePath,
                             title = onlineMeta?.title ?: directory.name,
-                            plot = onlineMeta?.plot ?: "No local or online show summary discovered.",
-                            userRating = onlineMeta?.rating ?: 0.0,
+                            plot = "No description available.",
+                            userRating = 0.0,
                             genre = "Local Series",
-                            premiered = onlineMeta?.premiered ?: "2026",
+                            premiered = "2026",
                             studio = "Unknown",
-                            posterPath = onlineMeta?.posterPath
+                            posterPath = null
                         )
                     )
                 }
@@ -152,17 +154,27 @@ object NfoScanner {
             val doc = getXmlDocument(nfoFile) ?: return null
             if (doc.documentElement.nodeName != "movie") return null
 
+            val root = doc.documentElement
+            val title = getTagText(root, "title").ifBlank { videoFile.nameWithoutExtension }
+            val originalTitle = getTagText(root, "originaltitle")
+            val userRating = getTagText(root, "userrating").toDoubleOrNull() ?: 0.0
+            val plot = getTagText(root, "plot").ifBlank { "No description available." }
+            val mpaa = getTagText(root, "mpaa")
+            val genre = getTagText(root, "genre").ifBlank { "Local Movie" }
+            val director = getTagText(root, "director").ifBlank { "Unknown" }
+            val premiered = getTagText(root, "premiered").ifBlank { getTagText(root, "year").ifBlank { "2026" } }
+
             MovieItem(
                 videoFilePath = videoFile.absolutePath,
-                title = doc.getElementsByTagName("title").item(0)?.textContent ?: videoFile.nameWithoutExtension,
-                originalTitle = doc.getElementsByTagName("originaltitle").item(0)?.textContent ?: "",
-                userRating = doc.getElementsByTagName("userrating").item(0)?.textContent?.toDoubleOrNull() ?: 0.0,
-                plot = doc.getElementsByTagName("plot").item(0)?.textContent ?: "No description available.",
-                mpaa = doc.getElementsByTagName("mpaa").item(0)?.textContent ?: "",
-                genre = doc.getElementsByTagName("genre").item(0)?.textContent ?: "Local Movie",
-                director = doc.getElementsByTagName("director").item(0)?.textContent ?: "Unknown",
-                premiered = doc.getElementsByTagName("premiered").item(0)?.textContent ?: "2026",
-                posterPath = resolvePoster(nfoFile)
+                title = title,
+                originalTitle = originalTitle,
+                userRating = userRating,
+                plot = plot,
+                mpaa = mpaa,
+                genre = genre,
+                director = director,
+                premiered = premiered,
+                posterPath = resolvePosterWithFallback(nfoFile, root)
             )
         } catch (e: Exception) {
             Log.e("CineHubScanner", "Error processing movie XML: ${nfoFile.name}", e)
@@ -175,15 +187,23 @@ object NfoScanner {
             val doc = getXmlDocument(nfoFile) ?: return null
             if (doc.documentElement.nodeName != "tvshow") return null
 
+            val root = doc.documentElement
+            val title = getTagText(root, "title").ifBlank { folder.name }
+            val plot = getTagText(root, "plot").ifBlank { "No description available." }
+            val userRating = getTagText(root, "userrating").toDoubleOrNull() ?: 0.0
+            val genre = getTagText(root, "genre").ifBlank { "Local Series" }
+            val premiered = getTagText(root, "premiered").ifBlank { getTagText(root, "year").ifBlank { "2026" } }
+            val studio = getTagText(root, "studio").ifBlank { "Unknown" }
+
             TvShowItem(
                 folderPath = folder.absolutePath,
-                title = doc.getElementsByTagName("title").item(0)?.textContent ?: folder.name,
-                plot = doc.getElementsByTagName("plot").item(0)?.textContent ?: "No description available.",
-                userRating = doc.getElementsByTagName("userrating").item(0)?.textContent?.toDoubleOrNull() ?: 0.0,
-                genre = doc.getElementsByTagName("genre").item(0)?.textContent ?: "Local Series",
-                premiered = doc.getElementsByTagName("premiered").item(0)?.textContent ?: "2026",
-                studio = doc.getElementsByTagName("studio").item(0)?.textContent ?: "Unknown",
-                posterPath = resolvePoster(nfoFile)
+                title = title,
+                plot = plot,
+                userRating = userRating,
+                genre = genre,
+                premiered = premiered,
+                studio = studio,
+                posterPath = resolvePosterWithFallback(nfoFile, root)
             )
         } catch (e: Exception) {
             Log.e("CineHubScanner", "Error processing tvshow XML: ${nfoFile.name}", e)
@@ -196,14 +216,22 @@ object NfoScanner {
             val doc = getXmlDocument(nfoFile) ?: return null
             if (doc.documentElement.nodeName != "episodedetails") return null
 
+            val root = doc.documentElement
+            val title = getTagText(root, "title").ifBlank { videoFile.nameWithoutExtension }
+            val season = getTagText(root, "season").toIntOrNull() ?: 1
+            val episode = getTagText(root, "episode").toIntOrNull() ?: 1
+            val plot = getTagText(root, "plot")
+            val userRating = getTagText(root, "userrating").toDoubleOrNull() ?: 0.0
+            val aired = getTagText(root, "aired")
+
             EpisodeItem(
                 videoFilePath = videoFile.absolutePath,
-                title = doc.getElementsByTagName("title").item(0)?.textContent ?: videoFile.nameWithoutExtension,
-                season = doc.getElementsByTagName("season").item(0)?.textContent?.toIntOrNull() ?: 1,
-                episode = doc.getElementsByTagName("episode").item(0)?.textContent?.toIntOrNull() ?: 1,
-                plot = doc.getElementsByTagName("plot").item(0)?.textContent ?: "",
-                userRating = doc.getElementsByTagName("userrating").item(0)?.textContent?.toDoubleOrNull() ?: 0.0,
-                aired = doc.getElementsByTagName("aired").item(0)?.textContent ?: ""
+                title = title,
+                season = season,
+                episode = episode,
+                plot = plot,
+                userRating = userRating,
+                aired = aired
             )
         } catch (e: Exception) {
             Log.e("CineHubScanner", "Error processing episode XML: ${nfoFile.name}", e)
@@ -221,12 +249,92 @@ object NfoScanner {
         } catch (e: Exception) { null }
     }
 
-    private fun resolvePoster(nfoFile: File): String? {
+    private fun getTagText(element: Element, tagName: String): String {
+        val nodeList = element.getElementsByTagName(tagName)
+        if (nodeList.length > 0) {
+            return nodeList.item(0)?.textContent?.trim() ?: ""
+        }
+        return ""
+    }
+
+    /**
+     * Advanced Failover Artwork Engine: Extracts local cover files first,
+     * and fallback parses direct high-quality cloud URLs inside <thumb> blocks natively.
+     */
+    private fun resolvePosterWithFallback(nfoFile: File, rootElement: Element): String? {
         val baseName = nfoFile.nameWithoutExtension
         val parentDir = nfoFile.parentFile
-        return File(parentDir, "$baseName.jpg").takeIf { it.exists() }?.absolutePath
+
+        // Step 1: Check Local Target Directory Files
+        val localCheck = File(parentDir, "$baseName.jpg").takeIf { it.exists() }?.absolutePath
             ?: File(parentDir, "$baseName.png").takeIf { it.exists() }?.absolutePath
             ?: File(parentDir, "poster.jpg").takeIf { it.exists() }?.absolutePath
             ?: File(parentDir, "folder.jpg").takeIf { it.exists() }?.absolutePath
+        if (localCheck != null) return localCheck
+
+        // Step 2: Fallback Parse Embedded XML <thumb> tags
+        val thumbList = rootElement.getElementsByTagName("thumb")
+        for (i in 0 until thumbList.length) {
+            val thumbNode = thumbList.item(i)
+            if (thumbNode != null && thumbNode.nodeType == Node.ELEMENT_NODE) {
+                val thumbElement = thumbNode as Element
+                val aspect = thumbElement.getAttribute("aspect")
+                // Give absolute priority to standard vertical posters
+                if (aspect == "poster" || aspect.isBlank()) {
+                    val url = thumbElement.textContent?.trim() ?: ""
+                    if (url.startsWith("http")) return url
+                }
+            }
+        }
+
+        // Final fallback to any valid url inside thumb blocks
+        if (thumbList.length > 0) {
+            val firstUrl = thumbList.item(0)?.textContent?.trim() ?: ""
+            if (firstUrl.startsWith("http")) return firstUrl
+        }
+
+        return null
+    }
+
+    /**
+     * Extracts deep actor information blocks including avatar portraits from NFO schemas
+     */
+    fun parseActorsFromNfo(nfoFile: File): List<Pair<String, String>> {
+        val actorsList = mutableListOf<Pair<String, String>>()
+        try {
+            val doc = getXmlDocument(nfoFile) ?: return actorsList
+            val actorNodes = doc.getElementsByTagName("actor")
+            for (i in 0 until actorNodes.length) {
+                val node = actorNodes.item(i)
+                if (node != null && node.nodeType == Node.ELEMENT_NODE) {
+                    val element = node as Element
+                    val name = getTagText(element, "name")
+                    val thumb = getTagText(element, "thumb")
+                    if (name.isNotBlank()) {
+                        actorsList.add(Pair(name, thumb))
+                    }
+                }
+            }
+        } catch (_: Exception) {}
+        return actorsList
+    }
+
+    /**
+     * Parses content resume state ratios to correctly track video progress layers
+     */
+    fun parseWatchProgress(nfoFile: File): Float {
+        try {
+            val doc = getXmlDocument(nfoFile) ?: return 0f
+            val resumeNodes = doc.getElementsByTagName("resume")
+            if (resumeNodes.length > 0) {
+                val element = resumeNodes.item(0) as Element
+                val position = getTagText(element, "position").toFloatOrNull() ?: 0f
+                val total = getTagText(element, "total").toFloatOrNull() ?: 0f
+                if (total > 0f) {
+                    return (position / total).coerceIn(0f, 1f)
+                }
+            }
+        } catch (_: Exception) {}
+        return 0f
     }
 }

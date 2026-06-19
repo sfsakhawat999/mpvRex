@@ -1,0 +1,491 @@
+package xyz.mpv.rex.ui.preferences
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import xyz.mpv.rex.R
+import xyz.mpv.rex.preferences.PlayerPreferences
+import xyz.mpv.rex.preferences.preference.collectAsState
+import xyz.mpv.rex.presentation.Screen
+import xyz.mpv.rex.ui.player.PlayerOrientation
+import xyz.mpv.rex.ui.player.controls.components.sheets.toFixed
+import xyz.mpv.rex.ui.utils.LocalBackStack
+import kotlinx.serialization.Serializable
+import me.zhanghai.compose.preference.ListPreference
+import me.zhanghai.compose.preference.ProvidePreferenceLocals
+import me.zhanghai.compose.preference.SliderPreference
+import xyz.mpv.rex.ui.preferences.components.SwitchPreference
+import org.koin.compose.koinInject
+import kotlin.math.roundToInt
+
+@Serializable
+object PlayerPreferencesScreen : Screen {
+  @OptIn(ExperimentalMaterial3Api::class)
+  @Composable
+  override fun Content() {
+    val backstack = LocalBackStack.current
+    val context = LocalContext.current
+    val preferences = koinInject<PlayerPreferences>()
+    Scaffold(
+      topBar = {
+        TopAppBar(
+          title = { 
+            Text(
+              text = stringResource(id = R.string.pref_player),
+              style = MaterialTheme.typography.headlineSmall,
+              fontWeight = FontWeight.ExtraBold,
+              color = MaterialTheme.colorScheme.primary,
+            ) 
+          },
+          navigationIcon = {
+            IconButton(onClick = backstack::removeLastOrNull) {
+              Icon(
+                Icons.AutoMirrored.Outlined.ArrowBack, 
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+              )
+            }
+          },
+        )
+      },
+    ) { padding ->
+      ProvidePreferenceLocals {
+        LazyColumn(
+          modifier =
+            Modifier
+              .fillMaxSize()
+              .padding(padding),
+        ) {
+          // General Section
+          item {
+            PreferenceSectionHeader(title = "General")
+          }
+          
+          item {
+            PreferenceCard {
+              val orientation by preferences.orientation.collectAsState()
+              ListPreference(
+                value = orientation,
+                onValueChange = preferences.orientation::set,
+                values = PlayerOrientation.entries,
+                valueToText = { AnnotatedString(context.getString(it.titleRes)) },
+                title = { Text(text = stringResource(id = R.string.pref_player_orientation)) },
+                summary = { 
+                  Text(
+                    text = stringResource(id = orientation.titleRes),
+                    color = MaterialTheme.colorScheme.outline,
+                  ) 
+                },
+              )
+              
+              PreferenceDivider()
+              
+              val savePositionOnQuit by preferences.savePositionOnQuit.collectAsState()
+              SwitchPreference(
+                value = savePositionOnQuit,
+                onValueChange = preferences.savePositionOnQuit::set,
+                title = { Text(stringResource(R.string.pref_player_save_position_on_quit)) },
+              )
+              
+              PreferenceDivider()
+              
+              val closeAfterEndOfVideo by preferences.closeAfterReachingEndOfVideo.collectAsState()
+              SwitchPreference(
+                value = closeAfterEndOfVideo,
+                onValueChange = preferences.closeAfterReachingEndOfVideo::set,
+                title = { Text(stringResource(id = R.string.pref_player_close_after_eof)) },
+              )
+              
+              PreferenceDivider()
+              
+              val autoplayNextVideo by preferences.autoplayNextVideo.collectAsState()
+              SwitchPreference(
+                value = autoplayNextVideo,
+                onValueChange = preferences.autoplayNextVideo::set,
+                title = { Text(text = "Autoplay next video") },
+                summary = {
+                  Text(
+                    text = if (autoplayNextVideo)
+                      "Automatically play next video when current ends"
+                    else
+                      "Stay on current video when it ends",
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
+              
+              PreferenceDivider()
+              
+              val playlistMode by preferences.playlistMode.collectAsState()
+              SwitchPreference(
+                value = playlistMode,
+                onValueChange = preferences.playlistMode::set,
+                title = { Text(text = stringResource(R.string.pref_autoplay_title)) },
+                summary = {
+                  Text(
+                    text = if (playlistMode)
+                      "Show next/previous buttons for all videos in folder"
+                    else
+                      "Play videos individually (select multiple for playlist)",
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
+              
+              PreferenceDivider()
+
+              val rememberBrightness by preferences.rememberBrightness.collectAsState()
+              SwitchPreference(
+                value = rememberBrightness,
+                onValueChange = preferences.rememberBrightness::set,
+                title = { Text(text = stringResource(R.string.pref_player_remember_brightness)) },
+              )
+
+              PreferenceDivider()
+
+              val autoPiPOnNavigation by preferences.autoPiPOnNavigation.collectAsState()
+              SwitchPreference(
+                value = autoPiPOnNavigation,
+                onValueChange = preferences.autoPiPOnNavigation::set,
+                title = { Text("Auto Picture-in-Picture") },
+                summary = {
+                  Text(
+                    text = "Automatically enter PIP mode when pressing home or back",
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
+
+              PreferenceDivider()
+
+              val keepScreenOnWhenPaused by preferences.keepScreenOnWhenPaused.collectAsState()
+              SwitchPreference(
+                value = keepScreenOnWhenPaused,
+                onValueChange = preferences.keepScreenOnWhenPaused::set,
+                title = { Text(stringResource(R.string.pref_player_keep_screen_on_when_paused_title)) },
+                summary = {
+                  Text(
+                    text = if (keepScreenOnWhenPaused)
+                      "Screen stays awake while video is paused"
+                    else
+                      "Screen can turn off while video is paused",
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
+              
+              PreferenceDivider()
+
+              val resumeOnUnlock by preferences.resumeOnUnlock.collectAsState()
+              SwitchPreference(
+                value = resumeOnUnlock,
+                onValueChange = preferences.resumeOnUnlock::set,
+                title = { Text(stringResource(R.string.pref_player_resume_on_unlock_title)) },
+                summary = {
+                  Text(
+                    text = if (resumeOnUnlock)
+                      stringResource(R.string.pref_player_resume_on_unlock_summary_on)
+                    else
+                      stringResource(R.string.pref_player_resume_on_unlock_summary_off),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
+            }
+          }
+          // Seeking Section
+          item {
+            PreferenceSectionHeader(title = stringResource(R.string.pref_player_seeking_title))
+          }
+          
+          item {
+            PreferenceCard {
+              val showDoubleTapOvals by preferences.showDoubleTapOvals.collectAsState()
+              SwitchPreference(
+                value = showDoubleTapOvals,
+                onValueChange = preferences.showDoubleTapOvals::set,
+                title = { Text(stringResource(R.string.show_splash_ovals_on_double_tap_to_seek)) },
+              )
+              
+              PreferenceDivider()
+              
+              val showSeekTimeWhileSeeking by preferences.showSeekTimeWhileSeeking.collectAsState()
+              SwitchPreference(
+                value = showSeekTimeWhileSeeking,
+                onValueChange = preferences.showSeekTimeWhileSeeking::set,
+                title = { Text(stringResource(R.string.show_time_on_double_tap_to_seek)) },
+              )
+              
+              PreferenceDivider()
+              
+              val usePreciseSeeking by preferences.usePreciseSeeking.collectAsState()
+              SwitchPreference(
+                value = usePreciseSeeking,
+                onValueChange = preferences.usePreciseSeeking::set,
+                title = { Text(stringResource(R.string.pref_player_use_precise_seeking)) },
+              )
+              
+              PreferenceDivider()
+
+              val showSeekBarWhenSeeking by preferences.showSeekBarWhenSeeking.collectAsState()
+              SwitchPreference(
+                value = showSeekBarWhenSeeking,
+                onValueChange = preferences.showSeekBarWhenSeeking::set,
+                title = { Text(stringResource(R.string.pref_player_show_seekbar_when_seeking_title)) },
+                summary = { Text(stringResource(R.string.pref_player_show_seekbar_when_seeking_summary)) },
+              )
+              
+              PreferenceDivider()
+
+              val hideOsdText by preferences.hideOsdText.collectAsState()
+              SwitchPreference(
+                value = hideOsdText,
+                onValueChange = preferences.hideOsdText::set,
+                title = { Text(stringResource(R.string.pref_player_hide_osd_text_title)) },
+                summary = { Text(stringResource(R.string.pref_player_hide_osd_text_summary)) },
+              )
+              
+              PreferenceDivider()
+              
+              val customSkipDuration by preferences.customSkipDuration.collectAsState()
+              SliderPreference(
+                value = customSkipDuration.toFloat(),
+                onValueChange = { preferences.customSkipDuration.set(it.roundToInt()) },
+                title = { Text(stringResource(R.string.pref_player_custom_skip_duration_title)) },
+                valueRange = 5f..180f,
+                summary = {
+                   val summaryText = stringResource(R.string.pref_player_custom_skip_duration_summary)
+                   Text(
+                     "$summaryText ($customSkipDuration s)",
+                     color = MaterialTheme.colorScheme.outline,
+                   )
+                },
+                onSliderValueChange = { preferences.customSkipDuration.set(it.roundToInt()) },
+                sliderValue = customSkipDuration.toFloat(),
+              )
+            }
+          }
+          // Gestures Section
+          item {
+            PreferenceSectionHeader(title = stringResource(R.string.pref_player_gestures))
+          }
+          
+          item {
+            PreferenceCard {
+              val brightnessGesture by preferences.brightnessGesture.collectAsState()
+              SwitchPreference(
+                value = brightnessGesture,
+                onValueChange = preferences.brightnessGesture::set,
+                title = { Text(stringResource(R.string.pref_player_gestures_brightness)) },
+              )
+              
+              PreferenceDivider()
+              
+              val volumeGesture by preferences.volumeGesture.collectAsState()
+              SwitchPreference(
+                value = volumeGesture,
+                onValueChange = preferences.volumeGesture::set,
+                title = { Text(stringResource(R.string.pref_player_gestures_volume)) },
+              )
+              
+              PreferenceDivider()
+              
+              val pinchToZoomGesture by preferences.pinchToZoomGesture.collectAsState()
+              SwitchPreference(
+                value = pinchToZoomGesture,
+                onValueChange = preferences.pinchToZoomGesture::set,
+                title = { Text(stringResource(R.string.pref_player_gestures_pinch_to_zoom)) },
+              )
+              
+              PreferenceDivider()
+              
+              val horizontalSwipeToSeek by preferences.horizontalSwipeToSeek.collectAsState()
+              SwitchPreference(
+                value = horizontalSwipeToSeek,
+                onValueChange = preferences.horizontalSwipeToSeek::set,
+                title = { Text(stringResource(R.string.pref_player_gestures_horizontal_swipe_to_seek)) },
+              )
+              
+              PreferenceDivider()
+
+              val swipeToSubtitleSeek by preferences.swipeToSubtitleSeek.collectAsState()
+              SwitchPreference(
+                value = swipeToSubtitleSeek,
+                onValueChange = preferences.swipeToSubtitleSeek::set,
+                title = { Text(stringResource(R.string.pref_player_gestures_swipe_to_subtitle_seek_title)) },
+                summary = { Text(stringResource(R.string.pref_player_gestures_swipe_to_subtitle_seek_summary)) },
+              )
+
+              PreferenceDivider()
+
+              val moveSubtitleByDragging by preferences.moveSubtitleByDragging.collectAsState()
+              SwitchPreference(
+                value = moveSubtitleByDragging,
+                onValueChange = preferences.moveSubtitleByDragging::set,
+                title = { Text(stringResource(R.string.pref_player_gestures_move_subtitle_by_dragging_title)) },
+                summary = { Text(stringResource(R.string.pref_player_gestures_move_subtitle_by_dragging_summary)) },
+              )
+
+              PreferenceDivider()
+              
+              val horizontalSwipeSensitivity by preferences.horizontalSwipeSensitivity.collectAsState()
+              SliderPreference(
+                value = horizontalSwipeSensitivity,
+                onValueChange = { preferences.horizontalSwipeSensitivity.set(it.toFixed(3)) },
+                title = { Text(stringResource(R.string.pref_player_gestures_horizontal_swipe_sensitivity)) },
+                valueRange = 0.020f..0.1f,
+                summary = {
+                  val sensitivityPercent = (horizontalSwipeSensitivity * 1000).toInt()
+                  Text(
+                    "Current: ${sensitivityPercent}/100 (${if (sensitivityPercent < 30) "Low" else if (sensitivityPercent < 55) "Medium" else "High"})",
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                onSliderValueChange = { preferences.horizontalSwipeSensitivity.set(it.toFixed(3)) },
+                sliderValue = horizontalSwipeSensitivity,
+              )
+              
+              PreferenceDivider()
+              
+              val holdForMultipleSpeed by preferences.holdForMultipleSpeed.collectAsState()
+              SliderPreference(
+                value = holdForMultipleSpeed,
+                onValueChange = { preferences.holdForMultipleSpeed.set(it.toFixed(2)) },
+                title = { Text(stringResource(R.string.pref_player_gestures_hold_for_multiple_speed)) },
+                valueRange = 0f..6f,
+                summary = {
+                  Text(
+                    if (holdForMultipleSpeed == 0F) {
+                      stringResource(R.string.generic_disabled)
+                    } else {
+                      "%.2fx".format(holdForMultipleSpeed)
+                    },
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                onSliderValueChange = { preferences.holdForMultipleSpeed.set(it.toFixed(2)) },
+                sliderValue = holdForMultipleSpeed,
+              )
+              
+              PreferenceDivider()
+              
+              val showDynamicSpeedOverlay by preferences.showDynamicSpeedOverlay.collectAsState()
+              SwitchPreference(
+                value = showDynamicSpeedOverlay,
+                onValueChange = preferences.showDynamicSpeedOverlay::set,
+                title = { Text("Dynamic Speed Overlay") },
+                summary = {
+                  Text(
+                    "Show advance overlay for speed control during long press and swipe",
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                }
+              )
+            }
+          }
+          // Controls Section
+          item {
+            PreferenceSectionHeader(title = stringResource(R.string.pref_player_controls))
+          }
+
+          item {
+            PreferenceCard {
+              val disableMediaButtons by preferences.disableMediaButtons.collectAsState()
+              SwitchPreference(
+                value = disableMediaButtons,
+                onValueChange = preferences.disableMediaButtons::set,
+                title = { Text(stringResource(id = R.string.pref_player_controls_disable_media_buttons_title)) },
+                summary = {
+                  Text(
+                    text = stringResource(R.string.pref_player_controls_disable_media_buttons_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
+              
+              PreferenceDivider()
+              
+              val allowGesturesInPanels by preferences.allowGesturesInPanels.collectAsState()
+              SwitchPreference(
+                value = allowGesturesInPanels,
+                onValueChange = preferences.allowGesturesInPanels::set,
+                title = {
+                  Text(
+                    text = stringResource(id = R.string.pref_player_controls_allow_gestures_in_panels),
+                  )
+                },
+              )
+              
+              PreferenceDivider()
+              
+              val swapVolumeAndBrightness by preferences.swapVolumeAndBrightness.collectAsState()
+              SwitchPreference(
+                value = swapVolumeAndBrightness,
+                onValueChange = preferences.swapVolumeAndBrightness::set,
+                title = { Text(stringResource(R.string.swap_the_volume_and_brightness_slider)) },
+              )
+              
+              PreferenceDivider()
+              
+              val showLoadingCircle by preferences.showLoadingCircle.collectAsState()
+              SwitchPreference(
+                value = showLoadingCircle,
+                onValueChange = preferences.showLoadingCircle::set,
+                title = { Text(stringResource(R.string.pref_player_controls_show_loading_circle)) },
+              )
+            }
+          }
+          // Display Section
+          item {
+            PreferenceSectionHeader(title = stringResource(R.string.pref_player_display))
+          }
+          
+          item {
+            PreferenceCard {
+              val showSystemStatusBar by preferences.showSystemStatusBar.collectAsState()
+              SwitchPreference(
+                value = showSystemStatusBar,
+                onValueChange = preferences.showSystemStatusBar::set,
+                title = { Text(stringResource(R.string.pref_player_display_show_status_bar)) },
+              )
+
+              PreferenceDivider()
+
+              val showSystemNavigationBar by preferences.showSystemNavigationBar.collectAsState()
+              SwitchPreference(
+                value = showSystemNavigationBar,
+                onValueChange = preferences.showSystemNavigationBar::set,
+                title = { Text("Show navigation bar with controls") },
+              )
+              
+              PreferenceDivider()
+              
+              val reduceMotion by preferences.reduceMotion.collectAsState()
+              SwitchPreference(
+                value = reduceMotion,
+                onValueChange = preferences.reduceMotion::set,
+                title = { Text(stringResource(R.string.pref_player_display_reduce_player_animation)) },
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+}

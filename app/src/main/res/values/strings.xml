@@ -535,6 +535,8 @@
     <string name="pref_player_use_precise_seeking">Use precise seeking</string>
     <string name="pref_player_show_seekbar_when_seeking_title">Show seekbar when seeking</string>
     <string name="pref_player_show_seekbar_when_seeking_summary">Display the video progress bar during gesture seeking</string>
+    <string name="pref_player_hide_osd_text_title">Hide player OSD text</string>
+    <string name="pref_player_hide_osd_text_summary">Hide the default mpv OSD text during seeking or subtitle seeking</string>
     <string name="pref_player_keep_screen_on_when_paused_title">Keep screen on when paused</string>
     <string name="pref_player_keep_screen_on_when_paused_summary">Prevents screen timeout during pause</string>
     <string name="pref_player_save_position_on_quit_summary">Remember where you left off</string>

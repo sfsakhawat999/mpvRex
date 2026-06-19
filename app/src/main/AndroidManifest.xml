@@ -40,13 +40,18 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:theme="@style/Theme.mpvex.Launcher" />
+
+        <activity-alias
+            android:name="app.marlboroadvance.mpvex.MainActivity"
+            android:targetActivity=".MainActivity"
+            android:exported="true"
             android:theme="@style/Theme.mpvex.Launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
 
         <activity
             android:name=".ui.player.PlayerActivity"

@@ -1,0 +1,427 @@
+package xyz.mpv.rex.utils.media
+
+import android.content.Context
+import android.net.Uri
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import net.mediaarea.mediainfo.lib.MediaInfo
+
+object MediaInfoOps {
+  /**
+   * Extract detailed media information from a video file
+   */
+  suspend fun getMediaInfo(
+    context: Context,
+    uri: Uri,
+    fileName: String,
+  ): Result<MediaInfoData> =
+    withContext(Dispatchers.IO) {
+      runCatching {
+        val contentResolver = context.contentResolver
+        val pfd =
+          contentResolver.openFileDescriptor(uri, "r")
+            ?: return@runCatching MediaInfoData.empty()
+
+        val fd = pfd.detachFd()
+        val mi = MediaInfo()
+
+        try {
+          mi.Open(fd, fileName)
+
+          val generalInfo = extractGeneralInfo(mi)
+          val videoStreams = extractVideoStreams(mi)
+          val audioStreams = extractAudioStreams(mi)
+          val textStreams = extractTextStreams(mi)
+
+          MediaInfoData(
+            general = generalInfo,
+            videoStreams = videoStreams,
+            audioStreams = audioStreams,
+            textStreams = textStreams,
+          )
+        } finally {
+          mi.Close()
+          pfd.close()
+        }
+      }
+    }
+
+  /**
+   * Generate formatted text output from MediaInfoData using native MediaInfo Text format
+   */
+  suspend fun generateTextOutput(
+    context: Context,
+    uri: Uri,
+    fileName: String,
+  ): Result<String> =
+    withContext(Dispatchers.IO) {
+      runCatching {
+        val contentResolver = context.contentResolver
+        val pfd =
+          contentResolver.openFileDescriptor(uri, "r")
+            ?: return@runCatching "Error: Could not open file"
+
+        val fd = pfd.detachFd()
+        val mi = MediaInfo()
+
+        try {
+          mi.Open(fd, fileName)
+
+          // Set output format to Text (human-readable format like MediaInfo desktop app)
+          mi.Option("Inform", "Text")
+
+          // Get the formatted text output
+          val textOutput = mi.Inform()
+
+          buildString {
+            appendLine("=".repeat(60))
+            appendLine("MEDIA INFO - $fileName")
+            appendLine("=".repeat(60))
+            appendLine()
+            append(textOutput)
+          }
+        } finally {
+          mi.Close()
+          pfd.close()
+        }
+      }
+    }
+
+  private fun MediaInfo.getInfo(
+    stream: MediaInfo.Stream,
+    index: Int,
+    parameter: String,
+  ): String = Get(stream, index, parameter)
+
+  private fun extractGeneralInfo(mi: MediaInfo): GeneralInfo =
+    GeneralInfo(
+      completeName = mi.getInfo(MediaInfo.Stream.General, 0, "CompleteName"),
+      format = mi.getInfo(MediaInfo.Stream.General, 0, "Format"),
+      formatVersion = mi.getInfo(MediaInfo.Stream.General, 0, "Format_Version"),
+      fileSize = mi.getInfo(MediaInfo.Stream.General, 0, "FileSize/String"),
+      duration = mi.getInfo(MediaInfo.Stream.General, 0, "Duration/String3"),
+      overallBitRate = mi.getInfo(MediaInfo.Stream.General, 0, "OverallBitRate/String"),
+      frameRate = mi.getInfo(MediaInfo.Stream.General, 0, "FrameRate/String"),
+      title = mi.getInfo(MediaInfo.Stream.General, 0, "Title"),
+      performer = mi.getInfo(MediaInfo.Stream.General, 0, "Performer"),
+      album = mi.getInfo(MediaInfo.Stream.General, 0, "Album"),
+      encodedDate = mi.getInfo(MediaInfo.Stream.General, 0, "Encoded_Date"),
+      writingApplication = mi.getInfo(MediaInfo.Stream.General, 0, "Encoded_Application/String"),
+      writingLibrary = mi.getInfo(MediaInfo.Stream.General, 0, "Encoded_Library/String"),
+    )
+
+  private fun extractVideoStreams(mi: MediaInfo): List<VideoStreamInfo> {
+    val count = mi.Count_Get(MediaInfo.Stream.Video)
+    return (0 until count).map { i ->
+      VideoStreamInfo(
+        streamIndex = i,
+        id = mi.getInfo(MediaInfo.Stream.Video, i, "ID"),
+        format = mi.getInfo(MediaInfo.Stream.Video, i, "Format"),
+        formatInfo = mi.getInfo(MediaInfo.Stream.Video, i, "Format/Info"),
+        formatProfile = mi.getInfo(MediaInfo.Stream.Video, i, "Format_Profile"),
+        codecId = mi.getInfo(MediaInfo.Stream.Video, i, "CodecID"),
+        duration = mi.getInfo(MediaInfo.Stream.Video, i, "Duration/String3"),
+        bitRate = mi.getInfo(MediaInfo.Stream.Video, i, "BitRate/String"),
+        width = mi.getInfo(MediaInfo.Stream.Video, i, "Width/String"),
+        height = mi.getInfo(MediaInfo.Stream.Video, i, "Height/String"),
+        displayAspectRatio = mi.getInfo(MediaInfo.Stream.Video, i, "DisplayAspectRatio/String"),
+        frameRate = mi.getInfo(MediaInfo.Stream.Video, i, "FrameRate/String"),
+        frameRateMode = mi.getInfo(MediaInfo.Stream.Video, i, "FrameRate_Mode"),
+        colorSpace = mi.getInfo(MediaInfo.Stream.Video, i, "ColorSpace"),
+        chromaSubsampling = mi.getInfo(MediaInfo.Stream.Video, i, "ChromaSubsampling"),
+        bitDepth = mi.getInfo(MediaInfo.Stream.Video, i, "BitDepth/String"),
+        bitsPixelFrame = mi.getInfo(MediaInfo.Stream.Video, i, "Bits-(Pixel*Frame)"),
+        streamSize = mi.getInfo(MediaInfo.Stream.Video, i, "StreamSize/String"),
+        encodingLibrary = mi.getInfo(MediaInfo.Stream.Video, i, "Encoded_Library/String"),
+        defaultStream = mi.getInfo(MediaInfo.Stream.Video, i, "Default/String"),
+        forcedStream = mi.getInfo(MediaInfo.Stream.Video, i, "Forced/String"),
+        hdrFormat = mi.getInfo(MediaInfo.Stream.Video, i, "HDR_Format"),
+        maxCLL = mi.getInfo(MediaInfo.Stream.Video, i, "MaxCLL"),
+        maxFALL = mi.getInfo(MediaInfo.Stream.Video, i, "MaxFALL"),
+      )
+    }
+  }
+
+  private fun extractAudioStreams(mi: MediaInfo): List<AudioStreamInfo> {
+    val count = mi.Count_Get(MediaInfo.Stream.Audio)
+    return (0 until count).map { i ->
+      AudioStreamInfo(
+        streamIndex = i,
+        id = mi.getInfo(MediaInfo.Stream.Audio, i, "ID"),
+        format = mi.getInfo(MediaInfo.Stream.Audio, i, "Format"),
+        formatInfo = mi.getInfo(MediaInfo.Stream.Audio, i, "Format/Info"),
+        codecId = mi.getInfo(MediaInfo.Stream.Audio, i, "CodecID"),
+        duration = mi.getInfo(MediaInfo.Stream.Audio, i, "Duration/String3"),
+        bitRate = mi.getInfo(MediaInfo.Stream.Audio, i, "BitRate/String"),
+        channels = mi.getInfo(MediaInfo.Stream.Audio, i, "Channel(s)/String"),
+        channelLayout = mi.getInfo(MediaInfo.Stream.Audio, i, "ChannelLayout"),
+        samplingRate = mi.getInfo(MediaInfo.Stream.Audio, i, "SamplingRate/String"),
+        frameRate = mi.getInfo(MediaInfo.Stream.Audio, i, "FrameRate/String"),
+        compressionMode = mi.getInfo(MediaInfo.Stream.Audio, i, "Compression_Mode"),
+        delay = mi.getInfo(MediaInfo.Stream.Audio, i, "Video_Delay/String3"),
+        streamSize = mi.getInfo(MediaInfo.Stream.Audio, i, "StreamSize/String"),
+        title = mi.getInfo(MediaInfo.Stream.Audio, i, "Title"),
+        language = mi.getInfo(MediaInfo.Stream.Audio, i, "Language/String"),
+        defaultStream = mi.getInfo(MediaInfo.Stream.Audio, i, "Default/String"),
+        forcedStream = mi.getInfo(MediaInfo.Stream.Audio, i, "Forced/String"),
+      )
+    }
+  }
+
+  private fun extractTextStreams(mi: MediaInfo): List<TextStreamInfo> {
+    val count = mi.Count_Get(MediaInfo.Stream.Text)
+    return (0 until count).map { i ->
+      TextStreamInfo(
+        streamIndex = i,
+        id = mi.getInfo(MediaInfo.Stream.Text, i, "ID"),
+        format = mi.getInfo(MediaInfo.Stream.Text, i, "Format"),
+        muxingMode = mi.getInfo(MediaInfo.Stream.Text, i, "MuxingMode"),
+        codecId = mi.getInfo(MediaInfo.Stream.Text, i, "CodecID"),
+        codecIdInfo = mi.getInfo(MediaInfo.Stream.Text, i, "CodecID/Info"),
+        duration = mi.getInfo(MediaInfo.Stream.Text, i, "Duration/String3"),
+        bitRate = mi.getInfo(MediaInfo.Stream.Text, i, "BitRate/String"),
+        frameRate = mi.getInfo(MediaInfo.Stream.Text, i, "FrameRate/String"),
+        countOfElements = mi.getInfo(MediaInfo.Stream.Text, i, "ElementCount"),
+        streamSize = mi.getInfo(MediaInfo.Stream.Text, i, "StreamSize/String"),
+        title = mi.getInfo(MediaInfo.Stream.Text, i, "Title"),
+        language = mi.getInfo(MediaInfo.Stream.Text, i, "Language/String"),
+        defaultStream = mi.getInfo(MediaInfo.Stream.Text, i, "Default/String"),
+        forcedStream = mi.getInfo(MediaInfo.Stream.Text, i, "Forced/String"),
+      )
+    }
+  }
+
+  data class MediaInfoData(
+    val general: GeneralInfo,
+    val videoStreams: List<VideoStreamInfo>,
+    val audioStreams: List<AudioStreamInfo>,
+    val textStreams: List<TextStreamInfo>,
+  ) {
+    companion object {
+      fun empty() =
+        MediaInfoData(
+          general = GeneralInfo(),
+          videoStreams = emptyList(),
+          audioStreams = emptyList(),
+          textStreams = emptyList(),
+        )
+    }
+  }
+
+  data class GeneralInfo(
+    val completeName: String = "",
+    val format: String = "",
+    val formatVersion: String = "",
+    val fileSize: String = "",
+    val duration: String = "",
+    val overallBitRate: String = "",
+    val frameRate: String = "",
+    val title: String = "",
+    val performer: String = "",
+    val album: String = "",
+    val encodedDate: String = "",
+    val writingApplication: String = "",
+    val writingLibrary: String = "",
+  )
+
+  data class VideoStreamInfo(
+    val streamIndex: Int,
+    val id: String = "",
+    val format: String = "",
+    val formatInfo: String = "",
+    val formatProfile: String = "",
+    val codecId: String = "",
+    val duration: String = "",
+    val bitRate: String = "",
+    val width: String = "",
+    val height: String = "",
+    val displayAspectRatio: String = "",
+    val frameRate: String = "",
+    val frameRateMode: String = "",
+    val colorSpace: String = "",
+    val chromaSubsampling: String = "",
+    val bitDepth: String = "",
+    val bitsPixelFrame: String = "",
+    val streamSize: String = "",
+    val encodingLibrary: String = "",
+    val defaultStream: String = "",
+    val forcedStream: String = "",
+    val hdrFormat: String = "",
+    val maxCLL: String = "",
+    val maxFALL: String = "",
+  )
+
+  data class AudioStreamInfo(
+    val streamIndex: Int,
+    val id: String = "",
+    val format: String = "",
+    val formatInfo: String = "",
+    val codecId: String = "",
+    val duration: String = "",
+    val bitRate: String = "",
+    val channels: String = "",
+    val channelLayout: String = "",
+    val samplingRate: String = "",
+    val frameRate: String = "",
+    val compressionMode: String = "",
+    val delay: String = "",
+    val streamSize: String = "",
+    val title: String = "",
+    val language: String = "",
+    val defaultStream: String = "",
+    val forcedStream: String = "",
+  )
+
+  data class TextStreamInfo(
+    val streamIndex: Int,
+    val id: String = "",
+    val format: String = "",
+    val muxingMode: String = "",
+    val codecId: String = "",
+    val codecIdInfo: String = "",
+    val duration: String = "",
+    val bitRate: String = "",
+    val frameRate: String = "",
+    val countOfElements: String = "",
+    val streamSize: String = "",
+    val title: String = "",
+    val language: String = "",
+    val defaultStream: String = "",
+    val forcedStream: String = "",
+  )
+
+  /**
+   * Quickly extract just size, duration, resolution, and framerate metadata from a video file
+   * Uses MediaInfo library which is faster and more reliable than MediaMetadataRetriever.
+   *
+   * @param context Android context
+   * @param uri URI of the video file
+   * @param fileName Name of the file (needed for MediaInfo to detect format correctly)
+   * @return Result containing VideoMetadata with size in bytes, duration in milliseconds, resolution, and fps
+   */
+  suspend fun extractBasicMetadata(
+    context: Context,
+    uri: Uri,
+    fileName: String,
+  ): Result<VideoMetadata> =
+    withContext(Dispatchers.IO) {
+      runCatching {
+        val contentResolver = context.contentResolver
+        val pfd =
+          contentResolver.openFileDescriptor(uri, "r")
+            ?: return@runCatching VideoMetadata(0L, 0L, 0, 0, 0, 0f, false)
+
+        val fd = pfd.detachFd()
+        val mi = MediaInfo()
+
+        try {
+          mi.Open(fd, fileName)
+
+          // Extract file size in bytes
+          val fileSizeStr = mi.getInfo(MediaInfo.Stream.General, 0, "FileSize")
+          val fileSize = fileSizeStr.toLongOrNull() ?: 0L
+
+          // Extract duration in milliseconds - handle both integer and decimal formats
+          val durationStr = mi.getInfo(MediaInfo.Stream.General, 0, "Duration")
+          val duration = durationStr.toDoubleOrNull()?.toLong() ?: 0L
+
+          // Extract tags
+          val artist = mi.getInfo(MediaInfo.Stream.General, 0, "Performer")
+          val album = mi.getInfo(MediaInfo.Stream.General, 0, "Album")
+
+          // Extract video resolution (width and height)
+          val widthStr = mi.getInfo(MediaInfo.Stream.Video, 0, "Width")
+          val width = widthStr.toIntOrNull() ?: 0
+
+          val heightStr = mi.getInfo(MediaInfo.Stream.Video, 0, "Height")
+          val height = heightStr.toIntOrNull() ?: 0
+
+          // Extract rotation
+          val rotationStr = mi.getInfo(MediaInfo.Stream.Video, 0, "Rotation")
+          val rotation = rotationStr.toFloatOrNull()?.toInt() ?: 0
+
+          // Extract framerate (fps)
+          val fpsStr = mi.getInfo(MediaInfo.Stream.Video, 0, "FrameRate")
+          val fps = fpsStr.toFloatOrNull() ?: 0f
+
+          val textCount = mi.Count_Get(MediaInfo.Stream.Text)
+          val hasEmbeddedSubtitles = textCount > 0
+
+          val subtitleCodec = if (hasEmbeddedSubtitles) {
+            val codecs = mutableSetOf<String>()
+            for (i in 0 until textCount) {
+              val codecId = mi.getInfo(MediaInfo.Stream.Text, i, "CodecID")
+
+              val normalizedCodec = when {
+                codecId.contains("PGS", ignoreCase = true) -> "PGS"
+                codecId.contains("ASS", ignoreCase = true) -> "ASS"
+                codecId.contains("SSA", ignoreCase = true) -> "SSA"
+                codecId.contains("SRT", ignoreCase = true) -> "SRT"
+                codecId.contains("SUBRIP", ignoreCase = true) -> "SRT"
+                codecId.contains("VOBSUB", ignoreCase = true) -> "DVD"
+                codecId.contains("WEBVTT", ignoreCase = true) -> "VTT"
+                codecId.contains("UTF8", ignoreCase = true) -> "SRT"
+                codecId.contains("HDMV", ignoreCase = true) -> "PGS"
+                codecId.contains("DVB", ignoreCase = true) -> "DVB"
+                codecId.contains("MOV_TEXT", ignoreCase = true) -> "TX3G"
+                codecId.isNotEmpty() -> {
+                  codecId.substringAfterLast("/").substringAfterLast("_").uppercase()
+                }
+                else -> ""
+              }
+              
+              if (normalizedCodec.isNotEmpty()) {
+                codecs.add(normalizedCodec)
+              }
+            }
+            codecs.joinToString(" ")
+          } else ""
+
+          VideoMetadata(fileSize, duration, width, height, rotation, fps, hasEmbeddedSubtitles, subtitleCodec, artist, album)
+        } finally {
+          mi.Close()
+          pfd.close()
+        }
+      }
+    }
+
+  /**
+   * Data class to hold basic video metadata (size, duration, resolution, and framerate)
+   */
+  data class VideoMetadata(
+    val sizeBytes: Long,
+    val durationMs: Long,
+    val width: Int,
+    val height: Int,
+    val rotation: Int = 0,
+    val fps: Float,
+    val hasEmbeddedSubtitles: Boolean,
+    val subtitleCodec: String = "",
+    val artist: String = "",
+    val album: String = "",
+  )
+
+  /**
+   * Extract rotation (in degrees) from the video stream. Returns 0 if not specified or on error.
+   */
+  suspend fun getRotation(
+    context: Context,
+    uri: Uri,
+    fileName: String = "",
+  ): Int = withContext(Dispatchers.IO) {
+    runCatching {
+      val contentResolver = context.contentResolver
+      val pfd = contentResolver.openFileDescriptor(uri, "r") ?: return@runCatching 0
+      val fd = pfd.detachFd()
+      val mi = MediaInfo()
+      try {
+        mi.Open(fd, fileName)
+        val rotationStr = mi.Get(MediaInfo.Stream.Video, 0, "Rotation")
+        rotationStr.toFloatOrNull()?.toInt() ?: 0
+      } finally {
+        mi.Close()
+        pfd.close()
+      }
+    }.getOrDefault(0)
+  }
+}

@@ -283,24 +283,6 @@ object AppearancePreferencesScreen : Screen {
 
                             PreferenceDivider()
 
-                            
-                            // --- INTEGRATION: CineHub preference switch layout ---
-                            val enableCineHub by browserPreferences.enableCineHub.collectAsState()
-                            SwitchPreference(
-                                value = enableCineHub,
-                                onValueChange = { browserPreferences.enableCineHub.set(it) },
-                                title = { Text(text = "CineHub") },
-                                summary = {
-                                    Text(
-                                        text = "Toggle structural local NFO media discovery board",
-                                        color = MaterialTheme.colorScheme.outline,
-                                    )
-                                }
-                            )
-
-                            PreferenceDivider()
-
-
                             val enableShorts by browserPreferences.enableShorts.collectAsState()
                             val enableTabRecents by browserPreferences.enableTabRecents.collectAsState()
                             val enableTabPlaylists by browserPreferences.enableTabPlaylists.collectAsState()

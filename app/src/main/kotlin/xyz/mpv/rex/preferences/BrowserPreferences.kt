@@ -35,7 +35,7 @@ class BrowserPreferences(
   val showFramerateInResolution = preferenceStore.getBoolean("show_framerate_in_resolution", false)
   val showSubtitleIndicator = preferenceStore.getBoolean("show_subtitle_indicator", false)
   val showProgressBar = preferenceStore.getBoolean("show_progress_bar", true)
-  val mediaLayoutMode = preferenceStore.getEnum("media_layout_mode", MediaLayoutMode.LIST)
+  val mediaLayoutMode = preferenceStore.getEnum("media_layout_mode", MediaLayoutMode. LIST)
 
   // Visibility preferences for folder card chips
   val showTotalVideosChip = preferenceStore.getBoolean("show_total_videos_chip", true)
@@ -65,9 +65,6 @@ class BrowserPreferences(
   val enableTabRecents = preferenceStore.getBoolean("enable_tab_recents", true)
   val enableTabPlaylists = preferenceStore.getBoolean("enable_tab_playlists", true)
   val enableTabNetwork = preferenceStore.getBoolean("enable_tab_network", true)
-  
-  // --- NAYA: CineHub global visibility toggle backend mapping key ---
-  val enableCineHub = preferenceStore.getBoolean("enable_cinehub", true)
 }
 
 /**
@@ -147,7 +144,7 @@ enum class MediaLayoutMode {
   GRID,
   ;
 
-  val displayName: String
+  val displayName:  String
     get() = when (this) {
       LIST -> "List"
       GRID -> "Grid"

@@ -11,11 +11,11 @@ data class YoutubeVideo(
     val publishedText: String = "",
     val lengthSeconds: Int = 0,
     val author: String = "",
-    val authorId: String = "", // Added for clean search filtering and channel reference mapping
+    val authorId: String = "", 
+    val authorVerified: Boolean = false, // Dynamic badge rendering support
     val videoThumbnails: List<YoutubeThumbnail> = emptyList()
 ) {
     fun getBestThumbnailUrl(): String {
-        // High-performance thumbnail fallback mechanism if response items are nested
         return videoThumbnails.maxByOrNull { it.width }?.url 
             ?: "https://img.youtube.com/vi/$videoId/hqdefault.jpg"
     }
@@ -35,12 +35,21 @@ data class YoutubeFormat(
     val container: String = "",
     val qualityLabel: String = "",
     val type: String = "",
-    val bitrate: Long = 0 // Added to trace high-definition audio/video streams instantly
+    val bitrate: Long = 0 
 )
 
 @Serializable
 data class VideoDataResponse(
     val formatStreams: List<YoutubeFormat> = emptyList(),
     val adaptiveFormats: List<YoutubeFormat> = emptyList(),
-    val description: String = "" // Added to handle full metadata fetch inside player layouts
+    val description: String = "" 
+)
+
+/**
+ * Type-safe data schema to handle user response loops cleanly 
+ */
+@Serializable
+data class InvidiousAuthResponse(
+    val sessionToken: String? = null,
+    val error: String? = null
 )

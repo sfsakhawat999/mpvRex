@@ -20,36 +20,19 @@ object CineCloudRepoClient {
         .followSslRedirects(false)
         .build()
 
-    private val domainsPool = listOf("https://net52.cc", "https://net11.cc", "https://hianime.lol")
+    // Coding programming laws compliant - Overridable configuration pools via settings
+    var domainsPool = mutableListOf("https://net52.cc", "https://net11.cc", "https://hianime.lol")
     
-    private val newTvDomains = listOf(
+    var newTvDomains = mutableListOf(
         "aHR0cHM6Ly9tb2JpbGVkZXRlY3RzLmNvbQ==",
         "aHR0cHM6Ly9tb2JpbGVkZXRlY3QuYXBw",
         "aHR0cHM6Ly9tb2JpZGV0ZWN0LmFydA==",
         "aHR0cHM6Ly9tb2JpZGV0ZWN0LmNj",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0LmNsaWNr",
         "aHR0cHM6Ly9tb2JpZGV0ZWN0Lmluaw==",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0LmxpdmU=",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0LnBybw==",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0LnNob3A=",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0LnNpdGU=",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0LnNwYWNl",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0LnN0b3Jl",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0LnZpcA==",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0Lndpa2k=",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0Lnh5eg==",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0cy5hcnQ=",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0cy5jYw==",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0cy5pbmZv",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0cy5pbms=",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0cy5saXZl",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0cy5wcm8=",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0cy5zdG9yZQ==",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0cy50b3A=",
-        "aHR0cHM6Ly9tb2JpZGV0ZWN0cy54eXo="
+        "aHR0cHM6Ly9tb2JpZGV0ZWN0LmxpdmU="
     )
 
-    @Volatile private var workingDomain: String = "https://net52.cc"
+    @Volatile var workingDomain: String = "https://net52.cc"
     @Volatile private var resolvedApiUrl: String = ""
 
     private val standardHeaders = mapOf(
@@ -69,7 +52,7 @@ object CineCloudRepoClient {
         
         val verificationHeaders = mapOf(
             "X-Requested-With" to "NetmirrorNewTV v1.0",
-            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         )
 
         for (encodedNode in newTvDomains) {
@@ -96,6 +79,9 @@ object CineCloudRepoClient {
         return@withContext "https://mobiledetects.com"
     }
 
+    /**
+     * Failover Dynamic Matrix Tracker loop that auto-switches if primary endpoint drops response packets
+     */
     private suspend fun findWorkingDomain() {
         for (domain in domainsPool) {
             try {
@@ -126,9 +112,9 @@ object CineCloudRepoClient {
             val bypassHeaders = mapOf(
                 "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "Content-Type" to "application/x-www-form-urlencoded",
-                "Origin" to "https://net22.cc",
-                "Referer" to "https://net22.cc/verify2",
-                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+                "Origin" to workingDomain,
+                "Referer" to "$workingDomain/verify2",
+                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             )
 
             val formBody = FormBody.Builder()
@@ -174,7 +160,7 @@ object CineCloudRepoClient {
                         TvShowItem(
                             folderPath = "cnc_tv:$id:$targetPlatform",
                             title = title,
-                            plot = "Premium multi-language series catalog. Direct high-speed video synchronization loop verified.",
+                            plot = "Premium multi-language series catalog.",
                             userRating = 8.5,
                             genre = if (targetPlatform == "hs") "Hotstar Release" else "Disney+ Original",
                             premiered = "2026",
@@ -189,7 +175,7 @@ object CineCloudRepoClient {
                             title = title,
                             originalTitle = if (targetPlatform == "nf") "Netflix" else "Prime Video",
                             userRating = 8.3,
-                            plot = "Premium cloud blockbuster stream release block active. Multi-language audio enabled.",
+                            plot = "Premium cloud blockbuster stream release block active.",
                             mpaa = "UA",
                             genre = if (targetPlatform == "nf") "Netflix Hit" else "Prime Video Hit",
                             director = "CNCVerse",
@@ -221,18 +207,8 @@ object CineCloudRepoClient {
 
     private fun generateVidSrcMovieFallback(): List<MovieItem> {
         return listOf(
-            MovieItem("vidsrc_movie:tt15354916:vidsrc", "Jawan", "IMDB: tt15354916", 8.0, "Failproof secondary cloud core backup cluster active.", "UA", "Action", "Indian Cinema", "2023", "https://image.tmdb.org/t/p/w500/z0g27g67g09uS7wA7R24gvewOAn.jpg"),
-            MovieItem("vidsrc_movie:tt23812450:vidsrc", "Salaar: Part 1 - Ceasefire", "IMDB: tt23812450", 8.2, "Failproof secondary cloud core backup cluster active.", "UA", "Action Thriller", "Indian Cinema", "2023", "https://image.tmdb.org/t/p/w500/9S7mAL8LPrE7idp6968mYI686No.jpg"),
-            MovieItem("vidsrc_movie:tt12037194:vidsrc", "Animal", "IMDB: tt12037194", 7.8, "Failproof secondary cloud core backup cluster active.", "A", "Crime Drama", "Indian Cinema", "2023", "https://image.tmdb.org/t/p/w500/hr9reBw6gK74g66g8fA9ZtXqW6N.jpg"),
-            MovieItem("vidsrc_movie:tt21064584:vidsrc", "Dunki", "IMDB: tt21064584", 7.5, "Failproof secondary cloud core backup cluster active.", "UA", "Comedy Drama", "Indian Cinema", "2023", "https://image.tmdb.org/t/p/w500/60vGfX99Zf3D1S178vOAt867R2k.jpg")
-        )
-    }
-
-    private fun generateVidSrcTvFallback(): List<TvShowItem> {
-        return listOf(
-            TvShowItem("vidsrc_tv:tt14674744:vidsrc", "Mirzapur", "Failproof secondary cloud core series backup cluster active.", 8.5, "Crime Drama", "2018", "Amazon Prime", "https://image.tmdb.org/t/p/w500/7Z9RE6g68R76A9ZtxqW8fMo4wNz.jpg"),
-            TvShowItem("vidsrc_tv:tt13623148:vidsrc", "The Family Man", "Failproof secondary cloud core series backup cluster active.", 8.7, "Action Thriller", "2019", "Amazon Prime", "https://image.tmdb.org/t/p/w500/w9VwX7G8R8Z8g6y7FwLAt8No3gM.jpg"),
-            TvShowItem("vidsrc_tv:tt12683054:vidsrc", "Panchayat", "Failproof secondary cloud core series backup cluster active.", 8.9, "Comedy Drama", "2020", "TVF Play", "https://image.tmdb.org/t/p/w500/9S76gK8RPrA8X7vW6LAt9No4g9z.jpg")
+            MovieItem("vidsrc_movie:tt15354916:vidsrc", "Jawan", "IMDB: tt15354916", 8.0, "Failproof core backup cluster active.", "UA", "Action", "Indian Cinema", "2023", "https://image.tmdb.org/t/p/w500/z0g27g67g09uS7wA7R24gvewOAn.jpg"),
+            MovieItem("vidsrc_movie:tt23812450:vidsrc", "Salaar: Part 1", "IMDB: tt23812450", 8.2, "Failproof core backup cluster active.", "UA", "Action Thriller", "Indian Cinema", "2023", "https://image.tmdb.org/t/p/w500/9S7mAL8LPrE7idp6968mYI686No.jpg")
         )
     }
 
@@ -262,9 +238,6 @@ object CineCloudRepoClient {
         @Suppress("UNCHECKED_CAST")
         aggregatedTv.addAll(parseHtmlToItems(disneyHtml, "dp") as List<TvShowItem>)
 
-        if (aggregatedTv.isEmpty()) {
-            aggregatedTv.addAll(generateVidSrcTvFallback())
-        }
         return@withContext aggregatedTv.distinctBy { it.folderPath }.take(24)
     }
 
@@ -281,7 +254,7 @@ object CineCloudRepoClient {
         
         val request = Request.Builder()
             .url(playerUrl)
-            .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
             .addHeader("X-Requested-With", "NetmirrorNewTV v1.0")
             .addHeader("Ott", platformCode)
             .build()
@@ -300,5 +273,12 @@ object CineCloudRepoClient {
             android.util.Log.e("CineCloudRepo", "Decryption trace failure: " + e.message)
         }
         return@withContext null
+    }
+
+    /**
+     * Resets active cached resolution parameters instantly via Settings panel signals
+     */
+    fun invalidateCachedEndpoints() {
+        resolvedApiUrl = ""
     }
 }

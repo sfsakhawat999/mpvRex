@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,6 +43,7 @@ import xyz.mpv.rex.features.cinehub.data.NfoScanner
 import xyz.mpv.rex.features.cinehub.data.CineCloudRepoClient
 import xyz.mpv.rex.features.cinetube.data.InvidiousClient
 import xyz.mpv.rex.features.cinetube.model.YoutubeVideo
+import xyz.mpv.rex.features.cinetube.ui.CineTubeScreen
 import xyz.mpv.rex.ui.browser.components.BrowserTopBar
 import kotlinx.coroutines.launch
 import java.io.File
@@ -52,6 +55,9 @@ fun CineHubScreen(
     tvShowsList: List<TvShowItem>,
     onPlayRequested: (filePath: String, cleanTitle: String) -> Unit
 ) {
+    // 0 = CineHub Standard Matrix, 1 = CineTube Streaming Engine Node
+    var moduleModeSwitch by remember { mutableIntStateOf(0) }
+
     var tabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf("Movies", "TV Shows")
     
@@ -59,6 +65,9 @@ fun CineHubScreen(
     var selectedTvShow by remember { mutableStateOf<TvShowItem?>(null) }
     var activeActorLookup by remember { mutableStateOf<String?>(null) }
 
+    // State placeholders for decoupled real-time synchronization observers
+    var localMoviesState by remember { mutableStateOf(moviesList) }
+    var localTvShowsState by remember { mutableStateOf(tvShowsList) }
     var onlineMovies by remember { mutableStateOf<List<MovieItem>>(emptyList()) }
     var onlineTvShows by remember { mutableStateOf<List<TvShowItem>>(emptyList()) }
     var isOnlineLoading by remember { mutableStateOf(false) }
@@ -67,6 +76,23 @@ fun CineHubScreen(
     val scope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
     val gridColumnCount = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 6 else 3
+
+    // Dynamic execution engine triggers folder auto-sync scanners instantly on launch
+    LaunchedEffect(Unit) {
+        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val movieFolder = File("/sdcard/CineRex/movies")
+            val tvFolder = File("/sdcard/CineRex/tvshows")
+            
+            if (movieFolder.exists()) {
+                val scanned = NfoScanner.scanDirectoryForMovies(movieFolder)
+                if (scanned.isNotEmpty()) localMoviesState = scanned
+            }
+            if (tvFolder.exists()) {
+                val scanned = NfoScanner.scanDirectoryForTvShows(tvFolder)
+                if (scanned.isNotEmpty()) localTvShowsState = scanned
+            }
+        }
+    }
 
     LaunchedEffect(tabIndex) {
         if (onlineMovies.isEmpty() || onlineTvShows.isEmpty()) {
@@ -77,237 +103,270 @@ fun CineHubScreen(
                     onlineTvShows = CineCloudRepoClient.fetchOnlineTvShows(context)
                 } catch (e: Exception) {
                     android.util.Log.e("CineHubUI", "Network fault bypass: " + e.message)
-                } finally {
+                } verify {
                     isOnlineLoading = false
                 }
             }
         }
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                BrowserTopBar(
-                    title = "CineHub",
-                    isInSelectionMode = false,
-                    selectedCount = 0,
-                    totalCount = moviesList.size + tvShowsList.size,
-                    onCancelSelection = {},
-                    isHomeScreen = true,
-                    onSearchClick = {}
+    // Main Engine Branch Control Router Panel
+    if (moduleModeSwitch == 1) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            CineTubeScreen(onPlayRequested = onPlayRequested)
+            
+            // Premium Floating Action Return Toggle
+            FilledTonalIconButton(
+                onClick = { moduleModeSwitch = 0 },
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.BottomEnd)
+                    .size(48.dp),
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
-
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    tonalElevation = 1.dp
-                ) {
-                    TabRow(
-                        selectedTabIndex = tabIndex,
-                        containerColor = Color.Transparent,
-                        divider = {}
-                    ) {
-                        tabs.forEachIndexed { index, title ->
-                            Tab(
-                                selected = tabIndex == index,
-                                onClick = { tabIndex = index },
-                                text = { Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
-                            )
-                        }
-                    }
-                }
+            ) {
+                Icon(imageVector = Icons.Default.Movie, contentDescription = "Switch to CineHub")
             }
         }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(bottom = 24.dp)
-        ) {
-            // ================= LAYER 1: LOCAL MEDIA ROW SLIDER =================
-            item {
-                Text(
-                    text = if (tabIndex == 0) "My Local Movies" else "My Local TV Series",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
-                )
-            }
+    } else {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    BrowserTopBar(
+                        title = "CineHub",
+                        isInSelectionMode = false,
+                        selectedCount = 0,
+                        totalCount = localMoviesState.size + localTvShowsState.size,
+                        onCancelSelection = {},
+                        isHomeScreen = true,
+                        onSearchClick = {}
+                    )
 
-            item {
-                if (tabIndex == 0) {
-                    if (moviesList.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
-                            Text("No local files found inside target folders.", fontSize = 13.sp, color = Color.Gray)
-                        }
-                    } else {
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-                            modifier = Modifier.fillMaxWidth()
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        tonalElevation = 1.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(end = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            items(moviesList) { movie ->
-                                Box(modifier = Modifier.width(135.dp)) {
-                                    CineHubGridCard(
-                                        title = movie.title,
-                                        genre = movie.genre,
-                                        rating = movie.userRating,
-                                        posterPath = movie.posterPath,
-                                        watchProgress = movie.watchProgress,
-                                        isCloudItem = movie.isCloudStream,
-                                        onClick = { selectedMovie = movie }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    if (tvShowsList.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
-                            Text("No local files found inside target folders.", fontSize = 13.sp, color = Color.Gray)
-                        }
-                    } else {
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            items(tvShowsList) { show ->
-                                Box(modifier = Modifier.width(135.dp)) {
-                                    CineHubGridCard(
-                                        title = show.title,
-                                        genre = show.genre,
-                                        rating = show.userRating,
-                                        posterPath = show.posterPath,
-                                        watchProgress = show.watchProgress,
-                                        isCloudItem = show.isCloudSeries,
-                                        onClick = { selectedTvShow = show }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // ================= LAYER 2: TRENDING RELEASES MATRICES =================
-            item {
-                Text(
-                    text = "Trending Online Releases",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 12.dp)
-                )
-            }
-
-            if (isOnlineLoading) {
-                item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(32.dp))
-                    }
-                }
-            } else {
-                if (tabIndex == 0) {
-                    if (onlineMovies.isEmpty()) {
-                        item {
-                            Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                                Text("Syncing secure server metadata networks...", fontSize = 13.sp, color = Color.Gray)
-                            }
-                        }
-                    } else {
-                        val chunkedMovies = onlineMovies.chunked(gridColumnCount)
-                        item {
-                            Column(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            TabRow(
+                                selectedTabIndex = tabIndex,
+                                containerColor = Color.Transparent,
+                                divider = {},
+                                modifier = Modifier.weight(1f)
                             ) {
-                                for (rowItems in chunkedMovies) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        for (movieItem in rowItems) {
-                                            Box(modifier = Modifier.weight(1f)) {
-                                                CineHubGridCard(
-                                                    title = movieItem.title,
-                                                    genre = movieItem.genre,
-                                                    rating = movieItem.userRating,
-                                                    posterPath = movieItem.posterPath,
-                                                    watchProgress = 0f,
-                                                    isCloudItem = movieItem.isCloudStream,
-                                                    onClick = {
-                                                        scope.launch {
-                                                            val rawId = movieItem.videoFilePath.substringAfter("cnc_stream:").substringBefore(":")
-                                                            val platformCode = movieItem.videoFilePath.substringAfterLast(":")
-                                                            val directM3u8 = CineCloudRepoClient.resolveDirectStreamUrl(rawId, platformCode)
-                                                            if (!directM3u8.isNullOrBlank()) {
-                                                                onPlayRequested(directM3u8, movieItem.title)
-                                                            } else {
-                                                                onPlayRequested("https://net52.cc/mobile/player.php?id=$rawId", movieItem.title)
-                                                            }
-                                                        }
-                                                    }
-                                                )
-                                            }
-                                        }
-                                        val residualSlots = gridColumnCount - rowItems.size
-                                        if (residualSlots > 0) {
-                                            repeat(residualSlots) { Spacer(modifier = Modifier.weight(1f)) }
-                                        }
+                                tabs.forEachIndexed { index, title ->
+                                    Tab(
+                                        selected = tabIndex == index,
+                                        onClick = { tabIndex = index },
+                                        text = { Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+                                    )
+                                }
+                            }
+
+                            // Mode Switch Hook resembling standard day/night triggers
+                            IconButton(
+                                onClick = { moduleModeSwitch = 1 },
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f), CircleShape)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Tv,
+                                    contentDescription = "Switch to CineTube",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        ) { innerPadding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentPadding = PaddingValues(bottom = 24.dp)
+            ) {
+                // ================= LAYER 1: LOCAL MEDIA ROW SLIDER =================
+                item {
+                    Text(
+                        text = if (tabIndex == 0) "My Local Movies" else "My Local TV Series",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+                    )
+                }
+
+                item {
+                    val currentLocalList = if (tabIndex == 0) localMoviesState else localTvShowsState
+                    if (currentLocalList.isEmpty()) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f))
+                        ) {
+                            Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+                                Text("No local items detected inside /sdcard/CineRex/ folder index.", fontSize = 13.sp, color = Color.Gray, fontWeight = FontWeight.Medium)
+                            }
+                        }
+                    } else {
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (tabIndex == 0) {
+                                items(localMoviesState) { movie ->
+                                    Box(modifier = Modifier.width(135.dp)) {
+                                        CineHubGridCard(
+                                            title = movie.title,
+                                            genre = movie.genre,
+                                            rating = movie.userRating,
+                                            posterPath = movie.posterPath,
+                                            watchProgress = movie.watchProgress,
+                                            isCloudItem = movie.isCloudStream,
+                                            onClick = { selectedMovie = movie }
+                                        )
+                                    }
+                                }
+                            } else {
+                                items(localTvShowsState) { show ->
+                                    Box(modifier = Modifier.width(135.dp)) {
+                                        CineHubGridCard(
+                                            title = show.title,
+                                            genre = show.genre,
+                                            rating = show.userRating,
+                                            posterPath = show.posterPath,
+                                            watchProgress = show.watchProgress,
+                                            isCloudItem = show.isCloudSeries,
+                                            onClick = { selectedTvShow = show }
+                                        )
                                     }
                                 }
                             }
                         }
                     }
+                }
+
+                // ================= LAYER 2: TRENDING RELEASES MATRICES =================
+                item {
+                    Text(
+                        text = "Trending Online Releases",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 12.dp)
+                    )
+                }
+
+                if (isOnlineLoading) {
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(32.dp))
+                        }
+                    }
                 } else {
-                    if (onlineTvShows.isEmpty()) {
-                        item {
-                            Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                                Text("Syncing secure server metadata networks...", fontSize = 13.sp, color = Color.Gray)
+                    if (tabIndex == 0) {
+                        if (onlineMovies.isEmpty()) {
+                            item {
+                                Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                                    Text("Syncing secure server metadata networks...", fontSize = 13.sp, color = Color.Gray)
+                                }
+                            }
+                        } else {
+                            val chunkedMovies = onlineMovies.chunked(gridColumnCount)
+                            item {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    for (rowItems in chunkedMovies) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            for (movieItem in rowItems) {
+                                                Box(modifier = Modifier.weight(1f)) {
+                                                    CineHubGridCard(
+                                                        title = movieItem.title,
+                                                        genre = movieItem.genre,
+                                                        rating = movieItem.userRating,
+                                                        posterPath = movieItem.posterPath,
+                                                        watchProgress = 0f,
+                                                        isCloudItem = movieItem.isCloudStream,
+                                                        onClick = {
+                                                            scope.launch {
+                                                                val rawId = movieItem.videoFilePath.substringAfter("cnc_stream:").substringBefore(":")
+                                                                val platformCode = movieItem.videoFilePath.substringAfterLast(":")
+                                                                val directM3u8 = CineCloudRepoClient.resolveDirectStreamUrl(rawId, platformCode)
+                                                                if (!directM3u8.isNullOrBlank()) {
+                                                                    onPlayRequested(directM3u8, movieItem.title)
+                                                                } else {
+                                                                    onPlayRequested("https://net52.cc/mobile/player.php?id=$rawId", movieItem.title)
+                                                                }
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                            val residualSlots = gridColumnCount - rowItems.size
+                                            if (residualSlots > 0) {
+                                                repeat(residualSlots) { Spacer(modifier = Modifier.weight(1f)) }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     } else {
-                        val chunkedTvShows = onlineTvShows.chunked(gridColumnCount)
-                        item {
-                            Column(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                for (rowItems in chunkedTvShows) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        for (tvShowItem in rowItems) {
-                                            Box(modifier = Modifier.weight(1f)) {
-                                                CineHubGridCard(
-                                                    title = tvShowItem.title,
-                                                    genre = tvShowItem.genre,
-                                                    rating = tvShowItem.userRating,
-                                                    posterPath = tvShowItem.posterPath,
-                                                    watchProgress = 0f,
-                                                    isCloudItem = tvShowItem.isCloudSeries,
-                                                    onClick = {
-                                                        scope.launch {
-                                                            val rawId = tvShowItem.folderPath.substringAfter("cnc_tv:").substringBefore(":")
-                                                            val platformCode = tvShowItem.folderPath.substringAfterLast(":")
-                                                            val directM3u8 = CineCloudRepoClient.resolveDirectStreamUrl(rawId, platformCode)
-                                                            if (!directM3u8.isNullOrBlank()) {
-                                                                onPlayRequested(directM3u8, tvShowItem.title)
-                                                            } else {
-                                                                onPlayRequested("https://net52.cc/mobile/player.php?id=$rawId", tvShowItem.title)
+                        if (onlineTvShows.isEmpty()) {
+                            item {
+                                Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                                    Text("Syncing secure server metadata networks...", fontSize = 13.sp, color = Color.Gray)
+                                }
+                            }
+                        } else {
+                            val chunkedTvShows = onlineTvShows.chunked(gridColumnCount)
+                            item {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    for (rowItems in chunkedTvShows) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            for (tvShowItem in rowItems) {
+                                                Box(modifier = Modifier.weight(1f)) {
+                                                    CineHubGridCard(
+                                                        title = tvShowItem.title,
+                                                        genre = tvShowItem.genre,
+                                                        rating = tvShowItem.userRating,
+                                                        posterPath = tvShowItem.posterPath,
+                                                        watchProgress = 0f,
+                                                        isCloudItem = tvShowItem.isCloudSeries,
+                                                        onClick = {
+                                                            scope.launch {
+                                                                val rawId = tvShowItem.folderPath.substringAfter("cnc_tv:").substringBefore(":")
+                                                                val platformCode = tvShowItem.folderPath.substringAfterLast(":")
+                                                                val directM3u8 = CineCloudRepoClient.resolveDirectStreamUrl(rawId, platformCode)
+                                                                if (!directM3u8.isNullOrBlank()) {
+                                                                    onPlayRequested(directM3u8, tvShowItem.title)
+                                                                } else {
+                                                                    onPlayRequested("https://net52.cc/mobile/player.php?id=$rawId", tvShowItem.title)
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                                )
+                                                    )
+                                                }
                                             }
-                                        }
-                                        val residualSlots = gridColumnCount - rowItems.size
-                                        if (residualSlots > 0) {
-                                            repeat(residualSlots) { Spacer(modifier = Modifier.weight(1f)) }
+                                            val residualSlots = gridColumnCount - rowItems.size
+                                            if (residualSlots > 0) {
+                                                repeat(residualSlots) { Spacer(modifier = Modifier.weight(1f)) }
+                                            }
                                         }
                                     }
                                 }

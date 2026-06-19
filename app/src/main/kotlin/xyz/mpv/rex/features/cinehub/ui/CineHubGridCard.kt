@@ -30,7 +30,8 @@ fun CineHubGridCard(
     genre: String,
     rating: Double,
     posterPath: String?,
-    watchProgress: Float = 0f, // Embedded from updated data schemas
+    watchProgress: Float = 0f, 
+    isCloudItem: Boolean = false, // Synced dynamically from updated model tags
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -58,7 +59,8 @@ fun CineHubGridCard(
         shape = RoundedCornerShape(14.dp),
         border = BorderStroke(
             width = 1.dp,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = if (isPressed) 0.4f else 0.1f)
+            color = if (isCloudItem) MaterialTheme.colorScheme.primary.copy(alpha = if (isPressed) 0.6f else 0.3f)
+                    else MaterialTheme.colorScheme.outline.copy(alpha = if (isPressed) 0.4f else 0.1f)
         ),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -89,11 +91,30 @@ fun CineHubGridCard(
                                 listOf(
                                     Color.Transparent,
                                     Color.Transparent,
-                                    Color.Black.copy(alpha = 0.65f)
+                                    Color.Black.copy(alpha = 0.7f)
                                 )
                             )
                         )
                 )
+
+                // --- PREMIUM CLOUD INDICATOR BADGE ---
+                if (isCloudItem) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(6.dp),
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .align(Alignment.TopEnd)
+                    ) {
+                        Text(
+                            text = "CLOUD",
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                        )
+                    }
+                }
 
                 if (rating > 0) {
                     Surface(
@@ -133,7 +154,7 @@ fun CineHubGridCard(
                             .fillMaxWidth()
                             .height(3.5.dp)
                             .align(Alignment.BottomCenter),
-                        color = MaterialTheme.colorScheme.error, // Streaming premium red bar tint
+                        color = MaterialTheme.colorScheme.error, 
                         trackColor = Color.White.copy(alpha = 0.35f)
                     )
                 }

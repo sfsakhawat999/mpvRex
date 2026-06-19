@@ -125,7 +125,7 @@ fun CineHubScreen(
                 .padding(innerPadding),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            // ================= LAYER 1: PREMIUM MY LOCAL MEDIA ROW SLIDER =================
+            // ================= LAYER 1: LOCAL MEDIA ROW SLIDER =================
             item {
                 Text(
                     text = if (tabIndex == 0) "My Local Movies" else "My Local TV Series",
@@ -156,6 +156,7 @@ fun CineHubScreen(
                                         rating = movie.userRating,
                                         posterPath = movie.posterPath,
                                         watchProgress = movie.watchProgress,
+                                        isCloudItem = movie.isCloudStream,
                                         onClick = { selectedMovie = movie }
                                     )
                                 }
@@ -181,6 +182,7 @@ fun CineHubScreen(
                                         rating = show.userRating,
                                         posterPath = show.posterPath,
                                         watchProgress = show.watchProgress,
+                                        isCloudItem = show.isCloudSeries,
                                         onClick = { selectedTvShow = show }
                                     )
                                 }
@@ -190,7 +192,7 @@ fun CineHubScreen(
                 }
             }
 
-            // ================= LAYER 2: CLEAN TRENDING RELEASES MATRICES =================
+            // ================= LAYER 2: TRENDING RELEASES MATRICES =================
             item {
                 Text(
                     text = "Trending Online Releases",
@@ -235,6 +237,7 @@ fun CineHubScreen(
                                                     rating = movieItem.userRating,
                                                     posterPath = movieItem.posterPath,
                                                     watchProgress = 0f,
+                                                    isCloudItem = movieItem.isCloudStream,
                                                     onClick = {
                                                         scope.launch {
                                                             val rawId = movieItem.videoFilePath.substringAfter("cnc_stream:").substringBefore(":")
@@ -286,6 +289,7 @@ fun CineHubScreen(
                                                     rating = tvShowItem.userRating,
                                                     posterPath = tvShowItem.posterPath,
                                                     watchProgress = 0f,
+                                                    isCloudItem = tvShowItem.isCloudSeries,
                                                     onClick = {
                                                         scope.launch {
                                                             val rawId = tvShowItem.folderPath.substringAfter("cnc_tv:").substringBefore(":")
@@ -314,7 +318,7 @@ fun CineHubScreen(
             }
         }
 
-        // --- MOVIES DETAIL OVERLAY METADATA SHEET ---
+        // --- MOVIES DETAIL OVERLAY ---
         selectedMovie?.let { movie ->
             if (!movie.videoFilePath.startsWith("cnc_stream:")) {
                 var trailerVideo by remember { mutableStateOf<YoutubeVideo?>(null) }
@@ -429,12 +433,11 @@ fun CineHubScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(movie.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
                                     Spacer(modifier = Modifier.height(4.dp))
-                                    Text("Rating: ★ ${movie.userRating} | Year: ${movie.premiered}", style = MaterialTheme.typography.bodyMedium)
+                                    Text("Rating: ★ ${movie.getFormattedRating()} | Year: ${movie.premiered}", style = MaterialTheme.typography.bodyMedium)
                                     Text("Genre: ${movie.genre}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                                 }
                             }
                             
-                            // Elegant Actor Deck Layout
                             if (movie.actors.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text("Cast & Characters", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -450,7 +453,7 @@ fun CineHubScreen(
                                                 .clickable { activeActorLookup = actor.name }
                                         ) {
                                             AsyncImage(
-                                                model = actor.thumbUrl,
+                                                model = actor.getBestActorThumb(),
                                                 contentDescription = actor.name,
                                                 contentScale = ContentScale.Crop,
                                                 modifier = Modifier.size(58.dp).clip(CircleShape).background(Color.LightGray)
@@ -505,7 +508,6 @@ fun CineHubScreen(
                         Text("Studio: ${show.studio} | Genre: ${show.genre}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         Spacer(modifier = Modifier.height(12.dp))
                         
-                        // Elegant Actor Deck Layout
                         if (show.actors.isNotEmpty()) {
                             Text("Cast & Characters", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                             LazyRow(
@@ -520,7 +522,7 @@ fun CineHubScreen(
                                             .clickable { activeActorLookup = actor.name }
                                     ) {
                                         AsyncImage(
-                                            model = actor.thumbUrl,
+                                            model = actor.getBestActorThumb(),
                                             contentDescription = actor.name,
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier.size(58.dp).clip(CircleShape).background(Color.LightGray)
@@ -570,7 +572,7 @@ fun CineHubScreen(
                                         ) {
                                             Column(modifier = Modifier.weight(1f)) {
                                                 Text(
-                                                    "Episode ${episode.episode}: ${episode.title}",
+                                                    "${episode.getEpisodeCode()}: ${episode.title}",
                                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                                                     color = MaterialTheme.colorScheme.onSurface
                                                 )
@@ -589,7 +591,7 @@ fun CineHubScreen(
                                             IconButton(
                                                 onClick = {
                                                     selectedTvShow = null
-                                                    onPlayRequested(episode.videoFilePath, "${show.title} - S${episode.season}E${episode.episode}")
+                                                    onPlayRequested(episode.videoFilePath, "${show.title} - ${episode.getEpisodeCode()}")
                                                 },
                                                 colors = IconButtonDefaults.iconButtonColors(
                                                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
@@ -607,7 +609,7 @@ fun CineHubScreen(
             }
         }
 
-        // --- SUB-BOTTOM SHEET: SHARED FILMOGRAPHY LOOKUP FROM ACTOR CLICK ---
+        // --- SUB-BOTTOM SHEET: FILMOGRAPHY LOOKUP ---
         activeActorLookup?.let { actorName ->
             val (actorMovies, actorShows) = remember(actorName) { NfoScanner.getSharedFilmography(actorName, moviesList, tvShowsList) }
             ModalBottomSheet(
@@ -621,17 +623,17 @@ fun CineHubScreen(
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(3),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp), // FIXED PARAMETER NAME HERE
+                        verticalArrangement = Arrangement.spacedBy(4.dp), 
                         modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
                     ) {
                         items(actorMovies) { movie ->
-                            CineHubGridCard(movie.title, movie.genre, movie.userRating, movie.posterPath, movie.watchProgress) {
+                            CineHubGridCard(movie.title, movie.genre, movie.userRating, movie.posterPath, movie.watchProgress, movie.isCloudStream) {
                                 activeActorLookup = null
                                 selectedMovie = movie
                             }
                         }
                         items(actorShows) { show ->
-                            CineHubGridCard(show.title, show.genre, show.userRating, show.posterPath, show.watchProgress) {
+                            CineHubGridCard(show.title, show.genre, show.userRating, show.posterPath, show.watchProgress, show.isCloudSeries) {
                                 activeActorLookup = null
                                 selectedTvShow = show
                             }

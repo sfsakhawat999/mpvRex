@@ -1,7 +1,7 @@
-package xyz.mpv.rex.youtube.data
+package xyz.mpv.rex.features.cinetube.data
 
-import xyz.mpv.rex.youtube.model.YoutubeVideo
-import xyz.mpv.rex.youtube.model.VideoDataResponse
+import xyz.mpv.rex.features.cinetube.model.YoutubeVideo
+import xyz.mpv.rex.features.cinetube.model.VideoDataResponse
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request

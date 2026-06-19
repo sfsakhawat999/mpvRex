@@ -1,4 +1,4 @@
-package xyz.mpv.rex.youtube.model
+package xyz.mpv.rex.features.cinetube.model
 
 import kotlinx.serialization.Serializable
 

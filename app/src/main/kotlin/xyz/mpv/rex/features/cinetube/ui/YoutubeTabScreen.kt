@@ -1,4 +1,4 @@
-package xyz.mpv.rex.youtube.ui
+package xyz.mpv.rex.features.cinetube.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -28,8 +28,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import xyz.mpv.rex.youtube.data.InvidiousClient
-import xyz.mpv.rex.youtube.model.YoutubeVideo
+import xyz.mpv.rex.features.cinetube.data.InvidiousClient
+import xyz.mpv.rex.features.cinetube.model.YoutubeVideo
 import xyz.mpv.rex.ui.browser.components.BrowserTopBar
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch

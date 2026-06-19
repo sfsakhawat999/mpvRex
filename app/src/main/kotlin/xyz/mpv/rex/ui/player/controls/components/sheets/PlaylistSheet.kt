@@ -69,7 +69,7 @@ import androidx.compose.ui.geometry.Offset
 import xyz.mpv.rex.presentation.components.PlayerSheet
 import xyz.mpv.rex.preferences.preference.collectAsState
 import xyz.mpv.rex.ui.theme.spacing
-import xyz.mpv.rex.cinehub.data.NfoScanner
+import xyz.mpv.rex.features.cinehub.data.NfoScanner
 import coil.compose.AsyncImage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.Dispatchers

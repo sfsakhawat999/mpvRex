@@ -1,8 +1,8 @@
-package xyz.mpv.rex.cinehub.data
+package xyz.mpv.rex.features.cinehub.data
 
 import android.content.Context
-import xyz.mpv.rex.cinehub.model.MovieItem
-import xyz.mpv.rex.cinehub.model.TvShowItem
+import xyz.mpv.rex.features.cinehub.model.MovieItem
+import xyz.mpv.rex.features.cinehub.model.TvShowItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.FormBody

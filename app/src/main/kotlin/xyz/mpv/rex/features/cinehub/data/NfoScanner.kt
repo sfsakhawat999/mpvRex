@@ -1,10 +1,10 @@
-package xyz.mpv.rex.cinehub.data
+package xyz.mpv.rex.features.cinehub.data
 
 import android.util.Log
-import xyz.mpv.rex.cinehub.model.MovieItem
-import xyz.mpv.rex.cinehub.model.TvShowItem
-import xyz.mpv.rex.cinehub.model.EpisodeItem
-import xyz.mpv.rex.cinehub.model.ActorItem
+import xyz.mpv.rex.features.cinehub.model.MovieItem
+import xyz.mpv.rex.features.cinehub.model.TvShowItem
+import xyz.mpv.rex.features.cinehub.model.EpisodeItem
+import xyz.mpv.rex.features.cinehub.model.ActorItem
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node

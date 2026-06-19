@@ -1,4 +1,4 @@
-package xyz.mpv.rex.cinehub.ui
+package xyz.mpv.rex.features.cinehub.ui
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.*
@@ -33,14 +33,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import xyz.mpv.rex.cinehub.model.MovieItem
-import xyz.mpv.rex.cinehub.model.TvShowItem
-import xyz.mpv.rex.cinehub.model.EpisodeItem
-import xyz.mpv.rex.cinehub.model.ActorItem
-import xyz.mpv.rex.cinehub.data.NfoScanner
-import xyz.mpv.rex.cinehub.data.CineCloudRepoClient
-import xyz.mpv.rex.youtube.data.InvidiousClient
-import xyz.mpv.rex.youtube.model.YoutubeVideo
+import xyz.mpv.rex.features.cinehub.model.MovieItem
+import xyz.mpv.rex.features.cinehub.model.TvShowItem
+import xyz.mpv.rex.features.cinehub.model.EpisodeItem
+import xyz.mpv.rex.features.cinehub.model.ActorItem
+import xyz.mpv.rex.features.cinehub.data.NfoScanner
+import xyz.mpv.rex.features.cinehub.data.CineCloudRepoClient
+import xyz.mpv.rex.features.cinetube.data.InvidiousClient
+import xyz.mpv.rex.features.cinetube.model.YoutubeVideo
 import xyz.mpv.rex.ui.browser.components.BrowserTopBar
 import kotlinx.coroutines.launch
 import java.io.File

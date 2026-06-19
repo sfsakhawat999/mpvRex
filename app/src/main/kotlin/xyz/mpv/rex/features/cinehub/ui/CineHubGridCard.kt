@@ -1,4 +1,4 @@
-package xyz.mpv.rex.cinehub.ui
+package xyz.mpv.rex.features.cinehub.ui
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring

@@ -1,4 +1,4 @@
-package xyz.mpv.rex.cinehub.model
+package xyz.mpv.rex.features.cinehub.model
 
 import kotlinx.serialization.Serializable
 

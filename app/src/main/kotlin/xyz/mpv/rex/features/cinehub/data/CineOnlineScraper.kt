@@ -1,4 +1,4 @@
-package xyz.mpv.rex.cinehub.data
+package xyz.mpv.rex.features.cinehub.data
 
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient

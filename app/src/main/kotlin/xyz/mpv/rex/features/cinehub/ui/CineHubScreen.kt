@@ -44,7 +44,6 @@ import xyz.mpv.rex.features.cinehub.data.CineCloudRepoClient
 import xyz.mpv.rex.features.cinetube.data.InvidiousClient
 import xyz.mpv.rex.features.cinetube.model.YoutubeVideo
 import xyz.mpv.rex.features.cinetube.ui.CineTubeScreen
-import xyz.mpv.rex.ui.browser.components.BrowserTopBar
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -55,7 +54,7 @@ fun CineHubScreen(
     tvShowsList: List<TvShowItem>,
     onPlayRequested: (filePath: String, cleanTitle: String) -> Unit
 ) {
-    // 0 = CineHub Standard Matrix, 1 = CineTube Streaming Engine Node
+    // 0 = CineHub Matrix Panel, 1 = CineTube Dynamic Mode Flipper 
     var moduleModeSwitch by remember { mutableIntStateOf(0) }
 
     var tabIndex by remember { mutableIntStateOf(0) }
@@ -65,7 +64,6 @@ fun CineHubScreen(
     var selectedTvShow by remember { mutableStateOf<TvShowItem?>(null) }
     var activeActorLookup by remember { mutableStateOf<String?>(null) }
 
-    // State placeholders for decoupled real-time synchronization observers
     var localMoviesState by remember { mutableStateOf(moviesList) }
     var localTvShowsState by remember { mutableStateOf(tvShowsList) }
     var onlineMovies by remember { mutableStateOf<List<MovieItem>>(emptyList()) }
@@ -77,7 +75,6 @@ fun CineHubScreen(
     val configuration = LocalConfiguration.current
     val gridColumnCount = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 6 else 3
 
-    // Dynamic execution engine triggers folder auto-sync scanners instantly on launch
     LaunchedEffect(Unit) {
         scope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val movieFolder = File("/sdcard/CineRex/movies")
@@ -89,6 +86,7 @@ fun CineHubScreen(
             }
             if (tvFolder.exists()) {
                 val scanned = NfoScanner.scanDirectoryForTvShows(tvFolder)
+                    .filter { !File(it.folderPath).name.lowercase().contains("season") }
                 if (scanned.isNotEmpty()) localTvShowsState = scanned
             }
         }
@@ -102,7 +100,7 @@ fun CineHubScreen(
                     onlineMovies = CineCloudRepoClient.fetchOnlineMovies(context)
                     onlineTvShows = CineCloudRepoClient.fetchOnlineTvShows(context)
                 } catch (e: Exception) {
-                    android.util.Log.e("CineHubUI", "Network fault bypass: " + e.message)
+                    android.util.Log.e("CineHubUI", "Fallback trace drop execution")
                 } finally { 
                     isOnlineLoading = false
                 }
@@ -110,12 +108,10 @@ fun CineHubScreen(
         }
     }
 
-    // Main Engine Branch Control Router Panel
     if (moduleModeSwitch == 1) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)) {
             CineTubeScreen(onPlayRequested = onPlayRequested)
             
-            // Premium Floating Action Return Toggle
             FilledTonalIconButton(
                 onClick = { moduleModeSwitch = 0 },
                 modifier = Modifier
@@ -131,53 +127,44 @@ fun CineHubScreen(
         }
     } else {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars),
             topBar = {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    BrowserTopBar(
-                        title = "CineHub",
-                        isInSelectionMode = false,
-                        selectedCount = 0,
-                        totalCount = localMoviesState.size + localTvShowsState.size,
-                        onCancelSelection = {},
-                        isHomeScreen = true,
-                        onSearchClick = {}
-                    )
-
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceContainerLow,
-                        tonalElevation = 1.dp
+                // REMOVED: Status text title layouts stripped down cleanly to preserve space
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    tonalElevation = 2.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(end = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        TabRow(
+                            selectedTabIndex = tabIndex,
+                            containerColor = Color.Transparent,
+                            divider = {},
+                            modifier = Modifier.weight(1f)
                         ) {
-                            TabRow(
-                                selectedTabIndex = tabIndex,
-                                containerColor = Color.Transparent,
-                                divider = {},
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                tabs.forEachIndexed { index, title ->
-                                    Tab(
-                                        selected = tabIndex == index,
-                                        onClick = { tabIndex = index },
-                                        text = { Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
-                                    )
-                                }
-                            }
-
-                            // Mode Switch Hook resembling standard day/night triggers
-                            IconButton(
-                                onClick = { moduleModeSwitch = 1 },
-                                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f), CircleShape)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Tv,
-                                    contentDescription = "Switch to CineTube",
-                                    tint = MaterialTheme.colorScheme.primary
+                            tabs.forEachIndexed { index, title ->
+                                Tab(
+                                    selected = tabIndex == index,
+                                    onClick = { tabIndex = index },
+                                    text = { Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
                                 )
                             }
+                        }
+
+                        IconButton(
+                            onClick = { moduleModeSwitch = 1 },
+                            modifier = Modifier
+                                .padding(end = 12.dp)
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f), CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Tv,
+                                contentDescription = "Switch Mode Node",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
                 }
@@ -189,7 +176,6 @@ fun CineHubScreen(
                     .padding(innerPadding),
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
-                // ================= LAYER 1: LOCAL MEDIA ROW SLIDER =================
                 item {
                     Text(
                         text = if (tabIndex == 0) "My Local Movies" else "My Local TV Series",
@@ -250,7 +236,6 @@ fun CineHubScreen(
                     }
                 }
 
-                // ================= LAYER 2: TRENDING RELEASES MATRICES =================
                 item {
                     Text(
                         text = "Trending Online Releases",
@@ -272,7 +257,7 @@ fun CineHubScreen(
                         if (onlineMovies.isEmpty()) {
                             item {
                                 Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                                    Text("Syncing secure server metadata networks...", fontSize = 13.sp, color = Color.Gray)
+                                    Text("Syncing secure server networks...", fontSize = 13.sp, color = Color.Gray)
                                 }
                             }
                         } else {
@@ -324,7 +309,7 @@ fun CineHubScreen(
                         if (onlineTvShows.isEmpty()) {
                             item {
                                 Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                                    Text("Syncing secure server metadata networks...", fontSize = 13.sp, color = Color.Gray)
+                                    Text("Syncing secure server networks...", fontSize = 13.sp, color = Color.Gray)
                                 }
                             }
                         } else {
@@ -385,7 +370,6 @@ fun CineHubScreen(
                 
                 LaunchedEffect(movie) {
                     scope.launch {
-                        // FIXED: Removed the 'whitespaces' typo from the variable structure declaration here
                         val searchResults = InvidiousClient.fetchSearchVideos("${movie.title} official trailer")
                         if (searchResults.isNotEmpty()) {
                             trailerVideo = searchResults.first()
@@ -498,14 +482,14 @@ fun CineHubScreen(
                                 }
                             }
                             
-                            if (movie.actors.isNotEmpty()) {
+                            if (movieActors.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text("Cast & Characters", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                                 LazyRow(
                                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                                 ) {
-                                    items(movie.actors) { actor ->
+                                    items(movieActors) { actor ->
                                         Column(
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             modifier = Modifier
@@ -558,6 +542,7 @@ fun CineHubScreen(
                 val episodes = remember(show) { NfoScanner.scanTvShowEpisodes(File(show.folderPath)).sortedBy { it.episode } }
                 val seasons = remember(episodes) { episodes.groupBy { it.season }.toSortedMap() }
                 var selectedSeasonTab by remember { mutableStateOf(seasons.keys.firstOrNull() ?: 1) }
+                val tvActors = remember(show) { NfoScanner.parseActorsFromNfo(NfoScanner.getXmlDocument(File(show.folderPath + "/tvshow.nfo")) ?: return@remember emptyList()) }
 
                 ModalBottomSheet(
                     onDismissRequest = { selectedTvShow = null },
@@ -568,13 +553,13 @@ fun CineHubScreen(
                         Text("Studio: ${show.studio} | Genre: ${show.genre}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         Spacer(modifier = Modifier.height(12.dp))
                         
-                        if (show.actors.isNotEmpty()) {
+                        if (tvActors.isNotEmpty()) {
                             Text("Cast & Characters", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                             LazyRow(
                                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                             ) {
-                                items(show.actors) { actor ->
+                                items(tvActors) { actor ->
                                     Column(
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         modifier = Modifier

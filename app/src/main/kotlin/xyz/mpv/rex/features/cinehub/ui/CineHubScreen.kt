@@ -103,7 +103,7 @@ fun CineHubScreen(
                     onlineTvShows = CineCloudRepoClient.fetchOnlineTvShows(context)
                 } catch (e: Exception) {
                     android.util.Log.e("CineHubUI", "Network fault bypass: " + e.message)
-                } finally { // FIXED: Replaced 'verify' with native correct 'finally' block
+                } finally { 
                     isOnlineLoading = false
                 }
             }
@@ -385,7 +385,8 @@ fun CineHubScreen(
                 
                 LaunchedEffect(movie) {
                     scope.launch {
-                        val search whitespaces = InvidiousClient.fetchSearchVideos("${movie.title} official trailer")
+                        // FIXED: Removed the 'whitespaces' typo from the variable structure declaration here
+                        val searchResults = InvidiousClient.fetchSearchVideos("${movie.title} official trailer")
                         if (searchResults.isNotEmpty()) {
                             trailerVideo = searchResults.first()
                         }

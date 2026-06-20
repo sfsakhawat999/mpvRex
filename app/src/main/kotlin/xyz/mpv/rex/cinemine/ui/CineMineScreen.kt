@@ -28,6 +28,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import xyz.mpv.rex.cinemine.model.MineTab
+import xyz.mpv.rex.cinemine.model.MovieItem
+import xyz.mpv.rex.cinemine.model.TvShowItem
+import xyz.mpv.rex.cinemine.model.YoutubeVideo
 import xyz.mpv.rex.cinemine.viewmodel.CineMineViewModel
 import xyz.mpv.rex.cinemine.ui.components.MovieItemCard
 import xyz.mpv.rex.cinemine.ui.components.TvShowItemCard
@@ -35,7 +38,6 @@ import xyz.mpv.rex.cinemine.ui.components.YoutubeVideoCard
 import xyz.mpv.rex.cinemine.ui.components.TvShowDetailSheet
 import xyz.mpv.rex.cinemine.data.CineMineRepo
 import xyz.mpv.rex.cinemine.data.CineMineStreamResolver
-import xyz.mpv.rex.features.cinetube.ui.CineTubeScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,11 +51,11 @@ fun CineMineScreen(
     val configuration = LocalConfiguration.current
     val gridColumnCount = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 6 else 3
     
-    // Core data references pool
-    var rawMovies by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinehub.model.MovieItem>()) }
-    var rawShows by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinehub.model.TvShowItem>()) }
-    var rawTubeVideos by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinetube.model.YoutubeVideo>()) }
-    var rawCloudMovies by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinehub.model.MovieItem>()) }
+    // Core data references pool securely typed to local model package
+    var rawMovies by remember { mutableStateOf(emptyList<MovieItem>()) }
+    var rawShows by remember { mutableStateOf(emptyList<TvShowItem>()) }
+    var rawTubeVideos by remember { mutableStateOf(emptyList<YoutubeVideo>()) }
+    var rawCloudMovies by remember { mutableStateOf(emptyList<MovieItem>()) }
     var isFetchingData by remember { mutableStateOf(false) }
 
     // M3 Glassmorphic specifications
@@ -61,7 +63,7 @@ fun CineMineScreen(
     val glassContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
     val glassBorder = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f))
 
-    // Asynchronous synchronization engine pipeline utilizing new internal data hooks
+    // Asynchronous synchronization engine pipeline loading data safely into unified states
     LaunchedEffect(Unit) {
         isFetchingData = true
         scope.launch {
@@ -231,14 +233,27 @@ fun CineMineScreen(
                     }
                 }
 
-                // ================= VIEWPORT B: STANDALONE CINETUBE FULL FRAME =================
+                // ================= VIEWPORT B: STANDALONE CINETUBE GRID MATRIX =================
                 MineTab.CINETUBE -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        CineTubeScreen(onPlayRequested = onPlayRequested)
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 3 else 1),
+                        contentPadding = PaddingValues(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(viewModel.filteredTubeVideos) { video ->
+                            YoutubeVideoCard(video.title, video.author, video.lengthSeconds, video.getBestThumbnailUrl()) {
+                                scope.launch {
+                                    val resolvedTubeUrl = CineMineStreamResolver.resolvePlaybackUrl(video.videoId)
+                                    onPlayRequested(resolvedTubeUrl, video.title)
+                                }
+                            }
+                        }
                     }
                 }
 
-                // ================= VIEWPORT C: STANDALONE FOCUS LOCAL MODULE =================
+                // ================= VIEWPORT C: STANDALONE FOCUS LOCAL HUB =================
                 MineTab.CINEHUB_LOCAL -> {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(gridColumnCount),

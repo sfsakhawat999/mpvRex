@@ -1,10 +1,13 @@
 package xyz.mpv.rex.cinemine.viewmodel
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import xyz.mpv.rex.cinemine.model.MineTab
-import xyz.mpv.rex.features.cinehub.model.MovieItem
-import xyz.mpv.rex.features.cinehub.model.TvShowItem
-import xyz.mpv.rex.features.cinetube.model.YoutubeVideo
+import xyz.mpv.rex.cinemine.model.MovieItem
+import xyz.mpv.rex.cinemine.model.TvShowItem
+import xyz.mpv.rex.cinemine.model.YoutubeVideo
 
 class CineMineViewModel {
     // Top bar search framework queries mapping
@@ -21,7 +24,7 @@ class CineMineViewModel {
     val filteredOnlineCloud = mutableStateListOf<MovieItem>()
 
     /**
-     * Deep Global Filtration across all 3 integrated subsystems simultaneously
+     * Deep Global Filtration across all integrated subsystems simultaneously
      */
     fun updateSearchAndFilter(
         query: String,

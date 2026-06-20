@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -115,11 +117,12 @@ fun MovieItemCard(
 
 /**
  * 📺 2. TV Show Item Card (Handles Local and Cloud Series Groups)
+ * UPDATE: Aligned signature layout property mapping directly to model types context variables
  */
 @Composable
 fun TvShowItemCard(
     title: String,
-    studio: String,
+    genre: String,
     rating: Double,
     posterPath: String?,
     onClick: () -> Unit
@@ -146,10 +149,26 @@ fun TvShowItemCard(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
+            
+            if (rating > 0.0) {
+                Surface(
+                    color = Color.Black.copy(alpha = 0.65f),
+                    shape = RoundedCornerShape(6.dp),
+                    modifier = Modifier.padding(6.dp)
+                ) {
+                    Text(
+                        text = "★ ${String.format("%.1f", rating)}",
+                        color = Color(0xFFFFD700),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.height(6.dp))
         Text(title, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(studio, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.secondary)
+        Text(genre, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.secondary)
     }
 }
 
@@ -252,7 +271,8 @@ fun ArtistInfoCard(
 }
 
 /**
- * 🎞️ 5. TV Show Episode List Item Card
+ * 5. TV Show Episode List Item Card
+ * UPDATE: Swapped out unresolved abstract standard reference identifier vector with fully qualified AutoMirrored PlayArrow
  */
 @Composable
 fun EpisodeItemRow(
@@ -302,7 +322,7 @@ fun EpisodeItemRow(
                 modifier = Modifier.size(36.dp)
             ) {
                 Icon(
-                    imageVector = androidx.compose.material.icons.filled.PlayArrow,
+                    imageVector = Icons.AutoMirrored.Filled.PlayArrow,
                     contentDescription = "Play Episode",
                     modifier = Modifier.size(20.dp)
                 )

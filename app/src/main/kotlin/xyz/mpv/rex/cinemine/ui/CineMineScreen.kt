@@ -9,6 +9,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,67 +20,67 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import xyz.mpv.rex.cinemine.model.MineTab
 import xyz.mpv.rex.cinemine.viewmodel.CineMineViewModel
-import xyz.mpv.rex.features.cinehub.data.NfoScanner[span_2](start_span)[span_2](end_span)
-import xyz.mpv.rex.features.cinehub.data.CineCloudRepoClient[span_3](start_span)[span_3](end_span)
-import xyz.mpv.rex.features.cinetube.data.InvidiousClient[span_4](start_span)[span_4](end_span)
-import xyz.mpv.rex.features.cinetube.ui.CineTubeScreen[span_5](start_span)[span_5](end_span)
+import xyz.mpv.rex.cinemine.ui.components.MovieItemCard
+import xyz.mpv.rex.cinemine.ui.components.TvShowItemCard
+import xyz.mpv.rex.cinemine.ui.components.YoutubeVideoCard
+import xyz.mpv.rex.features.cinehub.data.NfoScanner
+import xyz.mpv.rex.features.cinehub.data.CineCloudRepoClient
+import xyz.mpv.rex.features.cinetube.data.InvidiousClient
+import xyz.mpv.rex.features.cinetube.ui.CineTubeScreen
 import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CineMineScreen(
-    onPlayRequested: (filePath: String, cleanTitle: String) -> Unit[span_6](start_span)[span_6](end_span)[span_7](start_span)[span_7](end_span)
+    onPlayRequested: (filePath: String, cleanTitle: String) -> Unit
 ) {
     val viewModel = remember { CineMineViewModel() }
-    val context = LocalContext.current[span_8](start_span)[span_8](end_span)
-    val scope = rememberCoroutineScope()[span_9](start_span)[span_9](end_span)
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val configuration = LocalConfiguration.current
+    val gridColumnCount = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 6 else 3
     
-    // Core structural storage lists mirroring pre-written frameworks
+    // Core data references pool
     var rawMovies by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinehub.model.MovieItem>()) }
     var rawShows by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinehub.model.TvShowItem>()) }
     var rawTubeVideos by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinetube.model.YoutubeVideo>()) }
     var rawCloudMovies by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinehub.model.MovieItem>()) }
     var isFetchingCloud by remember { mutableStateOf(false) }
 
-    // M3 Glassmorphic structural specifications
+    // M3 Glassmorphic specifications
     val glassShape = RoundedCornerShape(24.dp)
     val glassContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
     val glassBorder = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f))
 
-    // Asynchronous loading hooks that sync directly into your pre-written data nodes
+    // Asynchronous synchronization engine pipeline
     LaunchedEffect(Unit) {
         scope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            val movieFolder = File("/sdcard/CineRex/movies")[span_10](start_span)[span_10](end_span)
-            val tvFolder = File("/sdcard/CineRex/tvshows")[span_11](start_span)[span_11](end_span)
+            val movieFolder = File("/sdcard/CineRex/movies")
+            val tvFolder = File("/sdcard/CineRex/tvshows")
             
             if (movieFolder.exists()) {
-                rawMovies = NfoScanner.scanDirectoryForMovies(movieFolder)[span_12](start_span)[span_12](end_span)
+                rawMovies = NfoScanner.scanDirectoryForMovies(movieFolder)
             }
             if (tvFolder.exists()) {
-                rawShows = NfoScanner.scanDirectoryForTvShows(tvFolder)[span_13](start_span)[span_13](end_span)
-                    .filter { !File(it.folderPath).name.lowercase().contains("season") }[span_14](start_span)[span_14](end_span)
+                rawShows = NfoScanner.scanDirectoryForTvShows(tvFolder)
+                    .filter { !File(it.folderPath).name.lowercase().contains("season") }
             }
             viewModel.resetFeeds(rawMovies, rawShows, rawTubeVideos, rawCloudMovies)
         }
 
         scope.launch {
             try {
-                rawTubeVideos = InvidiousClient.fetchTrendingVideos("Movies")[span_15](start_span)[span_15](end_span)
+                rawTubeVideos = InvidiousClient.fetchTrendingVideos("Movies")
                 viewModel.resetFeeds(rawMovies, rawShows, rawTubeVideos, rawCloudMovies)
             } catch (_: Exception) {}
         }
@@ -85,7 +88,7 @@ fun CineMineScreen(
         scope.launch {
             isFetchingCloud = true
             try {
-                rawCloudMovies = CineCloudRepoClient.fetchOnlineMovies(context)[span_16](start_span)[span_16](end_span)
+                rawCloudMovies = CineCloudRepoClient.fetchOnlineMovies(context)
                 viewModel.resetFeeds(rawMovies, rawShows, rawTubeVideos, rawCloudMovies)
             } catch (_: Exception) {} finally {
                 isFetchingCloud = false
@@ -166,51 +169,53 @@ fun CineMineScreen(
                 .padding(innerPadding)
         ) {
             when (viewModel.activeTab) {
-                // ================= VIEWPORT A: UNIFIED MIXED ROW ENGINE =================
+                // ================= VIEWPORT A: UNIFIED INTEGRATED DISCOVERY VIEWPORT =================
                 MineTab.UNIFIED -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 24.dp, top = 4.dp)
                     ) {
-                        // --- CATEGORY 1: CINEHUB LOCAL MOVIE SHELF ---
+                        // --- CATEGORY 1: LOCAL MOVIES ROW SLIDER ---
                         if (viewModel.filteredLocalMovies.isNotEmpty()) {
                             item {
                                 Text("Local Movies Collection", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 8.dp))
                                 LazyRow(contentPadding = PaddingValues(horizontal = 14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                     items(viewModel.filteredLocalMovies) { movie ->
-                                        CineMineGlassCard(movie.title, movie.genre, movie.posterPath, movie.getFormattedRating()) {[span_17](start_span)[span_17](end_span)
-                                            onPlayRequested(movie.videoFilePath, movie.title)[span_18](start_span)[span_18](end_span)
+                                        MovieItemCard(movie.title, movie.genre, movie.userRating, movie.posterPath, isCloud = false) {
+                                            onPlayRequested(movie.videoFilePath, movie.title)
                                         }
                                     }
                                 }
                             }
                         }
 
-                        // --- CATEGORY 2: CINEHUB LOCAL TV SHOWS SHELF ---
+                        // --- CATEGORY 2: LOCAL TV SHOWS ROW SLIDER ---
                         if (viewModel.filteredLocalShows.isNotEmpty()) {
                             item {
                                 Text("Local TV Series Grid", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp))
                                 LazyRow(contentPadding = PaddingValues(horizontal = 14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                     items(viewModel.filteredLocalShows) { show ->
-                                        CineMineGlassCard(show.title, show.genre, show.posterPath, show.getFormattedRating()) {[span_19](start_span)[span_19](end_span)
-                                            // Triggers local episodic grid logic cleanly when clicked
+                                        TvShowItemCard(show.title, show.studio, show.userRating, show.posterPath) {
+                                            // Managed via standalone sheet expansions
                                         }
                                     }
                                 }
                             }
                         }
 
-                        // --- CATEGORY 3: CINETUBE RANDOM STREAM CHANNELS ---
+                        // --- CATEGORY 3: CINETUBE ROW SLIDER ---
                         if (viewModel.filteredTubeVideos.isNotEmpty()) {
                             item {
                                 Text("CineTube Random Trends", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.tertiary, modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp))
                                 LazyRow(contentPadding = PaddingValues(horizontal = 14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                     items(viewModel.filteredTubeVideos) { video ->
-                                        CineMineGlassCard(video.title, video.author, video.getBestThumbnailUrl(), null) {[span_20](start_span)[span_20](end_span)
-                                            scope.launch {
-                                                val resolvedTubeUrl = InvidiousClient.fetchDirectStreamUrl(video.videoId)[span_21](start_span)[span_21](end_span)
-                                                if (resolvedTubeUrl != null) {
-                                                    onPlayRequested(resolvedTubeUrl, video.title)[span_22](start_span)[span_22](end_span)
+                                        Box(modifier = Modifier.width(220.dp)) {
+                                            YoutubeVideoCard(video.title, video.author, video.lengthSeconds, video.getBestThumbnailUrl()) {
+                                                scope.launch {
+                                                    val resolvedTubeUrl = InvidiousClient.fetchDirectStreamUrl(video.videoId)
+                                                    if (resolvedTubeUrl != null) {
+                                                        onPlayRequested(resolvedTubeUrl, video.title)
+                                                    }
                                                 }
                                             }
                                         }
@@ -219,18 +224,18 @@ fun CineMineScreen(
                             }
                         }
 
-                        // --- CATEGORY 4: CINEHUB ONLINE (REAL CLOUD DATA) ---
+                        // --- CATEGORY 4: CINEHUB ONLINE ROW SLIDER ---
                         if (viewModel.filteredOnlineCloud.isNotEmpty()) {
                             item {
                                 Text("Cloud Repo Network Releases", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp))
                                 LazyRow(contentPadding = PaddingValues(horizontal = 14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                     items(viewModel.filteredOnlineCloud) { cloudMovie ->
-                                        CineMineGlassCard(cloudMovie.title, cloudMovie.genre, cloudMovie.posterPath, cloudMovie.getFormattedRating()) {[span_23](start_span)[span_23](end_span)
+                                        MovieItemCard(cloudMovie.title, cloudMovie.genre, cloudMovie.userRating, cloudMovie.posterPath, isCloud = true) {
                                             scope.launch {
-                                                val postId = cloudMovie.videoFilePath.substringAfter("cnc_stream:").substringBefore(":")[span_24](start_span)[span_24](end_span)
-                                                val platformCode = cloudMovie.videoFilePath.substringAfterLast(":")[span_25](start_span)[span_25](end_span)
-                                                val m3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(postId, platformCode)[span_26](start_span)[span_26](end_span)
-                                                onPlayRequested(m3u8Url ?: "https://net52.cc/mobile/player.php?id=$postId", cloudMovie.title)[span_27](start_span)[span_27](end_span)
+                                                val postId = cloudMovie.videoFilePath.substringAfter("cnc_stream:").substringBefore("")
+                                                val platformCode = cloudMovie.videoFilePath.substringAfterLast(":")
+                                                val m3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(postId, platformCode)
+                                                onPlayRequested(m3u8Url ?: "https://net52.cc/mobile/player.php?id=$postId", cloudMovie.title)
                                             }
                                         }
                                     }
@@ -243,16 +248,47 @@ fun CineMineScreen(
                 // ================= VIEWPORT B: STANDALONE CINETUBE FULL FRAME =================
                 MineTab.CINETUBE -> {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        CineTubeScreen(onPlayRequested = onPlayRequested)[span_28](start_span)[span_28](end_span)
+                        CineTubeScreen(onPlayRequested = onPlayRequested)
                     }
                 }
 
-                // ================= VIEWPORT C & D: STANDALONE FOCUS MODES =================
+                // ================= VIEWPORT C: STANDALONE FOCUS LOCAL MODULE =================
                 MineTab.CINEHUB_LOCAL -> {
-                    // Triggers customized isolated Local columns grids
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(gridColumnCount),
+                        contentPadding = PaddingValues(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(viewModel.filteredLocalMovies) { movie ->
+                            MovieItemCard(movie.title, movie.genre, movie.userRating, movie.posterPath, isCloud = false) {
+                                onPlayRequested(movie.videoFilePath, movie.title)
+                            }
+                        }
+                    }
                 }
+
+                // ================= VIEWPORT D: STANDALONE FOCUS ONLINE MODULE =================
                 MineTab.CINEHUB_ONLINE -> {
-                    // Triggers customized isolated Cloud Repo streaming layouts
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(gridColumnCount),
+                        contentPadding = PaddingValues(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(viewModel.filteredOnlineCloud) { cloudMovie ->
+                            MovieItemCard(cloudMovie.title, cloudMovie.genre, cloudMovie.userRating, cloudMovie.posterPath, isCloud = true) {
+                                scope.launch {
+                                    val postId = cloudMovie.videoFilePath.substringAfter("cnc_stream:").substringBefore(":")
+                                    val platformCode = cloudMovie.videoFilePath.substringAfterLast(":")
+                                    val m3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(postId, platformCode)
+                                    onPlayRequested(m3u8Url ?: "https://net52.cc/mobile/player.php?id=$postId", cloudMovie.title)
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -263,78 +299,6 @@ fun CineMineScreen(
                         .padding(24.dp)
                         .size(28.dp),
                     strokeWidth = 2.5.dp
-                )
-            }
-        }
-    }
-}
-
-// ================= INTERNAL SHARED GLASSMORPHIC CARD REUSE =================
-@Composable
-private fun CineMineGlassCard(
-    title: String,
-    caption: String,
-    thumbnailUrl: String?,
-    ratingScore: String?,
-    onCardClick: () -> Unit
-) {
-    val layoutShape = RoundedCornerShape(18.dp)
-    Card(
-        modifier = Modifier
-            .width(135.dp)
-            .clip(layoutShape)
-            .clickable { onCardClick() },
-        shape = layoutShape,
-        border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.12f)),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.4f)
-        )
-    ) {
-        Column {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                AsyncImage(
-                    model = thumbnailUrl ?: android.R.drawable.ic_menu_gallery,[span_29](start_span)[span_29](end_span)
-                    contentDescription = title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(2f / 3f)[span_30](start_span)[span_30](end_span)
-                        .background(Color.DarkGray.copy(alpha = 0.2f))[span_31](start_span)[span_31](end_span)
-                )
-
-                if (!ratingScore.isNullOrBlank() && ratingScore != "0.0") {
-                    Surface(
-                        color = Color.Black.copy(alpha = 0.65f),
-                        shape = RoundedCornerShape(6.dp),
-                        modifier = Modifier.padding(6.dp)
-                    ) {
-                        Text(
-                            text = "★ $ratingScore",
-                            color = Color(0xFFFFD700),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Black,
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-            }
-
-            Column(modifier = Modifier.padding(8.dp)) {
-                Text(
-                    text = title,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = caption,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

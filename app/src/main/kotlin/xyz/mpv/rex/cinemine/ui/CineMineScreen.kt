@@ -51,19 +51,16 @@ fun CineMineScreen(
     val configuration = LocalConfiguration.current
     val gridColumnCount = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 6 else 3
     
-    // Core data references pool securely typed to local model package
     var rawMovies by remember { mutableStateOf(emptyList<MovieItem>()) }
     var rawShows by remember { mutableStateOf(emptyList<TvShowItem>()) }
     var rawTubeVideos by remember { mutableStateOf(emptyList<YoutubeVideo>()) }
     var rawCloudMovies by remember { mutableStateOf(emptyList<MovieItem>()) }
     var isFetchingData by remember { mutableStateOf(false) }
 
-    // M3 Glassmorphic specifications
     val glassShape = RoundedCornerShape(24.dp)
     val glassContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
     val glassBorder = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f))
 
-    // Asynchronous synchronization engine pipeline loading data safely into unified states
     LaunchedEffect(Unit) {
         isFetchingData = true
         scope.launch {
@@ -95,7 +92,6 @@ fun CineMineScreen(
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background.copy(alpha = 0.85f))
             ) {
-                // ================= COMPONENT 1: COMMON FLOATING GLASS SEARCH BAR =================
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -126,7 +122,6 @@ fun CineMineScreen(
                     )
                 }
 
-                // ================= COMPONENT 2: STANDALONE EXPLORATION TABS =================
                 ScrollableTabRow(
                     selectedTabIndex = viewModel.activeTab.ordinal,
                     containerColor = Color.Transparent,
@@ -158,13 +153,11 @@ fun CineMineScreen(
                 .padding(innerPadding)
         ) {
             when (viewModel.activeTab) {
-                // ================= VIEWPORT A: UNIFIED INTEGRATED DISCOVERY VIEWPORT =================
                 MineTab.UNIFIED -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 24.dp, top = 4.dp)
                     ) {
-                        // --- CATEGORY 1: LOCAL MOVIES ROW SLIDER ---
                         if (viewModel.filteredLocalMovies.isNotEmpty()) {
                             item {
                                 Text("Local Movies Collection", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 8.dp))
@@ -181,7 +174,6 @@ fun CineMineScreen(
                             }
                         }
 
-                        // --- CATEGORY 2: LOCAL TV SHOWS ROW SLIDER ---
                         if (viewModel.filteredLocalShows.isNotEmpty()) {
                             item {
                                 Text("Local TV Series Grid", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp))
@@ -195,7 +187,6 @@ fun CineMineScreen(
                             }
                         }
 
-                        // --- CATEGORY 3: CINETUBE ROW SLIDER ---
                         if (viewModel.filteredTubeVideos.isNotEmpty()) {
                             item {
                                 Text("CineTube Random Trends", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.tertiary, modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp))
@@ -214,7 +205,6 @@ fun CineMineScreen(
                             }
                         }
 
-                        // --- CATEGORY 4: CINEHUB ONLINE ROW SLIDER ---
                         if (viewModel.filteredOnlineCloud.isNotEmpty()) {
                             item {
                                 Text("Cloud Repo Network Releases", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp))
@@ -233,7 +223,6 @@ fun CineMineScreen(
                     }
                 }
 
-                // ================= VIEWPORT B: STANDALONE CINETUBE GRID MATRIX =================
                 MineTab.CINETUBE -> {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 3 else 1),
@@ -253,7 +242,6 @@ fun CineMineScreen(
                     }
                 }
 
-                // ================= VIEWPORT C: STANDALONE FOCUS LOCAL HUB =================
                 MineTab.CINEHUB_LOCAL -> {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(gridColumnCount),
@@ -273,7 +261,6 @@ fun CineMineScreen(
                     }
                 }
 
-                // ================= VIEWPORT D: STANDALONE FOCUS ONLINE MODULE =================
                 MineTab.CINEHUB_ONLINE -> {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(gridColumnCount),
@@ -294,7 +281,6 @@ fun CineMineScreen(
                 }
             }
 
-            // Display dynamic multi-season layout bottom sheet overlay triggered via structural states
             viewModel.selectedTvShowForSheet?.let { activeShow ->
                 TvShowDetailSheet(
                     show = activeShow,

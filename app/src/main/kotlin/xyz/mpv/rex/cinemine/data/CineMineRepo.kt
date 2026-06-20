@@ -14,11 +14,11 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 import java.util.Base64
 import javax.xml.parsers.DocumentBuilderFactory
-import xyz.mpv.rex.features.cinehub.model.MovieItem
-import xyz.mpv.rex.features.cinehub.model.TvShowItem
-import xyz.mpv.rex.features.cinehub.model.EpisodeItem
-import xyz.mpv.rex.features.cinetube.model.YoutubeVideo
-import xyz.mpv.rex.features.cinetube.model.YoutubeThumbnail
+import xyz.mpv.rex.cinemine.model.MovieItem
+import xyz.mpv.rex.cinemine.model.TvShowItem
+import xyz.mpv.rex.cinemine.model.EpisodeItem
+import xyz.mpv.rex.cinemine.model.YoutubeVideo
+import xyz.mpv.rex.cinemine.model.YoutubeThumbnail
 
 object CineMineRepo {
 
@@ -30,19 +30,19 @@ object CineMineRepo {
 
     private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
     
-    // --- TMDB KEY CONFIGS (For Local Metadata Scraper) ---
+    // --- TMDB KEY CONFIGS (For Local Metadata Scraper Fallback) ---
     private const val TMDB_API_KEY = "38a73d59546aa8789c007d3dbd96cdbc"
     private const val TMDB_BASE = "https://api.themoviedb.org/3"
     private const val IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
 
-    // --- CINETUBE (INVIDIOUS PARSER NODES) ---
+    // --- CINETUBE (INVIDIOUS AUTOMATIC LOAD BALANCING NODES) ---
     private val INVIDIOUS_INSTANCES = listOf(
         "https://invidious.projectsegfau.lt",
         "https://yewtu.be",
         "https://invidious.privacydev.net"
     )
 
-    // --- CINEMAX (CLOUD MIRROR REPO POOLS) ---
+    // --- CINEMAX (CLOUD MIRROR REPO POOLS Handshake Encryption Tokens) ---
     private val DOMAINS_POOL = mutableListOf("https://net52.cc", "https://net11.cc", "https://hianime.lol")
     private val NEW_TV_DOMAINS = listOf(
         "aHR0cHM6Ly9tb2JpbGVkZXRlY3RzLmNvbQ==",
@@ -297,7 +297,7 @@ object CineMineRepo {
                 }
                 if (videos.isNotEmpty()) return@withContext videos
             } catch (e: Exception) {
-                Log.w("CineMineRepo", "Invidious network fallback.")
+                Log.w("CineMineRepo", "Invidious network fallback configuration active.")
             }
         }
         return@withContext videos

@@ -11,6 +11,9 @@ class CineMineViewModel {
     var searchQuery by mutableStateOf("")
     var activeTab by mutableStateOf(MineTab.UNIFIED)
 
+    // Reactive state tracking to cleanly open/dismiss the Season-Wise TV Detail Sheet overlay
+    var selectedTvShowForSheet by mutableStateOf<TvShowItem?>(null)
+
     // Reactive State Lists for direct layout UI rows rendering injection
     val filteredLocalMovies = mutableStateListOf<MovieItem>()
     val filteredLocalShows = mutableStateListOf<TvShowItem>()
@@ -80,5 +83,14 @@ class CineMineViewModel {
         
         filteredOnlineCloud.clear()
         filteredOnlineCloud.addAll(cloudItems)
+    }
+
+    // --- SHEET STATE HANDLERS ---
+    fun openTvShowDetails(show: TvShowItem) {
+        selectedTvShowForSheet = show
+    }
+
+    fun closeTvShowDetails() {
+        selectedTvShowForSheet = null
     }
 }

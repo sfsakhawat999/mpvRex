@@ -45,7 +45,6 @@ fun CineMineScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     
-    // Core state engines mapped inside unified pipeline layers
     var rawMoviesBase by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinehub.model.MovieItem>()) }
     var rawShowsBase by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinehub.model.TvShowItem>()) }
     var rawCloudMoviesBase by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinehub.model.MovieItem>()) }
@@ -55,7 +54,6 @@ fun CineMineScreen(
     val glassBorderColor = Color.White.copy(alpha = 0.12f)
     val glassContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.45f)
 
-    // Dynamic execution engine loads raw background scanners immediately
     LaunchedEffect(Unit) {
         scope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val movieFolder = File("/sdcard/CineRex/movies")
@@ -77,7 +75,7 @@ fun CineMineScreen(
                 rawCloudMoviesBase = CineCloudRepoClient.fetchOnlineMovies(context)
                 viewModel.resetFeeds(rawMoviesBase, rawShowsBase, emptyList(), rawCloudMoviesBase)
             } catch (e: Exception) {
-                android.util.Log.e("CineMineUI", "Network dynamic authorization lock dropped")
+                android.util.Log.e("CineMineUI", "Network Cloud configuration fault bypass")
             } finally {
                 isCloudSyncing = false
             }
@@ -87,14 +85,10 @@ fun CineMineScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.statusBars), // Safely handles system headers mapping natively
+            .windowInsetsPadding(WindowInsets.statusBars),
         topBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.9f))
-            ) {
-                // ================= COMPONENT 1: TRANSLUCENT GLASS SEARCH HUB =================
+            Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background.copy(alpha = 0.9f))) {
+                // Common Floating Glass Search Box
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -108,13 +102,7 @@ fun CineMineScreen(
                         onValueChange = { 
                             viewModel.updateSearchAndFilter(it, rawMoviesBase, rawShowsBase, emptyList(), rawCloudMoviesBase) 
                         },
-                        placeholder = { 
-                            Text(
-                                "Search items globally across CineMine...", 
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                fontSize = 14.sp
-                            ) 
-                        },
+                        placeholder = { Text("Global search across all nodes...", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontSize = 14.sp) },
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -125,7 +113,7 @@ fun CineMineScreen(
                     )
                 }
 
-                // ================= COMPONENT 2: STANDALONE ACTIVE CONTROLLER TABS =================
+                // Control Tabs
                 ScrollableTabRow(
                     selectedTabIndex = viewModel.activeTab.ordinal,
                     containerColor = Color.Transparent,
@@ -151,19 +139,14 @@ fun CineMineScreen(
             }
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             when (viewModel.activeTab) {
-                // LAYER A: UNIFIED INTEGRATED DISCOVERY VIEWPORT
                 MineTab.UNIFIED -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 32.dp, top = 8.dp)
                     ) {
-                        // --- CATEGORY 1: LOCAL OFFLINE MOVIE SHELF ---
+                        // Raw Local Movies Slider
                         if (viewModel.filteredLocalMovies.isNotEmpty()) {
                             item {
                                 Text("Local Hub Movies", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 8.dp))
@@ -179,15 +162,15 @@ fun CineMineScreen(
                             }
                         }
 
-                        // --- CATEGORY 2: LOCAL OFFLINE TV SERIES SHELF ---
+                        // Raw Local TV Shows Slider
                         if (viewModel.filteredLocalShows.isNotEmpty()) {
                             item {
-                                Text("Local TV Shows", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp))
+                                Text("Local TV Series", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp))
                                 LazyRow(contentPadding = PaddingValues(horizontal = 14.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                     items(viewModel.filteredLocalShows) { show ->
                                         Box(modifier = Modifier.width(130.dp)) {
                                             CineHubGridCard(show.title, show.genre, show.userRating, show.posterPath, show.watchProgress, show.isCloudSeries) {
-                                                // Expands default episodic views structures dynamically 
+                                                // Dynamic trigger handling
                                             }
                                         }
                                     }
@@ -195,26 +178,23 @@ fun CineMineScreen(
                             }
                         }
 
-                        // --- CATEGORY 3: CINETUBE SYSTEM STREAM NODES ---
+                        // CineTube Navigation
                         item {
                             Text("CineTube Discoveries", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.tertiary, modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp))
-                            // Embeds quick horizontally scrollable nodes mapping YouTube video layers asynchronously
                             Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
                             ) {
                                 Box(modifier = Modifier.fillMaxWidth().height(90.dp).clickable { viewModel.activeTab = MineTab.CINETUBE }, contentAlignment = Alignment.Center) {
-                                    Text("Tap to launch explicit full-frame CineTube video matrices.", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                                    Text("Tap to open full frame CineTube streaming engine", fontSize = 13.sp, fontWeight = FontWeight.Medium)
                                 }
                             }
                         }
 
-                        // --- CATEGORY 4: CINEHUB ONLINE SECURE CLOUD SERVERS ---
+                        // Real Online Server Releases Slider
                         if (viewModel.filteredOnlineCloud.isNotEmpty()) {
                             item {
-                                Text("Cloud Repo Dynamic Releases", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp))
+                                Text("Cloud Repo Releases", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp))
                                 LazyRow(contentPadding = PaddingValues(horizontal = 14.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                     items(viewModel.filteredOnlineCloud) { cloudMovie ->
                                         Box(modifier = Modifier.width(130.dp)) {
@@ -233,27 +213,13 @@ fun CineMineScreen(
                         }
                     }
                 }
-
-                // LAYER B: INDEPENDENT ISOLATED CINETUBE STREAM NODE ENGINE
                 MineTab.CINETUBE -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         CineTubeScreen(onPlayRequested = onPlayRequested)
                     }
                 }
-
-                // LAYER C & D: TARGET EXTENSIONS RUNTIME FOR ADVANCED FOCUS MODES
-                MineTab.CINEHUB_LOCAL -> { /* Local focused matrix column sheets render here */ }
-                MineTab.CINEHUB_ONLINE -> { /* Cloud dynamic item cells grids render here */ }
-            }
-
-            if (isCloudSyncing) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(24.dp)
-                        .size(24.dp),
-                    strokeWidth = 2.dp
-                )
+                MineTab.CINEHUB_LOCAL -> { /* Local list column view */ }
+                MineTab.CINEHUB_ONLINE -> { /* Cloud repo grid view */ }
             }
         }
     }

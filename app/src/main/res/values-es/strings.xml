@@ -333,7 +333,7 @@ Next: NEXT</string>
     <string name="pref_anime4k_title">Escalado Anime4K (Experimental)</string>
     <string name="pref_anime4k_summary">Activar el filtro de escalado Anime4K</string>
     <string name="pref_anime4k_incompatibility">Incompatibilidad de Anime4K</string>
-    <string name="pref_anime4k_gpu_next_error">gpu-next es incompatible con los shaders de Anime4K. Cuando Anime4K esté activado, la app usará automáticamente el motor heredado 'gpu' para mantener la compatibilidad.</string>
+    <string name="pref_anime4k_gpu_next_error">gpu-next es incompatible con los shaders de Anime4K. Cuando Anime4K esté activado, la app usará automáticamente el motor heredado 'gpu' para mantener la compatibilidad</string>
     <string name="pref_anime4k_cannot_use_with_gpu_next">No se puede usar Anime4K cuando gpu-next está activado</string>
     <string name="anime4k_mode_title">Ajustes preestablecidos de Anime4K</string>
     <string name="anime4k_quality_title">Variantes de Anime4K</string>

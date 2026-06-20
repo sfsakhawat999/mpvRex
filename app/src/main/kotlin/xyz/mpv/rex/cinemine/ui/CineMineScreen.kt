@@ -32,12 +32,11 @@ import xyz.mpv.rex.cinemine.viewmodel.CineMineViewModel
 import xyz.mpv.rex.cinemine.ui.components.MovieItemCard
 import xyz.mpv.rex.cinemine.ui.components.TvShowItemCard
 import xyz.mpv.rex.cinemine.ui.components.YoutubeVideoCard
-import xyz.mpv.rex.features.cinehub.data.NfoScanner
-import xyz.mpv.rex.features.cinehub.data.CineCloudRepoClient
-import xyz.mpv.rex.features.cinetube.data.InvidiousClient
+import xyz.mpv.rex.cinemine.ui.components.TvShowDetailSheet
+import xyz.mpv.rex.cinemine.data.CineMineRepo
+import xyz.mpv.rex.cinemine.data.CineMineStreamResolver
 import xyz.mpv.rex.features.cinetube.ui.CineTubeScreen
 import kotlinx.coroutines.launch
-import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,44 +54,32 @@ fun CineMineScreen(
     var rawShows by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinehub.model.TvShowItem>()) }
     var rawTubeVideos by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinetube.model.YoutubeVideo>()) }
     var rawCloudMovies by remember { mutableStateOf(emptyList<xyz.mpv.rex.features.cinehub.model.MovieItem>()) }
-    var isFetchingCloud by remember { mutableStateOf(false) }
+    var isFetchingData by remember { mutableStateOf(false) }
 
     // M3 Glassmorphic specifications
     val glassShape = RoundedCornerShape(24.dp)
     val glassContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
     val glassBorder = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f))
 
-    // Asynchronous synchronization engine pipeline
+    // Asynchronous synchronization engine pipeline utilizing new internal data hooks
     LaunchedEffect(Unit) {
-        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            val movieFolder = File("/sdcard/CineRex/movies")
-            val tvFolder = File("/sdcard/CineRex/tvshows")
-            
-            if (movieFolder.exists()) {
-                rawMovies = NfoScanner.scanDirectoryForMovies(movieFolder)
-            }
-            if (tvFolder.exists()) {
-                rawShows = NfoScanner.scanDirectoryForTvShows(tvFolder)
-                    .filter { !File(it.folderPath).name.lowercase().contains("season") }
-            }
+        isFetchingData = true
+        scope.launch {
+            rawMovies = CineMineRepo.fetchLocalMovies()
             viewModel.resetFeeds(rawMovies, rawShows, rawTubeVideos, rawCloudMovies)
         }
-
         scope.launch {
-            try {
-                rawTubeVideos = InvidiousClient.fetchTrendingVideos("Movies")
-                viewModel.resetFeeds(rawMovies, rawShows, rawTubeVideos, rawCloudMovies)
-            } catch (_: Exception) {}
+            rawShows = CineMineRepo.fetchLocalTvShows()
+            viewModel.resetFeeds(rawMovies, rawShows, rawTubeVideos, rawCloudMovies)
         }
-
         scope.launch {
-            isFetchingCloud = true
-            try {
-                rawCloudMovies = CineCloudRepoClient.fetchOnlineMovies(context)
-                viewModel.resetFeeds(rawMovies, rawShows, rawTubeVideos, rawCloudMovies)
-            } catch (_: Exception) {} finally {
-                isFetchingCloud = false
-            }
+            rawTubeVideos = CineMineRepo.fetchCineTubeTrending()
+            viewModel.resetFeeds(rawMovies, rawShows, rawTubeVideos, rawCloudMovies)
+        }
+        scope.launch {
+            rawCloudMovies = CineMineRepo.fetchCineMaxReleases(context)
+            viewModel.resetFeeds(rawMovies, rawShows, rawTubeVideos, rawCloudMovies)
+            isFetchingData = false
         }
     }
 
@@ -182,7 +169,10 @@ fun CineMineScreen(
                                 LazyRow(contentPadding = PaddingValues(horizontal = 14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                     items(viewModel.filteredLocalMovies) { movie ->
                                         MovieItemCard(movie.title, movie.genre, movie.userRating, movie.posterPath, isCloud = false) {
-                                            onPlayRequested(movie.videoFilePath, movie.title)
+                                            scope.launch {
+                                                val streamLink = CineMineStreamResolver.resolvePlaybackUrl(movie.videoFilePath)
+                                                onPlayRequested(streamLink, movie.title)
+                                            }
                                         }
                                     }
                                 }
@@ -195,8 +185,8 @@ fun CineMineScreen(
                                 Text("Local TV Series Grid", fontWeight = FontWeight.Black, fontSize = 16.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp))
                                 LazyRow(contentPadding = PaddingValues(horizontal = 14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                     items(viewModel.filteredLocalShows) { show ->
-                                        TvShowItemCard(show.title, show.studio, show.userRating, show.posterPath) {
-                                            // Managed via standalone sheet expansions
+                                        TvShowItemCard(show.title, show.genre, show.userRating, show.posterPath) {
+                                            viewModel.openTvShowDetails(show)
                                         }
                                     }
                                 }
@@ -212,10 +202,8 @@ fun CineMineScreen(
                                         Box(modifier = Modifier.width(220.dp)) {
                                             YoutubeVideoCard(video.title, video.author, video.lengthSeconds, video.getBestThumbnailUrl()) {
                                                 scope.launch {
-                                                    val resolvedTubeUrl = InvidiousClient.fetchDirectStreamUrl(video.videoId)
-                                                    if (resolvedTubeUrl != null) {
-                                                        onPlayRequested(resolvedTubeUrl, video.title)
-                                                    }
+                                                    val resolvedTubeUrl = CineMineStreamResolver.resolvePlaybackUrl(video.videoId)
+                                                    onPlayRequested(resolvedTubeUrl, video.title)
                                                 }
                                             }
                                         }
@@ -232,10 +220,8 @@ fun CineMineScreen(
                                     items(viewModel.filteredOnlineCloud) { cloudMovie ->
                                         MovieItemCard(cloudMovie.title, cloudMovie.genre, cloudMovie.userRating, cloudMovie.posterPath, isCloud = true) {
                                             scope.launch {
-                                                val postId = cloudMovie.videoFilePath.substringAfter("cnc_stream:").substringBefore("")
-                                                val platformCode = cloudMovie.videoFilePath.substringAfterLast(":")
-                                                val m3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(postId, platformCode)
-                                                onPlayRequested(m3u8Url ?: "https://net52.cc/mobile/player.php?id=$postId", cloudMovie.title)
+                                                val streamLink = CineMineStreamResolver.resolvePlaybackUrl(cloudMovie.videoFilePath)
+                                                onPlayRequested(streamLink, cloudMovie.title)
                                             }
                                         }
                                     }
@@ -263,7 +249,10 @@ fun CineMineScreen(
                     ) {
                         items(viewModel.filteredLocalMovies) { movie ->
                             MovieItemCard(movie.title, movie.genre, movie.userRating, movie.posterPath, isCloud = false) {
-                                onPlayRequested(movie.videoFilePath, movie.title)
+                                scope.launch {
+                                    val streamLink = CineMineStreamResolver.resolvePlaybackUrl(movie.videoFilePath)
+                                    onPlayRequested(streamLink, movie.title)
+                                }
                             }
                         }
                     }
@@ -281,10 +270,8 @@ fun CineMineScreen(
                         items(viewModel.filteredOnlineCloud) { cloudMovie ->
                             MovieItemCard(cloudMovie.title, cloudMovie.genre, cloudMovie.userRating, cloudMovie.posterPath, isCloud = true) {
                                 scope.launch {
-                                    val postId = cloudMovie.videoFilePath.substringAfter("cnc_stream:").substringBefore(":")
-                                    val platformCode = cloudMovie.videoFilePath.substringAfterLast(":")
-                                    val m3u8Url = CineCloudRepoClient.resolveDirectStreamUrl(postId, platformCode)
-                                    onPlayRequested(m3u8Url ?: "https://net52.cc/mobile/player.php?id=$postId", cloudMovie.title)
+                                    val streamLink = CineMineStreamResolver.resolvePlaybackUrl(cloudMovie.videoFilePath)
+                                    onPlayRequested(streamLink, cloudMovie.title)
                                 }
                             }
                         }
@@ -292,7 +279,16 @@ fun CineMineScreen(
                 }
             }
 
-            if (isFetchingCloud) {
+            // Display dynamic multi-season layout bottom sheet overlay triggered via structural states
+            viewModel.selectedTvShowForSheet?.let { activeShow ->
+                TvShowDetailSheet(
+                    show = activeShow,
+                    onDismiss = { viewModel.closeTvShowDetails() },
+                    onPlayRequested = onPlayRequested
+                )
+            }
+
+            if (isFetchingData) {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)

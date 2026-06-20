@@ -54,7 +54,7 @@ import xyz.mpv.rex.ui.browser.playlist.PlaylistScreen
 import xyz.mpv.rex.ui.browser.recentlyplayed.RecentlyPlayedScreen
 import xyz.mpv.rex.ui.browser.shorts.ShortsScreen
 import xyz.mpv.rex.ui.browser.selection.SelectionManager
-import xyz.mpv.rex.features.FeaturesScreen // Clean dynamic features layer binding
+import xyz.mpv.rex.cinemine.ui.CineMineScreen // Premium CineMine Screen integration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -145,12 +145,12 @@ object MainScreen : Screen {
             FolderListScreen.Content()
           }
         )
-        // --- FIXED PIPELINE: Hooked intent bridge directly into internal framework nodes safely ---
+        // --- FIXED PIPELINE WIRING: Replaced old Features tab with CineMine Core Matrix Node ---
         add(
-          VisibleTab("features", "Features", Icons.Filled.FeaturedPlayList) {
-            FeaturesScreen(
+          VisibleTab("cinemine", "CineMine", Icons.Filled.FeaturedPlayList) {
+            CineMineScreen(
               onPlayRequested = { streamUrl, streamTitle ->
-                // Launches the stream natively inside the custom system architecture layout activity
+                // Direct high-performance interface navigation intent mapping for active local media playback
                 val intent = android.content.Intent(context, xyz.mpv.rex.ui.player.PlayerActivity::class.java).apply {
                     putExtra("playlist", arrayOf(streamUrl))
                     putExtra("title", streamTitle)

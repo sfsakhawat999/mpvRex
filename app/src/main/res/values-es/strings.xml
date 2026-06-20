@@ -45,14 +45,14 @@
     <string name="pref_appearance_player_always_dark_mode_title">Reproductor siempre en modo oscuro</string>
     <string name="pref_appearance_player_always_dark_mode_summary">Mantener los controles del reproductor en tema oscuro independientemente del tema de la app</string>
     <string name="pref_appearance_use_system_font_title">Usar fuente del sistema</string>
-    <string name="pref_appearance_use_system_font_summary">Usar la fuente predeterminada de tu dispositivo en lugar de la fuente de la app</string>  
+    <string name="pref_appearance_use_system_font_summary">Usar la fuente predeterminada de tu dispositivo en lugar de la fuente de la app</string>
     <string name="pref_appearance_category_file_browser">Explorador de archivos</string>
     <string name="pref_appearance_show_hidden_files_title">Mostrar archivos ocultos</string>
     <string name="pref_appearance_show_hidden_files_summary">Mostrar carpetas ocultas que comienzan con un punto (.) incluyendo carpetas de android, data, system y archivos .nomedia</string>
     <string name="pref_appearance_show_unplayed_old_video_label_title">Mostrar etiqueta para videos nuevos no reproducidos</string>
-    <string name="pref_appearance_show_unplayed_old_video_label_summary">Mostrar una etiqueta \"Nuevo\" en los videos agregados dentro de los días especificados que nunca se han reproducido</string>
+    <string name="pref_appearance_show_unplayed_old_video_label_summary">Mostrar una etiqueta "Nuevo" en los videos agregados dentro de los días especificados que nunca se han reproducido</string>
     <string name="pref_appearance_unplayed_old_video_days_title">Límite de días para la etiqueta de video nuevo</string>
-    <string name="pref_appearance_unplayed_old_video_days_summary">Los videos agregados dentro de los últimos %d días sin historial de reproducción se marcarán como nuevos</string>
+    <string name="pref_appearance_unplayed_old_video_days_summary">Los videos agregados dentro de los últimos %d dias sin historial de reproducción se marcarán como nuevos</string>
     <string name="pref_appearance_category_thumbnails">Miniatura</string>
     <string name="pref_appearance_show_network_thumbnails_title">Mostrar miniaturas de red (Experimental)</string>
     <string name="pref_appearance_show_network_thumbnails_summary">Generar miniaturas para transmisiones de red (Puede aumentar el uso de datos en redes móviles)</string>
@@ -142,6 +142,7 @@
     <string name="pref_clear_thumbnail_cache_title">Borrar caché de miniaturas</string>
     <string name="pref_clear_thumbnail_cache_summary">Eliminar todas las miniaturas de video guardadas en caché (se regenerarán al explorar carpetas)</string>
 
+
     <string name="pref_layout_title">Diseño del reproductor</string>
     <string name="pref_layout_summary">Personalizar el diseño de los botones del reproductor</string>
     <string name="pref_layout_reset_default">Restablecer valores predeterminados</string>
@@ -182,6 +183,8 @@
     <string name="pref_player_gestures_horizontal_swipe_to_seek_summary">Deslizar hacia la izquierda o derecha en la pantalla para retroceder o avanzar</string>
     <string name="pref_player_gestures_swipe_to_subtitle_seek_title">Deslizar para buscar subtítulos</string>
     <string name="pref_player_gestures_swipe_to_subtitle_seek_summary">Deslizar hacia la izquierda o derecha en la parte superior o inferior de la pantalla para pasar subtítulos</string>
+    <string name="pref_player_gestures_move_subtitle_by_dragging_title">Arrastrar subtítulo para reposicionar</string>
+    <string name="pref_player_gestures_move_subtitle_by_dragging_summary">Toca el subtítulo y arrastra hacia arriba o hacia abajo para moverlo. Los deslizamientos de brillo y volumen siguen funcionando en las demás áreas</string>
     <string name="pref_player_gestures_horizontal_swipe_sensitivity">Sensibilidad de deslizamiento horizontal</string>
     <string name="pref_player_gestures_horizontal_swipe_sensitivity_summary">Ajustar cuánta distancia de video se cubre por deslizamiento</string>
     <string name="pref_player_gestures_hold_for_multiple_speed">Mantener presionado para velocidad múltiple</string>
@@ -223,13 +226,21 @@
     <string name="pref_gesture_use_relative_seeking_title">Usar búsqueda relativa</string>
     <string name="pref_gesture_use_relative_seeking_summary">Buscar en relación con la posición inicial del arrastre en lugar de la posición absoluta del dedo.</string>
 
-    <string name="pref_gesture_double_tap_custom_info">Puedes asignar acciones personalizadas a estos gestos en input.conf usando los siguientes códigos de tecla:\n\nIzquierda: MBTN_LEFT_DBL\nCentro: MBTN_MID_DBL\nDerecha: MBTN_RIGHT_DBL</string>
+    <string name="pref_gesture_double_tap_custom_info">You can bind custom actions to these gestures in input.conf using the following key codes:
+
+Left: MBTN_LEFT_DBL
+Center: MBTN_MID_DBL
+Right: MBTN_RIGHT_DBL</string>
 
     <string name="pref_gesture_media_title">Controles multimedia</string>
     <string name="pref_gesture_media_previous">Anterior</string>
     <string name="pref_gesture_media_play">Reproducir/Pausar</string>
     <string name="pref_gesture_media_next">Siguiente</string>
-    <string name="pref_gesture_media_custom_info">Puedes asignar acciones personalizadas a los controles multimedia en input.conf usando los siguientes códigos de tecla:\n\nAnterior: PREV\nReproducir/Pausar: PLAYPAUSE\nSiguiente: NEXT</string>
+    <string name="pref_gesture_media_custom_info">You can bind custom actions to media controls in input.conf using the following key codes:
+
+Previous: PREV
+Play/Pause: PLAYPAUSE
+Next: NEXT</string>
 
     <string name="pref_gesture_view_title">Vista</string>
     <string name="pref_gesture_tap_thumbnail_to_select_title">Tocar miniatura para seleccionar</string>
@@ -260,6 +271,8 @@
     <string name="pref_custom_lua_summary">Gestionar botones personalizados del reproductor con código Lua</string>
     <string name="pref_preferred_languages">Idiomas preferidos</string>
     <string name="pref_subtitles_fonts_dir">Directorio de fuentes</string>
+    <string name="pref_subtitles_disable_by_default_title">Desactivar subtítulos por defecto</string>
+    <string name="pref_subtitles_disable_by_default_summary">Los subtítulos no aparecerán a menos que los actives manualmente durante la reproducción.</string>
     <string name="pref_subtitles_autoload_title">Cargar subtítulos automáticamente</string>
     <string name="pref_subtitles_autoload_summary">Cargar automáticamente subtítulos externos con el mismo nombre.</string>
     <string name="pref_subtitles_open_at_video_location_title">Abrir en la ubicación del video</string>
@@ -320,7 +333,7 @@
     <string name="pref_anime4k_title">Escalado Anime4K (Experimental)</string>
     <string name="pref_anime4k_summary">Activar el filtro de escalado Anime4K</string>
     <string name="pref_anime4k_incompatibility">Incompatibilidad de Anime4K</string>
-    <string name="pref_anime4k_gpu_next_error">gpu-next es incompatible con los shaders de Anime4K. Cuando Anime4K esté activado, la app usará automáticamente el motor heredado \'gpu\' para mantener la compatibilidad.</string>
+    <string name="pref_anime4k_gpu_next_error">gpu-next es incompatible con los shaders de Anime4K. Cuando Anime4K esté activado, la app usará automáticamente el motor heredado 'gpu' para mantener la compatibilidad.</string>
     <string name="pref_anime4k_cannot_use_with_gpu_next">No se puede usar Anime4K cuando gpu-next está activado</string>
     <string name="anime4k_mode_title">Ajustes preestablecidos de Anime4K</string>
     <string name="anime4k_quality_title">Variantes de Anime4K</string>
@@ -353,6 +366,16 @@
     <string name="pref_about_donate_paypal_url" translatable="false">https://paypal.me/aadinarvekar</string>
     <string name="pref_about_donate_upi">UPI</string>
     <string name="pref_about_donate_upi_id" translatable="false">aadiinarvekar@upi</string>
+
+    <string name="pref_about_telegram_title">Telegram</string>
+    <string name="pref_about_telegram_channel">Canal de Telegram</string>
+    <string name="pref_about_telegram_channel_summary">Únete a nuestro canal para estar al tanto de actualizaciones y novedades</string>
+    <string name="pref_about_telegram_group">Grupo de chat de Telegram</string>
+    <string name="pref_about_telegram_group_summary">Interactúa y conversa con la comunidad</string>
+    <string name="pref_about_show_community_icon_title">Acceso rápido a la comunidad</string>
+    <string name="pref_about_show_community_icon_summary">Mostrar acceso rápido a los enlaces de la comunidad en la cabecera de inicio</string>
+    <string name="pref_about_telegram_url" translatable="false">https://t.me/mpvRex</string>
+    <string name="pref_about_telegram_chat_url" translatable="false">https://t.me/mpvRex_chat</string>
 
     <string name="player_sheets_add_ext_sub">Añadir subtítulos externos</string>
     <string name="player_sheets_add_ext_audio">Añadir pistas de audio externas</string>
@@ -520,6 +543,12 @@
     <string name="pref_player_use_precise_seeking">Usar búsqueda precisa</string>
     <string name="pref_player_show_seekbar_when_seeking_title">Mostrar barra de búsqueda al desplazarse</string>
     <string name="pref_player_show_seekbar_when_seeking_summary">Mostrar la barra de progreso del video durante las búsquedas por gestos</string>
+    <string name="pref_player_hide_osd_text_title">Ocultar texto del OSD del reproductor</string>
+    <string name="pref_player_hide_osd_text_summary">Ocultar el texto predeterminado del OSD de mpv al buscar posiciones o subtítulos</string>
+    <string name="pref_player_keep_screen_on_when_paused_title">Mantener pantalla encendida al pausar</string>
+    <string name="pref_player_keep_screen_on_when_paused_summary">Evita que la pantalla se apague por inactividad durante la pausa</string>
+    <string name="pref_player_save_position_on_quit_summary">Recordar dónde te quedaste</string>
+    <string name="pref_player_interaction_header">Interacción del reproductor</string>
 
     <!-- Folders Preferences -->
     <string name="pref_folders_title">Carpetas</string>
@@ -541,7 +570,7 @@
     <string name="playlist_add_m3u_description">Introduce la URL de un archivo de lista de reproducción M3U</string>
     <string name="playlist_url_label">URL de la lista de reproducción</string>
     <string name="playlist_url_placeholder">https://example.com/playlist.m3u</string>
-    <string name="playlist_url_hint">Soporta formatos .m3u y .m3u8</string>
+    <string name="playlist_url_hint">Soporta formatos .m3u and .m3u8</string>
     <string name="playlist_add_success">Lista de reproducción M3U añadida correctamente</string>
     <string name="playlist_add_error">Error al añadir la lista de reproducción M3U: %s</string>
     <string name="playlist_create_empty">Crear lista de reproducción vacía</string>
@@ -567,6 +596,10 @@
     <string name="search_videos">Buscar videos…</string>
     <string name="search_folders_and_videos">Buscar carpetas y videos…</string>
     <string name="search_playlists">Buscar listas de reproducción…</string>
+    <string name="search_no_results_title">No se encontraron resultados</string>
+    <string name="search_no_results_message">Ningún archivo o carpeta coincide con tu búsqueda</string>
+    <string name="search_empty_title">Buscar</string>
+    <string name="search_empty_message">Escribe para buscar archivos y carpetas</string>
     <string name="play_recently_played_or_first">Reproducir el reciente o el primer video</string>
     <string name="toggle_menu">Alternar menú</string>
     <string name="close">Cerrar</string>
@@ -617,7 +650,7 @@
     <string name="username">Nombre de usuario</string>
     <string name="password">Contraseña</string>
     <string name="selected_long_press_to_reorder">Seleccionado (mantén pulsado para reordenar)</string>
-    <string name="available">Disponible</string>
+    <string name="available">Available</string>
     <string name="width">Ancho</string>
     <string name="height">Alto</string>
     <string name="filter_presets">Filtros preestablecidos</string>
@@ -628,4 +661,11 @@
     <!-- Browser Preferences -->
     <string name="pref_show_audio_files_title">Mostrar archivos de audio</string>
     <string name="pref_show_audio_files_summary">Mostrar e indexar archivos de audio en el explorador y las listas de reproducción</string>
+    <string name="pref_show_tree_view_path_title">Mostrar ruta de navegación</string>
+    <string name="pref_show_tree_view_path_summary">Mostrar la ruta de navegación de la carpeta en la parte superior de la vista de árbol</string>
+
+    <string name="copy_path">Copiar ruta</string>
+    <string name="copy_video_path">Copiar ruta del archivo de video</string>
+    <string name="copy_folder_path">Copiar ruta de la carpeta</string>
+    <string name="copied_to_clipboard">Copiado al portapapeles</string>
 </resources>

@@ -14,11 +14,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 import java.util.Base64
 import javax.xml.parsers.DocumentBuilderFactory
-import xyz.mpv.rex.cinemine.model.MovieItem
-import xyz.mpv.rex.cinemine.model.TvShowItem
-import xyz.mpv.rex.cinemine.model.EpisodeItem
-import xyz.mpv.rex.cinemine.model.YoutubeVideo
-import xyz.mpv.rex.cinemine.model.YoutubeThumbnail
+import xyz.mpv.rex.cinemine.model.*
 
 object CineMineRepo {
 
@@ -30,19 +26,16 @@ object CineMineRepo {
 
     private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
     
-    // --- TMDB KEY CONFIGS (For Local Metadata Scraper Fallback) ---
     private const val TMDB_API_KEY = "38a73d59546aa8789c007d3dbd96cdbc"
     private const val TMDB_BASE = "https://api.themoviedb.org/3"
     private const val IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
 
-    // --- CINETUBE (INVIDIOUS AUTOMATIC LOAD BALANCING NODES) ---
     private val INVIDIOUS_INSTANCES = listOf(
         "https://invidious.projectsegfau.lt",
         "https://yewtu.be",
         "https://invidious.privacydev.net"
     )
 
-    // --- CINEMAX (CLOUD MIRROR REPO POOLS Handshake Encryption Tokens) ---
     private val DOMAINS_POOL = mutableListOf("https://net52.cc", "https://net11.cc", "https://hianime.lol")
     private val NEW_TV_DOMAINS = listOf(
         "aHR0cHM6Ly9tb2JpbGVkZXRlY3RzLmNvbQ==",
@@ -54,41 +47,31 @@ object CineMineRepo {
     @Volatile private var workingDomain = "https://net52.cc"
     @Volatile private var resolvedApiUrl = ""
 
-    // =====================================================================
-    // ====================== MODULE 1: CINEHUB (LOCAL) =====================
-    // =====================================================================
-
     suspend fun fetchLocalMovies(): List<MovieItem> = withContext(Dispatchers.IO) {
         val movies = mutableListOf<MovieItem>()
         val dir = File("/sdcard/CineRex/movies")
         if (!dir.exists() || !dir.isDirectory) return@withContext movies
 
-        dir.listFiles()?.forEach { file ->
-            if (file.isFile && isVideoFile(file)) {
-                val specificNfo = File(dir, "${file.nameWithoutExtension}.nfo")
-                val genericNfo = File(dir, "movie.nfo")
-                val targetNfo = if (specificNfo.exists()) specificNfo else if (genericNfo.exists()) genericNfo else null
+        dir.walkTopDown().filter { it.isFile && isVideoFile(it) }.forEach { file ->
+            val specificNfo = File(file.parent, "${file.nameWithoutExtension}.nfo")
+            val genericNfo = File(file.parent, "movie.nfo")
+            val targetNfo = if (specificNfo.exists()) specificNfo else if (genericNfo.exists()) genericNfo else null
 
-                if (targetNfo != null) {
-                    parseMovieNfo(targetNfo, file)?.let { movies.add(it) }
-                } else {
-                    val onlineMeta = scrapeOnlineMovieMeta(file.name)
-                    movies.add(
-                        MovieItem(
-                            videoFilePath = file.absolutePath,
-                            title = onlineMeta?.get(0) ?: file.nameWithoutExtension.replace(Regex("[\\._\\-]"), " ").trim(),
-                            originalTitle = "",
-                            userRating = onlineMeta?.get(2)?.toDoubleOrNull() ?: 0.0,
-                            plot = onlineMeta?.get(1) ?: "Local Media File. Scan successful.",
-                            genre = "Local Movie",
-                            director = "Unknown",
-                            premiered = "2026",
-                            posterPath = onlineMeta?.get(3)?.ifBlank { null },
-                            watchProgress = 0f,
-                            actors = emptyList()
-                        )
+            if (targetNfo != null) {
+                parseMovieNfo(targetNfo, file)?.let { movies.add(it) }
+            } else {
+                val onlineMeta = scrapeOnlineMovieMeta(file.name)
+                movies.add(
+                    MovieItem(
+                        videoFilePath = file.absolutePath,
+                        title = onlineMeta?.get(0) ?: file.nameWithoutExtension.replace(Regex("[\\._\\-]"), " ").trim(),
+                        userRating = onlineMeta?.get(2)?.toDoubleOrNull() ?: 0.0,
+                        plot = onlineMeta?.get(1) ?: "Local Media File.",
+                        genre = "Local Movie",
+                        premiered = "2026",
+                        posterPath = onlineMeta?.get(3)?.ifBlank { null }
                     )
-                }
+                )
             }
         }
         return@withContext movies
@@ -100,24 +83,24 @@ object CineMineRepo {
         if (!dir.exists() || !dir.isDirectory) return@withContext tvShows
 
         dir.listFiles()?.forEach { subFolder ->
-            if (subFolder.isDirectory && !subFolder.name.lowercase().contains("season")) {
+            if (subFolder.isDirectory) {
                 val tvshowNfo = File(subFolder, "tvshow.nfo")
+                val posterFile = File(subFolder, "poster.jpg")
+                val posterPath = if (posterFile.exists()) posterFile.absolutePath else null
+                
                 if (tvshowNfo.exists()) {
-                    parseTvShowNfo(tvshowNfo, subFolder)?.let { tvShows.add(it) }
+                    parseTvShowNfo(tvshowNfo, subFolder, posterPath)?.let { tvShows.add(it) }
                 } else {
                     val onlineMeta = scrapeOnlineTvMeta(subFolder.name)
                     tvShows.add(
                         TvShowItem(
                             folderPath = subFolder.absolutePath,
                             title = onlineMeta?.get(0) ?: subFolder.name.replace(Regex("[\\._\\-]"), " ").trim(),
-                            plot = onlineMeta?.get(1) ?: "Local TV Series folder.",
+                            plot = onlineMeta?.get(1) ?: "Local TV Series.",
                             userRating = onlineMeta?.get(2)?.toDoubleOrNull() ?: 0.0,
                             genre = "Local Series",
                             premiered = "2026",
-                            studio = "Unknown",
-                            posterPath = onlineMeta?.get(3)?.ifBlank { null },
-                            watchProgress = 0f,
-                            actors = emptyList()
+                            posterPath = posterPath ?: onlineMeta?.get(3)?.ifBlank { null }
                         )
                     )
                 }
@@ -126,55 +109,41 @@ object CineMineRepo {
         return@withContext tvShows
     }
 
-    /**
-     * Scans isolated TV Show directory nodes to cleanly map episodic .nfo details dynamically
-     */
     suspend fun fetchLocalEpisodes(showFolderPath: String): List<EpisodeItem> = withContext(Dispatchers.IO) {
         val episodes = mutableListOf<EpisodeItem>()
         val folder = File(showFolderPath)
         if (!folder.exists() || !folder.isDirectory) return@withContext episodes
 
-        folder.listFiles()?.forEach { file ->
-            if (file.isFile && isVideoFile(file)) {
-                val nfoFile = File(folder, "${file.nameWithoutExtension}.nfo")
-                if (nfoFile.exists()) {
-                    try {
-                        val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(nfoFile)
-                        val root = doc.documentElement
-                        val title = root.getElementsByTagName("title").item(0)?.textContent ?: file.nameWithoutExtension
-                        val season = root.getElementsByTagName("season").item(0)?.textContent?.toIntOrNull() ?: 1
-                        val episode = root.getElementsByTagName("episode").item(0)?.textContent?.toIntOrNull() ?: 1
-                        val plot = root.getElementsByTagName("plot").item(0)?.textContent ?: ""
+        folder.walkTopDown().filter { it.isFile && isVideoFile(it) }.forEach { file ->
+            val nfoFile = File(file.parent, "${file.nameWithoutExtension}.nfo")
+            if (nfoFile.exists()) {
+                try {
+                    val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(nfoFile)
+                    val root = doc.documentElement
+                    val title = root.getElementsByTagName("title").item(0)?.textContent ?: file.nameWithoutExtension
+                    val season = root.getElementsByTagName("season").item(0)?.textContent?.toIntOrNull() ?: 1
+                    val episode = root.getElementsByTagName("episode").item(0)?.textContent?.toIntOrNull() ?: 1
+                    val plot = root.getElementsByTagName("plot").item(0)?.textContent ?: ""
 
-                        episodes.add(
-                            EpisodeItem(
-                                videoFilePath = file.absolutePath,
-                                title = title,
-                                season = season,
-                                episode = episode,
-                                plot = plot,
-                                userRating = 0.0,
-                                aired = "2026",
-                                watchProgress = 0f
-                            )
-                        )
-                    } catch (_: Exception) {}
-                } else {
                     episodes.add(
                         EpisodeItem(
-                            videoFilePath = file.absolutePath,
-                            title = file.nameWithoutExtension.replace(Regex("[\\._\\-]"), " ").trim(),
-                            season = 1,
-                            episode = 1,
-                            plot = "Local Episode tracking node.",
-                            userRating = 0.0,
-                            aired = "2026",
-                            watchProgress = 0f
+                            videoFilePath = file.absolutePath, title = title,
+                            season = season, episode = episode, plot = plot
                         )
                     )
-                }
-            } else if (file.isDirectory) {
-                episodes.addAll(fetchLocalEpisodes(file.absolutePath))
+                } catch (_: Exception) {}
+            } else {
+                // Regex parsing extraction fallback for SxxExx format strings
+                val match = Regex("(?i)S(\\d+)E(\\d+)").find(file.name)
+                val season = match?.groupValues?.get(1)?.toIntOrNull() ?: 1
+                val episode = match?.groupValues?.get(2)?.toIntOrNull() ?: 1
+                episodes.add(
+                    EpisodeItem(
+                        videoFilePath = file.absolutePath,
+                        title = file.nameWithoutExtension.replace(Regex("[\\._\\-]"), " ").trim(),
+                        season = season, episode = episode, plot = "Local Episode playback track."
+                    )
+                )
             }
         }
         return@withContext episodes.sortedWith(compareBy({ it.season }, { it.episode }))
@@ -242,35 +211,31 @@ object CineMineRepo {
             val title = root.getElementsByTagName("title").item(0)?.textContent ?: videoFile.nameWithoutExtension
             val plot = root.getElementsByTagName("plot").item(0)?.textContent ?: ""
             val rating = root.getElementsByTagName("userrating").item(0)?.textContent?.toDoubleOrNull() ?: 0.0
-            val poster = root.getElementsByTagName("thumb").item(0)?.textContent
+            val posterFile = File(file.parent, "poster.jpg")
+            val poster = if (posterFile.exists()) posterFile.absolutePath else root.getElementsByTagName("thumb").item(0)?.textContent
 
             MovieItem(
                 videoFilePath = videoFile.absolutePath, title = title, originalTitle = "",
-                userRating = rating, plot = plot, mpaa = "", genre = "Local Movie",
-                director = "Unknown", premiered = "2026", posterPath = poster, watchProgress = 0f, actors = emptyList()
+                userRating = rating, plot = plot, genre = "Local Movie", premiered = "2025", posterPath = poster
             )
         } catch (e: Exception) { null }
     }
 
-    private fun parseTvShowNfo(file: File, folder: File): TvShowItem? {
+    private fun parseTvShowNfo(file: File, folder: File, posterOverride: String?): TvShowItem? {
         return try {
             val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
             val root = doc.documentElement
             val title = root.getElementsByTagName("title").item(0)?.textContent ?: folder.name
             val plot = root.getElementsByTagName("plot").item(0)?.textContent ?: ""
             val rating = root.getElementsByTagName("userrating").item(0)?.textContent?.toDoubleOrNull() ?: 0.0
-            val poster = root.getElementsByTagName("thumb").item(0)?.textContent
+            val poster = posterOverride ?: root.getElementsByTagName("thumb").item(0)?.textContent
 
             TvShowItem(
                 folderPath = folder.absolutePath, title = title, plot = plot, userRating = rating,
-                genre = "Local Series", premiered = "2026", studio = "Unknown", posterPath = poster, watchProgress = 0f, actors = emptyList()
+                genre = "Local Series", premiered = "2026", posterPath = poster
             )
         } catch (e: Exception) { null }
     }
-
-    // =====================================================================
-    // ====================== MODULE 2: CINETUBE (YT/IV) ===================
-    // =====================================================================
 
     suspend fun fetchCineTubeTrending(): List<YoutubeVideo> = withContext(Dispatchers.IO) {
         val videos = mutableListOf<YoutubeVideo>()
@@ -297,7 +262,7 @@ object CineMineRepo {
                 }
                 if (videos.isNotEmpty()) return@withContext videos
             } catch (e: Exception) {
-                Log.w("CineMineRepo", "Invidious network fallback configuration active.")
+                Log.w("CineMineRepo", "Invidious network link try loop step.")
             }
         }
         return@withContext videos
@@ -316,10 +281,6 @@ object CineMineRepo {
         }
         return@withContext null
     }
-
-    // =====================================================================
-    // ====================== MODULE 3: CINEMAX (CLOUD REPO) ===============
-    // =====================================================================
 
     private fun decodeB64(v: String): String = String(Base64.getDecoder().decode(v))
 
@@ -401,7 +362,7 @@ object CineMineRepo {
                             title = title, originalTitle = "Netflix Cloud", userRating = 8.5,
                             plot = "Premium cloud streaming release active.",
                             genre = "Netflix Stream", director = "CineMax", premiered = "2026",
-                            posterPath = "https://imgcdn.kim/poster/v/$id.jpg", watchProgress = 0f, actors = emptyList()
+                            posterPath = "https://imgcdn.kim/poster/v/$id.jpg"
                         )
                     )
                 }

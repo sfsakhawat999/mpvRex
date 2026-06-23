@@ -581,7 +581,7 @@
     <string name="recents">最近</string>
     <string name="playlists">播放清單</string>
     <string name="network">網路</string>
-    <string name="seconds">秒</string>
+    <string name="unit_seconds">秒</string>
     <string name="milliseconds">毫秒</string>
     <string name="name">名稱</string>
     <string name="protocol">協定</string>

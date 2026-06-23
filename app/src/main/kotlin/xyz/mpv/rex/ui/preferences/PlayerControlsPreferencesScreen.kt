@@ -420,7 +420,7 @@ object PlayerControlsPreferencesScreen : Screen {
                     OutlinedTextField(
                       value = customTimeValue,
                       onValueChange = { customTimeValue = it },
-                      label = { Text("Milliseconds") },
+                      label = { Text(stringResource(id = R.string.milliseconds)) },
                       keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                       modifier = Modifier.fillMaxWidth(),
                       singleLine = true,

@@ -632,7 +632,7 @@
     <string name="recents">Recents</string>
     <string name="playlists">Playlists</string>
     <string name="network">Network</string>
-    <string name="seconds">Seconds</string>
+    <string name="unit_seconds">Seconds</string>
     <string name="milliseconds">Milliseconds</string>
     <string name="name">Name</string>
     <string name="protocol">Protocol</string>

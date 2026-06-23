@@ -147,7 +147,7 @@ object GesturePreferencesScreen : Screen {
                   OutlinedTextField(
                     value = customSeekValue,
                     onValueChange = { customSeekValue = it },
-                    label = { Text("Seconds") },
+                    label = { Text(stringResource(id = R.string.unit_seconds)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,

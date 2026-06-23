@@ -638,7 +638,7 @@ Next: NEXT</string>
     <string name="recents">Recientes</string>
     <string name="playlists">Listas</string>
     <string name="network">Red</string>
-    <string name="seconds">Segundos</string>
+    <string name="unit_seconds">Segundos</string>
     <string name="milliseconds">Milisegundos</string>
     <string name="name">Nombre</string>
     <string name="protocol">Protocolo</string>

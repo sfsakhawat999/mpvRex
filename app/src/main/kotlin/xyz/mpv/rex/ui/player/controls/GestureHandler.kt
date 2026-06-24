@@ -925,10 +925,15 @@ fun GestureHandler(
 
           do {
             val event = awaitPointerEvent()
-            val pressed = event.changes.filter { it.pressed }
+            val pressed = event.changes.filter { it.pressed && !it.isConsumed }
 
             if (pressed.size == 1) {
               val change = pressed[0]
+              
+              if (viewModel.isVerticalGestureActive.value || viewModel.isGestureSeeking.value) {
+                continue
+              }
+
               val zoom = MPVLib.getPropertyDouble("video-zoom")?.toFloat() ?: 0f
               if (zoom <= 0f) { continue }
 
@@ -944,7 +949,7 @@ fun GestureHandler(
                 val dx = pos.x - startX
                 val dy = pos.y - startY
                 // If it's a horizontal seek gesture, let horizontal swipe-to-seek block handle it instead
-                val isHorizontalSeek = horizontalSwipeToSeek && (abs(dx) > abs(dy) * 2f) && (abs(dx) > 30f)
+                val isHorizontalSeek = horizontalSwipeToSeek && (abs(dx) > abs(dy) * 1.2f)
                 if (isHorizontalSeek) {
                   continue
                 }

@@ -42,6 +42,7 @@ import xyz.mpv.rex.preferences.FolderViewMode
 import xyz.mpv.rex.preferences.MediaLayoutMode
 import xyz.mpv.rex.preferences.preference.collectAsState
 import org.koin.compose.koinInject
+import xyz.mpv.rex.ui.utils.LocalBackStack
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Switch
 import androidx.compose.material3.FilterChipDefaults
@@ -820,6 +821,7 @@ fun FolderSortDialog(
   onSortTypeChange: (FolderSortType) -> Unit,
   onSortOrderChange: (SortOrder) -> Unit,
 ) {
+  val backstack = LocalBackStack.current
   val browserPreferences = koinInject<BrowserPreferences>()
   val appearancePreferences = koinInject<AppearancePreferences>()
   val showTotalVideosChip by browserPreferences.showTotalVideosChip.collectAsState()
@@ -919,19 +921,34 @@ fun FolderSortDialog(
           label = "Folder",
           icon = Icons.Filled.ViewModule,
           isSelected = folderViewMode == FolderViewMode.AlbumView,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.AlbumView) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.AlbumView)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         ),
         ViewModeOption(
           label = "Tree",
           icon = Icons.Filled.AccountTree,
           isSelected = folderViewMode == FolderViewMode.FileManager,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.FileManager) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.FileManager)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         ),
         ViewModeOption(
           label = "Library",
           icon = Icons.Filled.VideoLibrary,
           isSelected = folderViewMode == FolderViewMode.MediaLibrary,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         )
       )
     ),
@@ -1031,6 +1048,7 @@ fun VideoSortDialog(
   onSortTypeChange: (VideoSortType) -> Unit,
   onSortOrderChange: (SortOrder) -> Unit,
 ) {
+  val backstack = LocalBackStack.current
   val browserPreferences = koinInject<BrowserPreferences>()
   val videoGridColumnsPortrait by browserPreferences.videoGridColumnsPortrait.collectAsState()
   val videoGridColumnsLandscape by browserPreferences.videoGridColumnsLandscape.collectAsState()
@@ -1127,19 +1145,34 @@ fun VideoSortDialog(
           label = "Folder",
           icon = Icons.Filled.ViewModule,
           isSelected = folderViewMode == FolderViewMode.AlbumView,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.AlbumView) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.AlbumView)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         ),
         ViewModeOption(
           label = "Tree",
           icon = Icons.Filled.AccountTree,
           isSelected = folderViewMode == FolderViewMode.FileManager,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.FileManager) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.FileManager)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         ),
         ViewModeOption(
           label = "Library",
           icon = Icons.Filled.VideoLibrary,
           isSelected = folderViewMode == FolderViewMode.MediaLibrary,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         )
       )
     ),
@@ -1237,6 +1270,7 @@ fun FileSystemSortDialog(
   onDismiss: () -> Unit,
   isAtRoot: Boolean = true,
 ) {
+  val backstack = LocalBackStack.current
   val browserPreferences = koinInject<BrowserPreferences>()
   val appearancePreferences = koinInject<AppearancePreferences>()
   val folderViewMode by browserPreferences.folderViewMode.collectAsState()
@@ -1338,19 +1372,34 @@ fun FileSystemSortDialog(
           label = "Folder",
           icon = Icons.Filled.ViewModule,
           isSelected = folderViewMode == FolderViewMode.AlbumView,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.AlbumView) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.AlbumView)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         ),
         ViewModeOption(
           label = "Tree",
           icon = Icons.Filled.AccountTree,
           isSelected = folderViewMode == FolderViewMode.FileManager,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.FileManager) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.FileManager)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         ),
         ViewModeOption(
           label = "Library",
           icon = Icons.Filled.VideoLibrary,
           isSelected = folderViewMode == FolderViewMode.MediaLibrary,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         )
       )
     ),
@@ -1370,7 +1419,6 @@ fun FileSystemSortDialog(
     ),
     folderGridColumnSelector = folderGridColumnSelector,
     videoGridColumnSelector = videoGridColumnSelector,
-    enableViewModeOptions = isAtRoot,
     enableLayoutModeOptions = true, // Enabled for FileSystem/Tree view too!
     contentToggles = listOf(
       ContentToggle(

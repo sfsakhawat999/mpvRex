@@ -831,6 +831,10 @@ fun FolderSortDialog(
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
   val showAudioFiles by browserPreferences.showAudioFiles.collectAsState()
   val unlimitedNameLines by appearancePreferences.unlimitedNameLines.collectAsState()
+  val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
+  val showSizeChip by browserPreferences.showSizeChip.collectAsState()
+  val showResolutionChip by browserPreferences.showResolutionChip.collectAsState()
+  val showFramerateInResolution by browserPreferences.showFramerateInResolution.collectAsState()
   val folderViewMode by browserPreferences.folderViewMode.collectAsState()
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
   val folderGridColumnsPortrait by browserPreferences.folderGridColumnsPortrait.collectAsState()
@@ -953,6 +957,11 @@ fun FolderSortDialog(
     ),
     visibilityToggles = listOf(
       VisibilityToggle(
+        label = "Video Thumbnails",
+        checked = showVideoThumbnails,
+        onCheckedChange = { browserPreferences.showVideoThumbnails.set(it) },
+      ),
+      VisibilityToggle(
         label = "Full Name",
         checked = unlimitedNameLines,
         onCheckedChange = { appearancePreferences.unlimitedNameLines.set(it) },
@@ -976,6 +985,21 @@ fun FolderSortDialog(
         label = "Folder Size",
         checked = showTotalSizeChip,
         onCheckedChange = { browserPreferences.showTotalSizeChip.set(it) },
+      ),
+      VisibilityToggle(
+        label = "File Size",
+        checked = showSizeChip,
+        onCheckedChange = { browserPreferences.showSizeChip.set(it) },
+      ),
+      VisibilityToggle(
+        label = "Resolution",
+        checked = showResolutionChip,
+        onCheckedChange = { browserPreferences.showResolutionChip.set(it) },
+      ),
+      VisibilityToggle(
+        label = "Framerate",
+        checked = showFramerateInResolution,
+        onCheckedChange = { browserPreferences.showFramerateInResolution.set(it) },
       ),
       VisibilityToggle(
         label = "Date",
@@ -1020,7 +1044,7 @@ fun VideoSortDialog(
   val folderGridColumns = if (isLandscape) folderGridColumnsLandscape else folderGridColumnsPortrait
   val appearancePreferences = koinInject<AppearancePreferences>()
   val showAudioFiles by browserPreferences.showAudioFiles.collectAsState()
-  val showThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
+  val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
   val showSizeChip by browserPreferences.showSizeChip.collectAsState()
   val showResolutionChip by browserPreferences.showResolutionChip.collectAsState()
   val showFramerateInResolution by browserPreferences.showFramerateInResolution.collectAsState()
@@ -1028,6 +1052,10 @@ fun VideoSortDialog(
   val showDateChip by browserPreferences.showDateChip.collectAsState()
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
   val unlimitedNameLines by appearancePreferences.unlimitedNameLines.collectAsState()
+  val showFolderPath by browserPreferences.showFolderPath.collectAsState()
+  val showTotalVideosChip by browserPreferences.showTotalVideosChip.collectAsState()
+  val showTotalDurationChip by browserPreferences.showTotalDurationChip.collectAsState()
+  val showTotalSizeChip by browserPreferences.showTotalSizeChip.collectAsState()
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
   val folderViewMode by browserPreferences.folderViewMode.collectAsState()
 
@@ -1138,14 +1166,9 @@ fun VideoSortDialog(
     visibilityToggles =
       listOf(
         VisibilityToggle(
-          label = "Thumbnails",
-          checked = showThumbnails,
+          label = "Video Thumbnails",
+          checked = showVideoThumbnails,
           onCheckedChange = { browserPreferences.showVideoThumbnails.set(it) },
-        ),
-        VisibilityToggle(
-          label = "Subtitle Indicator",
-          checked = showSubtitleIndicator,
-          onCheckedChange = { browserPreferences.showSubtitleIndicator.set(it) },
         ),
         VisibilityToggle(
           label = "Full Name",
@@ -1153,7 +1176,27 @@ fun VideoSortDialog(
           onCheckedChange = { appearancePreferences.unlimitedNameLines.set(it) },
         ),
         VisibilityToggle(
-          label = "Size",
+          label = "Path",
+          checked = showFolderPath,
+          onCheckedChange = { browserPreferences.showFolderPath.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Total Videos",
+          checked = showTotalVideosChip,
+          onCheckedChange = { browserPreferences.showTotalVideosChip.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Total Duration",
+          checked = showTotalDurationChip,
+          onCheckedChange = { browserPreferences.showTotalDurationChip.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Folder Size",
+          checked = showTotalSizeChip,
+          onCheckedChange = { browserPreferences.showTotalSizeChip.set(it) },
+        ),
+        VisibilityToggle(
+          label = "File Size",
           checked = showSizeChip,
           onCheckedChange = { browserPreferences.showSizeChip.set(it) },
         ),
@@ -1176,6 +1219,11 @@ fun VideoSortDialog(
           label = "Progress Bar",
           checked = showProgressBar,
           onCheckedChange = { browserPreferences.showProgressBar.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Subtitle Indicator",
+          checked = showSubtitleIndicator,
+          onCheckedChange = { browserPreferences.showSubtitleIndicator.set(it) },
         ),
       ),
     folderGridColumnSelector = folderGridColumnSelector,
@@ -1205,6 +1253,8 @@ fun FileSystemSortDialog(
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
   val unlimitedNameLines by appearancePreferences.unlimitedNameLines.collectAsState()
   val showAudioFiles by browserPreferences.showAudioFiles.collectAsState()
+  val showTotalDurationChip by browserPreferences.showTotalDurationChip.collectAsState()
+  val showDateChip by browserPreferences.showDateChip.collectAsState()
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
   val folderGridColumnsPortrait by browserPreferences.folderGridColumnsPortrait.collectAsState()
   val folderGridColumnsLandscape by browserPreferences.folderGridColumnsLandscape.collectAsState()
@@ -1351,12 +1401,17 @@ fun FileSystemSortDialog(
         onCheckedChange = { browserPreferences.showTotalVideosChip.set(it) },
       ),
       VisibilityToggle(
+        label = "Total Duration",
+        checked = showTotalDurationChip,
+        onCheckedChange = { browserPreferences.showTotalDurationChip.set(it) },
+      ),
+      VisibilityToggle(
         label = "Folder Size",
         checked = showTotalSizeChip,
         onCheckedChange = { browserPreferences.showTotalSizeChip.set(it) },
       ),
       VisibilityToggle(
-        label = "Size",
+        label = "File Size",
         checked = showSizeChip,
         onCheckedChange = { browserPreferences.showSizeChip.set(it) },
       ),
@@ -1371,16 +1426,20 @@ fun FileSystemSortDialog(
         onCheckedChange = { browserPreferences.showFramerateInResolution.set(it) },
       ),
       VisibilityToggle(
-        label = "Subtitle",
-        checked = showSubtitleIndicator,
-        onCheckedChange = { browserPreferences.showSubtitleIndicator.set(it) },
+        label = "Date",
+        checked = showDateChip,
+        onCheckedChange = { browserPreferences.showDateChip.set(it) },
       ),
       VisibilityToggle(
         label = "Progress Bar",
         checked = showProgressBar,
         onCheckedChange = { browserPreferences.showProgressBar.set(it) },
       ),
+      VisibilityToggle(
+        label = "Subtitle Indicator",
+        checked = showSubtitleIndicator,
+        onCheckedChange = { browserPreferences.showSubtitleIndicator.set(it) },
+      ),
     )
   )
 }
-

@@ -47,6 +47,8 @@ import xyz.mpv.rex.preferences.BrowserPreferences
 import xyz.mpv.rex.preferences.GesturePreferences
 import xyz.mpv.rex.preferences.PlayerPreferences
 import xyz.mpv.rex.preferences.SubtitlesPreferences
+import xyz.mpv.rex.preferences.FolderSortType
+import xyz.mpv.rex.preferences.SortOrder
 import xyz.mpv.rex.database.repository.VideoMetadataCacheRepository
 import xyz.mpv.rex.ui.player.controls.PlayerControls
 import xyz.mpv.rex.ui.theme.MpvexPlayerTheme
@@ -3549,6 +3551,19 @@ class PlayerActivity :
             )
           val sortedVideos = xyz.mpv.rex.utils.sort.SortUtils.sortVideos(videosInFolder, videoSortType, videoSortOrder)
           sortedVideos.mapNotNull { video -> files.find { it.absolutePath == video.path } }
+        } else if (launchSource == "tree_mode") {
+          val folderSortType = browserPreferences.folderSortType.get()
+          val folderSortOrder = browserPreferences.folderSortOrder.get()
+          val videosInFolder = xyz.mpv.rex.utils.storage.VideoScanUtils.getVideosInFolder(context, parentFolder.absolutePath)
+          val sortedVideos = when (folderSortType) {
+            FolderSortType.Title -> videosInFolder.sortedWith { t1, t2 -> xyz.mpv.rex.utils.sort.SortUtils.NaturalOrderComparator.DEFAULT.compare(t1.displayName, t2.displayName) }
+            FolderSortType.Duration -> videosInFolder.sortedBy { it.duration }
+            FolderSortType.Date -> videosInFolder.sortedBy { File(it.path).lastModified() }
+            FolderSortType.Size -> videosInFolder.sortedBy { it.size }
+            FolderSortType.VideoCount -> videosInFolder.sortedBy { it.duration }
+          }
+          val orderedVideos = if (folderSortOrder.isAscending) sortedVideos else sortedVideos.reversed()
+          orderedVideos.mapNotNull { video -> files.find { it.absolutePath == video.path } }
         } else {
           files.sortedWith { f1, f2 -> xyz.mpv.rex.utils.sort.SortUtils.NaturalOrderComparator.DEFAULT.compare(f1.name, f2.name) }
         }

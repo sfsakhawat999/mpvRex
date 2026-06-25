@@ -78,6 +78,16 @@ Based on mpvEx, with additional enhancements and optimizations built on top.
 
 ---
 
+## Translations
+
+We use [Weblate](https://weblate.org/) to manage translations. If you would like to help translate mpvRex into your language, you can do so on the translation project page.
+
+[![Translation status](https://hosted.weblate.org/widgets/mpvrex/-/horizontal-auto.svg)](https://hosted.weblate.org/engage/mpvrex/)
+
+*Hosting is provided for free by Hosted Weblate for libre software projects.*
+
+---
+
 ## Credits
 
 mpvRex is a fork of **[mpvEx](https://github.com/marlboro-advance/mpvEx)** (based on **[mpv-android](https://github.com/mpv-android/mpv-android)**). Special thanks for the foundation and inspiration:

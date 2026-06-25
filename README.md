@@ -13,6 +13,7 @@
   <img src="https://img.shields.io/badge/License-Apache--2.0-blue.svg" />
   <img src="https://img.shields.io/badge/Kotlin-2.3.10-purple.svg" />
   <a href="https://github.com/sfsakhawat999/mpvRex/releases"><img src="https://img.shields.io/github/downloads/sfsakhawat999/mpvRex/total?logo=Github"/></a>
+  <a href="https://hosted.weblate.org/engage/mpvrex/"><img src="https://hosted.weblate.org/widgets/mpvrex/-/horizontal-auto.svg" alt="Translation status" /></a>
 </p>
 
 mpvRex is an advanced, customizable video player for Android. It combines the versatility of libmpv with a modern Jetpack Compose interface and unique user-centric features.

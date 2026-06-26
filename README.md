@@ -46,9 +46,9 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 
 ### 🎬 Playback & Gestures
 
+- **Seek Cancellation** — cancel a seek mid-gesture by dragging backwards, with interactive pointer-scaling feedback animations
 - **Subtitle Drag-to-Reposition** — tap and drag subtitles vertically to position them anywhere on screen
 - **Subtitle Swipe Seeking** — swipe horizontally to jump precisely between subtitle lines
-- **Seek Cancellation** — cancel a seek mid-gesture by dragging backwards, with interactive pointer-scaling feedback
 - **Top Seek Capsule OSD** — pill-shaped overlay showing double-tap seek feedback without blocking the video
 - **Dynamic A-B Loop & Frame Navigation** — set loop points with adjustable vertical bias; fine-tune with a floating, non-colliding frame-by-frame panel
 - **Persistent Video Pan & Zoom** — zoom and position settings saved per video, with quick sliders in the Aspect Ratio menu
@@ -58,15 +58,15 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 
 ### 🎨 UI & Aesthetics
 
+- **Dynamic Tab Manager** — hide, show, and reorder dashboard tabs to fully customize your bottom navigation
 - **Material You** — player controls dynamically match your Android system accent or app theme
 - **Animated Splash Screen** — custom vector-art launch animation with light/dark mode support
-- **Dynamic Tab Manager** — show, hide, or reorder bottom navigation tabs
 - **Shorts Mode** — vertical video playback with auto-swipe for Reels-style content
 - **Clean Preferences** — organized Jetpack Compose preference screens with fully localized strings
 
 ### 🗂️ File Explorer & Media Library
 
-- **Unified Explorer Engine** — consistent, strategy-driven browser for Local Files, Folder list, Tree view, Network streams, and Playlists
+- **Unified Explorer Engine** — ensures every browsing mode (local storage, network shares, and playlists) looks, feels, and behaves identically
 - **Multi-Select Range Gestures** — select multiple files or directories with touch-and-drag
 - **Sectioned Grid/List Layouts** — independently customizable inside tree subdirectories
 - **Folder Metadata** — recursive file counts, watched/unplayed dimming, and reactive "NEW" badges

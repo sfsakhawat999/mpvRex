@@ -61,7 +61,6 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 - **Dynamic Tab Manager** — hide, show, and reorder dashboard tabs to fully customize your bottom navigation
 - **Material You** — player controls dynamically match your Android system accent or app theme
 - **Animated Splash Screen** — custom vector-art launch animation with light/dark mode support
-- **Shorts Mode** — vertical video playback with auto-swipe for Reels-style content
 - **Clean Preferences** — organized Jetpack Compose preference screens with fully localized strings
 
 ### 🗂️ File Explorer & Media Library
@@ -75,6 +74,7 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 - **Network Streaming Proxy** — high-performance proxy for WebDAV, SMB, and FTP streams with image preview caching
 - **Mark As System** — mark videos as watched, skipped, or flagged; filter your library accordingly
 - **Media Library View** — browse your full video collection outside the file tree
+- **Shorts Mode** — vertical video playback with auto-swipe for Reels-style content
 
 ### ⚙️ Engine & Customization
 
@@ -86,7 +86,7 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 
 ### ⚡ Performance
 
-- **Battery-Optimized Playback Loop** — rewritten video position tracking to drastically cut JNI overhead during long sessions
+- **Battery-Optimized Playback** — optimized playback engine designed to maximize battery life during long viewing sessions
 - **Async UI Animations** — seekbar animations run in coroutine contexts, off the UI thread
 - **Smart Background Service** — background playback service starts only when actually backgrounded
 - **Compose Recomposition Tuning** — minimized unnecessary recompositions across all player controls

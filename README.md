@@ -66,7 +66,7 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 ### 🗂️ File Explorer & Media Library
 
 - **Unified Explorer Engine** — ensures every browsing mode (local storage, network shares, and playlists) looks, feels, and behaves identically
-- **Multi-Select Range Gestures** — select multiple files or directories with touch-and-drag
+- **Multi-Select Range** — select a range of items easily by long-pressing the first file and tapping the last
 - **Sectioned Grid/List Layouts** — independently customizable inside tree subdirectories
 - **Folder Metadata** — recursive file counts, watched/unplayed dimming, and reactive "NEW" badges
 - **Breadcrumb Navigation** — toggleable path breadcrumbs in the tree view
@@ -79,10 +79,8 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 ### ⚙️ Engine & Customization
 
 - **HDR-to-SDR Tone Mapping** — high-quality tone mapping via `hdr-toys` shader pipeline
-- **Custom OSD Buttons & Lua Scripts** — map custom buttons to your own Lua scripts directly in the player
 - **Smart Orientation** — force landscape/portrait per video, stored as a preference
-- **Audio Mode** — load external audio tracks via a file picker, or play audio files natively
-- **Online Subtitle Search** — integrated search powered by Wyzie, with primary track indicators
+- **Audio Support** — scan, display, and play standalone audio files directly inside the file explorer and player
 
 ### ⚡ Performance
 

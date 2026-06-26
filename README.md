@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <b>A powerful, independent Android video player built on libmpv.</b>
+  <b>Feature-rich Android video player based on libmpv.</b>
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/github/stars/sfsakhawat999/mpvRex?style=flat&logo=github" />
 </p>
 
-mpvRex is an independent Android video player that combines the power of libmpv with a modern Jetpack Compose interface. It offers deep gesture control, a unified file explorer, Media Library, HDR support, and continuous performance improvements — built and maintained by an active community.
+mpvRex is an advanced, customizable video player for Android. It combines the versatility of libmpv with a modern Jetpack Compose interface and unique user-centric features.
 
 ---
 

@@ -35,10 +35,33 @@ object ShortsDiscoveryOps {
                 VideoScanUtils.getVideosInFolder(context, folder.path)
             }.filter { !it.isAudio }
 
-            // 3. Enrich videos with metadata
-            val enrichedVideos = MetadataRetrieval.enrichVideosIfNeeded(
-                context, allVideos, browserPreferences, metadataCache
-            )
+            // 3. Batch extract and enrich metadata for all videos
+            val fileTriples = allVideos.mapNotNull { video ->
+                val file = java.io.File(video.path)
+                if (file.exists()) {
+                    Triple(file, video.uri, video.displayName)
+                } else {
+                    null
+                }
+            }
+            val metadataMap = metadataCache.getOrExtractMetadataBatch(fileTriples)
+            val fullyEnrichedVideos = allVideos.map { video ->
+                val metadata = metadataMap[video.path]
+                if (metadata != null) {
+                    video.copy(
+                        duration = metadata.durationMs,
+                        durationFormatted = MediaFormatter.formatDuration(metadata.durationMs),
+                        width = metadata.width,
+                        height = metadata.height,
+                        fps = metadata.fps,
+                        resolution = MediaFormatter.formatResolutionWithFps(metadata.width, metadata.height, metadata.fps),
+                        hasEmbeddedSubtitles = metadata.hasEmbeddedSubtitles,
+                        subtitleCodec = metadata.subtitleCodec
+                    )
+                } else {
+                    video
+                }
+            }
 
             // 4. Get shorts metadata from DB
             val shortsMetadata = shortsMediaDao.getAllShortsMedia().associateBy { it.path }
@@ -48,27 +71,14 @@ object ShortsDiscoveryOps {
             val maxHorizontalMs = browserPreferences.maxHorizontalVideoDurationMinutes.get() * 60 * 1000L
 
             // 6. Filter for shorts based on orientation or user-defined short-duration preference
-            enrichedVideos.filter { video ->
+            fullyEnrichedVideos.filter { video ->
                 val metadata = shortsMetadata[video.path]
                 val isBlocked = metadata?.isBlocked ?: false
                 if (isBlocked) return@filter false
 
                 val isManuallyAdded = metadata?.isManuallyAdded ?: false
-                
-                var width = video.width
-                var height = video.height
-                
-                // Force dimension extraction if missing
-                if (width == 0 || height == 0) {
-                   val file = java.io.File(video.path)
-                   if (file.exists()) {
-                       val meta = metadataCache.getOrExtractMetadata(file, video.uri, video.displayName)
-                       if (meta != null) {
-                           width = meta.width
-                           height = meta.height
-                       }
-                   }
-                }
+                val width = video.width
+                val height = video.height
 
                 val isVertical = height > width && height > 0
                 

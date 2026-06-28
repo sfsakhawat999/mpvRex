@@ -19,7 +19,10 @@ import org.xmlpull.v1.XmlPullParser
 fun ShortsPlayerHost(
     modifier: Modifier = Modifier,
     onReady: (MPVView) -> Unit,
-    onPlayerReadyChange: (Boolean) -> Unit
+    onPlayerReadyChange: (Boolean) -> Unit,
+    onProgressUpdate: (timePos: Double, duration: Long) -> Unit = { _, _ -> },
+    onPauseUpdate: (Boolean) -> Unit = {},
+    onPlaybackEnd: () -> Unit = {}
 ) {
     val context = LocalContext.current
     
@@ -40,10 +43,16 @@ fun ShortsPlayerHost(
 
     DisposableEffect(Unit) {
         val observer = object : MPVLib.EventObserver {
+            private var lastTimePos = 0.0
+            private var lastDuration = 0L
+
             override fun event(eventId: Int, data: MPVNode) {
                 when (eventId) {
                     MPVLib.MpvEvent.MPV_EVENT_START_FILE -> {
                         onPlayerReadyChange(false)
+                        lastTimePos = 0.0
+                        lastDuration = 0L
+                        onProgressUpdate(0.0, 0L)
                     }
                     MPVLib.MpvEvent.MPV_EVENT_FILE_LOADED -> {
                         onPlayerReadyChange(true)
@@ -51,15 +60,36 @@ fun ShortsPlayerHost(
                 }
             }
             override fun eventProperty(property: String) {}
-            override fun eventProperty(property: String, value: Long) {}
-            override fun eventProperty(property: String, value: Boolean) {}
+            override fun eventProperty(property: String, value: Long) {
+                if (property == "duration") {
+                    lastDuration = value
+                    onProgressUpdate(lastTimePos, lastDuration)
+                }
+            }
+            override fun eventProperty(property: String, value: Boolean) {
+                when (property) {
+                    "pause" -> onPauseUpdate(value)
+                    "eof-reached" -> {
+                        if (value) {
+                            onPlaybackEnd()
+                        }
+                    }
+                }
+            }
             override fun eventProperty(property: String, value: String) {}
-            override fun eventProperty(property: String, value: Double) {}
+            override fun eventProperty(property: String, value: Double) {
+                if (property == "time-pos") {
+                    lastTimePos = value
+                    onProgressUpdate(lastTimePos, lastDuration)
+                }
+            }
             override fun eventProperty(property: String, value: MPVNode) {}
         }
 
         mpvView.initialize(context.filesDir.path, context.cacheDir.path)
         MPVLib.setPropertyString("loop-file", "inf")
+        MPVLib.observeProperty("time-pos", MPVLib.MpvFormat.MPV_FORMAT_DOUBLE)
+        MPVLib.observeProperty("duration", MPVLib.MpvFormat.MPV_FORMAT_INT64)
         MPVLib.addObserver(observer)
         onReady(mpvView)
         

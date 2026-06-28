@@ -12,6 +12,7 @@ import xyz.mpv.rex.database.repository.VideoMetadataCacheRepository
 import xyz.mpv.rex.domain.media.model.Video
 import xyz.mpv.rex.domain.thumbnail.ThumbnailRepository
 import xyz.mpv.rex.preferences.BrowserPreferences
+import xyz.mpv.rex.utils.media.MediaFormatter
 import xyz.mpv.rex.utils.media.ShortsDiscoveryOps
 import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,7 +74,30 @@ class ShortsViewModel(
                 }.filter { !it.isAudio }
                 
                 val blockedPathsSet = blockedInDb.map { it.path }.toSet()
-                allVideos.filter { it.path in blockedPathsSet }
+                val blockedVideos = allVideos.filter { it.path in blockedPathsSet }
+                
+                val fileTriples = blockedVideos.mapNotNull { video ->
+                    val file = java.io.File(video.path)
+                    if (file.exists()) Triple(file, video.uri, video.displayName) else null
+                }
+                val metadataMap = metadataCache.getOrExtractMetadataBatch(fileTriples)
+                blockedVideos.map { video ->
+                    val metadata = metadataMap[video.path]
+                    if (metadata != null) {
+                        video.copy(
+                            duration = metadata.durationMs,
+                            durationFormatted = MediaFormatter.formatDuration(metadata.durationMs),
+                            width = metadata.width,
+                            height = metadata.height,
+                            fps = metadata.fps,
+                            resolution = MediaFormatter.formatResolutionWithFps(metadata.width, metadata.height, metadata.fps),
+                            hasEmbeddedSubtitles = metadata.hasEmbeddedSubtitles,
+                            subtitleCodec = metadata.subtitleCodec
+                        )
+                    } else {
+                        video
+                    }
+                }
             } else {
                 ShortsDiscoveryOps.discoverShorts(
                     getApplication(),

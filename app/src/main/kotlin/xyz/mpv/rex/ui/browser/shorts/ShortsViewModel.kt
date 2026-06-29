@@ -63,6 +63,7 @@ class ShortsViewModel(
     private val seenPaths = mutableSetOf<String>()
 
     fun loadShorts(initialVideoPath: String? = null, blockedOnly: Boolean = false) {
+        _shorts.value = emptyList()
         viewModelScope.launch {
             _isLoading.value = true
             

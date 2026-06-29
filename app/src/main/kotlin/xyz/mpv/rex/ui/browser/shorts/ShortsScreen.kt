@@ -277,7 +277,8 @@ data class ShortsScreen(
                         }
                     }
 
-                    LaunchedEffect(pagerState.settledPage, mpvView, autoSwipe) {
+                    val currentVideoPath = shorts.getOrNull(pagerState.settledPage)?.path
+                    LaunchedEffect(pagerState.settledPage, mpvView, autoSwipe, currentVideoPath) {
                         if (mpvView != null && shorts.isNotEmpty()) {
                             if (pagerState.settledPage < shorts.size) {
                                 val video = shorts[pagerState.settledPage]

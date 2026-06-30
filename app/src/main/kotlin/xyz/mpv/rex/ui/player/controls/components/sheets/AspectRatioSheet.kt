@@ -35,11 +35,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import xyz.mpv.rex.R
 import xyz.mpv.rex.presentation.components.PlayerSheet
 import xyz.mpv.rex.ui.theme.spacing
 
@@ -67,14 +70,17 @@ fun AspectRatioSheet(
 
   val presetRatios =
     listOf(
-      AspectRatio("Default", -1.0),
-      AspectRatio("4:3", 4.0 / 3.0),
-      AspectRatio("16:9", 16.0 / 9.0),
-      AspectRatio("16:10", 16.0 / 10.0),
-      AspectRatio("21:9", 21.0 / 9.0),
-      AspectRatio("32:9", 32.0 / 9.0),
-      AspectRatio("2.35:1", 2.35),
-      AspectRatio("2.39:1", 2.39),
+      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_default), -1.0),
+      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_4_3), 4.0 / 3.0),
+      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_16_9), 16.0 / 9.0),
+      AspectRatio(
+        stringResource(R.string.player_sheets_aspect_ratio_preset_16_10),
+        16.0 / 10.0,
+      ),
+      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_21_9), 21.0 / 9.0),
+      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_32_9), 32.0 / 9.0),
+      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_2_35_1), 2.35),
+      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_2_39_1), 2.39),
     )
 
   PlayerSheet(onDismissRequest) {
@@ -85,7 +91,7 @@ fun AspectRatioSheet(
           .padding(vertical = MaterialTheme.spacing.medium),
     ) {
       Text(
-        text = "Aspect Ratio",
+        text = stringResource(R.string.player_sheets_aspect_ratio_title),
         style = MaterialTheme.typography.headlineSmall,
         modifier =
           Modifier
@@ -95,7 +101,7 @@ fun AspectRatioSheet(
 
       // Preset ratios
       Text(
-        text = "Presets",
+        text = stringResource(R.string.player_sheets_aspect_ratio_presets),
         style = MaterialTheme.typography.titleSmall,
         modifier =
           Modifier
@@ -120,7 +126,7 @@ fun AspectRatioSheet(
           InputChip(
             selected = showCustomInput,
             onClick = { showCustomInput = !showCustomInput },
-            label = { Text("Custom...") },
+            label = { Text(stringResource(R.string.player_sheets_aspect_ratio_custom_toggle)) },
             modifier = Modifier.animateItem(),
             leadingIcon = null,
           )
@@ -130,7 +136,7 @@ fun AspectRatioSheet(
       // Custom ratios
       if (customRatios.isNotEmpty()) {
         Text(
-          text = "Custom",
+          text = stringResource(R.string.player_sheets_aspect_ratio_custom_section),
           style = MaterialTheme.typography.titleSmall,
           modifier =
             Modifier
@@ -178,7 +184,7 @@ fun AspectRatioSheet(
       )
 
       Text(
-        text = "Manual Zoom & Pan (Camera Offset)",
+        text = stringResource(R.string.player_sheets_aspect_ratio_manual_zoom_pan_title),
         style = MaterialTheme.typography.titleMedium,
         modifier = Modifier
           .padding(horizontal = MaterialTheme.spacing.medium)
@@ -198,7 +204,7 @@ fun AspectRatioSheet(
         ) {
           val zoomFactor = java.lang.Math.pow(2.0, videoZoom.toDouble())
           Text(
-            text = String.format("Zoom: %.2fx", zoomFactor),
+            text = stringResource(R.string.player_sheets_aspect_ratio_zoom_value, zoomFactor),
             style = MaterialTheme.typography.bodyMedium
           )
           
@@ -209,7 +215,7 @@ fun AspectRatioSheet(
             ) {
               Icon(
                 imageVector = Icons.Default.Refresh,
-                contentDescription = "Reset Zoom",
+                contentDescription = stringResource(R.string.player_sheets_aspect_ratio_reset_zoom),
                 modifier = Modifier.size(16.dp)
               )
             }
@@ -238,7 +244,11 @@ fun AspectRatioSheet(
           modifier = Modifier.fillMaxWidth()
         ) {
           Text(
-            text = String.format("Horizontal Offset: %.3f", videoPanX),
+            text =
+              stringResource(
+                R.string.player_sheets_aspect_ratio_horizontal_offset_value,
+                videoPanX,
+              ),
             style = MaterialTheme.typography.bodyMedium
           )
           
@@ -249,7 +259,7 @@ fun AspectRatioSheet(
             ) {
               Icon(
                 imageVector = Icons.Default.Refresh,
-                contentDescription = "Reset Pan",
+                contentDescription = stringResource(R.string.player_sheets_aspect_ratio_reset_pan),
                 modifier = Modifier.size(16.dp)
               )
             }
@@ -275,6 +285,7 @@ private fun AddCustomRatioRow(
   var widthText by remember { mutableStateOf("") }
   var heightText by remember { mutableStateOf("") }
   var errorMessage by remember { mutableStateOf<String?>(null) }
+  val context = LocalContext.current
   val keyboardController = LocalSoftwareKeyboardController.current
 
   Column(
@@ -284,7 +295,7 @@ private fun AddCustomRatioRow(
         .padding(horizontal = MaterialTheme.spacing.medium),
   ) {
     Text(
-      text = "Add Custom Ratio (e.g. 16:9)",
+      text = stringResource(R.string.player_sheets_aspect_ratio_add_custom_title),
       style = MaterialTheme.typography.titleSmall,
       modifier = Modifier.padding(bottom = MaterialTheme.spacing.small),
     )
@@ -301,7 +312,7 @@ private fun AddCustomRatioRow(
           widthText = it.filter { char -> char.isDigit() || char == '.' }
           errorMessage = null
         },
-        label = { Text("Width") },
+        label = { Text(stringResource(R.string.player_sheets_aspect_ratio_width)) },
         isError = errorMessage != null,
         keyboardOptions =
           KeyboardOptions(
@@ -314,7 +325,7 @@ private fun AddCustomRatioRow(
 
       // Colon separator
       Text(
-        text = ":",
+        text = stringResource(R.string.player_sheets_aspect_ratio_separator),
         style = MaterialTheme.typography.headlineMedium,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(horizontal = MaterialTheme.spacing.extraSmall),
@@ -327,7 +338,7 @@ private fun AddCustomRatioRow(
           heightText = it.filter { char -> char.isDigit() || char == '.' }
           errorMessage = null
         },
-        label = { Text("Height") },
+        label = { Text(stringResource(R.string.player_sheets_aspect_ratio_height)) },
         isError = errorMessage != null,
         keyboardOptions =
           KeyboardOptions(
@@ -339,12 +350,19 @@ private fun AddCustomRatioRow(
             onDone = {
               val result = calculateRatio(widthText, heightText)
               if (result != null) {
-                onAdd("$widthText:$heightText", result)
+                onAdd(
+                  context.getString(
+                    R.string.player_sheets_aspect_ratio_custom_ratio_label,
+                    widthText,
+                    heightText,
+                  ),
+                  result,
+                )
                 widthText = ""
                 heightText = ""
                 keyboardController?.hide()
               } else {
-                errorMessage = "Invalid"
+                errorMessage = context.getString(R.string.player_sheets_aspect_ratio_invalid)
               }
             },
           ),
@@ -357,16 +375,26 @@ private fun AddCustomRatioRow(
         onClick = {
           val result = calculateRatio(widthText, heightText)
           if (result != null) {
-            onAdd("$widthText:$heightText", result)
+            onAdd(
+              context.getString(
+                R.string.player_sheets_aspect_ratio_custom_ratio_label,
+                widthText,
+                heightText,
+              ),
+              result,
+            )
             widthText = ""
             heightText = ""
             keyboardController?.hide()
           } else {
-            errorMessage = "Invalid"
+            errorMessage = context.getString(R.string.player_sheets_aspect_ratio_invalid)
           }
         },
       ) {
-        Icon(Icons.Default.Add, contentDescription = "Add")
+        Icon(
+          Icons.Default.Add,
+          contentDescription = stringResource(R.string.player_sheets_aspect_ratio_add),
+        )
       }
     }
 

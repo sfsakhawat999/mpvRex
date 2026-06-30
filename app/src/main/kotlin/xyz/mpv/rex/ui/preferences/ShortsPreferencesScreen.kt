@@ -20,6 +20,24 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,6 +64,15 @@ object ShortsPreferencesScreen : Screen {
         val autoSwipeShorts by browserPreferences.autoSwipeShorts.collectAsState()
         val includeHorizontal by browserPreferences.includeShortHorizontalVideos.collectAsState()
         val maxDuration by browserPreferences.maxHorizontalVideoDurationMinutes.collectAsState()
+        val context = LocalContext.current
+        val shortsSourceFolders by browserPreferences.shortsSourceFolders.collectAsState()
+        
+        var showFolderSelector by remember { mutableStateOf(false) }
+        var allFolders by remember { mutableStateOf<List<xyz.mpv.rex.domain.media.model.MediaFolder>>(emptyList()) }
+        
+        LaunchedEffect(Unit) {
+            allFolders = xyz.mpv.rex.utils.storage.CoreMediaScanner.getFlatMediaFolders(context)
+        }
 
         Scaffold(
             topBar = {
@@ -136,7 +163,7 @@ object ShortsPreferencesScreen : Screen {
 
                             PreferenceDivider()
 
-                            SliderPreference(
+                             SliderPreference(
                                 value = maxDuration.toFloat(),
                                 onValueChange = { browserPreferences.maxHorizontalVideoDurationMinutes.set(it.roundToInt()) },
                                 sliderValue = maxDuration.toFloat(),
@@ -154,6 +181,33 @@ object ShortsPreferencesScreen : Screen {
                                 icon = {
                                     // Empty icon for alignment if needed or specific icon
                                 }
+                            )
+
+                            PreferenceDivider()
+
+                            Preference(
+                                title = { Text("Sourced Folders") },
+                                summary = {
+                                    val text = if (shortsSourceFolders.isEmpty()) {
+                                        "Sourced from all scanned directories"
+                                    } else {
+                                        val names = allFolders.filter { it.path in shortsSourceFolders }.map { it.name }
+                                        if (names.isEmpty()) {
+                                            "Sourced from ${shortsSourceFolders.size} folder(s)"
+                                        } else {
+                                            "Sourced from: ${names.joinToString()}"
+                                        }
+                                    }
+                                    Text(text = text, color = MaterialTheme.colorScheme.outline)
+                                },
+                                icon = {
+                                    Icon(
+                                        Icons.Outlined.Folder,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                                onClick = { showFolderSelector = true }
                             )
                         }
                     }
@@ -185,6 +239,77 @@ object ShortsPreferencesScreen : Screen {
                     }
                 }
             }
+        }
+
+        if (showFolderSelector && allFolders.isNotEmpty()) {
+            var selectedFolders by remember { mutableStateOf(shortsSourceFolders) }
+            AlertDialog(
+                onDismissRequest = { showFolderSelector = false },
+                title = { Text("Select Sourced Folders") },
+                text = {
+                    Column {
+                        Text(
+                            text = "Choose directories to source shorts from. If none are selected, shorts will be sourced from all folders.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                        LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+                            items(allFolders) { folder ->
+                                val isChecked = selectedFolders.contains(folder.path)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            selectedFolders = if (isChecked) {
+                                                selectedFolders - folder.path
+                                            } else {
+                                                selectedFolders + folder.path
+                                            }
+                                        }
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Checkbox(
+                                        checked = isChecked,
+                                        onCheckedChange = { checked ->
+                                            selectedFolders = if (checked == true) {
+                                                selectedFolders + folder.path
+                                            } else {
+                                                selectedFolders - folder.path
+                                            }
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(text = folder.name, style = MaterialTheme.typography.bodyLarge)
+                                        Text(
+                                            text = folder.path,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.outline
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            browserPreferences.shortsSourceFolders.set(selectedFolders)
+                            showFolderSelector = false
+                        }
+                    ) {
+                        Text("Save")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showFolderSelector = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }

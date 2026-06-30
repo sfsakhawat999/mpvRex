@@ -60,6 +60,7 @@ class BrowserPreferences(
   val autoSwipeShorts = preferenceStore.getBoolean("shorts_auto_swipe", false)
   val includeShortHorizontalVideos = preferenceStore.getBoolean("shorts_include_horizontal", false)
   val maxHorizontalVideoDurationMinutes = preferenceStore.getInt("shorts_max_horizontal_minutes", 1)
+  val shortsSourceFolders = preferenceStore.getStringSet("shorts_source_folders", emptySet())
 
   // Bottom navigation visibility preferences
   val enableTabRecents = preferenceStore.getBoolean("enable_tab_recents", true)

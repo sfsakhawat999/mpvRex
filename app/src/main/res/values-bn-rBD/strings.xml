@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="generic_share">শেয়ার</string>
+    <string name="generic_confirm">নিশ্চিত করুন</string>
+    <string name="generic_cancel">বাতিল</string>
+    <string name="generic_ok">ওকে</string>
+    <string name="pref_appearance_tab_home_title">হোম / ফাইলগুলো</string>
+    <string name="pref_appearance_tab_home_summary">লোকাল ফোল্ডার দেখান &amp; ফাইল অনুসন্ধানকারী</string>
+    <string name="pref_appearance_tab_recents_summary">আগের ভিডিও সেশন দ্রুত পুনরায় শুরু করুন</string>
+    <string name="pref_appearance_tab_playlists_title">প্লেলিস্ট</string>
+    <string name="pref_appearance_tab_playlists_summary">লোকাল কাস্টম ভিডিও প্লেলিস্টগুলো দেখান</string>
+    <string name="pref_appearance_tab_network_title">নেটওয়ার্ক স্ট্রিমিং</string>
+    <string name="pref_appearance_tab_network_summary">SMB, FTP এবং WebDAV ড্রাইভে প্রবেশ করুন</string>
+    <string name="pref_appearance_summary">ডার্ক মোড, ম্যাটেরিয়াল ইউ</string>
+    <string name="pref_appearance_category_theme">থিম</string>
+    <string name="pref_appearance_darkmode_system">সিস্টেম</string>
+    <string name="pref_appearance_darkmode_light">লাইট</string>
+    <string name="pref_appearance_darkmode_dark">ডার্ক</string>
+    <string name="pref_appearance_amoled_mode_title">অ্যামোলেড ডার্ক মোড</string>
+    <string name="pref_appearance_amoled_mode_summary">ডার্ক থিমে সম্পূর্ণ কালো ব্যাকগ্রাউন্ড ব্যবহার করুন</string>
+    <string name="pref_appearance_material_you_title">ম্যাটেরিয়াল ইউ</string>
+</resources>

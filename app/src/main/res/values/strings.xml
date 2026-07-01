@@ -662,4 +662,23 @@
     <string name="copy_video_path">Copy video file path</string>
     <string name="copy_folder_path">Copy folder path</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
+    
+    <!-- Media Info Screen -->
+    <string name="media_info_title">Media Info</string>
+    <string name="media_info_back">Back</string>
+    <string name="media_info_copy">Copy</string>
+    <string name="media_info_share">Share</string>
+    <string name="media_info_no_file_provided">No media file provided</string>
+    <string name="media_info_unknown_file_name">Unknown</string>
+    <string name="media_info_failed_to_load">Failed to load media information</string>
+    <string name="media_info_unknown_error">Unknown error</string>
+    <string name="media_info_analyzing">Analyzing media file...</string>
+    <string name="media_info_error_prefix">Error: %1$s</string>
+    <string name="media_info_loading_details">Loading detailed information...</string>
+    <string name="media_info_clipboard_label">Media Info - %1$s</string>
+    <string name="media_info_share_subject">Media Info - %1$s</string>
+    <string name="media_info_share_text">Media information for: %1$s</string>
+    <string name="media_info_share_chooser_title">Share Media Info</string>
+    <string name="media_info_share_failed">Failed to share: %1$s</string>
+    <string name="media_info_default_file_name">Media File</string>
 </resources>

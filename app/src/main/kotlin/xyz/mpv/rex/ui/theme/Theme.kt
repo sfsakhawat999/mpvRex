@@ -137,14 +137,17 @@ private fun ThemeTransitionOverlay(
     state: ThemeTransitionState,
     content: @Composable () -> Unit
 ) {
+    val isAnimating = state.isAnimating
+    val bitmap = state.screenshotBitmap
+    val progress = state.animationProgress.value
+
+
     Box(modifier = Modifier.fillMaxSize()) {
         // 1. Render the new content at the base layer (underneath the overlay)
         content()
 
         // 2. Render the overlay of the old screen state on top if animating and we have a bitmap
-        val bitmap = state.screenshotBitmap
-        if (state.isAnimating && bitmap != null) {
-            val progress = state.animationProgress.value
+        if (isAnimating && bitmap != null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -172,10 +175,12 @@ private fun ThemeTransitionOverlay(
     LaunchedEffect(state.isAnimating) {
         if (state.isAnimating) {
             state.resetProgress()
+            // Wait for the heavy theme switch recomposition to finish in the background
+            kotlinx.coroutines.delay(250)
             state.animationProgress.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = 500,
+                    durationMillis = 400,
                     easing = FastOutSlowInEasing
                 )
             )
@@ -210,6 +215,7 @@ private class CircularRevealShape(
         
         // Create a path that represents the area OUTSIDE the circle (inverse clip)
         val path = android.graphics.Path().apply {
+            fillType = android.graphics.Path.FillType.EVEN_ODD
             // Add the entire rectangle
             addRect(0f, 0f, size.width, size.height, android.graphics.Path.Direction.CW)
             // Subtract the circle (creates hole in the middle)

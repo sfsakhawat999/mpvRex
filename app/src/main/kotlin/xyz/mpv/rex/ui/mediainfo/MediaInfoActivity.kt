@@ -53,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -111,7 +112,8 @@ class MediaInfoActivity : ComponentActivity() {
     var error by remember { mutableStateOf<String?>(null) }
     var textContent by remember { mutableStateOf<String?>(null) }
     var fullMediaInfoText by remember { mutableStateOf<String?>(null) }
-    var fileName by remember { mutableStateOf("Media File") }
+    val defaultFileName = stringResource(xyz.mpv.rex.R.string.media_info_default_file_name)
+    var fileName by remember { mutableStateOf(defaultFileName) }
     var fileUri by remember { mutableStateOf<Uri?>(null) }
     var mediaInfo by remember { mutableStateOf<MediaInfoOps.MediaInfoData?>(null) }
 
@@ -143,7 +145,7 @@ class MediaInfoActivity : ComponentActivity() {
       }
 
       if (uri == null) {
-        error = "No media file provided"
+        error = context.getString(xyz.mpv.rex.R.string.media_info_no_file_provided)
         isLoading = false
         return@LaunchedEffect
       }
@@ -155,14 +157,14 @@ class MediaInfoActivity : ComponentActivity() {
         context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
           val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
           if (nameIndex >= 0 && cursor.moveToFirst()) {
-            cursor.getString(nameIndex) ?: uri.lastPathSegment ?: "Unknown"
+            cursor.getString(nameIndex) ?: uri.lastPathSegment ?: context.getString(xyz.mpv.rex.R.string.media_info_unknown_file_name)
           } else {
-            uri.lastPathSegment ?: "Unknown"
+            uri.lastPathSegment ?: context.getString(xyz.mpv.rex.R.string.media_info_unknown_file_name)
           }
-        } ?: uri.lastPathSegment ?: "Unknown"
+        } ?: uri.lastPathSegment ?: context.getString(xyz.mpv.rex.R.string.media_info_unknown_file_name)
       } catch (e: Exception) {
         Log.e(TAG, "Error getting file name", e)
-        uri.lastPathSegment ?: "Unknown"
+        uri.lastPathSegment ?: context.getString(xyz.mpv.rex.R.string.media_info_unknown_file_name)
       }
 
       // Load media info
@@ -181,11 +183,11 @@ class MediaInfoActivity : ComponentActivity() {
 
             isLoading = false
           }.onFailure { e ->
-            error = e.message ?: "Failed to load media information"
+            error = e.message ?: context.getString(xyz.mpv.rex.R.string.media_info_failed_to_load)
             isLoading = false
           }
         } catch (e: Exception) {
-          error = e.message ?: "Unknown error"
+          error = e.message ?: context.getString(xyz.mpv.rex.R.string.media_info_unknown_error)
           isLoading = false
         }
       }
@@ -197,7 +199,7 @@ class MediaInfoActivity : ComponentActivity() {
           title = {
             Column {
               Text(
-                text = "Media Info",
+                text = stringResource(xyz.mpv.rex.R.string.media_info_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
               )
@@ -212,7 +214,7 @@ class MediaInfoActivity : ComponentActivity() {
           },
           navigationIcon = {
             IconButton(onClick = onBack) {
-              Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
+              Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = stringResource(xyz.mpv.rex.R.string.media_info_back))
             }
           },
           actions = {
@@ -231,7 +233,7 @@ class MediaInfoActivity : ComponentActivity() {
                 ) {
                   Icon(
                     imageVector = Icons.Filled.ContentCopy,
-                    contentDescription = "Copy",
+                    contentDescription = stringResource(xyz.mpv.rex.R.string.media_info_copy),
                   )
                 }
 
@@ -250,7 +252,7 @@ class MediaInfoActivity : ComponentActivity() {
                 ) {
                   Icon(
                     imageVector = Icons.Filled.Share,
-                    contentDescription = "Share",
+                    contentDescription = stringResource(xyz.mpv.rex.R.string.media_info_share),
                   )
                 }
               }
@@ -293,7 +295,7 @@ class MediaInfoActivity : ComponentActivity() {
           modifier = Modifier.size(48.dp),
         )
         Text(
-          text = "Analyzing media file...",
+          text = stringResource(xyz.mpv.rex.R.string.media_info_analyzing),
           style = MaterialTheme.typography.bodyLarge,
           fontWeight = FontWeight.Medium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -317,7 +319,7 @@ class MediaInfoActivity : ComponentActivity() {
         shape = MaterialTheme.shapes.extraLarge,
       ) {
         Text(
-          text = "Error: $errorMessage",
+          text = stringResource(xyz.mpv.rex.R.string.media_info_error_prefix, errorMessage),
           style = MaterialTheme.typography.bodyLarge,
           fontWeight = FontWeight.Medium,
           color = MaterialTheme.colorScheme.onErrorContainer,
@@ -334,7 +336,7 @@ class MediaInfoActivity : ComponentActivity() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
       ) {
-        Text("Loading detailed information...")
+        Text(stringResource(xyz.mpv.rex.R.string.media_info_loading_details))
       }
       return
     }
@@ -476,9 +478,9 @@ class MediaInfoActivity : ComponentActivity() {
   private suspend fun copyToClipboard(content: String, fileName: String) {
     withContext(Dispatchers.Main) {
       val clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-      val clip = android.content.ClipData.newPlainText("Media Info - $fileName", content)
+      val clip = android.content.ClipData.newPlainText(getString(xyz.mpv.rex.R.string.media_info_clipboard_label, fileName), content)
       clipboard.setPrimaryClip(clip)
-      Toast.makeText(this@MediaInfoActivity, "Copied to clipboard", Toast.LENGTH_SHORT).show()
+      Toast.makeText(this@MediaInfoActivity, getString(xyz.mpv.rex.R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show()
     }
   }
 
@@ -499,18 +501,18 @@ class MediaInfoActivity : ComponentActivity() {
           val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_STREAM, fileUri)
-            putExtra(Intent.EXTRA_SUBJECT, "Media Info - $fileName")
-            putExtra(Intent.EXTRA_TEXT, "Media information for: $fileName")
+            putExtra(Intent.EXTRA_SUBJECT, getString(xyz.mpv.rex.R.string.media_info_share_subject, fileName))
+            putExtra(Intent.EXTRA_TEXT, getString(xyz.mpv.rex.R.string.media_info_share_text, fileName))
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
           }
 
-          startActivity(Intent.createChooser(shareIntent, "Share Media Info"))
+          startActivity(Intent.createChooser(shareIntent, getString(xyz.mpv.rex.R.string.media_info_share_chooser_title)))
         }
       } catch (e: Exception) {
         withContext(Dispatchers.Main) {
           Toast.makeText(
             this@MediaInfoActivity,
-            "Failed to share: ${e.message}",
+            getString(xyz.mpv.rex.R.string.media_info_share_failed, e.message),
             Toast.LENGTH_LONG,
           ).show()
         }

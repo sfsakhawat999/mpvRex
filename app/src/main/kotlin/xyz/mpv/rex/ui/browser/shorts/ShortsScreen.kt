@@ -48,8 +48,9 @@ import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material3.SwitchDefaults
@@ -292,7 +293,7 @@ data class ShortsScreen(
                                 // Phase B: Mark as seen in current session
                                 viewModel.markAsSeen(video)
                             } else {
-                                MPVLib.command("stop")
+                                MPVLib.setPropertyBoolean("pause", true)
                                 isPlayerReady = false
                             }
                         }
@@ -433,7 +434,8 @@ private fun ShortsPager(
     VerticalPager(
         state = pagerState,
         modifier = Modifier.fillMaxSize(),
-        beyondViewportPageCount = 1
+        beyondViewportPageCount = 1,
+        key = { page -> if (page < shorts.size) shorts[page].path else "finished" }
     ) { page ->
         if (page < shorts.size) {
             val video = shorts[page]
@@ -489,6 +491,7 @@ private fun ShortPageItem(
     var thumbnail by remember { mutableStateOf<Bitmap?>(null) }
     var showInfo by remember { mutableStateOf(false) }
     var showMore by remember { mutableStateOf(false) }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
 
     val playerPreferences = koinInject<PlayerPreferences>()
     val playerTutorialManager = koinInject<PlayerTutorialManager>()
@@ -866,6 +869,55 @@ private fun ShortPageItem(
                 onShowInfo = {
                     showMore = false
                     showInfo = true
+                },
+                onDeleteShort = {
+                    showMore = false
+                    showDeleteConfirmation = true
+                }
+            )
+        }
+
+        if (showDeleteConfirmation) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirmation = false },
+                title = { Text(text = "Delete Short") },
+                text = {
+                    Column {
+                        Text(text = "Are you sure you want to permanently delete this short video? This action cannot be undone.", modifier = Modifier.padding(bottom = 8.dp))
+                        Text(text = "File Path:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        Text(text = video.path, fontSize = 12.sp, color = MaterialTheme.colorScheme.outline)
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showDeleteConfirmation = false
+                            val currentList = viewModel.shorts.value
+                            val currentIndex = currentList.indexOf(video)
+                            val nextVideo = if (currentIndex != -1 && currentIndex < currentList.size - 1) {
+                                currentList[currentIndex + 1]
+                            } else if (currentIndex > 0) {
+                                currentList[currentIndex - 1]
+                            } else {
+                                null
+                            }
+                            
+                            if (nextVideo != null) {
+                                MPVLib.command("loadfile", nextVideo.path)
+                            } else {
+                                MPVLib.command("stop")
+                            }
+                            
+                            viewModel.deleteShort(video)
+                        }
+                    ) {
+                        Text("Delete", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirmation = false }) {
+                        Text("Cancel")
+                    }
                 }
             )
         }    }
@@ -919,7 +971,8 @@ private fun MoreActionsSheet(
     isSpeedLocked: Boolean,
     onToggleSpeedLock: (Boolean) -> Unit,
     onShowBlocked: () -> Unit,
-    onShowInfo: () -> Unit
+    onShowInfo: () -> Unit,
+    onDeleteShort: () -> Unit
 ) {
     val playerPreferences = koinInject<PlayerPreferences>()
     val holdForMultipleSpeed by playerPreferences.holdForMultipleSpeed.collectAsState()
@@ -1040,6 +1093,19 @@ private fun MoreActionsSheet(
                 modifier = Modifier.clickable { onShowBlocked() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent)
             )
+            ListItem(
+                headlineContent = { Text("Delete Short", color = MaterialTheme.colorScheme.error) },
+                supportingContent = { Text("Permanently delete this file from device", color = MaterialTheme.colorScheme.error.copy(alpha = 0.8f)) },
+                leadingContent = { 
+                    Icon(
+                        Icons.Default.Delete, 
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error
+                    ) 
+                },
+                modifier = Modifier.clickable { onDeleteShort() },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+            )
         }
     }
 }
@@ -1093,7 +1159,7 @@ private fun ActionColumn(
         
         // Free button (Clean UI Toggle)
         ActionButton(
-            icon = if (isFreeModeEnabled) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, 
+            icon = if (isFreeModeEnabled) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen, 
             label = "Free", 
             iconColor = if (isFreeModeEnabled) MaterialTheme.colorScheme.primary else Color.White,
             onClick = onFreeModeToggle

@@ -43,6 +43,7 @@ enum class PlayerButton(
   DECODER(Icons.Outlined.Memory),
   SCREEN_ROTATION(Icons.Outlined.ScreenRotation),
   FRAME_NAVIGATION(Icons.Outlined.Camera),
+  VIDEO_ZOOM(Icons.Outlined.ZoomIn),
   PICTURE_IN_PICTURE(Icons.Outlined.PictureInPictureAlt),
   ASPECT_RATIO(Icons.Outlined.AspectRatio),
   LOCK_CONTROLS(Icons.Outlined.LockOpen),
@@ -87,6 +88,7 @@ fun getPlayerButtonLabel(button: PlayerButton): String =
     PlayerButton.DECODER -> "Decoder" // stringResource(R.string.btn_label_decoder)
     PlayerButton.SCREEN_ROTATION -> "Screen Rotation" // stringResource(R.string.btn_label_rotation)
     PlayerButton.FRAME_NAVIGATION -> "Frame Navigation" // stringResource(R.string.btn_label_frame_nav)
+    PlayerButton.VIDEO_ZOOM -> "Video Zoom" // stringResource(R.string.btn_label_zoom)
     PlayerButton.PICTURE_IN_PICTURE -> "Picture-in-Picture" // stringResource(R.string.btn_label_pip)
     PlayerButton.ASPECT_RATIO -> "Aspect Ratio" // stringResource(R.string.btn_label_aspect)
     PlayerButton.LOCK_CONTROLS -> "Lock Controls" // stringResource(R.string.btn_label_lock)

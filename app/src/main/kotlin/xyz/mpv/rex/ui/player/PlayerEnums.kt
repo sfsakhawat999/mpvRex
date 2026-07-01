@@ -102,6 +102,7 @@ enum class Sheets {
   Chapters,
   Decoders,
   More,
+  VideoZoom,
   AspectRatios,
   Playlist,
   FrameNavigation,

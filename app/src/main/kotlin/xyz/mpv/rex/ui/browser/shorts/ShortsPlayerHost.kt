@@ -6,6 +6,9 @@ import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -25,6 +28,7 @@ fun ShortsPlayerHost(
     onPlaybackEnd: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     
     val mpvView = remember {
         val parser = context.resources.getLayout(R.layout.shorts_dummy_layout)
@@ -55,7 +59,10 @@ fun ShortsPlayerHost(
                         onProgressUpdate(0.0, 0L)
                     }
                     MPVLib.MpvEvent.MPV_EVENT_FILE_LOADED -> {
-                        onPlayerReadyChange(true)
+                        coroutineScope.launch {
+                            delay(150)
+                            onPlayerReadyChange(true)
+                        }
                     }
                 }
             }

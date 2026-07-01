@@ -22,6 +22,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.Dispatchers
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -241,6 +245,24 @@ class ShortsViewModel(
             val newEntity = current?.copy(isBlocked = !isBlocked)
                 ?: ShortsMediaEntity(path = video.path, isBlocked = true, addedDate = System.currentTimeMillis())
             shortsMediaDao.upsert(newEntity)
+        }
+    }
+
+    fun deleteShort(video: Video) {
+        viewModelScope.launch {
+            val currentList = _shorts.value
+            val updatedList = currentList.filter { it.path != video.path }
+            _shorts.value = updatedList
+            _totalShortsCount.value = updatedList.size
+            shortsMediaDao.deleteByPath(video.path)
+
+            withContext(NonCancellable + Dispatchers.IO) {
+                delay(1000)
+                val file = java.io.File(video.path)
+                if (file.exists()) {
+                    file.delete()
+                }
+            }
         }
     }
 

@@ -19,6 +19,7 @@ import xyz.mpv.rex.ui.player.controls.components.sheets.AudioTracksSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.ChaptersSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.CustomSkipDurationSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.SleepTimerSheet
+import xyz.mpv.rex.ui.player.controls.components.sheets.VideoZoomSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.DecodersSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.FrameNavigationSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.MoreSheet
@@ -313,6 +314,16 @@ fun PlayerSheets(
         onResetPresets = onResetSpeedPresets,
         onMakeDefault = onMakeDefaultSpeed,
         onResetDefault = onResetDefaultSpeed,
+        onDismissRequest = onDismissRequest,
+      )
+    }
+
+    Sheets.VideoZoom -> {
+      val videoZoom by viewModel.videoZoom.composeCollectAsState()
+      VideoZoomSheet(
+        videoZoom = videoZoom,
+        onSetVideoZoom = viewModel::setVideoZoom,
+        onResetVideoPan = viewModel::resetVideoPan,
         onDismissRequest = onDismissRequest,
       )
     }

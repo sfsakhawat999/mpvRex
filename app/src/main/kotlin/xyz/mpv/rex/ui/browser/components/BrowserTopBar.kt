@@ -227,6 +227,7 @@ private fun NormalTopBar(
               themeTransition?.startTransition(windowOffset)
               // Delay theme change to allow overlay to display first
               coroutineScope.launch {
+                kotlinx.coroutines.delay(50)
                 toggleDarkMode()
               }
             },

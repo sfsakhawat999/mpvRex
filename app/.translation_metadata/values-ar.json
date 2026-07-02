@@ -2370,5 +2370,205 @@
   "copied_to_clipboard": {
     "source_hash": "d37078fe6a1faa15fc48c293dd1d4c37698eb0cfafae8ca1c456b0cc4600db11",
     "translated_value": "تم النسخ إلى الحافظة"
+  },
+  "player_sheets_aspect_ratio_title": {
+    "source_hash": "556f85efa2beec5213eaaaa22951c73e4c0b499c9e9af875bd5c88a2f0d84583",
+    "translated_value": "نسبة العرض إلى الارتفاع"
+  },
+  "player_sheets_aspect_ratio_presets": {
+    "source_hash": "954f93fe1c66ae447f4d9e75eb0dc5a32f3a45dfc1cfb6df391a9d5947a97d10",
+    "translated_value": "إعدادات مسبقة"
+  },
+  "player_sheets_aspect_ratio_preset_default": {
+    "source_hash": "21b111cbfe6e8fca2d181c43f53ad548b22e38aca955b9824706a504b0a07a2d",
+    "translated_value": "افتراضي"
+  },
+  "player_sheets_aspect_ratio_preset_4_3": {
+    "source_hash": "3be52504bc3601514c8eb1a050a3ccdba6326a46d4f1c7d3c051e64c4c750b1f",
+    "translated_value": "4:3"
+  },
+  "player_sheets_aspect_ratio_preset_16_9": {
+    "source_hash": "cb140f95f8a88c27fc464e08c2e4627de234c89cfbec1feb903e8733ff04f073",
+    "translated_value": "16:9"
+  },
+  "player_sheets_aspect_ratio_preset_16_10": {
+    "source_hash": "006c189dae5b80765e906bc16adce5b347d6e46b57850cb5fc72591440e409f3",
+    "translated_value": "16:10"
+  },
+  "player_sheets_aspect_ratio_preset_21_9": {
+    "source_hash": "7a5af662ae76d508689737c511e9ede859717a0bd42ea6dd5cb1cf21e7fedbcc",
+    "translated_value": "21:9"
+  },
+  "player_sheets_aspect_ratio_preset_32_9": {
+    "source_hash": "e39cd34bc29bba2c7678cd4a341fc794e15afbaf3c894287d8a848e3f6077319",
+    "translated_value": "32:9"
+  },
+  "player_sheets_aspect_ratio_preset_2_35_1": {
+    "source_hash": "3d4f3f5e4dcd9d11a19f5b4a49e9c9222ee9ce78d6f8c929dd1c492d0da50f21",
+    "translated_value": "2.35:1"
+  },
+  "player_sheets_aspect_ratio_preset_2_39_1": {
+    "source_hash": "e38b3e135abae4616e15bd072307fddd2b74e1974182f8b5fc8b434400de3a95",
+    "translated_value": "2.39:1"
+  },
+  "player_sheets_aspect_ratio_custom_toggle": {
+    "source_hash": "b497c0b77dade0a66cfcd9137b98b57db2bdcf27bf5c83a88b548ce53f579fa2",
+    "translated_value": "مخصص..."
+  },
+  "player_sheets_aspect_ratio_custom_section": {
+    "source_hash": "494ca78f7374e46fb2de9ad9f2dbd4aaae89b50b2ca044177a1566a59e06627e",
+    "translated_value": "مخصص"
+  },
+  "player_sheets_aspect_ratio_manual_zoom_pan_title": {
+    "source_hash": "e7d6d661ba1ad75d0f5a7980822e89505e03bc7c072037f83d53fc2949dda368",
+    "translated_value": "تكبير وتحريك يدوي (إزاحة الكاميرا)"
+  },
+  "player_sheets_aspect_ratio_zoom_value": {
+    "source_hash": "4ee8d97789b85c370ebb97fc9c756948863a17c3dfbcf0a716ebae28038553cb",
+    "translated_value": "التكبير: %1$.2fx"
+  },
+  "player_sheets_aspect_ratio_reset_zoom": {
+    "source_hash": "3a43acdce0ce0a6c20d593a477d0731ed680662c3ea8ef4f9afbfd15de34238e",
+    "translated_value": "إعادة ضبط التكبير"
+  },
+  "player_sheets_aspect_ratio_horizontal_offset_value": {
+    "source_hash": "6e2d2cb55cec0f7e6ebd8f2fa18fe87675aaa099550fb6c379ab240ee264f8c6",
+    "translated_value": "الإزاحة الأفقية: %1$.3f"
+  },
+  "player_sheets_aspect_ratio_reset_pan": {
+    "source_hash": "473d7d9a6d13a361a72d981eb27ecb493d58232d16ddc63fe0defc757d42d8cd",
+    "translated_value": "إعادة ضبط التحريك"
+  },
+  "player_sheets_aspect_ratio_add_custom_title": {
+    "source_hash": "213202e749c28d1a5d91827f545b54f0e5a362b3218b6343bc58162ab2608816",
+    "translated_value": "إضافة نسبة مخصصة (مثال: 16:9)"
+  },
+  "player_sheets_aspect_ratio_width": {
+    "source_hash": "3019947b6daf18b0534a15d8c7ac30ab587e36cc93fb45a6e7b750348006d620",
+    "translated_value": "العرض"
+  },
+  "player_sheets_aspect_ratio_separator": {
+    "source_hash": "e7ac0786668e0ff0f02b62bd04f45ff636fd82db63b1104601c975dc005f3a67",
+    "translated_value": ":"
+  },
+  "player_sheets_aspect_ratio_height": {
+    "source_hash": "bfe2eca401797325bc268f93c7397554551de4274d5d73ed421ee36fe9cd3ae0",
+    "translated_value": "الارتفاع"
+  },
+  "player_sheets_aspect_ratio_custom_ratio_label": {
+    "source_hash": "069c89df364d8327d5da89f13c37e43743834195458f6e5011bfcf346c85147e",
+    "translated_value": "%1$s:%2$s"
+  },
+  "player_sheets_aspect_ratio_invalid": {
+    "source_hash": "96c34a0719eb565c268a1626c44313a20de4f83927890933bd9b480849adb76c",
+    "translated_value": "غير صالح"
+  },
+  "player_sheets_aspect_ratio_add": {
+    "source_hash": "9fd728c66c9a256b121472dabf32a34317aed01d8427d70ec830289cf23a7cc8",
+    "translated_value": "إضافة"
+  },
+  "player_sheets_frame_navigation_timestamp_value": {
+    "source_hash": "ee785cc6b5cc334f9b86f7d3dbb940721f3cfde78c2673b75f3428e96a795105",
+    "translated_value": "%1$02d:%2$02d:%3$02d"
+  },
+  "player_sheets_frame_navigation_frame_label": {
+    "source_hash": "44adebbcb41d143d83792618b953b4b70baf530776ab60475eb8738035029e8c",
+    "translated_value": "الإطار:\\u0020"
+  },
+  "player_sheets_frame_navigation_frame_count": {
+    "source_hash": "a9f73dcc653e780fd15921d3dc7a31ee046f98b73533f4e277f3de8f4e6ac7b4",
+    "translated_value": "%1$d / %2$d"
+  },
+  "player_sheets_frame_navigation_current_frame": {
+    "source_hash": "ea1d648bc9001a9e8c309c470a71379d0124321d8ce522994667ca7f8b20977f",
+    "translated_value": "%1$d"
+  },
+  "player_sheets_frame_navigation_timestamp_label": {
+    "source_hash": "1f67d401b479a69c3bd565f50777fd6a97ae067050010e50d2e3abe2738d54c8",
+    "translated_value": "الطابع الزمني:\\u0020"
+  },
+  "player_sheets_frame_navigation_screenshot_create_failed": {
+    "source_hash": "32044faa78de37567226e3d73adb11c448b204b97e7b618bc2da19dae611441c",
+    "translated_value": "فشل إنشاء لقطة الشاشة"
+  },
+  "player_sheets_frame_navigation_mediastore_entry_failed": {
+    "source_hash": "012dbe76e6b9d65d027091ba26d5fb5bdae6172a89a4c85eee48a25584b1b5c0",
+    "translated_value": "فشل إنشاء إدخال MediaStore"
+  },
+  "player_sheets_frame_navigation_snapshot_dir_failed": {
+    "source_hash": "7322e9a66f206559d826e1965edd39a5361d6c97896bf060a1fb372a0fb68f2b",
+    "translated_value": "فشل إنشاء مجلد mpvSnaps"
+  },
+  "player_sheets_frame_navigation_snapshot_save_failed": {
+    "source_hash": "57c3d47525a4fbd7ab84e6abf2bb90411bd77499d3902401f7d574740b70e1ef",
+    "translated_value": "فشل حفظ اللقطة: %1$s"
+  },
+  "media_info_title": {
+    "source_hash": "4a4a1d1e3cae270eacfc58d17d44591f9f542beceeea5fc0c89fa8725ea4b547",
+    "translated_value": "معلومات الوسائط"
+  },
+  "media_info_back": {
+    "source_hash": "76900f1bfd16c8d4dd3d25e6f46638d7165aee23883ccea6bfe071c514421769",
+    "translated_value": "رجوع"
+  },
+  "media_info_copy": {
+    "source_hash": "e21f935f11d7e966dbbae78da9daa378fe8142a14e7c0cd7434183005faa6c5c",
+    "translated_value": "نسخ"
+  },
+  "media_info_share": {
+    "source_hash": "29887a5ff9846ccc23327565a07e17fa6dcaea6211f1898ae825f84ae38f4223",
+    "translated_value": "مشاركة"
+  },
+  "media_info_no_file_provided": {
+    "source_hash": "a97193fa7b2149d9ecd9009331e2100d83ba1de2804e059b998648a8846c9645",
+    "translated_value": "لم يتم توفير ملف وسائط"
+  },
+  "media_info_unknown_file_name": {
+    "source_hash": "b764cdc0eab7137467211272fa539f1260d1bf2e71bcf6ff3bdc960f5c16aa14",
+    "translated_value": "غير معروف"
+  },
+  "media_info_failed_to_load": {
+    "source_hash": "6f948def7669297b8023df438d63bd2e106a1a8a5239b28745fcf45d53583201",
+    "translated_value": "فشل تحميل معلومات الوسائط"
+  },
+  "media_info_unknown_error": {
+    "source_hash": "27c2ccd962c2b8dccb52fe3688ab236f186f7a41fd57d810478712048e9ad3f8",
+    "translated_value": "خطأ غير معروف"
+  },
+  "media_info_analyzing": {
+    "source_hash": "1db0882971bee4c8f68495c3e2e5a2cea6c0d88a1243895f75baae0efaf59cc2",
+    "translated_value": "جارٍ تحليل ملف الوسائط..."
+  },
+  "media_info_error_prefix": {
+    "source_hash": "81a2d6c71464c8a5a1e3b1baf4320d7cbb87abd33cb0dbb323b544798aa29abd",
+    "translated_value": "خطأ: %1$s"
+  },
+  "media_info_loading_details": {
+    "source_hash": "3f7907660d404b8d9ce44655a022bd5e72aa82cfcdd0f725ffec0622b378d133",
+    "translated_value": "جارٍ تحميل المعلومات التفصيلية..."
+  },
+  "media_info_clipboard_label": {
+    "source_hash": "7b60351ec4a0a8ac6a90018840961341f24f80b58d16d794459bf9dbd2645760",
+    "translated_value": "معلومات الوسائط - %1$s"
+  },
+  "media_info_share_subject": {
+    "source_hash": "7b60351ec4a0a8ac6a90018840961341f24f80b58d16d794459bf9dbd2645760",
+    "translated_value": "معلومات الوسائط - %1$s"
+  },
+  "media_info_share_text": {
+    "source_hash": "297aa4b2ddf0fec9cd46078d513894631ca34c0adb0f9cecdfad49f214e8b59a",
+    "translated_value": "معلومات الوسائط لـ: %1$s"
+  },
+  "media_info_share_chooser_title": {
+    "source_hash": "22ea06ff46fe0b72ebb0f9b1e4302bc61e3702f2e896496f836e446d46d9e7f9",
+    "translated_value": "مشاركة معلومات الوسائط"
+  },
+  "media_info_share_failed": {
+    "source_hash": "f429d87bfb955d8100047c3445cd41f03852a8c7a14daa9745fcf417f8f2e5de",
+    "translated_value": "فشل المشاركة: %1$s"
+  },
+  "media_info_default_file_name": {
+    "source_hash": "4d9ba9dd9b332888c1b4fc0c030779d43638417334b0c8ad57919b06c5cbe985",
+    "translated_value": "ملف الوسائط"
   }
 }

@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import xyz.mpv.rex.R
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import xyz.mpv.rex.ui.theme.spacing
 import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.Utils
@@ -30,11 +32,15 @@ fun ChaptersSheet(
   modifier: Modifier = Modifier,
 ) {
   val listState = rememberLazyListState()
+  val hasScrolled = remember { mutableStateOf(false) }
 
   LaunchedEffect(currentChapter, chapters) {
-    val index = if (currentChapter != null) chapters.indexOf(currentChapter) else -1
-    if (index >= 0) {
-      listState.scrollToItem(index)
+    if (!hasScrolled.value && chapters.isNotEmpty()) {
+      val index = if (currentChapter != null) chapters.indexOf(currentChapter) else -1
+      if (index >= 0) {
+        listState.scrollToItem(index)
+        hasScrolled.value = true
+      }
     }
   }
 

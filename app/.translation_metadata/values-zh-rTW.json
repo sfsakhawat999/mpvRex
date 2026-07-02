@@ -1,0 +1,2150 @@
+{
+  "app_name": {
+    "source_hash": "bee2c0b1ba6c1b9e567e37012ea643828f1bb22ca4140d66c4808c8753667519",
+    "translated_value": "mpvRex"
+  },
+  "author_name": {
+    "source_hash": "b73f7b1da4bad259de21767947548fcc23991b725fe1727ceb584e4489be7da7",
+    "translated_value": "Sakhawat"
+  },
+  "generic_reset": {
+    "source_hash": "daee7606b339f3c339076fe2c9f372a3ff40c8ee896005d829c7481b64ca5303",
+    "translated_value": "重設"
+  },
+  "generic_share": {
+    "source_hash": "29887a5ff9846ccc23327565a07e17fa6dcaea6211f1898ae825f84ae38f4223",
+    "translated_value": "分享"
+  },
+  "generic_confirm": {
+    "source_hash": "eebdd24a77d9ad32222660c07777163bf5f6732df2b172351f3f8d5783e4f529",
+    "translated_value": "確認"
+  },
+  "generic_cancel": {
+    "source_hash": "19766ed6ccb2f4a32778eed80d1928d2c87a18d7c275ccb163ec6709d3eb2e27",
+    "translated_value": "取消"
+  },
+  "generic_ok": {
+    "source_hash": "565339bc4d33d72817b583024112eb7f5cdf3e5eef0252d6ec1b9c9a94e12bb3",
+    "translated_value": "確認"
+  },
+  "generic_unit_ms": {
+    "source_hash": "f785c3ce1d580c8f22c1db8a14cf1268e44279ff5d461361dbbfaf19e8b11578",
+    "translated_value": "毫秒"
+  },
+  "generic_disabled": {
+    "source_hash": "75081b593d15cf6e631971bc6768723f593b88b172477e40ae7d363e4829816d",
+    "translated_value": "已停用"
+  },
+  "pref_preferences": {
+    "source_hash": "66962f72a08883733c35df6f82a049b929f9579f19c4bc083ac99bead602eab3",
+    "translated_value": "偏好設定"
+  },
+  "pref_appearance_title": {
+    "source_hash": "3907fa7f80722a6fc58cd8c1bd30abf7638095d6774f183b6e831b7093957d1b",
+    "translated_value": "外觀"
+  },
+  "pref_appearance_summary": {
+    "source_hash": "896487a28234df1659dd2247433266ba9aa3fd2d73e8fdf9f9feebe14ab94286",
+    "translated_value": "深色模式、Material You"
+  },
+  "pref_appearance_category_theme": {
+    "source_hash": "efb52e7172b77731d996ff4f51cd7b3dcfd55fc6f07392994619418d58d170dd",
+    "translated_value": "主題"
+  },
+  "pref_appearance_darkmode_system": {
+    "source_hash": "6725e7bbcd28f3a8a586fa34bf191fd72dde8b61756932cd3237c17a6f196f1a",
+    "translated_value": "系統預設"
+  },
+  "pref_appearance_darkmode_light": {
+    "source_hash": "dbcd5e7bb7a0f538810de44c3efbd813037ee3fa358747bb71fa58e157af45f7",
+    "translated_value": "淺色"
+  },
+  "pref_appearance_darkmode_dark": {
+    "source_hash": "60acc53f13a5d1bf115878c4a785e9a43e8286c4139a8402a6ac7d23966f9153",
+    "translated_value": "深色"
+  },
+  "pref_appearance_amoled_mode_title": {
+    "source_hash": "c534cde58e2aec560a6f0d92d9a410e8540aa168d2fada9d6b8db7644d4d613f",
+    "translated_value": "AMOLED 純黑模式"
+  },
+  "pref_appearance_amoled_mode_summary": {
+    "source_hash": "8dc2686fa3ab060a0bfec24ac2bce389ed4b8068581897a8d7b4bf8277dc2eb8",
+    "translated_value": "在深色主題中使用純黑背景"
+  },
+  "pref_appearance_material_you_title": {
+    "source_hash": "bd97877831ade32782cc6806a10fd93776816db3b156bd609bb2f8681ef4d30e",
+    "translated_value": "Material You"
+  },
+  "pref_appearance_material_you_summary": {
+    "source_hash": "05c3d632e8fd1883ae525b7196c3be74b048388f96777cf4f6e6f0c5a82fa1fb",
+    "translated_value": "啟用動態色彩"
+  },
+  "pref_appearance_material_you_summary_disabled": {
+    "source_hash": "0384d81a8b98cf96ad8116d55a91437c67b3360eac38e90e5392562819ce4a0c",
+    "translated_value": "僅適用於 Android 12 及以上版本"
+  },
+  "pref_appearance_unlimited_name_lines_title": {
+    "source_hash": "3b701a8d4b5ac3169206c9c2cc584668907de9b945d7938fb88d9b11bdb29bca",
+    "translated_value": "顯示完整名稱"
+  },
+  "pref_appearance_unlimited_name_lines_summary": {
+    "source_hash": "2381b8454a6a9b95455fe4078ed41643b85181eafaacbc50b98f6118ca46af5e",
+    "translated_value": "顯示完整的資料夾和影片名稱，不進行截斷"
+  },
+  "pref_appearance_enable_bounce_animation_title": {
+    "source_hash": "839c83f3d35ca64f737ccf1a435c029b3a42e3215d136e3ca29d172a0eb890bb",
+    "translated_value": "啟用回彈動畫"
+  },
+  "pref_appearance_enable_bounce_animation_summary": {
+    "source_hash": "d17150d59dbd0c386c2312d6b3d241ca9af0bfde8169e310c4eee2ca8b45dfcc",
+    "translated_value": "滑動條和音量/亮度滑動條將以回彈效果呈現動畫"
+  },
+  "pref_appearance_hide_player_buttons_background_title": {
+    "source_hash": "686153dae7072dcec92b6bbc3b3304f9fb7618cd3492ff16d60099042842f222",
+    "translated_value": "隱藏播放程式按鈕背景"
+  },
+  "pref_appearance_hide_player_buttons_background_summary": {
+    "source_hash": "ce81c980d285d8a85743954e55b7a3029f648010e1bd4c2a37b42b55a1486246",
+    "translated_value": "隱藏所有播放控制按鈕的背景"
+  },
+  "pref_appearance_match_player_controls_to_theme_title": {
+    "source_hash": "cad597b8e261c6d99c34b2619805a7f2a51defaa61e8125984967d25234a3e01",
+    "translated_value": "播放程式控制項配對主題"
+  },
+  "pref_appearance_match_player_controls_to_theme_summary": {
+    "source_hash": "fcb08fb373f8d4b34675d4201376c024778d1985cbe65e7463728c55e88666fe",
+    "translated_value": "使用目前的主題顏色為播放程式按鈕著色"
+  },
+  "pref_appearance_player_always_dark_mode_title": {
+    "source_hash": "d1e10d2af71afa18f067a9e06dd341b00520a63cb0af813a949d9542169d04ee",
+    "translated_value": "播放程式一律深色模式"
+  },
+  "pref_appearance_player_always_dark_mode_summary": {
+    "source_hash": "453b59d5907aa641e2e3b7b33a54e4e8e67adef0d7be1f0f0e572d42fbd55189",
+    "translated_value": "無論應用程式主題為何，皆將播放程式控制項保持在深色主題"
+  },
+  "pref_appearance_use_system_font_title": {
+    "source_hash": "700d0173edbd3b221d15526e9e8bac2ddcc373cf19332f58d87ae6da531b21cd",
+    "translated_value": "使用系統字型"
+  },
+  "pref_appearance_use_system_font_summary": {
+    "source_hash": "039c91bf67d912b099139a44598cd4cd3e8affea7bae2ab940d08e117ea6df93",
+    "translated_value": "使用您裝置的預設字型，而非應用程式字型"
+  },
+  "pref_appearance_category_file_browser": {
+    "source_hash": "33b8a7901c02ac2e461656d43c5834489431ecf374b0b4972443ab3410a9a658",
+    "translated_value": "檔案瀏覽器"
+  },
+  "pref_appearance_show_hidden_files_title": {
+    "source_hash": "415951a5dbe937a1f17084be3f7dd61c7f632c877c0c2209e0dc66564eefa300",
+    "translated_value": "顯示隱藏檔案"
+  },
+  "pref_appearance_show_hidden_files_summary": {
+    "source_hash": "d9b0f1ff6bfa81d483c789c7747f3c5120ddfd1991938b6821801856befd52b7",
+    "translated_value": "顯示以點 (.) 開頭的隱藏資料夾，包括 android、data、系統資料夾和 .nomedia 檔案"
+  },
+  "pref_appearance_show_unplayed_old_video_label_title": {
+    "source_hash": "5e164b84327d2d7b9c13eca9ef0304ca0abf41ba11412354a85f3cd4d4028174",
+    "translated_value": "顯示新未播放影片標籤"
+  },
+  "pref_appearance_show_unplayed_old_video_label_summary": {
+    "source_hash": "1d64c17ba86113997480bb072daf2d661b6965a7eb34343bfbc8896ff99e9ee9",
+    "translated_value": "在指定天數內新增且從未播放過的影片上顯示「新」標籤"
+  },
+  "pref_appearance_unplayed_old_video_days_title": {
+    "source_hash": "50397a9a687a81b9c962bf90a87cbc762a61e56ffa57416f217b97c212a51446",
+    "translated_value": "新影片標籤的天數閾值"
+  },
+  "pref_appearance_unplayed_old_video_days_summary": {
+    "source_hash": "7de5d1b1bd661d2d49d8efd670b2cf8dd819ff5bf964259eadca87ceb6cad988",
+    "translated_value": "在過去 %d 天內新增且無播放記錄的影片將被標記為新影片"
+  },
+  "pref_appearance_category_thumbnails": {
+    "source_hash": "f3fe2c93b34f41e66fd681bc14fe91300d610ecde1762a5338736df64d627483",
+    "translated_value": "縮圖"
+  },
+  "pref_appearance_show_network_thumbnails_title": {
+    "source_hash": "73fcd5f5f00d99653cf82e177ffedff026d2307341dcae4c842f1c519d6e2453",
+    "translated_value": "顯示網路縮圖 (實驗性)"
+  },
+  "pref_appearance_show_network_thumbnails_summary": {
+    "source_hash": "bfb4ac9dc8fe071d0b961562e454dff41c3130662396e1689d5b4bef949972b1",
+    "translated_value": "為網路串流產生縮圖 (可能會增加行動網路的數據使用量)"
+  },
+  "pref_appearance_thumbnail_strategy_title": {
+    "source_hash": "f026ce5013d3d9ff873218eb1c3db92ac2ef250737275b3630113f9c992d0390",
+    "translated_value": "縮圖產生策略"
+  },
+  "pref_appearance_thumbnail_strategy_summary": {
+    "source_hash": "6a6f5a2df86b6d999d16d67e542a6216007616022b23a20fde097b906cfad6f3",
+    "translated_value": "選擇從影片中擷取縮圖的方式"
+  },
+  "pref_appearance_thumbnail_strategy_first_frame_title": {
+    "source_hash": "c5cf3d9e4a2cada9dc4339474ed77106e358ad62fda84024e7f6cc1754dc295e",
+    "translated_value": "首個影格"
+  },
+  "pref_appearance_thumbnail_strategy_first_frame_summary": {
+    "source_hash": "0c90883236ce7c24dc3e387dc7783da5a81789925616c2e91b42f8104ab31dd8",
+    "translated_value": "最快速的擷取方式。使用影片的 10 秒處。"
+  },
+  "pref_appearance_thumbnail_strategy_position_title": {
+    "source_hash": "4df2af099a556867eee3ae14c63d0c22d96fc0d4825c0e3dc12facb617ed7323",
+    "translated_value": "指定位置影格"
+  },
+  "pref_appearance_thumbnail_strategy_position_summary": {
+    "source_hash": "903c876f586a9db86fd055cb97203738a1246caf177c99e11419ef58a21a7005",
+    "translated_value": "需要較多處理。從影片較後方擷取影格，以避免空白標題畫面。"
+  },
+  "pref_appearance_thumbnail_position_title": {
+    "source_hash": "b6458903bdcb2a8a9497de08bfc368bb06be6f1bf691684d1e7f7d6d8e227993",
+    "translated_value": "縮圖影格位置"
+  },
+  "pref_appearance_thumbnail_position_summary": {
+    "source_hash": "40fb3db407cffe23628502c503fe4a431686235bda027a088a25a08444e40378",
+    "translated_value": "在影片總長的 %d%% 處擷取縮圖"
+  },
+  "pref_appearance_thumbnail_position_reset": {
+    "source_hash": "3a498d6b9099c8648b6cc6ec408bb164373a44e5462d2cf5d35be16d1818d576",
+    "translated_value": "重設縮圖位置為預設值"
+  },
+  "pref_appearance_theme_picker_label": {
+    "source_hash": "31618ef34d6255c1a6d9a1c88cb083bc28aea4b837f612ccd6ebd277de946c90",
+    "translated_value": "應用程式主題"
+  },
+  "pref_appearance_auto_scroll_title": {
+    "source_hash": "41407e893820c8c19c710e300d21383a84e09e822f140d65bb2ee3b583a620bc",
+    "translated_value": "自動捲動到上次播放"
+  },
+  "pref_appearance_auto_scroll_summary": {
+    "source_hash": "fd4eb8b818340916044233477467b37d13c3d1bf16d0d73113daf46dc043f4e4",
+    "translated_value": "開啟影片列表時自動捲動到上次播放的影片"
+  },
+  "pref_appearance_watched_threshold_title": {
+    "source_hash": "a806cc994d3b13744c6f19b6649ac7428153095fef90f73a4b5214167885804e",
+    "translated_value": "已觀看閾值"
+  },
+  "pref_appearance_watched_threshold_summary": {
+    "source_hash": "e516cf4ba36283f5ea25050772e30879a531afda9ba2969a9585e4266c4311c5",
+    "translated_value": "當播放進度達到 %d%% 時將影片標記為已觀看"
+  },
+  "video_label_new": {
+    "source_hash": "a253ff09c5a8678e1fd1962b2c329245e139e45f9cc6ced4e5d7ad42c4108fc0",
+    "translated_value": "新"
+  },
+  "theme_default": {
+    "source_hash": "21b111cbfe6e8fca2d181c43f53ad548b22e38aca955b9824706a504b0a07a2d",
+    "translated_value": "預設"
+  },
+  "theme_dynamic": {
+    "source_hash": "b6ee7b3e8d9c49d8599a79b0d17a3524522c29584e79d66fbf772446ab6ba10d",
+    "translated_value": "動態"
+  },
+  "theme_cloudflare": {
+    "source_hash": "f9191531404c401686ab9b96e57d6a30825f3487b3375c8b90a2245b65f40551",
+    "translated_value": "Cloudflare"
+  },
+  "theme_cotton_candy": {
+    "source_hash": "a8a8d2fa3e4d921ef3bfb59507b2ec65491964269304cbe5526568b84568caf8",
+    "translated_value": "棉花糖"
+  },
+  "theme_doom": {
+    "source_hash": "00a8d2984a2a1839afb7a62de7cf12309da52f29a1934269c5c9fd66defe6e59",
+    "translated_value": "Doom"
+  },
+  "theme_green_apple": {
+    "source_hash": "d651cde2cdd36753f5688fbf746019e42efce0049f35b7017d9e2fa8c1a8c357",
+    "translated_value": "青蘋果"
+  },
+  "theme_lavender": {
+    "source_hash": "60707cfeb40e2a665b352fd1618c7c84685856fdc4b7f5ebffc7987ade98df2f",
+    "translated_value": "薰衣草"
+  },
+  "theme_midnight": {
+    "source_hash": "aa996cf21f0dbc617e27fac13ab13916a07944c2de10c2dbcd60b95a6023f80b",
+    "translated_value": "午夜"
+  },
+  "theme_mocha": {
+    "source_hash": "676cf0fe867132422c4421187d11d48a20e10f484a5dc396e9f7c0261aa80bd3",
+    "translated_value": "摩卡"
+  },
+  "theme_strawberry": {
+    "source_hash": "8b08b70bef0c5f31046c217add159aca8236f286665088b39d872ae5b37c1771",
+    "translated_value": "草莓"
+  },
+  "theme_tidal": {
+    "source_hash": "f8251b05efbd16cc2f49d35b2d954ddf1e9409d6f42058ee66f0a6267f95180e",
+    "translated_value": "Tidal"
+  },
+  "theme_nord": {
+    "source_hash": "85fb49e051915a77ef6d27b52ce52eb5c4f81d46e18e1526eb59ddb150289ea7",
+    "translated_value": "Nord"
+  },
+  "theme_tako_green": {
+    "source_hash": "32a3d2cac1c77224bf3d00ff54f535df34c141ed7a2baf0a753d699a48c0f1ab",
+    "translated_value": "Tako"
+  },
+  "theme_yin_yang": {
+    "source_hash": "220f85c5436676d4a7199082c249cd52be4472fe6df24688f5cf3b8773d4df6b",
+    "translated_value": "陰陽"
+  },
+  "theme_yotsuba": {
+    "source_hash": "f17f1bde4bd6f34edae972fc8cec21064c87bc29325a81ae3de970118a497645",
+    "translated_value": "四葉"
+  },
+  "theme_sapphire": {
+    "source_hash": "d142d3dd1dbb1367889d5cced0661154ed13225b860dafade85b0fb69725b557",
+    "translated_value": "藍寶石"
+  },
+  "theme_sunset": {
+    "source_hash": "275dbda9dedbb4a219a49e2ec4b35d325d3c5929a5ba1474264f09ae3d5492e9",
+    "translated_value": "日落"
+  },
+  "theme_ocean": {
+    "source_hash": "fed12611d2d8c162e34719e368f2b823bd4051762b171196a55fd975745d726f",
+    "translated_value": "海洋"
+  },
+  "theme_forest": {
+    "source_hash": "eed88b3afe90b755e6c7524ea01c2b5a3e75235801054adb2a3a04bb6feaaab7",
+    "translated_value": "森林"
+  },
+  "theme_rose_gold": {
+    "source_hash": "e0c49c658ee63e0c8c93f9ebe96b4035a8e8c9aa71f3987b605b022f3d0d50be",
+    "translated_value": "玫瑰金"
+  },
+  "theme_violet": {
+    "source_hash": "2a36428839a37e680cdce701c1100a695cf2cac101f81f594ba4ec8c8c8a8d3b",
+    "translated_value": "紫羅蘭"
+  },
+  "theme_amber": {
+    "source_hash": "a5cccbcead7dcd65375ec6ea6ec28e3cd59af94417bbbee3276764c5d60ae5e9",
+    "translated_value": "琥珀色"
+  },
+  "theme_coral": {
+    "source_hash": "56ac628a2f10b3b0ac611cc5adc8d9b497c78d6f771a343d1d6d5407bb1e92dd",
+    "translated_value": "珊瑚色"
+  },
+  "theme_slate": {
+    "source_hash": "10ad4c3873636fa8bcd943493cc5b4b17e164a7f57e306b124ff6f1a9f3cd26b",
+    "translated_value": "石板色"
+  },
+  "theme_dracula": {
+    "source_hash": "0544a724fd7c22abaa4206abb153150171bd270dde72b422c3a196ddeda8f70a",
+    "translated_value": "Dracula"
+  },
+  "theme_monochrome": {
+    "source_hash": "30cc92d87a1e767febfdd38cb7d9ec97c7516c9cfe721fd80dd065e88331947c",
+    "translated_value": "黑白"
+  },
+  "theme_catppuccin": {
+    "source_hash": "baa951970c15b25cfd2dc5a9721387a7f6cb1a2f82a62bb57a08ddcba602f46a",
+    "translated_value": "Catppuccin"
+  },
+  "theme_gruvbox": {
+    "source_hash": "899aa80aa09882d02cc858f05f76557b34d6f19622f83c467d5c8ff39cf87f3d",
+    "translated_value": "Gruvbox"
+  },
+  "theme_tokyo_night": {
+    "source_hash": "c34af94ebbbffb4651957a17f10300e5522315412897c69ba28f3609a3be7175",
+    "translated_value": "Tokyo Night"
+  },
+  "theme_kanagawa": {
+    "source_hash": "c7fd3498f0b9051ffc69469c78e2132df147ddc2c964e9d0ac1767266c942ca8",
+    "translated_value": "Kanagawa"
+  },
+  "theme_rose_pine": {
+    "source_hash": "327f2b1ebe932fd0b65736b1825b91c75e37fd2d835eb0e7faa0f278788e75d6",
+    "translated_value": "Rosé Pine"
+  },
+  "settings_search_hint": {
+    "source_hash": "57054c5a04beafff6108aaaf6f6bc2602d9828d1061ed5dda9f1dcb07cc733cf",
+    "translated_value": "搜尋設定…"
+  },
+  "settings_search_no_results": {
+    "source_hash": "3e4d15d46dc7aa4884a0ae2f82e99e537362a37c21bd05144ac0ed7f7c033a96",
+    "translated_value": "找不到相關設定"
+  },
+  "settings_search_title": {
+    "source_hash": "49c266baaaa70981ea188fa714d5c40cf13830d786a861c9943ae0d26a7f3fe9",
+    "translated_value": "搜尋"
+  },
+  "pref_autoplay_title": {
+    "source_hash": "289414abd1599be93f3056a98eb2164ab269585c00c4cf97526281a6f87ac34c",
+    "translated_value": "啟用上一個/下一個導航"
+  },
+  "pref_autoplay_summary": {
+    "source_hash": "57d7558a208d8aa82292439f82259757131b542b462e451f470ca091b35d2907",
+    "translated_value": "為資料夾中的所有影片顯示下一個/上一個按鈕"
+  },
+  "pref_autoplay_next_video_title": {
+    "source_hash": "a4bebacb05a300f3585be5244a9ae76a079f9f0c0be653b69a4666d7fefc81fe",
+    "translated_value": "自動播放下一個影片"
+  },
+  "pref_autoplay_next_video_summary": {
+    "source_hash": "e9b7a17547ef4ee9a5722bc71da146d1fa0cf76f37ed5686ae4885f3b497a723",
+    "translated_value": "當前影片結束時自動播放下一個影片"
+  },
+  "pref_auto_pip_title": {
+    "source_hash": "d1ce348cdd5b22df9bc9f5965d24ffefa61a13a39c3d2a23fbf507ffb6fcdf5c",
+    "translated_value": "自動子母畫面"
+  },
+  "pref_auto_pip_summary": {
+    "source_hash": "5ad6b5dc4df87526ab0468d2430463132737f39be0a796d4c392ee2ef473301c",
+    "translated_value": "按下首頁或返回鍵時自動進入子母畫面模式"
+  },
+  "pref_dynamic_speed_overlay_title": {
+    "source_hash": "0833cc3858eda92366c0b49c6c5df8f79456393203981703797adf09f8ea1b39",
+    "translated_value": "動態速度疊加層"
+  },
+  "pref_dynamic_speed_overlay_summary": {
+    "source_hash": "32c1cfa91bb943bb9ee0998bd00b90cdbf7f127424a3a366c165e8aca6fd9433",
+    "translated_value": "在長按和滑動期間顯示速度控制的進階疊加層"
+  },
+  "pref_show_navigation_bar_title": {
+    "source_hash": "2ddc2e9c0d5db56b47120b334f622a618ee149c8f4483aa9d7410cbc2866d8b7",
+    "translated_value": "隨控制項顯示導覽列"
+  },
+  "pref_double_tap_seek_area_width_title": {
+    "source_hash": "285e702f0d5747d2ac987d3f5f75c29cb4fce55a28503fab65aa0c4fee5601e3",
+    "translated_value": "雙擊搜尋區域寬度"
+  },
+  "pref_double_tap_seek_area_width_summary": {
+    "source_hash": "118d274d0e1158aec1242858bbea440a450a731e77d16c08e89fae191344f077",
+    "translated_value": "目前：%d%%"
+  },
+  "pref_export_settings_title": {
+    "source_hash": "653fc2d4487b9be1a913bc0f646568d99021e0916692a30d27b304f33de1aeae",
+    "translated_value": "匯出設定"
+  },
+  "pref_export_settings_summary": {
+    "source_hash": "d884b267ba98f65f5aa1a5ec751db61dbc8881dc7b9118c3daa5230abda8b1e9",
+    "translated_value": "將設定匯出為 XML 檔案"
+  },
+  "pref_import_settings_title": {
+    "source_hash": "dfd32c99ac6e8e461f30d22e15ff5c95b1426020ea11ee2252972482923afa45",
+    "translated_value": "匯入設定"
+  },
+  "pref_import_settings_summary": {
+    "source_hash": "e2622566ecbe5d008752bb2c2c1fa45c5f86eef68993ea63eedc0af93adb516f",
+    "translated_value": "從 XML 檔案匯入設定"
+  },
+  "pref_enable_lua_scripts_title": {
+    "source_hash": "45ff145679a29fbf5f9914b06a4721436201a9c40416a1c7e36eb04ca2c2eea7",
+    "translated_value": "啟用 Lua 指令碼"
+  },
+  "pref_enable_lua_scripts_summary": {
+    "source_hash": "0084389a325898da097012096ee693996d650a75e00052452e1da6d9e471ebd1",
+    "translated_value": "從設定目錄載入 Lua 指令碼"
+  },
+  "pref_manage_lua_scripts_title": {
+    "source_hash": "379e0fd26929ccbf493cdd70c693d7872d60ad42cf63456568a2326f1e15c114",
+    "translated_value": "管理 Lua 指令碼"
+  },
+  "pref_manage_lua_scripts_summary": {
+    "source_hash": "1d27da00fac030820da7d2af681f627f39c6816456e454aeb73d465eb24bf6af",
+    "translated_value": "管理已啟用的 Lua 指令碼"
+  },
+  "pref_clear_config_cache_title": {
+    "source_hash": "cd2c1904bbde920838fcb2f6ddf8d3a4b55c9ac52001bb322b447726dcd383d6",
+    "translated_value": "清除設定快取"
+  },
+  "pref_clear_config_cache_summary": {
+    "source_hash": "82fcaa2d373f3ca8e39e25bc9746984879490d082cf681cd4345591b29ceaeb5",
+    "translated_value": "清除快取的 mpv.conf 設定"
+  },
+  "pref_clear_thumbnail_cache_title": {
+    "source_hash": "374cfb620faa3ce696988215ff0e9c96d8856e4a581b75e8209eb5171813b61d",
+    "translated_value": "清除縮圖快取"
+  },
+  "pref_clear_thumbnail_cache_summary": {
+    "source_hash": "b867ee44b81879552098cdf68495747b93747b19082a642b89cca17fd9cf31e9",
+    "translated_value": "刪除所有快取的影片縮圖 (在瀏覽資料夾時會重新產生)"
+  },
+  "pref_layout_title": {
+    "source_hash": "ef3702ba27e8b366850298a5ec403ca9a0b068c66ea85e494132e0b5ac056461",
+    "translated_value": "播放程式配置"
+  },
+  "pref_layout_summary": {
+    "source_hash": "3a8456d91daf1a739e2bac013b00cc93752d7d8f9d74f69baee9ff5110154f84",
+    "translated_value": "自訂播放程式按鈕配置"
+  },
+  "pref_layout_reset_default": {
+    "source_hash": "bc5b45ae7b60692ade0bb26ebe5b6830f150d97134153e3c3091882eb72e7c25",
+    "translated_value": "重設為預設值"
+  },
+  "pref_layout_top_right_controls": {
+    "source_hash": "d0a178479e8ec50f61c1abd2000d19f2709253536c1f054c77eb122ad5a3cb5c",
+    "translated_value": "右上角控制項"
+  },
+  "pref_layout_bottom_right_controls": {
+    "source_hash": "d5c52371b156acb2df9b605dcc4f9da9fb50d60d41868ced694b3357421fcd36",
+    "translated_value": "右下角控制項"
+  },
+  "pref_layout_bottom_left_controls": {
+    "source_hash": "e81e46d6d926edbe81e02f1b57f9c86b5a87ce45dfdd29608b41c6191716de0d",
+    "translated_value": "左下角控制項"
+  },
+  "pref_layout_portrait_bottom_controls": {
+    "source_hash": "58b1df4b2a121d25435d4fd7fc8003a2e660ca5b3868ad36fe51460e616330fc",
+    "translated_value": "直向底部控制項"
+  },
+  "pref_layout_preview": {
+    "source_hash": "324b134f57c70c729ae3dc4d298bb451656717d70523e942c1ce667b8024ea07",
+    "translated_value": "預覽"
+  },
+  "pref_layout_reset_title": {
+    "source_hash": "42c62cab9d4d188a2074ff4cc79556b228a9f1cc6008a1faf785934aa8a4ac18",
+    "translated_value": "重設配置？"
+  },
+  "pref_layout_reset_summary": {
+    "source_hash": "e482517696b9b117ac0ad45322a93defae273ffa6d32299cc68194c9fe39b107",
+    "translated_value": "所有自訂的播放程式控制配置將重設為預設位置"
+  },
+  "pref_player": {
+    "source_hash": "64aee8c6cbd026d9ea9221661f7632351d9a741198cd01ca017450b56f78a206",
+    "translated_value": "播放程式"
+  },
+  "pref_player_summary": {
+    "source_hash": "83dff0ed3b2441b2954dffd28959f2e9f26be827d4d85d0e54135ea77107e7e1",
+    "translated_value": "螢幕方向、手勢與控制"
+  },
+  "pref_player_orientation": {
+    "source_hash": "e3d11242200fe8f2f21c2e5334ba0e0a7aa4dcd2a4533f92f4ec921fa9ff16a4",
+    "translated_value": "螢幕方向"
+  },
+  "pref_player_orientation_free": {
+    "source_hash": "f411a1fb62758b4c54690d0a702b4955b54dd22115416fa7b1ce51b4a084818d",
+    "translated_value": "自由"
+  },
+  "pref_player_orientation_video": {
+    "source_hash": "d534be829e32196b4d1e53b67103cf1e376b1d60071857572598c196abfefbc6",
+    "translated_value": "影片"
+  },
+  "pref_player_orientation_smart": {
+    "source_hash": "9e6ad6db21dbc4ccca3a5789b267e29fbacebb89091f6d55123a060ecd7c2cbe",
+    "translated_value": "智慧"
+  },
+  "pref_player_orientation_smart_summary": {
+    "source_hash": "b4674112e44062ac474abd1e79a6e9d6f561b1a7bf113a231e77324ff30d7c63",
+    "translated_value": "除非手動更改，否則遵循影片方向"
+  },
+  "pref_player_orientation_portrait": {
+    "source_hash": "f71094c30160d155c9b29fd67e3b6f86ad254003a163da4c24d1f0061b0ed0ad",
+    "translated_value": "直向"
+  },
+  "pref_player_orientation_reverse_portrait": {
+    "source_hash": "4cf89246b4057d903dde6d8de25f339a2e127d597b9315761339bc3970ebaca1",
+    "translated_value": "反向直向"
+  },
+  "pref_player_orientation_sensor_portrait": {
+    "source_hash": "af7d54ed2dafe98303fb7ab706efcd31e19d23a6710db2902015f0fc1916bf0b",
+    "translated_value": "感應器直向"
+  },
+  "pref_player_orientation_landscape": {
+    "source_hash": "e658d3ae034a3dcf77eafffab7e7f78f5734e83eca41c698ed6e5fcc7e146a59",
+    "translated_value": "橫向"
+  },
+  "pref_player_orientation_reverse_landscape": {
+    "source_hash": "c22926f4bbce914c3bf7c2bcd7355f2f591f847a4d9c77a3c4ea3142202a4378",
+    "translated_value": "反向橫向"
+  },
+  "pref_player_orientation_sensor_landscape": {
+    "source_hash": "43731e1f8b69184046ce9f579557525dc5ef8e1343962af46238a4a06e7b5f08",
+    "translated_value": "感應器橫向"
+  },
+  "pref_player_save_position_on_quit": {
+    "source_hash": "ae56be0413255a180b0cf4cd330e9a9f372ca5c186fc0e1c865c439f5735faa4",
+    "translated_value": "結束時儲存位置"
+  },
+  "pref_player_double_tap_seek_duration": {
+    "source_hash": "29e36a906f759c96b65a15ff2734201e3c328fac26f5da8d1311a1fe7896ecb3",
+    "translated_value": "雙擊搜尋時間"
+  },
+  "pref_player_custom_skip_duration_title": {
+    "source_hash": "9de3fd2509fb3f7d71f2d684120bf65d53b8a755c9dd25026a7ef4ee4f54fea2",
+    "translated_value": "自訂跳過時間"
+  },
+  "pref_player_custom_skip_duration_summary": {
+    "source_hash": "6e07f455b44134fe27a4adaf0178252766f25aac6328ac3a7c952c43d3e915d5",
+    "translated_value": "自訂跳過按鈕的前進時間"
+  },
+  "pref_player_seeking_title": {
+    "source_hash": "d60b8785cdcd0bad8f2b5f9b1fbd6d72b83492f5885eacc2e72022aabb18e708",
+    "translated_value": "搜尋"
+  },
+  "pref_player_close_after_eof": {
+    "source_hash": "34fc649aa3cbbd64f06fc15d59d183f6c048984d090a3a7a41429081f674f022",
+    "translated_value": "播放結束後關閉"
+  },
+  "pref_player_remember_brightness": {
+    "source_hash": "350e8be82362477ad11be763892d04fdce51f32edd62b536aaba3fb3234e223a",
+    "translated_value": "記住螢幕亮度"
+  },
+  "pref_player_gestures": {
+    "source_hash": "19f425135f78d2b1d6874131c4f7e2a73fd064057c651e08d388449ebf18c606",
+    "translated_value": "手勢"
+  },
+  "pref_player_gestures_brightness": {
+    "source_hash": "fe32afb641d48e4ca47e22de58fed40abdb1dc486a33caf21c146f585090c01d",
+    "translated_value": "亮度手勢"
+  },
+  "pref_player_gestures_volume": {
+    "source_hash": "4979cd63fbb7bbe516f9e4f5b5918dfe42e64e5fd965a01601df545e4328dc55",
+    "translated_value": "音量手勢"
+  },
+  "pref_player_gestures_pinch_to_zoom": {
+    "source_hash": "423044040c1049a6eb794769ac4f77e0e6e978b5d6424ac458446336b59243b9",
+    "translated_value": "捏合縮放"
+  },
+  "pref_player_gestures_horizontal_swipe_to_seek": {
+    "source_hash": "10160e92a3225f9fefd9b6214d0ba5d2bf72aab56ebea83cd87c9f8c69433792",
+    "translated_value": "水平滑動搜尋"
+  },
+  "pref_player_gestures_horizontal_swipe_to_seek_summary": {
+    "source_hash": "de603bb37fdd27b1ddd96e56f9028234adedeea32980800c196d7703db5ddb53",
+    "translated_value": "在螢幕上向左或向右滑動以進行快進或快退"
+  },
+  "pref_player_gestures_swipe_to_subtitle_seek_title": {
+    "source_hash": "6e058d0a721743731b9544168233ab64a254fd0ba28e6791322f837f1ad6c8cd",
+    "translated_value": "滑動搜尋字幕"
+  },
+  "pref_player_gestures_swipe_to_subtitle_seek_summary": {
+    "source_hash": "c04702d3f216c1ea2c1e750520c2b7ff18875a85d6df6c5c24344394162232b5",
+    "translated_value": "在螢幕頂部或底部向左或向右滑動以搜尋字幕"
+  },
+  "pref_player_gestures_horizontal_swipe_sensitivity": {
+    "source_hash": "d920d2fdc687ca830c261ac557e4f848c2be1b4b3843159b1295cfe1a039e4c7",
+    "translated_value": "水平滑動靈敏度"
+  },
+  "pref_player_gestures_horizontal_swipe_sensitivity_summary": {
+    "source_hash": "84264468fab6fe13b481c13add3d3f2f2d067014788a4b756f60e8e6c1a786e8",
+    "translated_value": "調整每次滑動覆蓋的距離"
+  },
+  "pref_player_gestures_hold_for_multiple_speed": {
+    "source_hash": "435f64e6f123fac18d343bbe5178b0229d3ab5465784e02e011fdaf9f6ec0da9",
+    "translated_value": "長按進行多倍速播放"
+  },
+  "pref_player_controls": {
+    "source_hash": "799c269135742a36ae48dddf3a69c47c7d2a428a34e351f6da93ae6490101b47",
+    "translated_value": "控制"
+  },
+  "pref_player_controls_allow_gestures_in_panels": {
+    "source_hash": "d8d2dbb67338a142f8fc9ef0c2d5e245651716db98351e2d10e3710cecfcf590",
+    "translated_value": "允許在面板中使用手勢"
+  },
+  "pref_player_controls_display_volume_as_percentage": {
+    "source_hash": "5755cc7e9b707af4bad1583a2c94ea4463ec7be54ad623312ffcfb36da959005",
+    "translated_value": "將音量顯示為百分比"
+  },
+  "pref_player_controls_show_loading_circle": {
+    "source_hash": "7dd25a1098ea6b9447e3ef7740a7e71ad7b4faff24e81bc3d12a50a8316a5305",
+    "translated_value": "顯示載入環"
+  },
+  "pref_player_display_show_status_bar": {
+    "source_hash": "9ead891f0c88156d779b2715219ecacdab988e8cb432dc86fa9fc94dfd4759bf",
+    "translated_value": "隨控制項顯示系統狀態列"
+  },
+  "pref_player_display": {
+    "source_hash": "34e108c0896d0158ca4f2797d4f12a143943803be2151aa5d2136ea1bcd9a468",
+    "translated_value": "顯示"
+  },
+  "pref_player_display_panel_opacity": {
+    "source_hash": "6d8e2f52b8c911428cda5964e6d924552ecbb90a7a1ab141fb29d79b579022cc",
+    "translated_value": "面板透明度"
+  },
+  "pref_player_display_panel_transparency_summary": {
+    "source_hash": "71fafb7498ddf411a51b6833a023fe26774c0f72b473c428588c8be8cbc9de11",
+    "translated_value": "%d%%"
+  },
+  "pref_gesture": {
+    "source_hash": "19f425135f78d2b1d6874131c4f7e2a73fd064057c651e08d388449ebf18c606",
+    "translated_value": "手勢"
+  },
+  "pref_gesture_summary": {
+    "source_hash": "db47d1a0268a6228a7208cf2fd781f333a2a0e0549397aa51905c08868b6e632",
+    "translated_value": "雙擊、媒體控制"
+  },
+  "pref_gesture_double_tap_title": {
+    "source_hash": "b7f18903d7ca55dde65f4cd88cf7ee05ab86ce74e1fa4872bf6da4f569791574",
+    "translated_value": "雙擊"
+  },
+  "pref_gesture_double_tap_none": {
+    "source_hash": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91",
+    "translated_value": "無"
+  },
+  "pref_gesture_double_tap_seek": {
+    "source_hash": "67ae3405bcd4df1fdbe812a588a449a53ce65bdfb1658746237edb0a9beefa53",
+    "translated_value": "搜尋"
+  },
+  "pref_gesture_double_tap_subseek": {
+    "source_hash": "25a9b8a5e670c3cdd033e1138b6cc3ae5f50b30db3ec98da63c8bf47c91fa0a1",
+    "translated_value": "搜尋字幕"
+  },
+  "pref_gesture_reverse_double_tap_title": {
+    "source_hash": "b6f240906292dd03b97e876d23a37270d6ddc65783fc7a03b4f671fbc69f9d4f",
+    "translated_value": "反轉左/右手勢"
+  },
+  "pref_gesture_reverse_double_tap_summary": {
+    "source_hash": "d16010ddb652d7af9edfa1f6b8d92ddc736fa8a7c97ca2d883a7a08c2312be99",
+    "translated_value": "交換左側和右側的雙擊/單擊手勢"
+  },
+  "pref_gesture_double_tap_play": {
+    "source_hash": "c9c7c7ecde581775f10bdb3f5d18aaa57685b3efa6902203a1508fe663385f3a",
+    "translated_value": "播放/暫停"
+  },
+  "pref_gesture_double_tap_custom": {
+    "source_hash": "494ca78f7374e46fb2de9ad9f2dbd4aaae89b50b2ca044177a1566a59e06627e",
+    "translated_value": "自訂"
+  },
+  "pref_gesture_double_tap_left_title": {
+    "source_hash": "6148eea196b3b31a408670bb5ef10ff51a9f6efe2f2351e5290d14c11fe7d303",
+    "translated_value": "雙擊 (左側)"
+  },
+  "pref_gesture_double_tap_center_title": {
+    "source_hash": "13a0db19d337c3a686e9d5081716749ac58acd4d3bb0831e491382f36586b240",
+    "translated_value": "雙擊 (中間)"
+  },
+  "pref_gesture_single_tap_center_title": {
+    "source_hash": "68f92db02daca861201b19de0eae88f87e8ec5f42922da2d909d76ab86266c11",
+    "translated_value": "單擊 (中間)"
+  },
+  "pref_gesture_double_tap_right_title": {
+    "source_hash": "2e9afb4c6215f1e86859dc65f86566f8313ed0d27ff5131c2d268853cad83876",
+    "translated_value": "雙擊 (右側)"
+  },
+  "pref_gesture_single_tap_right_title": {
+    "source_hash": "8d232db54ef8f9ca3ef7f6be7c0ff62fb31e40876f9de12826fc3d1842882c1a",
+    "translated_value": "單擊 (右側)"
+  },
+  "pref_gesture_single_tap_left_title": {
+    "source_hash": "e533eb69a60378473b6afa94cd7ef48466d4b874a051a69574fcbf8488a9d8a8",
+    "translated_value": "單擊 (左側)"
+  },
+  "pref_gesture_use_single_tap_for_center_title": {
+    "source_hash": "33dacf74149487980f021464313848a6377d801bdfb67c5b6921868edd23ada9",
+    "translated_value": "中間手勢使用單擊"
+  },
+  "pref_gesture_use_single_tap_for_center_summary": {
+    "source_hash": "c81e4ccd3f5afcc510ff4ba5bb07ef0a10fd01ff95b072d3d0b624b14abe56dc",
+    "translated_value": "在中間區域使用單擊進行手勢 (如播放/暫停) 而非雙擊。"
+  },
+  "pref_gesture_use_single_tap_for_left_right_title": {
+    "source_hash": "2cb46f7888d7b427b63593ce0b3e231d11e20f25b77b099b6b51ad2efa0ea97e",
+    "translated_value": "左/右手勢使用單擊"
+  },
+  "pref_gesture_use_single_tap_for_left_right_summary": {
+    "source_hash": "9f47c0539c065385e4b24351f2557d5376a11875374d8762dd267ebbcfbd287f",
+    "translated_value": "在左側和右側區域使用單擊進行手勢而非雙擊。"
+  },
+  "pref_gesture_prevent_seekbar_tap_title": {
+    "source_hash": "ad019c20a0bc58139ad1a54e870c1768dca7b1773a4df03c32d6cc14933435d7",
+    "translated_value": "防止意外點擊滑動條進行搜尋"
+  },
+  "pref_gesture_prevent_seekbar_tap_summary": {
+    "source_hash": "a81fd83a182096ad33478f9a5d8a7ba5e53a61fe2abd781086b08c5e785fa023",
+    "translated_value": "影片僅能透過拖動滑動條進行搜尋，點擊滑動條無效。"
+  },
+  "pref_gesture_use_relative_seeking_title": {
+    "source_hash": "bc489d88e861fef41d5389c5fd0d322e4e8136bf43e94cd22fa83b58e04315c3",
+    "translated_value": "使用相對搜尋"
+  },
+  "pref_gesture_use_relative_seeking_summary": {
+    "source_hash": "cea7dd2292705b803c600239775cea9aea439f1d1420b63d5f15bfbc99f4be62",
+    "translated_value": "相對於開始拖動的位置進行搜尋，而非手指的絕對位置。"
+  },
+  "pref_gesture_double_tap_custom_info": {
+    "source_hash": "ae38018a716be660ae4cb8fad8c13950957f31d68659e95be1db86cf3aa7fc24",
+    "translated_value": "您可以在 input.conf 中使用以下鍵碼將自訂動作綁定到這些手勢：\n\n左側：MBTN_LEFT_DBL\n中間：MBTN_MID_DBL\n右側：MBTN_RIGHT_DBL"
+  },
+  "pref_gesture_media_title": {
+    "source_hash": "d07deb8344922b975cd38c7159ac14e708774db894e8233c7022217e43cebd40",
+    "translated_value": "媒體控制"
+  },
+  "pref_gesture_media_previous": {
+    "source_hash": "a57b08a480b822a0a572b993391c292ede593bf8000b406675b180bbb16260fa",
+    "translated_value": "上一個"
+  },
+  "pref_gesture_media_play": {
+    "source_hash": "c9c7c7ecde581775f10bdb3f5d18aaa57685b3efa6902203a1508fe663385f3a",
+    "translated_value": "播放/暫停"
+  },
+  "pref_gesture_media_next": {
+    "source_hash": "1ff57a29d7c9d11bdf61c1b80f2b289b44c1ea844824d4b94a0d52b6ba5fc858",
+    "translated_value": "下一個"
+  },
+  "pref_gesture_media_custom_info": {
+    "source_hash": "548e830844d75abb5e46b7cfc19b5a42a2a72185eb7907371aa3f07c990dd0c5",
+    "translated_value": "您可以在 input.conf 中使用以下鍵碼將自訂動作綁定到媒體控制：\n\n上一個：PREV\n播放/暫停：PLAYPAUSE\n下一個：NEXT"
+  },
+  "pref_gesture_view_title": {
+    "source_hash": "dcc839a4015c4b7dd9db959a8f757833b8adb92462a751b973386e453c6d58a3",
+    "translated_value": "檢視"
+  },
+  "pref_gesture_tap_thumbnail_to_select_title": {
+    "source_hash": "2334f282f0ce806716d451141d756af7e2b8db2857741a82368b59e8d204d119",
+    "translated_value": "點擊縮圖進行選擇"
+  },
+  "pref_gesture_tap_thumbnail_to_select_summary": {
+    "source_hash": "0b006037e12a1c3095bc9faf5566499f8bb6e6c825450ff6de155124c9bf3fa8",
+    "translated_value": "啟用時，點擊縮圖進入選擇模式。停用時，點擊縮圖將播放影片。"
+  },
+  "pref_decoder": {
+    "source_hash": "36883f070fe0e9946c42420d7c6be5ad3d94b79e70bfcdcbb7091d1d8b0d775d",
+    "translated_value": "解碼器"
+  },
+  "pref_decoder_summary": {
+    "source_hash": "567c466029b5c20dd9d5066779f475d0fb64f8a24087e35bc0e2e9375e095826",
+    "translated_value": "硬體解碼、像素格式、去帶 (Debanding)"
+  },
+  "pref_decoder_profile_title": {
+    "source_hash": "480f5bb36a053e17775882119f41ae1b5797abdb95c5e5e30a4f02fe18762734",
+    "translated_value": "MPV 設定檔"
+  },
+  "pref_decoder_try_hw_dec_title": {
+    "source_hash": "1b50f0c74457592a2d55583125b2eb89e1eb61092c455c41d1ca58867d330566",
+    "translated_value": "嘗試硬體解碼"
+  },
+  "pref_decoder_gpu_next_title": {
+    "source_hash": "d52a56ae1bca00bd6991cd9b0501eb7f5f3a25d5059f5d513d9540ef2e0d7fd3",
+    "translated_value": "使用 gpu-next"
+  },
+  "pref_decoder_gpu_next_summary": {
+    "source_hash": "b1bff79d1df6d38ad75f75497927d2b00747a7018699de7a8706f51102706863",
+    "translated_value": "新的渲染後端"
+  },
+  "pref_decoder_gpu_next_enable_title": {
+    "source_hash": "c6c821291a55b310d735b45876a428ae4659dea99cf67390e87739b827896a91",
+    "translated_value": "啟用 gpu-next？"
+  },
+  "pref_decoder_gpu_next_warning": {
+    "source_hash": "b97ac743616fabe5c0d49ee31992384dcaa939ca6472c9c35b177c212816cd65",
+    "translated_value": "在某些裝置上啟用 gpu-next 可能會導致播放期間出現紫色螢幕問題。"
+  },
+  "pref_decoder_gpu_next_purple_screen_fix": {
+    "source_hash": "919675be86ff1d43f88c15d385651773893fcdb782e80b23ef404b4949aa7839",
+    "translated_value": "如果您遇到紫色螢幕，請嘗試在進階設定 (mpv.conf) 中停用 opengl-pbo："
+  },
+  "pref_decoder_gpu_next_enable_anyway": {
+    "source_hash": "6edc8242b9b8cc59452658c3c97a95c73b7c3ec04a726d0989b628df2b0647d2",
+    "translated_value": "仍然啟用"
+  },
+  "pref_decoder_debanding_title": {
+    "source_hash": "3d3b0d9a564a85ce10e10c8f6aa2d7b082d910a94bd0b9954b7ff518e27273d9",
+    "translated_value": "去帶 (Debanding)"
+  },
+  "pref_decoder_yuv420p_title": {
+    "source_hash": "1506bd18500f7210189c7bd4dbebc408fb71a564dfdb448daeac30ae114c2f8f",
+    "translated_value": "使用 YUV420P 像素格式"
+  },
+  "pref_decoder_yuv420p_summary": {
+    "source_hash": "0a1511f0d85860339244723640b69c1bc3e95d3d53a110d3210bea0aff83c970",
+    "translated_value": "可能修復某些影片編解碼器的黑屏問題，也可能以犧牲品質為代價提高效能"
+  },
+  "pref_decoder_vulkan_title": {
+    "source_hash": "d66c9d90442049d52cc7314b5d179ec9c17179f141947ac445519b8ab80522f0",
+    "translated_value": "使用 Vulkan"
+  },
+  "pref_decoder_vulkan_summary": {
+    "source_hash": "c29d309952ee56cb120faacbae9d179dd6b4fe14ba25fae269838934a38f21e4",
+    "translated_value": "在支援的裝置上啟用 Vulkan 渲染 (可能提高效能)"
+  },
+  "pref_decoder_vulkan_not_supported": {
+    "source_hash": "b69511d363ea021ab0297ee53aa44ec3a009ecc653eced7ef26132c3fa6412e6",
+    "translated_value": "不支援 (需要 Android 13+ 及 Vulkan 1.3)"
+  },
+  "pref_subtitles": {
+    "source_hash": "0ee695bdeb26a296117c515156ac6785099fa25450755144ccdb5fbb9b2c1841",
+    "translated_value": "字幕"
+  },
+  "pref_subtitles_summary": {
+    "source_hash": "a3864e3bdc947d815297f87b864a75a89f36855af7abc40cd79d112ccd0e6ee8",
+    "translated_value": "偏好語言、字型與搜尋"
+  },
+  "pref_subtitle_search_title": {
+    "source_hash": "d9d7d17024990e5da3f886c3958313b4f5ccb31439a51650dfabb73eab9c5db4",
+    "translated_value": "線上字幕搜尋"
+  },
+  "pref_subtitle_search_summary": {
+    "source_hash": "050d5a6d0673e5f0f83adb813818628b9f767a4e726ecd47c5008fb21544ee31",
+    "translated_value": "從線上來源搜尋並下載字幕"
+  },
+  "pref_custom_lua_title": {
+    "source_hash": "66fac376cce1f1313f76916d143732cce3d95c2339d1b31d8195714844879222",
+    "translated_value": "自訂 Lua 按鈕"
+  },
+  "pref_custom_lua_summary": {
+    "source_hash": "e71a1cce2f1575b08cb0ba4924c59bf5bd1414717d5c40622cc9218f3d9ca4c8",
+    "translated_value": "使用 Lua 程式碼管理自訂播放程式按鈕"
+  },
+  "pref_preferred_languages": {
+    "source_hash": "22af382e8b7c2909e229adcade833632e4cc76d668a3d5a21d13c6a47e79999d",
+    "translated_value": "偏好語言"
+  },
+  "pref_subtitles_fonts_dir": {
+    "source_hash": "69879af6082e89fb3be75b9d16e45edbbb7bc07cbc60c22b26a27b770f901bf7",
+    "translated_value": "字型目錄"
+  },
+  "pref_subtitles_autoload_title": {
+    "source_hash": "ee909620ea6d0d7f0a48c861eaf6292890525a2f23c11720e6c85877fffd370d",
+    "translated_value": "自動載入字幕"
+  },
+  "pref_subtitles_autoload_summary": {
+    "source_hash": "70d233257c4a27f9f780477523b3255abe2f341fe19f4a10a168e64b480bbcec",
+    "translated_value": "自動載入同名的外部字幕。"
+  },
+  "pref_subtitles_save_location": {
+    "source_hash": "4826134a4ef026ef4c1ec2d0dd96f25034bf22de8d6b9d23837a8e27fa275092",
+    "translated_value": "字幕儲存位置"
+  },
+  "pref_subtitles_search_online": {
+    "source_hash": "c21e63c0af648f8bf0d3f93cfe09e86a9f46c9d6ad992236720c9365efee828f",
+    "translated_value": "線上字幕搜尋…"
+  },
+  "pref_subtitles_subdl_languages": {
+    "source_hash": "7fa2f5139a49d4b9c727d12141baa97d621eb4f1682c4a6401104c8f9ea89b63",
+    "translated_value": "字幕語言"
+  },
+  "all_languages": {
+    "source_hash": "cf0875d166bd1925428edbf4691b3146d97a7bfb2841843d1cad481336feb4c4",
+    "translated_value": "全部 (選擇性過濾)"
+  },
+  "pref_subtitles_clear_downloads": {
+    "source_hash": "0a9366481fa890ea8571547cb04bad5756561b594e0927c2698d18c0fce985d6",
+    "translated_value": "清除字幕下載"
+  },
+  "pref_subtitles_clear_downloads_summary": {
+    "source_hash": "50f48ff0d88715ddf9cf2e3fc99372ab40dbec05dfa396f8a17cfb0b37d9c0bc",
+    "translated_value": "刪除目前儲存位置中的所有檔案"
+  },
+  "pref_subtitles_clear_downloads_confirmation": {
+    "source_hash": "e62df060226554e15c3d259692714fbbfc1bb2e02d9a16398053fd27fe42d7ee",
+    "translated_value": "您確定要刪除所有下載的字幕嗎？此操作無法復原。訂"
+  },
+  "toast_subtitles_cleared": {
+    "source_hash": "40cee9bdc8435cad6ba16c3e5fd12a666daa976a2e94c6b81c3cc9490db454c8",
+    "translated_value": "已清除字幕下載"
+  },
+  "pref_subtitles_searching": {
+    "source_hash": "c31723ab330289fe2cc4c7b69b7a862361da79a01f84893dc7b89a6de0ab4b42",
+    "translated_value": "搜尋中…"
+  },
+  "pref_subtitles_found": {
+    "source_hash": "09c7484b514f62a706bf31f8d2c0254792a018879b02a5090108edfde863b849",
+    "translated_value": "找到 %d 個字幕"
+  },
+  "pref_subtitles_online_search_title": {
+    "source_hash": "d9d7d17024990e5da3f886c3958313b4f5ccb31439a51650dfabb73eab9c5db4",
+    "translated_value": "線上字幕搜尋"
+  },
+  "pref_audio": {
+    "source_hash": "bc1b88907d3b748af99cb9d4ffc07a0118dad5dab21a9dbdcc5a17a09641364a",
+    "translated_value": "音訊"
+  },
+  "pref_audio_summary": {
+    "source_hash": "659a8dd1872996cfb8130d22d2277f00c7333ee58f271551d553978b2dbb8890",
+    "translated_value": "偏好語言、音訊聲道、音調修正"
+  },
+  "pref_audio_pitch_correction_title": {
+    "source_hash": "d6c3bcf71f98022ec55bbbdc4cb2892172eadad14b5fd37403445d9813efcf91",
+    "translated_value": "啟用音訊音調修正"
+  },
+  "pref_audio_pitch_correction_summary": {
+    "source_hash": "4385439cbe98a1db1254517f5556b7bbefaf0d1c92c1c292fc8d38c65b256e87",
+    "translated_value": "防止音訊在較快速度時變高音，在較慢速度時變低音"
+  },
+  "pref_audio_volume_normalization_title": {
+    "source_hash": "856d1e2dbfb2ad6f0ec194693b2566c698a1588e8626a1672e2578930c61f78e",
+    "translated_value": "音量標準化"
+  },
+  "pref_audio_volume_normalization_summary": {
+    "source_hash": "86de7a58c2ec9c98f6ae2ca14ab88905d9fe50ba8b8944de3a8559ea7e9ed8bd",
+    "translated_value": "自動調整音訊音量以保持一致的響度水準"
+  },
+  "pref_audio_channels": {
+    "source_hash": "c8d5a00379f40313f7c8348ef423d04bcd15a1a65486a2cd5d7d7240e3b2feb1",
+    "translated_value": "音訊聲道"
+  },
+  "pref_audio_channels_auto": {
+    "source_hash": "0286249762f7c94349cdc0ba3bb2255baf9a80036e2193ead1d77696f888582f",
+    "translated_value": "自動"
+  },
+  "pref_audio_channels_auto_safe": {
+    "source_hash": "7419824e1d7bb3ff1efd84fc8aaee9966f75f9f8d0ac8ae3421d12ff3ee5b4e6",
+    "translated_value": "自動安全"
+  },
+  "pref_audio_channels_mono": {
+    "source_hash": "6f00156cec078cc0c6c207117b68104f4e0e06cf67a3eebc6398b2c7f5248f45",
+    "translated_value": "單聲道"
+  },
+  "pref_audio_channels_stereo": {
+    "source_hash": "14f0f9082358a5c95c918981d200523c9979a7062cbe39447c5b31129ff29478",
+    "translated_value": "雙聲道"
+  },
+  "pref_audio_channels_stereo_reversed": {
+    "source_hash": "e651543d751081656980f9357aac32f280c3495a3aa3ce9353fde207d6e6dd86",
+    "translated_value": "反向雙聲道"
+  },
+  "pref_audio_preferred_language": {
+    "source_hash": "6599d2668b1835fd0c63be220ac1a0d5e22369fcbdeaa0c72e51f228e13e1671",
+    "translated_value": "具有多個音軌的影片預設選擇的語言，可使用兩位或三位字母的語言代碼。多個值可用逗號分隔。"
+  },
+  "pref_audio_volume_boost_cap": {
+    "source_hash": "f922e3c31676e5321b845a4d819ce4cd81b90f34a3ecf213c0b92cc166a7e27f",
+    "translated_value": "音量增益上限"
+  },
+  "pref_advanced": {
+    "source_hash": "9f088dbebd6c3c70a5ddbc2c943b11e4ca9acea5757b0b4f2b32479f0dbb747e",
+    "translated_value": "進階"
+  },
+  "pref_advanced_summary": {
+    "source_hash": "c64e3a6dd3ce282a518f8b3ab80277903e0404c9a24c57be852d53225f9d59b7",
+    "translated_value": "設定位置、mpv.conf"
+  },
+  "pref_advanced_mpv_conf_storage_location": {
+    "source_hash": "c9bf8cf447715535e9300c097c376fa45dccde0110faee79923b3e53e81856d2",
+    "translated_value": "選擇設定儲存位置"
+  },
+  "pref_advanced_mpv_conf": {
+    "source_hash": "06ebe08c1026060c08738208b4803556323484ebab287ead1c6cb122fd7300ad",
+    "translated_value": "編輯 mpv.conf"
+  },
+  "pref_advanced_input_conf": {
+    "source_hash": "caa59b7b90ea96b277a9b85fccef27f5ff7a6599ba91f1bf9d1d3da855110a41",
+    "translated_value": "編輯 input.conf"
+  },
+  "pref_advanced_dump_logs_title": {
+    "source_hash": "921b7934962833c50e1e8244000287567f21f22a24765fd935743fbcf73a6774",
+    "translated_value": "匯出日誌"
+  },
+  "pref_advanced_dump_logs_summary": {
+    "source_hash": "19797180bba3bc9a79e464a38386841633f9f44dc3380410355d79fa1c439468",
+    "translated_value": "匯出並複製日誌以供開發者參考"
+  },
+  "pref_advanced_verbose_logging_title": {
+    "source_hash": "982bb6c1fefefb62ed33724cc01d87aea86b023494689b6c80717ae26f5a44fa",
+    "translated_value": "詳細記錄"
+  },
+  "pref_advanced_verbose_logging_summary": {
+    "source_hash": "436c8f968cf2b11fbe494af2a4ef826b2a1bce562728737e86140b0c705009d5",
+    "translated_value": "有助於偵錯，但可能影響效能"
+  },
+  "pref_advanced_clear_playback_history": {
+    "source_hash": "47937012d27f072e449ca850447eb0667057c9b49bab1c63a67545b4c4520369",
+    "translated_value": "清除播放記錄"
+  },
+  "pref_advanced_clear_playback_history_confirm_title": {
+    "source_hash": "18d694d6cdc5d82c6909f8f9286db651391b41a86fb2796cc271be3a5bd0b9f0",
+    "translated_value": "您確定要清除播放記錄嗎？"
+  },
+  "pref_advanced_clear_playback_history_confirm_subtitle": {
+    "source_hash": "6abed82686465681a189d39797fc0a65bdc643bf88e36b0c4befd6fb817162da",
+    "translated_value": "這將清除您之前媒體的所有播放位置、選定的字幕和音軌，以及它們的延遲和速度"
+  },
+  "pref_advanced_cleared_playback_history": {
+    "source_hash": "a5373025a0569ef7cc98466fa84e0ae674c62dc0b735d7d3c024db4e7f740f99",
+    "translated_value": "已清除播放記錄"
+  },
+  "pref_advanced_clear_fonts_cache": {
+    "source_hash": "51923a0fa2e58be6c942db172bfee6c8f944073a67fc966834c0a076ee207b27",
+    "translated_value": "清除字型快取"
+  },
+  "pref_advanced_cleared_fonts_cache": {
+    "source_hash": "e61ea2aef07f6bb308f65f032c93b85e2a0d51dd39b7186aa89f84a944b2b533",
+    "translated_value": "已清除字型快取"
+  },
+  "pref_advanced_enable_recently_played_title": {
+    "source_hash": "2344da54d85827011b4bed41ad88c675bc47f5b94cf858e57c1bef4ef40f38fe",
+    "translated_value": "最近播放"
+  },
+  "pref_advanced_enable_recently_played_summary": {
+    "source_hash": "eef1749ae0036eb91aa3cdf423b3be60d1e420c0e851c6b9290e59c18a2785ae",
+    "translated_value": "追蹤並顯示最近播放的影片和播放清單"
+  },
+  "pref_advanced_features_tooltip": {
+    "source_hash": "483e7bfa0ae9496f3afa5d52744b5f78bab069f681a73ad5a6f203addd6a68a7",
+    "translated_value": "啟用實驗性或進階功能，例如統計頁面和 Anime4K 提升"
+  },
+  "pref_anime4k_title": {
+    "source_hash": "c88756bedb5a26586257e114e1f1ca6c025f069d57071d2ac50ac99ace0b695f",
+    "translated_value": "Anime4K 提升 (實驗性)"
+  },
+  "pref_anime4k_summary": {
+    "source_hash": "5b2de98335e3a330ae94f4bf267083b586dbf053391ce2de95b9e1364abd84ab",
+    "translated_value": "啟用 Anime4K 提升過濾器"
+  },
+  "pref_anime4k_incompatibility": {
+    "source_hash": "5479d634726f11eecce45e0c2a4a2e350058107c9d3d3be78f26d4df0eb69b6b",
+    "translated_value": "Anime4K 不相容性"
+  },
+  "pref_anime4k_gpu_next_error": {
+    "source_hash": "35fa64bc90ac1a0fae1fdf5b8a4c0291899f2abdc5b08be1b66b80bdeb5c3424",
+    "translated_value": "gpu-next 與 Anime4K 著色器不相容。啟用 Anime4K 時，應用程式將自動使用舊的「gpu」後端以確保著色器相容性。"
+  },
+  "pref_anime4k_cannot_use_with_gpu_next": {
+    "source_hash": "b5cf0bae9d6955f91fbec47ed28980f999f409a746508f5ca095b47ddc599a69",
+    "translated_value": "啟用 gpu-next 時無法使用 Anime4K"
+  },
+  "anime4k_mode_title": {
+    "source_hash": "ee1dd20613077221d0f058cf7e0de56bf153641d8b0eb31455c0e27cfba8a4f9",
+    "translated_value": "Anime4K 預設"
+  },
+  "anime4k_quality_title": {
+    "source_hash": "7447f920142823ef7678fc339acdb2b296be25f70e9832f4580012b43c82e883",
+    "translated_value": "Anime4K 變體"
+  },
+  "anime4k_mode_toast": {
+    "source_hash": "5be4017fd3fa5fa4d7f6910e98c10bac687e5ddaf2034737165d5124524ac17f",
+    "translated_value": "Anime4K：預設 %1$s"
+  },
+  "anime4k_quality_toast": {
+    "source_hash": "d94e7635e2b3444e170bc867fba2b96496a02820a77e1e571db2eeee7db06cfc",
+    "translated_value": "Anime4K 變體：%1$s"
+  },
+  "anime4k_mode_off": {
+    "source_hash": "ca7981b46ecf2c1787b6d76d81d9fd7fa0ca95842e2fcc2a452869891a9334d1",
+    "translated_value": "關閉"
+  },
+  "anime4k_mode_a": {
+    "source_hash": "559aead08264d5795d3909718cdd05abd49572e84fe55590eef31a88a08fdffd",
+    "translated_value": "A"
+  },
+  "anime4k_mode_b": {
+    "source_hash": "df7e70e5021544f4834bbee64a9e3789febc4be81470df629cad6ddb03320a5c",
+    "translated_value": "B"
+  },
+  "anime4k_mode_c": {
+    "source_hash": "6b23c0d5f35d1b11f9b683f0b0a617355deb11277d91ae091d399c655b87940d",
+    "translated_value": "C"
+  },
+  "anime4k_mode_a_plus": {
+    "source_hash": "aee8736c2b78925066991632c3a5fc38b2a79cf7b083146654ca958b2a99b7ca",
+    "translated_value": "A+"
+  },
+  "anime4k_mode_b_plus": {
+    "source_hash": "4211f2cc8e2bb21e8cdb3b02a144b829d52c0995bbacc830469707265c89df69",
+    "translated_value": "B+"
+  },
+  "anime4k_mode_c_plus": {
+    "source_hash": "a99effbf3936a2ad1185430487511a2fbf1c2b715098d2679d3ff2873d388cca",
+    "translated_value": "C+"
+  },
+  "anime4k_quality_fast": {
+    "source_hash": "6c582b62e0e5aa05647388bd045f2e3e5e7f51f479d00d9df592634c8088a22b",
+    "translated_value": "快速"
+  },
+  "anime4k_quality_balanced": {
+    "source_hash": "5386ea5db81c8579a363438895a447d9580cbca1bdecdad43f2839af6d6fbf5c",
+    "translated_value": "平衡"
+  },
+  "anime4k_quality_high": {
+    "source_hash": "c4ebc6d4a5832cd9415f906ad03661110c705a72381c8b8b145761d02e2dd23a",
+    "translated_value": "高品質"
+  },
+  "pref_about_title": {
+    "source_hash": "4efca0d10c5feb8e9b35eb1d994f2905bb71714e6a271f511d713b539ea5faa1",
+    "translated_value": "關於"
+  },
+  "pref_about_summary": {
+    "source_hash": "45bd51ea2060ccfe17fd7576bbdc46b9301679c26a6868f8625d77b4ae6ca0dc",
+    "translated_value": "致謝、授權"
+  },
+  "pref_about_oss_libraries": {
+    "source_hash": "62ef6fd92ee145d9f000697f85abd4c680d9754e96c988ec7fe2b1072240df92",
+    "translated_value": "函式庫"
+  },
+  "pref_about_donate_title": {
+    "source_hash": "c91ee0f2799df915efcc117ba063d95e0cbf0d5e8e6eca5373333bb9b06c5f13",
+    "translated_value": "贊助"
+  },
+  "pref_about_donate_kofi": {
+    "source_hash": "76c38e42cf40e957992b9c703923af7198922f5f21a9fcb8f143389aa45443d4",
+    "translated_value": "Ko-fi"
+  },
+  "pref_about_donate_kofi_summary": {
+    "source_hash": "d145ad590142724e5a04aaba0b07d2fcdc0126cda28f835ee049909e7ac27430",
+    "translated_value": "在 Ko-fi 上支持開發者"
+  },
+  "pref_about_donate_kofi_url": {
+    "source_hash": "2c59ab8df30aeea0b78987f1e78fce8958c37071a56f97cc34995cb9fa6d37fa",
+    "translated_value": "https://ko-fi.com/adityanarvekar"
+  },
+  "pref_about_donate_paypal": {
+    "source_hash": "ab8a4f6bb84d161b3622afe130be97ddfa367e1b8707e49e5437a0b87ba1ae55",
+    "translated_value": "PayPal"
+  },
+  "pref_about_donate_paypal_summary": {
+    "source_hash": "018b795d0b4ec22f535c9d6433e355f9e168e57be0822c3b188399ffc5deaac8",
+    "translated_value": "在 PayPal 上支持開發者"
+  },
+  "pref_about_donate_paypal_url": {
+    "source_hash": "2a81c5bb0023834bbffeaac2b44865a85faf9ee3c1770bc53243f137d58bb944",
+    "translated_value": "https://paypal.me/aadinarvekar"
+  },
+  "pref_about_donate_upi": {
+    "source_hash": "7b06e0160857f939dc67543aa6b732b08a7df5426d18a5bda423c10c17d91258",
+    "translated_value": "UPI"
+  },
+  "pref_about_donate_upi_id": {
+    "source_hash": "f9ba706fad8088584a3be5ee2553ad808b83cef588ec508b8939c5f1450270bc",
+    "translated_value": "aadiinarvekar@upi"
+  },
+  "player_sheets_add_ext_sub": {
+    "source_hash": "ce4c8004fdd4008a9c8e0639558134195b40fee1f7a91d8d9330b500be4e42d0",
+    "translated_value": "新增外部字幕"
+  },
+  "player_sheets_add_ext_audio": {
+    "source_hash": "c126f5e89fd3290bb1ebf34c7a2ac2b65ef37d2e5f6db1c2fde3ea71f2de0454",
+    "translated_value": "新增外部音軌"
+  },
+  "player_sheets_tracks_off": {
+    "source_hash": "ca7981b46ecf2c1787b6d76d81d9fd7fa0ca95842e2fcc2a452869891a9334d1",
+    "translated_value": "關閉"
+  },
+  "player_sheets_track_title_w_lang": {
+    "source_hash": "74957b156016b86ad45d7468ad57293bdd98831a67f6c8ca63a9a576835e1f5f",
+    "translated_value": "#%d: %s (%s)"
+  },
+  "player_sheets_track_title_wo_lang": {
+    "source_hash": "64479a2700fa46cd1993f205c36a835ca43c9bb84d2765b6cfb8e4a3e1fb90d5",
+    "translated_value": "#%d: %s"
+  },
+  "player_sheets_track_lang_wo_title": {
+    "source_hash": "64479a2700fa46cd1993f205c36a835ca43c9bb84d2765b6cfb8e4a3e1fb90d5",
+    "translated_value": "#%d: %s"
+  },
+  "player_sheets_chapter_title_substitute_subtitle": {
+    "source_hash": "41ff8419e633ab759b86c55d275f0306e59a9c243a9d65603122f118acdc2612",
+    "translated_value": "Subtitle #%d"
+  },
+  "player_sheets_chapter_title_substitute_audio": {
+    "source_hash": "c6031a3dc89d2eb5ae9b13a0d886cd804aad34985c1c9155fccae8111867cb72",
+    "translated_value": "Audio #%d"
+  },
+  "player_sheets_subtitles_settings_title": {
+    "source_hash": "ce9bce69c756f5196c7eec35fe6004a5c5bbc69f55d300c4a1886e321fdb7a5f",
+    "translated_value": "字幕設定"
+  },
+  "player_sheets_subtitles_color_text": {
+    "source_hash": "71988c4d8e0803ba4519f0b2864c1331c14a1890bf8694e251379177bfedb5c3",
+    "translated_value": "文字"
+  },
+  "player_sheets_subtitles_color_border": {
+    "source_hash": "3b4bdff339e94fdc7a3303268454bc6150cf30113c1065f4e9c797414ab271c8",
+    "translated_value": "邊框"
+  },
+  "player_sheets_subtitles_color_background": {
+    "source_hash": "ea2b8a878841df5955c78edc6cae47446483b86e3f5ccb04e1a8d940cf7e59fd",
+    "translated_value": "背景"
+  },
+  "player_sheets_subtitles_border_style": {
+    "source_hash": "911cb22e73800ddc4b9e7297905a52a2403bb6d950128ad8abbfd023857ee3d4",
+    "translated_value": "邊框樣式"
+  },
+  "player_sheets_subtitles_border_style_outline_and_shadow": {
+    "source_hash": "f6623a04d785dc221c993722145c211a8261445250b4f6609526108a354f0cd6",
+    "translated_value": "外框與陰影"
+  },
+  "player_sheets_subtitles_border_style_opaque_box": {
+    "source_hash": "f74a453b601c9ccc6d6fc86f19215f98c28bc5f939b1c1eb74ba1bc531c78ef8",
+    "translated_value": "不透明方框"
+  },
+  "player_sheets_subtitles_shadow_offset": {
+    "source_hash": "ec261c4fece114eeb9e3b479006d0098c3c54d7a42948e9fad0597a9ab493bdc",
+    "translated_value": "陰影偏移"
+  },
+  "player_sheets_sub_color_red": {
+    "source_hash": "ba19e9c3d5f49882ddaafed4f286a8a81491150426d321179270e27e74a89097",
+    "translated_value": "紅"
+  },
+  "player_sheets_sub_color_green": {
+    "source_hash": "d486dfbd5fb578340bccbdd0a662527eab38550648d5f44517e5ac71b8824703",
+    "translated_value": "綠"
+  },
+  "player_sheets_sub_color_blue": {
+    "source_hash": "ec7d56a01607001e6401366417c5e2eb00ffa0df17ca1a9a831e0b32c8f11bf7",
+    "translated_value": "藍"
+  },
+  "player_sheets_sub_color_alpha": {
+    "source_hash": "b1a96dd646bccaa24cef7a3db22a6f995f05658f4f1c3272913e258c03e6fb24",
+    "translated_value": "Alpha"
+  },
+  "player_sheets_sub_override_ass": {
+    "source_hash": "4d3444cfc77d06e02497c283d291443725825a263c5b601feb61385e31a51506",
+    "translated_value": "覆蓋 ASS/SSA 字幕"
+  },
+  "player_sheets_sub_override_ass_subtitle": {
+    "source_hash": "249d2ce3c92cd20a1f3ac4dc8e3a7ecef8c106c09e369227c90957d71f72700e",
+    "translated_value": "強制覆蓋 ASS/SSA 字幕格式"
+  },
+  "player_sheets_sub_scale_by_window": {
+    "source_hash": "18bf9b140597290b36a33d9b0ce3240c7b0ab3f0131c8f6350a1dbe66a06c3c8",
+    "translated_value": "依視窗縮放"
+  },
+  "player_sheets_sub_scale_by_window_summary": {
+    "source_hash": "a8abd42016b47bae87e3c531b8f82f7d6d86fa2f6b26ae9dafc36c2c801ee334",
+    "translated_value": "依視窗大小縮放字幕並使用影片邊距"
+  },
+  "player_sheets_sub_scale": {
+    "source_hash": "f102986b39effb31080ae442f61febe7ed58df1515c0711ccfadfe0311ccec81",
+    "translated_value": "縮放"
+  },
+  "player_sheets_sub_position": {
+    "source_hash": "6d031af10da7a25e554bb21247f28f0e6cef77f1471175199e7fcc571964dc3d",
+    "translated_value": "位置"
+  },
+  "player_sheets_sub_typography_card_title": {
+    "source_hash": "cab94aba84f97f7f8d3f46516a5f92c25363f39f9492415c4d76be84b2873883",
+    "translated_value": "排版"
+  },
+  "player_sheets_sub_typography_font": {
+    "source_hash": "64d0b3adcd2dbe33500fe9b96d2bc048601b19f4dc9db0d30f8648e156b583ad",
+    "translated_value": "字型"
+  },
+  "player_sheets_sub_typography_font_size": {
+    "source_hash": "6d784d95c63833e60695476524e3bcf7b9cab90d6e405aa434e7511bf610ad3b",
+    "translated_value": "字型大小"
+  },
+  "player_sheets_sub_typography_border_size": {
+    "source_hash": "d0f61905151193841c1501991fab417f2310161550f3e516719bdaf5af0184c5",
+    "translated_value": "邊框大小"
+  },
+  "player_sheets_sub_colors_card_title": {
+    "source_hash": "88c45d9e526c08dd7f8b9d1d3ab96a72d68205232090be5da57e05251bfea650",
+    "translated_value": "顏色"
+  },
+  "player_sheets_sub_misc_card_title": {
+    "source_hash": "5cb0b42660589925c804543d433ba0764dab859487e5a9ed855481dcbfec1f06",
+    "translated_value": "雜項"
+  },
+  "player_sheets_sub_delay_card_title": {
+    "source_hash": "82511947764389c68383996b7556593a787e8297eac28aa6127267a6723b60e9",
+    "translated_value": "字幕延遲"
+  },
+  "player_sheets_sub_delay_card_delay": {
+    "source_hash": "fd9b6df3cdbc3d35b9a3e634d9ecba3765eaadb9abe4bf13c20cf8df089b8a48",
+    "translated_value": "延遲"
+  },
+  "player_sheets_sub_delay_card_speed": {
+    "source_hash": "c372fee9b4566b85a592ae6e98e571f3929c8e262cf2feff7acba63a65a50f14",
+    "translated_value": "速度"
+  },
+  "player_sheets_sub_delay_subtitle_type_primary": {
+    "source_hash": "0937ed54e0f5c5314b6b2abc84ad93eb09b56fc4497ac390aa59b2a1ce8712ac",
+    "translated_value": "主要字幕"
+  },
+  "player_sheets_sub_delay_subtitle_type_secondary": {
+    "source_hash": "d7fc02949b7be586997451941a875d8f5aa31206800af0d45b3cd1c404bace89",
+    "translated_value": "次要字幕"
+  },
+  "player_sheets_sub_delay_subtitle_type_primary_and_secondary": {
+    "source_hash": "b6c1d862f9f75ec31eb9829b6a5968eb291dc8785e7fb59d4bc6ef00f292d3f7",
+    "translated_value": "兩者"
+  },
+  "player_sheets_sub_delay_subtitle_voice_heard": {
+    "source_hash": "b20d2090dd9aabdb78da99f7ccddeb80e89785a8013dc66f14583c252850ddd1",
+    "translated_value": "聽到聲音"
+  },
+  "player_sheets_sub_delay_subtitle_text_seen": {
+    "source_hash": "add35a6b3caff5f110b819b4a90a828a79d58bdc56fe8ca0d7a6660a6552e012",
+    "translated_value": "看到文字"
+  },
+  "player_sheets_delay_set_as_default": {
+    "source_hash": "d09b4dd6265a220211fc2e0fc1fbe77a19e78a124bf6e916541a06712221381a",
+    "translated_value": "設為預設值"
+  },
+  "player_sheets_audio_delay_card_title": {
+    "source_hash": "f1f2f51eaa4406fac1f9428344688ab89b45903d98c93d761b80b295a6cfb9a8",
+    "translated_value": "音訊延遲"
+  },
+  "player_sheets_sub_delay_audio_sound_heard": {
+    "source_hash": "ab77922055eae501b3fac1b229e5aa18ab12b9851574773f375cc75e63151360",
+    "translated_value": "聽到聲音"
+  },
+  "player_sheets_sub_delay_sound_sound_spotted": {
+    "source_hash": "79d684fee6002fc88c6d433c71d6f0de932ce49fcc03939f0e2f33b5e45bdd2d",
+    "translated_value": "發現聲音"
+  },
+  "player_sheets_video_settings_title": {
+    "source_hash": "5c1ee3bd9d6ca10124f99f5fba68137c09b2573d3ff958d198ab68448c932cf4",
+    "translated_value": "影片設定"
+  },
+  "player_sheets_deband_title": {
+    "source_hash": "962649665886d739e76392f646b8cff3d43a597168cf4b1566b08ef9a057a748",
+    "translated_value": "去帶 (Deband)"
+  },
+  "player_sheets_deband_none": {
+    "source_hash": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91",
+    "translated_value": "無"
+  },
+  "player_sheets_deband_cpu": {
+    "source_hash": "db9a4c7d4c195ebf80068dd04120accce1cbfbef342bb43a53cbd651eb96e37b",
+    "translated_value": "CPU"
+  },
+  "player_sheets_deband_gpu": {
+    "source_hash": "ea49523d744c40bc900b4462c43132d1c8a8de5216fa8436cc0e8b3e89dddbe3",
+    "translated_value": "GPU"
+  },
+  "player_sheets_deband_iterations": {
+    "source_hash": "4740b573715316a4698d4dee44ebb90046ed94f5f582ffa67ccab31e68a8a6b5",
+    "translated_value": "迭代次數"
+  },
+  "player_sheets_deband_threshold": {
+    "source_hash": "0da627ada476c179bb6421d267cb6de8c9f770a2274b5d673d898e33cea29247",
+    "translated_value": "閾值"
+  },
+  "player_sheets_deband_range": {
+    "source_hash": "5de74a81b192304c10bf7b8cf50e863a19e8ae4c38a4d5c5116359db0deed29f",
+    "translated_value": "範圍"
+  },
+  "player_sheets_deband_grain": {
+    "source_hash": "540faafbd76707640d78876db815b322bd6792626d521c13d1e80c7f333e788e",
+    "translated_value": "雜點 (Grain)"
+  },
+  "player_sheets_filters_title": {
+    "source_hash": "546ebb8eb993ea561029d9febd84c363bdb09010bb2cb915a8287762b76b9a64",
+    "translated_value": "過濾器"
+  },
+  "player_sheets_filters_brightness": {
+    "source_hash": "ec811d30a89ce96d1c7555ffaede78b188fedb1d283adf7cdf55a4edae6697a7",
+    "translated_value": "亮度"
+  },
+  "player_sheets_filters_contrast": {
+    "source_hash": "08795ba031bcd121e4e1ce47c1c2828a796ffbf6bb4e93daeee3937017bc7a04",
+    "translated_value": "對比"
+  },
+  "player_sheets_filters_gamma": {
+    "source_hash": "a8ab3d5805c9214bc66b794f599cbccd5a5958dc5a6a322ee81e3a68344c6db7",
+    "translated_value": "伽瑪 (Gamma)"
+  },
+  "player_sheets_filters_Saturation": {
+    "source_hash": "993f024b650eaf0f1c64118f6033c44b7c98d220539bcb51454ca578f6f2b477",
+    "translated_value": "飽和度"
+  },
+  "player_sheets_filters_hue": {
+    "source_hash": "4d7056f0e9bef4870b289d7b77634cead0e646a63708a1eb500c6eab11c1328e",
+    "translated_value": "色調"
+  },
+  "player_sheets_filters_sharpness": {
+    "source_hash": "6a4c00af2dbfd09ac502838157e6c7525f61c8bc7ede9e9769f05168b433fa72",
+    "translated_value": "銳利度"
+  },
+  "player_sheets_filters_warning": {
+    "source_hash": "0c2310e1c32744b298ce89adbef36fb49c2c718c17d10dc0ab67f220499ba1fd",
+    "translated_value": "某些過濾器可能無法在您目前的影片驅動程式上運作"
+  },
+  "player_sheets_speed_slider_label": {
+    "source_hash": "c372fee9b4566b85a592ae6e98e571f3929c8e262cf2feff7acba63a65a50f14",
+    "translated_value": "速度"
+  },
+  "player_sheets_speed_make_default": {
+    "source_hash": "69d2268e8d717d7a217eb317cde9c86a787945d46dd5a57a6755437ab648d0b1",
+    "translated_value": "設為預設速度"
+  },
+  "player_sheets_decoder_formatted": {
+    "source_hash": "7ff78404a18215b631da819118c3b7e05fb7e4054d38f5af92c835fde769bf3e",
+    "translated_value": "%s (%s)"
+  },
+  "numeric_chooser_value_too_big": {
+    "source_hash": "7935455d12e8935e38dd239657d728130d5a292dced42f475d79c527f86bc7d7",
+    "translated_value": "數值太大"
+  },
+  "numeric_chooser_value_too_small": {
+    "source_hash": "19c35f4026e1815d6e51f41346fc7a5d368aeb2106de25acc5ef199cf159d4bd",
+    "translated_value": "數值太小"
+  },
+  "player_sheets_more_title": {
+    "source_hash": "d47d7cb0e4f8fd2be5ee07826694c18917d83ca77d0a01698582d05f432db996",
+    "translated_value": "更多"
+  },
+  "player_sheets_stats_page_title": {
+    "source_hash": "f9b401fc0afca5fc55d61a1afbbe1335f1cb3ef6449a950e4d128eb7bdb0ad4e",
+    "translated_value": "預設統計頁面"
+  },
+  "player_sheets_stats_page_chip": {
+    "source_hash": "8373d95ec092084d5b98f43b5a412728cd1f5f384804da605afd294bf23dc775",
+    "translated_value": "第 %d 頁"
+  },
+  "player_sheets_stats_page_0_desc": {
+    "source_hash": "ded241c958c9405929e95b5fd5ee5edc6489d61028b1389cc06291298a6ab052",
+    "translated_value": "已停用。無重疊統計資訊。"
+  },
+  "player_sheets_stats_page_1_desc": {
+    "source_hash": "97d8ef2bec8e71057d089758d9353ec78e3e2c7057d28317ca75be182e97564a",
+    "translated_value": "概覽。CPU/GPU 使用率、音訊/影片同步、丟失影格、時脈速度。"
+  },
+  "player_sheets_stats_page_2_desc": {
+    "source_hash": "2535d82820a35cfabd46daaddf022b0e5f8ddc1c088e3e3d1899fd0d2b290505",
+    "translated_value": "影格時間。解碼/渲染時間、縮放器資訊。"
+  },
+  "player_sheets_stats_page_3_desc": {
+    "source_hash": "27558283e20f2bced9c2928ae44a237b9b646dfcda31ea47972c9863f6ece383",
+    "translated_value": "快取狀態。緩衝區健康度、解複用器 (Demuxer) 快取、可搜尋範圍。"
+  },
+  "player_sheets_stats_page_4_desc": {
+    "source_hash": "2272f3ff9ead1937dbe606c756c88ae4e091e2c1898f65c0332571f7341402b2",
+    "translated_value": "目前按鍵綁定。已映射的鍵盤快捷鍵列表。"
+  },
+  "player_sheets_stats_page_5_desc": {
+    "source_hash": "b0ea76464ec94073009aa3fb9ae0409c09478a0be37f9a8db971fd652070efe4",
+    "translated_value": "軌道列表。影片、音訊和字幕軌道的詳細資訊。"
+  },
+  "player_speed": {
+    "source_hash": "9d1b8bfd41b3c69881ea1bb25ae331f44e2944eb20bef070215c51e29ead32c8",
+    "translated_value": "%.2fx"
+  },
+  "player_aspect_fit": {
+    "source_hash": "a5af24161bdead870534b558a9db820721b83daa35c5125f8bccde44204c34aa",
+    "translated_value": "配合螢幕"
+  },
+  "player_aspect_crop": {
+    "source_hash": "98caf7c43c6f2c35cbc0376c937d27f67edad50c0d3e98dbc451c272c02ce479",
+    "translated_value": "裁剪"
+  },
+  "player_aspect_stretch": {
+    "source_hash": "a33fbcf83f7be3bae0c16237391f38315ed671e5deefd78e7558210ed0a8a13f",
+    "translated_value": "拉伸"
+  },
+  "crash_screen_title": {
+    "source_hash": "31d694956ddcdb8b2d61ee7b91beb5af37ce0557b6ca44438d2c3ca9f96c56d9",
+    "translated_value": "糟糕"
+  },
+  "crash_screen_subtitle": {
+    "source_hash": "6f976f59e009986be2d95a88570124606b4bb5aa4e7b0d916c948f3baee1be3e",
+    "translated_value": "看起來 %s 遇到了非預期的錯誤。請考慮在 GitHub Issue 中分享崩潰日誌。"
+  },
+  "crash_screen_logs_title": {
+    "source_hash": "bb17d135a6009c6fbf42c2c5773d07c01839f98a4c0b8f5622b7d965d6e71e3c",
+    "translated_value": "崩潰日誌："
+  },
+  "crash_screen_share": {
+    "source_hash": "1abbda4da756c9e8cfb198dd3176418027d373ace26972e6fa94e841a9b19bdc",
+    "translated_value": "分享崩潰日誌"
+  },
+  "crash_screen_restart": {
+    "source_hash": "45912a0b11b348c744f0d762d6e4a6ad8feca37ac06aa60f81562b97f7a41059",
+    "translated_value": "重新啟動應用程式"
+  },
+  "crash_screen_fix_crash": {
+    "source_hash": "27b01304b0c29f46949fafe8d99e4a3cec93ba329310ce7eea967cb33ecb5968",
+    "translated_value": "修復崩潰 (刪除資料庫)"
+  },
+  "crash_screen_database_deleted": {
+    "source_hash": "6d94240b4476178f67cada3755908525c7bb03819e3b8190a88d6450b333a599",
+    "translated_value": "資料庫已成功刪除。請重新啟動應用程式。"
+  },
+  "crash_screen_database_hint": {
+    "source_hash": "5fb2b65e161b41713ab556a6a3f5546ce56fb4558979cb5b39636dbd3857a34d",
+    "translated_value": "此崩潰似乎與資料庫有關。請嘗試刪除資料庫以修復。"
+  },
+  "timer_picker_enter_timer": {
+    "source_hash": "b92d43cce390d0cd0138e4ac50b53ee93d6ac1dc19808d6e072da4d7a936b121",
+    "translated_value": "輸入時間"
+  },
+  "timer_picker_pick_time": {
+    "source_hash": "911222bc08fb63320a66162c6c8ba84c885f978f61fcbaafb04bbd3d5b1e04c3",
+    "translated_value": "選擇時間"
+  },
+  "timer_title": {
+    "source_hash": "336c84d8da7c99a4f78d2399aba06f42002dcbba9bd8ef60f81e7ba965702a2f",
+    "translated_value": "睡眠定時器"
+  },
+  "timer_remaining": {
+    "source_hash": "375fac824da901b4dee4aecad47c43c9dd0194544ed45aa1940f0a51f32bebd6",
+    "translated_value": "剩餘 %s"
+  },
+  "toast_sleep_timer_ended": {
+    "source_hash": "55aeb399a1e9c36b5648868dc71d0ceaca9814cd51f740996df71647b38729c6",
+    "translated_value": "睡眠定時器結束"
+  },
+  "volume_slider_absolute_value": {
+    "source_hash": "25222ca8affacc375eda65ddd8760a24afa0941a1ddd53b8ad1acfbbc6f24a4c",
+    "translated_value": "%d"
+  },
+  "value_percentage_int": {
+    "source_hash": "71fafb7498ddf411a51b6833a023fe26774c0f72b473c428588c8be8cbc9de11",
+    "translated_value": "%d%%"
+  },
+  "github_repo_url": {
+    "source_hash": "9ebdb0c450bf3b22bddab8e7f6d870213ed118fe8e708f86d45eea40e895c77a",
+    "translated_value": "https://github.com/sfsakhawat999/mpvRex"
+  },
+  "swap_the_volume_and_brightness_slider": {
+    "source_hash": "d2335c80ff3b4481ed1eae2aaac7e0ace608f7e0115a56950ce075fe7e85c30d",
+    "translated_value": "交換音量和亮度滑動條"
+  },
+  "pref_player_display_reduce_player_animation": {
+    "source_hash": "eb45de0eb0dba537f4b233f9150ffeb5f77c34d8a175190218eb1ec612850c9e",
+    "translated_value": "減少播放程式動畫"
+  },
+  "pref_player_display_hide_player_control_time": {
+    "source_hash": "fe893bb03650507ec1087ef19591713e2ac1608f0ed4cd333823de36b8ec873b",
+    "translated_value": "隱藏播放控制時間"
+  },
+  "show_splash_ovals_on_double_tap_to_seek": {
+    "source_hash": "7915f3ea877a2b47e7f3b73da050cb7b59c06bcd6193c8b9a679f8fa28f2265b",
+    "translated_value": "雙擊搜尋時顯示漣漪效果"
+  },
+  "show_time_on_double_tap_to_seek": {
+    "source_hash": "af8ec2b700fb93467b8e1e7ce0b54ee86be35c9d101c7124373531d444cfc978",
+    "translated_value": "顯示搜尋時間"
+  },
+  "player_gesture_seek_indicator": {
+    "source_hash": "d179a358fb0db8354b23a579becf6e2ce36fe3dc7462b7f9b9fc3b6aadcd1b74",
+    "translated_value": "[%1$s%2$s] (%3$s)"
+  },
+  "pref_audio_channels_auto_safe_desc": {
+    "source_hash": "f364d7494d863c56a8bf939108fde0942f888b66024d4d285c59f72139ec7ce4",
+    "translated_value": "預設，安全自動選擇"
+  },
+  "pref_audio_channels_auto_desc": {
+    "source_hash": "f5f51b6c9733164213f6d55a25f776bec7cedbfa516360f64b8744763fbd63f1",
+    "translated_value": "自動選擇"
+  },
+  "pref_audio_channels_mono_desc": {
+    "source_hash": "81cbd401071d35701689b153cdb80fb8840db171a4141890cafff9a4a3178233",
+    "translated_value": "混音為單聲道"
+  },
+  "pref_audio_channels_stereo_desc": {
+    "source_hash": "218652f3058d4c3c9deb33ff7d7442cbc55786ffa833c0f970e9d24c8cb64e81",
+    "translated_value": "混音為雙聲道"
+  },
+  "pref_audio_channels_reverse_stereo_desc": {
+    "source_hash": "f381b0724a3ed474e579e0edb3f359b08e72c558d33035404d1af66f65b2c44b",
+    "translated_value": "交換左右聲道"
+  },
+  "player_sheets_frame_navigation_title": {
+    "source_hash": "0fad97682debe3fbc2f442280ba1a6c030a8286d92582f59d59d4c80e026c606",
+    "translated_value": "影格導航"
+  },
+  "player_sheets_frame_navigation_snapshot_saved": {
+    "source_hash": "d2882552995cc29ff7068a247643d04d35b99c3b88d198e73e5814f87f888ce0",
+    "translated_value": "Saved to Pictures/mpvSnaps"
+  },
+  "player_sheets_frame_navigation_include_subtitles": {
+    "source_hash": "f23cc8efd5aa02c465d9d8646389bc4441d0a0375e20dc25e59a26b91e49553c",
+    "translated_value": "快照中包含字幕"
+  },
+  "player_sheets_zoom_slider_label": {
+    "source_hash": "394e3dc57c5ed5a712c540a32228d0e1826bebd88fa7f5be5bc4a9cb50eee7f6",
+    "translated_value": "影片縮放"
+  },
+  "background_playback_title": {
+    "source_hash": "12ed353a85c0bc02f1b499bfadbfd07bebeeb7e57954b80a4384eebad018a5b1",
+    "translated_value": "背景播放"
+  },
+  "deselect_all": {
+    "source_hash": "5cd261bcc680ffdaef07096b65379d9358316948ef7fddce644405f7e518c848",
+    "translated_value": "取消全選"
+  },
+  "select_all": {
+    "source_hash": "d1ec69e64b9609d089aae09f7adc5c566d2cd222f8d8325f0ab3b523f0ac2690",
+    "translated_value": "全選"
+  },
+  "invert_selection": {
+    "source_hash": "995fe6fd2030db1808f5fcf562e8fab164639a375f5b1d4e4272077205927e8e",
+    "translated_value": "反向選擇"
+  },
+  "selected_items": {
+    "source_hash": "8b087570514465d842d481ec26a9d3346a1b38434411defed7a1960d0c7d80ac",
+    "translated_value": "%1$d / %2$d 已選擇"
+  },
+  "selection_options": {
+    "source_hash": "7dc56380a73fd5dd2dfe21c0c7761e5fba91293aa0b28f641f13c37079805df5",
+    "translated_value": "選擇選項"
+  },
+  "back": {
+    "source_hash": "76900f1bfd16c8d4dd3d25e6f46638d7165aee23883ccea6bfe071c514421769",
+    "translated_value": "返回"
+  },
+  "sort": {
+    "source_hash": "bec69036aa27e7fab7d44cad3909477b76631c39ba46fd7841ea71aae7e5a735",
+    "translated_value": "排序"
+  },
+  "settings": {
+    "source_hash": "74a883a037bc227f91891ab654a753d3a99f31ab06ae5b5d2b6e594a692b41f8",
+    "translated_value": "設定"
+  },
+  "rename": {
+    "source_hash": "3064d79a295cefe4b384b8fe5cb29fd6b06d7eb1ad94b8895f4148039d06b330",
+    "translated_value": "重新命名"
+  },
+  "info": {
+    "source_hash": "170322a32f3c35b2c61576a5553d352d7b3c8ae7086dab78f15fc891a28c067c",
+    "translated_value": "資訊"
+  },
+  "delete": {
+    "source_hash": "e2d0a54968ead24efc0dffa6ac78fc606dceec34a0f586177a74a54cc2272cf8",
+    "translated_value": "刪除"
+  },
+  "got_it": {
+    "source_hash": "5ad3dbd1242a4cea217e8b68a9fd2c8187f2c337258279193f6d9a31a9f1a69c",
+    "translated_value": "知道了"
+  },
+  "general": {
+    "source_hash": "c910d474dcd724bff83ddedeb06bf1eceaf9fb3af7c76bb282be057f36e6dffa",
+    "translated_value": "一般"
+  },
+  "not_set_video_default": {
+    "source_hash": "ced5c0a8b2293aeaaa386db3dbf62350e6fcd382c235105fb7252a1875c265d0",
+    "translated_value": "未設定 (將使用影片預設值)"
+  },
+  "enter_language_codes": {
+    "source_hash": "5b5f9748bc674cdd2b61c6176abdc53e30022b02edc75fc8b1facb5da721ddf5",
+    "translated_value": "輸入以逗號分隔的語言代碼 (例如：eng,jpn,spa)"
+  },
+  "language_codes_placeholder": {
+    "source_hash": "a7486a03a561b2d7980b5b38b27c91be1da7efdb3647f5303810e52d1d665805",
+    "translated_value": "eng,jpn,spa"
+  },
+  "not_set_system_fonts": {
+    "source_hash": "52198f438a88d339c67df007dbad64afea2888c99637ae3dd885a3bd89a6653f",
+    "translated_value": "未設定 (使用系統字型)"
+  },
+  "fonts_loaded": {
+    "source_hash": "33f1cdbf7594611c253af1ea6c93e3ea1767f055fabadb9143ee407082696744",
+    "translated_value": "已載入 %1$d 個字型"
+  },
+  "reload_fonts": {
+    "source_hash": "92f5a2793d59879ef6e68629ab14689be88ebc40ddbe02f135c3a4653a6fc09d",
+    "translated_value": "重新載入字型"
+  },
+  "clear_font_directory": {
+    "source_hash": "c8e292e76b51d9613a4404af4b6977e8adca427b34fffd646fc5173da2231739",
+    "translated_value": "清除字型目錄"
+  },
+  "reset_to_default_font": {
+    "source_hash": "40d36848df38028d3ecf959c27b1281598889a5c81e8ce496dd428d865180094",
+    "translated_value": "重設為預設字型"
+  },
+  "set_as_default": {
+    "source_hash": "d09b4dd6265a220211fc2e0fc1fbe77a19e78a124bf6e916541a06712221381a",
+    "translated_value": "設為預設值"
+  },
+  "notification_channel_name": {
+    "source_hash": "524638515ba83ff9367dc6fd3306af8604f74720ba91b19058ab123fd616fe07",
+    "translated_value": "媒體播放"
+  },
+  "notification_channel_description": {
+    "source_hash": "5b7e4a703a83c2ad2b9994929ba980ce04aa312b55ab973d16b926cad8fe986b",
+    "translated_value": "媒體播放控制"
+  },
+  "notification_playing": {
+    "source_hash": "deaf6f9d23bc24d464d85c146c94995db5f73929e1fe5462d1d136516b2ad1ec",
+    "translated_value": "播放中"
+  },
+  "pref_player_use_precise_seeking": {
+    "source_hash": "726917dd9ef79831f317d4034212b63386db8c52a45d45b1a06f00ae7b5bcec5",
+    "translated_value": "使用精確搜尋"
+  },
+  "pref_player_show_seekbar_when_seeking_title": {
+    "source_hash": "7e802b2f7efb869edc0ad6048c8930ce31960c46271381e1cc8c4c80cb9ca255",
+    "translated_value": "搜尋時顯示滑動條"
+  },
+  "pref_player_show_seekbar_when_seeking_summary": {
+    "source_hash": "adc2b5da4b14c1b88a1bc13d6ca814160ab7f6f82326911aa558ff9f6a9909f6",
+    "translated_value": "手勢搜尋期間顯示影片進度條"
+  },
+  "pref_folders_title": {
+    "source_hash": "c4d6bb200f4c058a9b16e900cb5495e59b52fda24cf011eedef8645c90051a8c",
+    "translated_value": "資料夾"
+  },
+  "pref_folders_summary": {
+    "source_hash": "d536a488c4a06d5e3f3812635d46861e5b8a43a2839117d5249b7ca568af3048",
+    "translated_value": "管理資料夾黑名單"
+  },
+  "pref_folders_empty_title": {
+    "source_hash": "1dfc2b2c717bdb37ea8482a873c049a7221040bc752d73a265d11782a586af08",
+    "translated_value": "無黑名單資料夾"
+  },
+  "pref_folders_empty_message": {
+    "source_hash": "1558e651d60f2ae498beb9eed43c3e74672ac521e638b72fa1d6e608ca778e84",
+    "translated_value": "點擊下方按鈕以新增您想要在資料夾列表中隱藏的資料夾"
+  },
+  "pref_folders_add_folder": {
+    "source_hash": "5ba71fc565630d1568321a94cdbbfbdf2995a1c9502b64212af0a2991053514d",
+    "translated_value": "將資料夾新增至黑名單"
+  },
+  "pref_folders_select_folders": {
+    "source_hash": "bd9e9d447fc0ceecf08a2cf7621a8e05abb81ca3bd01d8111232f6f1dae6ac6a",
+    "translated_value": "選擇資料夾"
+  },
+  "pref_folders_loading": {
+    "source_hash": "d0aa0da7a562a85f6c36f8b9d1e65c963b9b426eef065a892fac7c6c61f32289",
+    "translated_value": "載入資料夾中…"
+  },
+  "pref_folders_no_folders": {
+    "source_hash": "5bad0c736d2c141a89b27e6ac31061cadaac6ce7c0d014a8199d7dee76b1f91d",
+    "translated_value": "找不到資料夾"
+  },
+  "pref_folders_clear_all": {
+    "source_hash": "8c8adddd2cad498e77d7039b18991dd3a9314fb28234c6cf47e7d9bf26be85d2",
+    "translated_value": "清除所有黑名單資料夾"
+  },
+  "pref_folders_clear_all_confirm_title": {
+    "source_hash": "66f5ac909900c0a995bf4fc5e721a3aa3b0751626d10f7323507c4b2556d6ff8",
+    "translated_value": "清除所有黑名單資料夾？"
+  },
+  "pref_folders_clear_all_confirm_message": {
+    "source_hash": "5bd84ebcabbfaed6632035546a0241214a95bf8c84588b98d95c9de6f308e142",
+    "translated_value": "這將從黑名單中移除所有資料夾。您可以稍後重新新增它們。"
+  },
+  "pref_folders_blacklist": {
+    "source_hash": "3094851745d4be7ea898da7ccabd6ce8a7436816bf363b5eff554e3be477cd3e",
+    "translated_value": "黑名單"
+  },
+  "pref_folders_blacklisted": {
+    "source_hash": "a9c32a101a4214f657592859df1d50a4560941a4c36141086195ac38aefa16f2",
+    "translated_value": "資料夾已列入黑名單"
+  },
+  "playlist_add_m3u_title": {
+    "source_hash": "4a7291923e66806628cc8e70232efae7a4f78127f4cbc719c7e6dec507c5982f",
+    "translated_value": "新增 M3U 播放清單"
+  },
+  "playlist_add_m3u_description": {
+    "source_hash": "25dad81e7a035d5389236718a773017b51e03c87cb531c90f86a49bd1cdacebd",
+    "translated_value": "輸入 M3U 播放清單檔案的網址"
+  },
+  "playlist_url_label": {
+    "source_hash": "498c686fc2858c902ee4ae0357bfca46031ecf8f022103a48722ff5af4fa683a",
+    "translated_value": "播放清單網址"
+  },
+  "playlist_url_placeholder": {
+    "source_hash": "4f428fa5d2c09ed7da6c10b733e26a1e2c3b6d48ab106cbcf828e07c3c522515",
+    "translated_value": "https://example.com/playlist.m3u"
+  },
+  "playlist_url_hint": {
+    "source_hash": "57807d8e6abcf9516a692cea64603e17d2748f00a5cda572b5cc0401f198d818",
+    "translated_value": "支援 .m3u 和 .m3u8 格式"
+  },
+  "playlist_add_success": {
+    "source_hash": "f80c9d388f4bee07f3a30ae37f64ae4c5207c824ed361cb27d5da898d50de49d",
+    "translated_value": "M3U 播放清單新增成功"
+  },
+  "playlist_add_error": {
+    "source_hash": "437be4b80f41c3b365945d2e50246b726b96ddd57151c67af3bf21bd84818e46",
+    "translated_value": "新增 M3U 播放清單失敗：%s"
+  },
+  "playlist_create_empty": {
+    "source_hash": "724d7cbf15ebf8ef39e059842219c1bead17b89930410632e125aae4ea34babb",
+    "translated_value": "建立空白播放清單"
+  },
+  "playlist_add_from_url": {
+    "source_hash": "effa3d0eeb395e7f03c9189a38921406e28b3805551e175864f33f6d7003d003",
+    "translated_value": "從 M3U/M3U8 網址新增"
+  },
+  "playlist_refresh_m3u": {
+    "source_hash": "1b2b32860fc3954fe683c4d30540c56a045a92fdc60ec66b1fe662fee58ee857",
+    "translated_value": "重新整理 M3U 播放清單"
+  },
+  "playlist_refresh_success": {
+    "source_hash": "8446d61b198ebb1960b9f813e6c8b95cd8ea20ceb622ae97be78d5f4b617dd97",
+    "translated_value": "播放清單重新整理成功"
+  },
+  "playlist_refresh_error": {
+    "source_hash": "763391fd65e4a2348b560a468c44a69941e0f0a477a993e25c126eec6de87402",
+    "translated_value": "重新整理播放清單失敗：%s"
+  },
+  "playlist_m3u_badge": {
+    "source_hash": "6161e1be37d3e418ebcaa8ae5abd93342398a7a6fdf62a829f87ba6762c4dffb",
+    "translated_value": "M3U"
+  },
+  "open_file": {
+    "source_hash": "4190c0c7ec72706424419ed939851e81551f9536f2c96d0f2ce385934cbe1741",
+    "translated_value": "開啟檔案"
+  },
+  "recently_played": {
+    "source_hash": "452ec9f553a38ba2c22343c8ce9c2e29004a254f2d4f9d727b056b5f22cdfb73",
+    "translated_value": "最近播放"
+  },
+  "open_link": {
+    "source_hash": "aab63f85c7f1cd14d92f057b29a894ee524c891cc75a0e0225709b7685d0a0eb",
+    "translated_value": "開啟連結"
+  },
+  "install": {
+    "source_hash": "569ca49f4aaf7846e952c1d4aeca72febd0b79fa1c4f9db08fd3127551218572",
+    "translated_value": "安裝"
+  },
+  "download": {
+    "source_hash": "d6eafe82359100423c93c5ce53c352c1b51ca1e699215fcec3f5c5dd9bf12d24",
+    "translated_value": "下載"
+  },
+  "failed_load_audio_invalid_uri": {
+    "source_hash": "41d31722e45c14a439a6f67dde56d27e135d252152e7ed93f2b7ae9867248737",
+    "translated_value": "載入音訊檔案失敗：無效的 URI"
+  },
+  "audio_track_added": {
+    "source_hash": "696c5bdf6f31bee2f7426c1642ca176a79f76b1b084874bce370676ada0d08d2",
+    "translated_value": "已新增音軌"
+  },
+  "failed_load_audio": {
+    "source_hash": "8b71b16c1b6f41c4f9fa505ee4407a35e90596c3f6209ba6d80dd8579ed037e1",
+    "translated_value": "載入音訊失敗：%s"
+  },
+  "invalid_subtitle_format": {
+    "source_hash": "15898fbc0531a9f8301ffd9bc09d3cce37b14ec3b2dafd0a039ee43b754d22e0",
+    "translated_value": "無效的字幕檔案格式"
+  },
+  "subtitle_added": {
+    "source_hash": "c50b47b45f314d2aae5271dbd521e87b530705485904e74040a6021c85cd080f",
+    "translated_value": "已新增 %s"
+  },
+  "failed_load_subtitle": {
+    "source_hash": "3062799c59b2a0c40e491c9eeab96cc34680e117e88f97522616e18690d02b0f",
+    "translated_value": "載入字幕失敗"
+  },
+  "remove_from_playlist": {
+    "source_hash": "99672af2428c98c25e273d80c3b720dcfa1ec118f58f27033c6e8b602206cda8",
+    "translated_value": "從播放清單中移除 %1$d %2$s？"
+  },
+  "remove_playlist_items_confirm": {
+    "source_hash": "a44f8042a92aa638c3b910822050750db519073efeba1be6053a3e127d028277",
+    "translated_value": "選定的 %2$s 將從此播放清單中移除。原始 %3$s 不會被刪除。"
+  },
+  "search_videos": {
+    "source_hash": "630c837e93662088d33abb104836570b5cdb0033458d46164ab32fe9f5d265c4",
+    "translated_value": "搜尋影片…"
+  },
+  "search_folders_and_videos": {
+    "source_hash": "159ab03c3f79efdce7f6d01b72f6b1026e59583eeb07cb8b2b6d40d9da861766",
+    "translated_value": "搜尋資料夾和影片…"
+  },
+  "search_playlists": {
+    "source_hash": "6c2d11d506dcc97d46e9916d1f027c548ac9d6a3224d1761724764c69b7f3be3",
+    "translated_value": "搜尋播放清單…"
+  },
+  "play_recently_played_or_first": {
+    "source_hash": "5a3fc545e402ceed57367174e3d11ddbb348547f661d62f8f801a4a98960d06b",
+    "translated_value": "播放最近播放或第一個影片"
+  },
+  "toggle_menu": {
+    "source_hash": "c02651240c87b47d3319c6878d0c2ec16eadc4d6932b9f4f35955326463d4cdb",
+    "translated_value": "切換選單"
+  },
+  "close": {
+    "source_hash": "7d9eb7acb13e24625c404401d8e88b2350e32162455885f18276cf802f7701ed",
+    "translated_value": "關閉"
+  },
+  "copy": {
+    "source_hash": "e21f935f11d7e966dbbae78da9daa378fe8142a14e7c0cd7434183005faa6c5c",
+    "translated_value": "複製"
+  },
+  "done": {
+    "source_hash": "11a6767d5674c7e45f7e00dc525762275b3a48491ad6045427d2609cc496c516",
+    "translated_value": "完成"
+  },
+  "create": {
+    "source_hash": "4759498ac2a719c619e2c8cf8ee60af2d2407425e95d308eb208425b2a6d427a",
+    "translated_value": "建立"
+  },
+  "select": {
+    "source_hash": "2a78025de6aae5e7ff88e5a951bb3a78ddd67388913529cf9e2dd9653e62b02d",
+    "translated_value": "選擇"
+  },
+  "browse": {
+    "source_hash": "3227aa9666253f7a736509074fb83bc4d47b19582faaa0233f228746de29217a",
+    "translated_value": "瀏覽"
+  },
+  "disconnect": {
+    "source_hash": "acfc5be785a9bb3da11c9f05adb69bd5633096f09002aa44813a1b3207e912ad",
+    "translated_value": "中斷連線"
+  },
+  "connect": {
+    "source_hash": "1a2303ede07493acc7caaa7c737f3c52bcc9cf04372be19ed1b0af6b9f2c791e",
+    "translated_value": "連線"
+  },
+  "remove": {
+    "source_hash": "c3812fc4acb861d5182fc2b8155f327f736fbe5e5eb86a7bd7afcb6dc5497282",
+    "translated_value": "移除"
+  },
+  "add": {
+    "source_hash": "9fd728c66c9a256b121472dabf32a34317aed01d8427d70ec830289cf23a7cc8",
+    "translated_value": "新增"
+  },
+  "ignore": {
+    "source_hash": "fce77c34d3fec98733dd4c29f1592a92e60e93e43f0bfe8690c91160ae7efebe",
+    "translated_value": "忽略"
+  },
+  "check_for_updates_now": {
+    "source_hash": "54a83816ad4128677bcf4bff7c5b686e98330d2616401376dd603baaf795bb8a",
+    "translated_value": "立即檢查更新"
+  },
+  "loading_detailed_information": {
+    "source_hash": "7ea5acc01bbf366dae8f90f62aee56afc9d7093c98980cfa35f69b4281af1cda",
+    "translated_value": "正在載入詳細資訊…"
+  },
+  "stream_url": {
+    "source_hash": "e176b768867080872baa071a3064e0270c485e47180820d2cc48945e546ebf8d",
+    "translated_value": "串流網址"
+  },
+  "export_complete": {
+    "source_hash": "81f3f0a234b6ad87a466e5b3d3b256267a66043a378966afe17a198113f82107",
+    "translated_value": "匯出完成"
+  },
+  "import_complete": {
+    "source_hash": "a9c747fe220f0a9f1cf16923b4fd8d8dc7d11e9f15a58eeb28d1c7c769267185",
+    "translated_value": "匯入完成"
+  },
+  "auto_picture_in_picture": {
+    "source_hash": "3de791eaf7163b0e4abd30ea4da1837d294a9d16cdda79af9922377cd1e66aa7",
+    "translated_value": "自動子母畫面"
+  },
+  "dynamic_speed_overlay": {
+    "source_hash": "f6d7c743f562f1d15115a0ea9c858cd7ee80971a965c75a6c993b9af1714980e",
+    "translated_value": "動態速度疊加層"
+  },
+  "show_navigation_bar_with_controls": {
+    "source_hash": "2ddc2e9c0d5db56b47120b334f622a618ee149c8f4483aa9d7410cbc2866d8b7",
+    "translated_value": "隨控制項顯示導覽列"
+  },
+  "enable_lua_scripts": {
+    "source_hash": "dda30ef464e82082f8a985552c9b5054f1305e86827f6292ca4cc2eeee1c7161",
+    "translated_value": "啟用 Lua 指令碼"
+  },
+  "manage_lua_scripts": {
+    "source_hash": "f80961791e2c891c0827feecb00a9bb653c9459e1868a802ddf04a09bb6b00c8",
+    "translated_value": "管理 Lua 指令碼"
+  },
+  "rename_playlist": {
+    "source_hash": "b89f2c23f32c1ab7c039559877be9d73ec3e191549b77781495050e4dd1b5bdf",
+    "translated_value": "重新命名播放清單"
+  },
+  "create_playlist": {
+    "source_hash": "7f097f735e739275caee4c65a3a683270ee94f64b48da9eba263bf54191e1aad",
+    "translated_value": "建立播放清單"
+  },
+  "add_connection": {
+    "source_hash": "685f88ae3db24ee15edd7e342447d933e018a46d99e8878c21ce3065d93c21a9",
+    "translated_value": "新增連線"
+  },
+  "playlist_name": {
+    "source_hash": "159728ef5a6159201c8c17e0429a8dd867e10ce3815b9fd2d21933322e885720",
+    "translated_value": "播放清單名稱"
+  },
+  "playlist_url": {
+    "source_hash": "498c686fc2858c902ee4ae0357bfca46031ecf8f022103a48722ff5af4fa683a",
+    "translated_value": "播放清單網址"
+  },
+  "enter_url": {
+    "source_hash": "a2acd6ac9fb24720fe0e95490823ac08b44cf649bd26c7953960ff42e61ccaf8",
+    "translated_value": "輸入網址"
+  },
+  "new_name": {
+    "source_hash": "04eea2a4ae80ebbe510d656f245a347c49328c4b79e642708d9028e27e84e1bb",
+    "translated_value": "新名稱"
+  },
+  "folder_name": {
+    "source_hash": "14d34edf50ef6c8738db97eb3fc56d0d5c8521b4555404b3ad456cedbb0c815d",
+    "translated_value": "資料夾名稱"
+  },
+  "video_url": {
+    "source_hash": "f094b14a517a2f4b404a7c74203071bbaa91172159e2398c66b6c3aab0eb0044",
+    "translated_value": "影片網址"
+  },
+  "choose_local_m3u_file": {
+    "source_hash": "bf997b0ce29469e093536c14f1f4f4876bc38bcefd8c5f74ec284fa471249176",
+    "translated_value": "選擇本機 M3U 檔案"
+  },
+  "add_from_url": {
+    "source_hash": "fedfd101ab6a41da79803dedcc1cf12adbb960bfdceae1d05378894f1e9c426c",
+    "translated_value": "從網址新增"
+  },
+  "home": {
+    "source_hash": "3a78695388b38b5cceefaf6796b0137877514593543b91af2752d5a17e3d736c",
+    "translated_value": "首頁"
+  },
+  "recents": {
+    "source_hash": "41a86988751ad5cbcd9f1a336274976be421b311b8fe80b5a70dc2c08c8eecb3",
+    "translated_value": "最近"
+  },
+  "playlists": {
+    "source_hash": "dcd0a4d2c65a4996c011445dc3bbc49e5c712f2d20e009f4c98fca3aaec915f4",
+    "translated_value": "播放清單"
+  },
+  "network": {
+    "source_hash": "1744b96470b51bf30935e2748b237a708d226a0430063f92accf90961cd28d86",
+    "translated_value": "網路"
+  },
+  "unit_seconds": {
+    "source_hash": "381a8e9699052f3a958001510611a9634e7cef8aa6a1421cb7e7f6e119f91edc",
+    "translated_value": "秒"
+  },
+  "milliseconds": {
+    "source_hash": "522ff63cdfa8c9a78b83de0fd65bc781b84ecd25968d0c60501ab66a0df0a486",
+    "translated_value": "毫秒"
+  },
+  "name": {
+    "source_hash": "dcd1d5223f73b3a965c07e3ff5dbee3eedcfedb806686a05b9b3868a2c3d6d50",
+    "translated_value": "名稱"
+  },
+  "protocol": {
+    "source_hash": "cf0883343f4abef779b777c35764f86c9f1f4324e8b5490840245d02ad2f7c6f",
+    "translated_value": "協定"
+  },
+  "host_ip_address": {
+    "source_hash": "005a953d4160546ede2ddd3fa70ecd234c1c58a1877c899888af341466cc3e4a",
+    "translated_value": "主機/IP 位址"
+  },
+  "port": {
+    "source_hash": "72e9a59f5a1d6289dbacb35df897d6c007c55a27e77018455c37e7b372668475",
+    "translated_value": "連接埠"
+  },
+  "path": {
+    "source_hash": "62fa5a5b0d3c318835a213e22a4b335c42515443d598741d0413e8c47f9ecf67",
+    "translated_value": "路徑"
+  },
+  "anonymous_guest_access": {
+    "source_hash": "d3f5a5fb2780a653cd18ed4b7c9c57ed3914128c578cc6606c59fe42eb52d1a8",
+    "translated_value": "匿名/訪客存取"
+  },
+  "use_https_secure_connection": {
+    "source_hash": "4ce1b8a0b77fd437daec5ae877f42a81a4dc01185a96c3570e347d1379f55a37",
+    "translated_value": "使用 HTTPS (安全連線)"
+  },
+  "username": {
+    "source_hash": "e3b89e9d33f88e523083d8b4436adcc3726c89e97fd3179a2e102d765d1b16ed",
+    "translated_value": "使用者名稱"
+  },
+  "password": {
+    "source_hash": "e7cf3ef4f17c3999a94f2c6f612e8a888e5b1026878e4e19398b23bd38ec221a",
+    "translated_value": "密碼"
+  },
+  "selected_long_press_to_reorder": {
+    "source_hash": "6085a87cc5aa51b76c45c087ee79172eb197f5d1b00ae21740b96220f7bb5eae",
+    "translated_value": "已選擇 (長按可重新排序)"
+  },
+  "available": {
+    "source_hash": "e674447337e83c1346f6122ed69f35bf5526e2a11842b2f2b788f3fb67d714ca",
+    "translated_value": "可用"
+  },
+  "width": {
+    "source_hash": "3019947b6daf18b0534a15d8c7ac30ab587e36cc93fb45a6e7b750348006d620",
+    "translated_value": "寬度"
+  },
+  "height": {
+    "source_hash": "bfe2eca401797325bc268f93c7397554551de4274d5d73ed421ee36fe9cd3ae0",
+    "translated_value": "高度"
+  },
+  "filter_presets": {
+    "source_hash": "c756b0b6cf857ad43886a2ae6c1511662f48b55b8987858251929652c8b1a4c7",
+    "translated_value": "過濾器預設"
+  },
+  "no_storage_devices_found": {
+    "source_hash": "3e3fa86f57b13028bc9212139b9beee3bf0b0c89397b9ce993a26011f01591a7",
+    "translated_value": "找不到儲存裝置"
+  },
+  "no_folders_or_supported_files": {
+    "source_hash": "8703b9e51fbcbeb799f90ba92580bf738400a05cce48c7e10927b18c5b3d9d65",
+    "translated_value": "無資料夾或支援的檔案"
+  },
+  "hello_world": {
+    "source_hash": "64ec88ca00b268e5ba1a35678a1b5316d212f4f366b2477232534a8aeca37f3c",
+    "translated_value": "你好世界"
+  },
+  "pref_show_audio_files_title": {
+    "source_hash": "5cc6f00accdcdab9dd39e0f80e471c4204fd4bf4d2afda1592a0f2b4b740306c",
+    "translated_value": "顯示音訊檔案"
+  },
+  "pref_show_audio_files_summary": {
+    "source_hash": "b1933067ad5db30b0af51ad76473535a90b1edf0f5dea190ac6b660b560badbe",
+    "translated_value": "在瀏覽器和播放清單中顯示並索引音訊檔案"
+  }
+}

@@ -662,4 +662,54 @@
     <string name="copy_video_path">نسخ مسار ملف الفيديو</string>
     <string name="copy_folder_path">نسخ مسار المجلد</string>
     <string name="copied_to_clipboard">تم النسخ إلى الحافظة</string>
+    <string name="player_sheets_aspect_ratio_title">نسبة العرض إلى الارتفاع</string>
+    <string name="player_sheets_aspect_ratio_presets">إعدادات مسبقة</string>
+    <string name="player_sheets_aspect_ratio_preset_default">افتراضي</string>
+    <string name="player_sheets_aspect_ratio_preset_4_3" translatable="false">4:3</string>
+    <string name="player_sheets_aspect_ratio_preset_16_9" translatable="false">16:9</string>
+    <string name="player_sheets_aspect_ratio_preset_16_10" translatable="false">16:10</string>
+    <string name="player_sheets_aspect_ratio_preset_21_9" translatable="false">21:9</string>
+    <string name="player_sheets_aspect_ratio_preset_32_9" translatable="false">32:9</string>
+    <string name="player_sheets_aspect_ratio_preset_2_35_1" translatable="false">2.35:1</string>
+    <string name="player_sheets_aspect_ratio_preset_2_39_1" translatable="false">2.39:1</string>
+    <string name="player_sheets_aspect_ratio_custom_toggle">مخصص...</string>
+    <string name="player_sheets_aspect_ratio_custom_section">مخصص</string>
+    <string name="player_sheets_aspect_ratio_manual_zoom_pan_title">تكبير وتحريك يدوي (إزاحة الكاميرا)</string>
+    <string name="player_sheets_aspect_ratio_zoom_value">التكبير: %1$.2fx</string>
+    <string name="player_sheets_aspect_ratio_reset_zoom">إعادة ضبط التكبير</string>
+    <string name="player_sheets_aspect_ratio_horizontal_offset_value">الإزاحة الأفقية: %1$.3f</string>
+    <string name="player_sheets_aspect_ratio_reset_pan">إعادة ضبط التحريك</string>
+    <string name="player_sheets_aspect_ratio_add_custom_title">إضافة نسبة مخصصة (مثال: 16:9)</string>
+    <string name="player_sheets_aspect_ratio_width">العرض</string>
+    <string name="player_sheets_aspect_ratio_separator" translatable="false">:</string>
+    <string name="player_sheets_aspect_ratio_height">الارتفاع</string>
+    <string name="player_sheets_aspect_ratio_custom_ratio_label" translatable="false">%1$s:%2$s</string>
+    <string name="player_sheets_aspect_ratio_invalid">غير صالح</string>
+    <string name="player_sheets_aspect_ratio_add">إضافة</string>
+    <string name="player_sheets_frame_navigation_timestamp_value" formatted="false" translatable="false">%1$02d:%2$02d:%3$02d</string>
+    <string name="player_sheets_frame_navigation_frame_label">الإطار:\\u0020</string>
+    <string name="player_sheets_frame_navigation_frame_count" translatable="false">%1$d / %2$d</string>
+    <string name="player_sheets_frame_navigation_current_frame" translatable="false">%1$d</string>
+    <string name="player_sheets_frame_navigation_timestamp_label">الطابع الزمني:\\u0020</string>
+    <string name="player_sheets_frame_navigation_screenshot_create_failed">فشل إنشاء لقطة الشاشة</string>
+    <string name="player_sheets_frame_navigation_mediastore_entry_failed">فشل إنشاء إدخال MediaStore</string>
+    <string name="player_sheets_frame_navigation_snapshot_dir_failed">فشل إنشاء مجلد mpvSnaps</string>
+    <string name="player_sheets_frame_navigation_snapshot_save_failed">فشل حفظ اللقطة: %1$s</string>
+    <string name="media_info_title">معلومات الوسائط</string>
+    <string name="media_info_back">رجوع</string>
+    <string name="media_info_copy">نسخ</string>
+    <string name="media_info_share">مشاركة</string>
+    <string name="media_info_no_file_provided">لم يتم توفير ملف وسائط</string>
+    <string name="media_info_unknown_file_name">غير معروف</string>
+    <string name="media_info_failed_to_load">فشل تحميل معلومات الوسائط</string>
+    <string name="media_info_unknown_error">خطأ غير معروف</string>
+    <string name="media_info_analyzing">جارٍ تحليل ملف الوسائط...</string>
+    <string name="media_info_error_prefix">خطأ: %1$s</string>
+    <string name="media_info_loading_details">جارٍ تحميل المعلومات التفصيلية...</string>
+    <string name="media_info_clipboard_label">معلومات الوسائط - %1$s</string>
+    <string name="media_info_share_subject">معلومات الوسائط - %1$s</string>
+    <string name="media_info_share_text">معلومات الوسائط لـ: %1$s</string>
+    <string name="media_info_share_chooser_title">مشاركة معلومات الوسائط</string>
+    <string name="media_info_share_failed">فشل المشاركة: %1$s</string>
+    <string name="media_info_default_file_name">ملف الوسائط</string>
 </resources>

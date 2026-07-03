@@ -712,4 +712,18 @@
     <string name="media_info_share_chooser_title">مشاركة معلومات الوسائط</string>
     <string name="media_info_share_failed">فشل المشاركة: %1$s</string>
     <string name="media_info_default_file_name">ملف الوسائط</string>
-</resources>
+
+    <!-- Network Connection Card -->
+    <string name="network_connection_protocol_host">%1$s • %2$s:%3$s</string>
+    <string name="network_connection_edit">تعديل</string>
+    <string name="network_connection_delete">حذف</string>
+    <string name="network_connection_path_prefix">المسار: %1$s</string>
+    <string name="network_connection_user_prefix">المستخدم: %1$s</string>
+    <string name="network_connection_error_prefix">خطأ: %1$s</string>
+    <string name="network_connection_auto_connect">الاتصال تلقائياً عند تشغيل التطبيق</string>
+    <string name="network_connection_connecting">جارٍ الاتصال</string>
+    <string name="network_connection_browse">تصفح</string>
+    <string name="network_connection_disconnect">قطع الاتصال</string>
+    <string name="network_connection_connect">اتصال</string>
+
+    </resources>

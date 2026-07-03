@@ -715,4 +715,17 @@
     <string name="media_info_share_chooser_title">Share Media Info</string>
     <string name="media_info_share_failed">Failed to share: %1$s</string>
     <string name="media_info_default_file_name">Media File</string>
+
+    <!-- Network Connection Card -->
+    <string name="network_connection_protocol_host">%1$s • %2$s:%3$s</string>
+    <string name="network_connection_edit">Edit</string>
+    <string name="network_connection_delete">Delete</string>
+    <string name="network_connection_path_prefix">Path: %1$s</string>
+    <string name="network_connection_user_prefix">User: %1$s</string>
+    <string name="network_connection_error_prefix">Error: %1$s</string>
+    <string name="network_connection_auto_connect">Connect automatically on app launch</string>
+    <string name="network_connection_connecting">Connecting</string>
+    <string name="network_connection_browse">Browse</string>
+    <string name="network_connection_disconnect">Disconnect</string>
+    <string name="network_connection_connect">Connect</string>
 </resources>

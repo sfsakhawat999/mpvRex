@@ -64,6 +64,7 @@ fun <T> UnifiedExplorerContent(
   playedFolderPaths: Set<String> = emptySet(),
   newVideoIds: Set<Long> = emptySet(),
   watchedVideoIds: Set<Long> = emptySet(),
+  videoPlaybackProgress: Map<Long, Float> = emptyMap(),
   autoScrollToLastPlayed: Boolean = false,
   scrollTriggerKey: Any? = null,
   gridColumns: Int? = null,
@@ -290,6 +291,7 @@ fun <T> UnifiedExplorerContent(
                         playedFolderPaths = playedFolderPaths,
                         newVideoIds = newVideoIds,
                         watchedVideoIds = watchedVideoIds,
+                        videoPlaybackProgress = videoPlaybackProgress,
                         showSections = showSections
                       )
                     }
@@ -335,6 +337,7 @@ fun <T> UnifiedExplorerContent(
                   playedFolderPaths = playedFolderPaths,
                   newVideoIds = newVideoIds,
                   watchedVideoIds = watchedVideoIds,
+                  videoPlaybackProgress = videoPlaybackProgress,
                   showSections = showSections
                 )
               }
@@ -395,6 +398,7 @@ fun <T> UnifiedExplorerContent(
                         playedFolderPaths = playedFolderPaths,
                         newVideoIds = newVideoIds,
                         watchedVideoIds = watchedVideoIds,
+                        videoPlaybackProgress = videoPlaybackProgress,
                         showSections = showSections
                       )
                     }
@@ -440,6 +444,7 @@ fun <T> UnifiedExplorerContent(
                   playedFolderPaths = playedFolderPaths,
                   newVideoIds = newVideoIds,
                   watchedVideoIds = watchedVideoIds,
+                  videoPlaybackProgress = videoPlaybackProgress,
                   showSections = showSections
                 )
               }
@@ -493,6 +498,7 @@ fun <T> UnifiedExplorerContent(
               playedFolderPaths = playedFolderPaths,
               newVideoIds = newVideoIds,
               watchedVideoIds = watchedVideoIds,
+              videoPlaybackProgress = videoPlaybackProgress,
               showSections = showSections
             )
           }
@@ -555,6 +561,7 @@ fun <T> UnifiedExplorerContent(
                       playedFolderPaths = playedFolderPaths,
                       newVideoIds = newVideoIds,
                       watchedVideoIds = watchedVideoIds,
+                      videoPlaybackProgress = videoPlaybackProgress,
                       showSections = showSections
                     )
                   }
@@ -587,6 +594,7 @@ fun <T> UnifiedExplorerContent(
                 playedFolderPaths = playedFolderPaths,
                 newVideoIds = newVideoIds,
                 watchedVideoIds = watchedVideoIds,
+                videoPlaybackProgress = videoPlaybackProgress,
                 showSections = showSections
               )
             }
@@ -641,6 +649,7 @@ private fun <T> ExplorerItemCard(
   playedFolderPaths: Set<String> = emptySet(),
   newVideoIds: Set<Long> = emptySet(),
   watchedVideoIds: Set<Long> = emptySet(),
+  videoPlaybackProgress: Map<Long, Float> = emptyMap(),
   showSections: Boolean = false,
 ) {
   when (item) {
@@ -807,8 +816,10 @@ private fun <T> ExplorerItemCard(
         isGridMode = isGridMode,
         gridColumns = columns,
         showSubtitleIndicator = showSubtitleIndicator,
+        progressPercentage = videoPlaybackProgress[item.video.id],
         isOldAndUnplayed = isOldAndUnplayed,
         isWatched = isWatched,
+        isNeverPlayed = videoPlaybackProgress[item.video.id] == null,
         isRecentlyPlayed = isRecentlyPlayed
       )
     }

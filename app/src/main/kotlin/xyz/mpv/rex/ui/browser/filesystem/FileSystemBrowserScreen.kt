@@ -1448,6 +1448,7 @@ private fun FileSystemBrowserContent(
       listState = listState,
       newVideoIds = newVideoIds,
       watchedVideoIds = watchedVideoIds,
+      videoPlaybackProgress = videoFilesWithPlayback,
       scrollTriggerKey = scrollTriggerKey,
       showSections = true,
     )

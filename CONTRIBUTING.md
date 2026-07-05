@@ -81,7 +81,7 @@ To keep the repository history clean and manageable, we adhere to the following 
 * **Feature Branches:** Create a new branch for every feature or fix, branched off `master`.
 * **Atomic Commits:** Separate structural refactoring from visual/functional fixes into distinct commits.
 * **Keep Branches Updated:** Use `rebase` instead of merge to bring your branch up to date with `master`.
-* **Commit Messages:** We follow [Conventional Commits](https://www.conventionalcommits.org/) (e.g. `fix:`, `feat:`, `refactor:`, `chore:`) since our changelog is generated automatically via `git-cliff`. You are responsible for keeping your commits clean and conforming; non-conforming commits will need to be reworded or squashed by you before merge.
+* **Commit Messages:** We follow [Conventional Commits](https://www.conventionalcommits.org/) (e.g. `fix:`, `feat:`, `refactor:`, `chore:`) to keep our commit history clear and organized. You are responsible for keeping your commits clean and conforming; non-conforming commits will need to be reworded or squashed by you before merge.
 
 ### Pull Requests
 

@@ -110,7 +110,7 @@ mpvRex is an advanced, customizable video player for Android. It combines the ve
 
 Translations can be managed using **[Droidlate](https://github.com/estiaksoyeb/Droidlate)** ([PyPI](https://pypi.org/project/droidlate/)) — a local, web-based UI designed for editing Android `strings.xml` translation files.
 
-If you would like to contribute to translating mpvRex into your language, you can run Droidlate locally to update the files and submit a pull request.
+If you would like to contribute to translating mpvRex into your language, please refer to the [Translation Contribution Guide](https://github.com/sfsakhawat999/mpvRex/tree/update-readme-droidlate?tab=contributing-ov-file#translation-contributions) for step-by-step instructions on running Droidlate locally.
 
 ---
 

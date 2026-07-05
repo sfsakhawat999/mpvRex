@@ -1,24 +1,12 @@
-# Contributing to mpvRex
+Looking to report an issue/bug or make a feature request? Please refer to the [README](README.md) file.
+
+Thanks for your interest in contributing to mpvRex!
 
 This guide outlines our development practices, code guidelines, git workflow, and translation contribution process.
 
 ---
 
-## 🐛 Reporting Bugs & Requesting Features
-
-Before opening an issue, please search existing issues to avoid duplicates.
-
-**Bug reports** should include:
-* Device model and Android version
-* mpvRex version (Settings → About)
-* Steps to reproduce
-* Expected vs. actual behavior, and a logcat snippet if available
-
-**Feature requests** should describe the use case, not just the feature. If it's inspired by another player or fork, say so — it helps us evaluate fit rather than just novelty.
-
----
-
-## 💻 Code Contributions
+## Code Contributions
 
 We welcome bug fixes, performance optimizations, and feature enhancements.
 
@@ -108,7 +96,7 @@ GitHub Issues and Pull Request discussions are our primary channels for communic
 
 ---
 
-## 🌐 Translation Contributions (Droidlate Workflow)
+## Translation Contributions
 
 For translations, we use **[Droidlate](https://github.com/estiaksoyeb/Droidlate)** ([PyPI](https://pypi.org/project/droidlate/)) — a lightweight, local, web-based translation workspace designed specifically for Android `strings.xml` resource files.
 

@@ -909,4 +909,31 @@
     <string name="pref_about_check_updates">Check for Updates</string>
     <string name="pref_about_checking">Checking…</string>
     <string name="pref_about_check_updates_summary">Manually check for new versions on GitHub</string>
+
+    <!-- Player Button Labels -->
+    <string name="btn_label_back">Back Arrow</string>
+    <string name="btn_label_title">Video Title</string>
+    <string name="btn_label_bookmarks">Chapters / Bookmarks</string>
+    <string name="btn_label_speed">Playback Speed</string>
+    <string name="btn_label_decoder">Decoder</string>
+    <string name="btn_label_rotation">Screen Rotation</string>
+    <string name="btn_label_frame_nav">Frame Navigation</string>
+    <string name="btn_label_zoom">Video Zoom</string>
+    <string name="btn_label_pip">Picture-in-Picture</string>
+    <string name="btn_label_aspect">Aspect Ratio</string>
+    <string name="btn_label_lock">Lock Controls</string>
+    <string name="btn_label_audio">Audio Track</string>
+    <string name="btn_label_subtitles">Subtitles</string>
+    <string name="btn_label_more">More Options</string>
+    <string name="btn_label_chapter">Current Chapter</string>
+    <string name="btn_label_repeat_mode">Repeat Mode</string>
+    <string name="btn_label_shuffle">Shuffle</string>
+    <string name="btn_label_mirror">Horizontal Flip</string>
+    <string name="btn_label_vertical_flip">Vertical Flip</string>
+    <string name="btn_label_ab_loop">A-B Loop</string>
+    <string name="btn_label_custom_skip">Custom Skip</string>
+    <string name="btn_label_background_playback">Background Playback</string>
+    <string name="btn_label_ambient_mode">Ambience Mode</string>
+    <string name="btn_label_sleep_timer">Sleep Timer</string>
+    <string name="btn_label_none">None</string>
 </resources>

@@ -836,4 +836,31 @@
     <string name="pref_about_check_updates">التحقق من وجود تحديثات</string>
     <string name="pref_about_checking">جارٍ التحقق…</string>
     <string name="pref_about_check_updates_summary">التحقق يدويًا من وجود إصدارات جديدة على GitHub</string>
+
+    <!-- Player Button Labels -->
+    <string name="btn_label_back">سهم الرجوع</string>
+    <string name="btn_label_title">عنوان الفيديو</string>
+    <string name="btn_label_bookmarks">الفصول / الإشارات المرجعية</string>
+    <string name="btn_label_speed">سرعة التشغيل</string>
+    <string name="btn_label_decoder">وحدة فك الترميز</string>
+    <string name="btn_label_rotation">تدوير الشاشة</string>
+    <string name="btn_label_frame_nav">التنقل بين الإطارات</string>
+    <string name="btn_label_zoom">تكبير الفيديو</string>
+    <string name="btn_label_pip">صورة داخل صورة</string>
+    <string name="btn_label_aspect">نسبة العرض إلى الارتفاع</string>
+    <string name="btn_label_lock">قفل عناصر التحكم</string>
+    <string name="btn_label_audio">المسار الصوتي</string>
+    <string name="btn_label_subtitles">الترجمة</string>
+    <string name="btn_label_more">المزيد من الخيارات</string>
+    <string name="btn_label_chapter">الفصل الحالي</string>
+    <string name="btn_label_repeat_mode">وضع التكرار</string>
+    <string name="btn_label_shuffle">تشغيل عشوائي</string>
+    <string name="btn_label_mirror">قلب أفقي</string>
+    <string name="btn_label_vertical_flip">قلب رأسي</string>
+    <string name="btn_label_ab_loop">تكرار A-B</string>
+    <string name="btn_label_custom_skip">تخطي مخصص</string>
+    <string name="btn_label_background_playback">التشغيل في الخلفية</string>
+    <string name="btn_label_ambient_mode">الوضع السينيمائي</string>
+    <string name="btn_label_sleep_timer">مؤقت النوم</string>
+    <string name="btn_label_none">لا شيء</string>
 </resources>

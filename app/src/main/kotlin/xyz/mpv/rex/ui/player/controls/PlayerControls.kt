@@ -384,8 +384,17 @@ fun PlayerControls(
         val rawMediaTitle by MPVLib.propString["media-title"].collectAsState()
         val mediaTitle by remember(rawMediaTitle, activity) {
           derivedStateOf {
-            rawMediaTitle?.takeIf { it.isNotBlank() }
-              ?: activity.getTitleForControls()
+            val title = activity.getTitleForControls()
+            if (title.startsWith("http://") || title.startsWith("https://") || title.contains(".m3u8") || title.contains(".m3u")) {
+              val raw = rawMediaTitle
+              if (raw != null && raw.isNotBlank() && !raw.startsWith("http://") && !raw.startsWith("https://") && !raw.contains(".m3u8") && !raw.contains(".m3u")) {
+                raw
+              } else {
+                title
+              }
+            } else {
+              title
+            }
           }
         }
 
@@ -662,7 +671,7 @@ fun PlayerControls(
                 xyz.mpv.rex.ui.player.RepeatMode.OFF -> "Repeat: Off"
                 xyz.mpv.rex.ui.player.RepeatMode.ONE -> "Repeat: Current file"
                 xyz.mpv.rex.ui.player.RepeatMode.ALL -> {
-                  if (playlistMode && viewModel.hasPlaylistSupport()) {
+                  if (viewModel.hasPlaylistSupport()) {
                     "Repeat: All playlist"
                   } else {
                     "Repeat: Current file"
@@ -675,7 +684,7 @@ fun PlayerControls(
             is PlayerUpdates.Shuffle -> {
               val enabled = (currentPlayerUpdate as PlayerUpdates.Shuffle).enabled
               val text = if (enabled) {
-                if (playlistMode && viewModel.hasPlaylistSupport()) {
+                if (viewModel.hasPlaylistSupport()) {
                   "Shuffle: On"
                 } else {
                   "Shuffle: Not available"
@@ -973,7 +982,7 @@ fun PlayerControls(
                 else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
               )
 
-              if (playlistMode && viewModel.hasPlaylistSupport()) {
+              if (viewModel.hasPlaylistSupport()) {
                 androidx.compose.foundation.layout.Row(
                   horizontalArrangement = Arrangement.spacedBy(24.dp),
                   verticalAlignment = Alignment.CenterVertically,

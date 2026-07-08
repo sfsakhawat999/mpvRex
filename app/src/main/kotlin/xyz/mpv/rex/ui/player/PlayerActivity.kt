@@ -1527,6 +1527,9 @@ class PlayerActivity :
 
       safeSetPropertyString("http-header-fields", headersString)
       Log.d(TAG, "Set HTTP headers: $headersString")
+    } else {
+      safeSetPropertyString("http-header-fields", "")
+      Log.d(TAG, "Cleared HTTP headers")
     }
   }
   /**
@@ -1546,7 +1549,7 @@ class PlayerActivity :
       Log.d(TAG, "Auto-detected Referer for playlist item: $referer")
     }
 
-    // Set all headers in MPV
+    // Set all headers in MPV, or clear them if empty
     if (headerMap.isNotEmpty()) {
       val headersString = headerMap
         .map { "${it.key}: ${it.value.replace(",", "\\,")}" }
@@ -1554,6 +1557,9 @@ class PlayerActivity :
 
       safeSetPropertyString("http-header-fields", headersString)
       Log.d(TAG, "Set HTTP headers for playlist item: $headersString")
+    } else {
+      safeSetPropertyString("http-header-fields", "")
+      Log.d(TAG, "Cleared HTTP headers for playlist item")
     }
   }
 
@@ -2157,9 +2163,14 @@ class PlayerActivity :
 
     applySubtitlePreferences()
 
-    // Don't force media-title for m3u/m3u8 streams - let MPV provide it
-    if (!isCurrentStreamM3U()) {
+    // Don't force media-title for standalone m3u/m3u8 streams - let MPV provide it
+    // But if we are playing from an M3U playlist with custom titles, we MUST set it
+    val isM3uPlaylist = viewModel.playlistManager.isM3uPlaylist
+    val hasCustomTitle = !viewModel.playlistManager.getTitleAt(viewModel.playlistManager.currentIndex.value).isNullOrBlank()
+    if (!isCurrentStreamM3U() || isM3uPlaylist || hasCustomTitle) {
       safeSetPropertyString("force-media-title", fileName)
+      viewModel.setMediaTitle(fileName)
+    } else {
       viewModel.setMediaTitle(fileName)
     }
 
@@ -3391,10 +3402,15 @@ class PlayerActivity :
     }
 
     // Update media title (this will trigger UI update)
-    // Don't force media-title for m3u/m3u8 streams - let MPV provide it
-    val isM3U = uri.toString().lowercase().contains(".m3u8") || uri.toString().lowercase().contains(".m3u")
-    if (!isM3U) {
+    // Don't force media-title for standalone m3u/m3u8 streams - let MPV provide it
+    // But if we are playing from an M3U playlist with custom titles, we MUST set it
+    val isM3U = isUriM3U(uri)
+    val isM3uPlaylist = viewModel.playlistManager.isM3uPlaylist
+    val hasCustomTitle = !viewModel.playlistManager.getTitleAt(index).isNullOrBlank()
+    if (!isM3U || isM3uPlaylist || hasCustomTitle) {
       safeSetPropertyString("force-media-title", fileName)
+      viewModel.setMediaTitle(fileName)
+    } else {
       viewModel.setMediaTitle(fileName)
     }
 

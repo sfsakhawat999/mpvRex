@@ -510,8 +510,17 @@ fun ControlsTab(
 
   val mediaTitle by remember(activity) {
       derivedStateOf {
-          MPVLib.getPropertyString("media-title")?.takeIf { it.isNotBlank() }
-              ?: activity.getTitleForControls()
+          val title = activity.getTitleForControls()
+          if (title.startsWith("http://") || title.startsWith("https://") || title.contains(".m3u8") || title.contains(".m3u")) {
+              val raw = MPVLib.getPropertyString("media-title")
+              if (raw != null && raw.isNotBlank() && !raw.startsWith("http://") && !raw.startsWith("https://") && !raw.contains(".m3u8") && !raw.contains(".m3u")) {
+                  raw
+              } else {
+                  title
+              }
+          } else {
+              title
+          }
       }
   }
 

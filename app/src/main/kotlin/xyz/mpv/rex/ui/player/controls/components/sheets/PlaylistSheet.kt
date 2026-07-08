@@ -24,16 +24,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.ViewList
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -241,23 +247,18 @@ fun PlaylistSheet(
 
   val accentColor = MaterialTheme.colorScheme.primary
 
-  // Check portrait mode
-  val isPortrait = configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
+  // Search state
+  var isSearching by remember { mutableStateOf(false) }
+  var searchQuery by rememberSaveable { mutableStateOf("") }
 
-  // Portrait mode => list mode
-  val isListModePreference by playerPreferences.playlistViewMode.collectAsState()
-  var isListMode by remember { mutableStateOf(if (isPortrait) true else isListModePreference) }
-
-  LaunchedEffect(isPortrait) {
-    if (isPortrait && !isListMode) {
-      isListMode = true
-    }
-  }
-
-  // Update preference when view mode changes (only in landscape)
-  LaunchedEffect(isListMode) {
-    if (!isPortrait && isListMode != isListModePreference) {
-      playerPreferences.playlistViewMode.set(isListMode)
+  // Filtered playlist based on search query
+  val filteredPlaylist by remember(playlist, searchQuery) {
+    derivedStateOf {
+      if (searchQuery.isBlank()) {
+        playlist
+      } else {
+        playlist.filter { it.title.contains(searchQuery, ignoreCase = true) }
+      }
     }
   }
 
@@ -269,10 +270,10 @@ fun PlaylistSheet(
   // Scroll state for the playlist
   val lazyListState = rememberLazyListState()
 
-  // Find the currently playing item index - tracks changes in playlist items
-  val playingItemIndex by remember {
+  // Find the currently playing item index in the filtered list
+  val playingItemIndex by remember(filteredPlaylist) {
     derivedStateOf {
-      playlist.indexOfFirst { it.isPlaying }
+      filteredPlaylist.indexOfFirst { it.isPlaying }
     }
   }
 
@@ -284,24 +285,16 @@ fun PlaylistSheet(
   }
 
   val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-  val sheetWidth = if (isListMode) {
-    if (LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
-      640.dp
-    } else {
-      420.dp
-    }
-  } else {
-    screenWidth * 0.85f
-  }
+  val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
   PlayerSheet(
     onDismissRequest = onDismissRequest,
-    modifier = Modifier.fillMaxWidth(),
-    customMaxWidth = sheetWidth,
-    customMaxHeight = if (isPortrait) LocalConfiguration.current.screenHeightDp.dp * 0.5f else null,
+    modifier = Modifier.fillMaxSize(),
+    customMaxWidth = screenWidth,
+    customMaxHeight = screenHeight,
   ) {
     Surface(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier.fillMaxSize(),
       color = Color.Transparent,
       shape = RoundedCornerShape(
         topStart = 16.dp,
@@ -312,71 +305,129 @@ fun PlaylistSheet(
       tonalElevation = 0.dp,
     ) {
       Column(
-        modifier = modifier.padding(
-          vertical = MaterialTheme.spacing.smaller,
-          horizontal = if (!isListMode) MaterialTheme.spacing.medium else 0.dp
-        )
+        modifier = modifier
+          .fillMaxSize()
+          .padding(
+            vertical = MaterialTheme.spacing.smaller,
+            horizontal = 0.dp
+          )
       ) {
-        // Header showing current playlist info with toggle button
+        // Header showing current playlist info with search option
         val currentItem = playlist.find { it.isPlaying }
         Row(
           modifier = Modifier
             .fillMaxWidth()
             .padding(
-              horizontal = if (isListMode) MaterialTheme.spacing.medium else 0.dp,
+              horizontal = MaterialTheme.spacing.medium,
               vertical = MaterialTheme.spacing.small,
             ),
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
-            modifier = Modifier.weight(1f)
-          ) {
-            if (currentItem != null) {
-              Text(
-                text = "Now Playing",
-                style = MaterialTheme.typography.titleSmall.copy(
-                  fontWeight = FontWeight.Bold,
-                  color = accentColor,
-                ),
+          if (isSearching) {
+            // Search Input taking place of Now Playing division
+            BasicTextField(
+              value = searchQuery,
+              onValueChange = { searchQuery = it },
+              modifier = Modifier
+                .weight(1f)
+                .padding(end = MaterialTheme.spacing.small),
+              singleLine = true,
+              textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+              decorationBox = { innerTextField ->
+                Box(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                  contentAlignment = Alignment.CenterStart
+                ) {
+                  if (searchQuery.isEmpty()) {
+                    Text(
+                      text = "Search...",
+                      style = MaterialTheme.typography.bodyMedium,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                  }
+                  innerTextField()
+                }
+              }
+            )
+
+            IconButton(
+              onClick = {
+                searchQuery = ""
+                isSearching = false
+              }
+            ) {
+              Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Close Search",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
               )
+            }
+          } else {
+            // Original Now Playing / Total items layout
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
+              modifier = Modifier.weight(1f)
+            ) {
+              if (currentItem != null) {
+                Text(
+                  text = "Now Playing",
+                  style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = accentColor,
+                  ),
+                )
+                Text(
+                  text = "•",
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+              }
               Text(
-                text = "•",
+                text = "${filteredPlaylist.size} of $totalCount items",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
               )
             }
-            Text(
-              text = "$totalCount items",
-              style = MaterialTheme.typography.bodyMedium,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
 
-          // Toggle button for list/grid view (only in landscape)
-          if (!isPortrait) {
             IconButton(
-              onClick = { isListMode = !isListMode }
+              onClick = { isSearching = true }
             ) {
               Icon(
-                imageVector = if (isListMode) Icons.Default.GridView else Icons.Default.ViewList,
-                contentDescription = if (isListMode) "Switch to Grid View" else "Switch to List View",
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
               )
             }
           }
         }
 
-        // Conditional rendering based on view mode
-        if (isListMode) {
-          // Vertical list mode (original implementation)
+        // Playlist/Track list
+        if (filteredPlaylist.isEmpty()) {
+          Box(
+            modifier = Modifier
+              .weight(1f)
+              .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+          ) {
+            Text(
+              text = "No items found",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+          }
+        } else {
           LazyColumn(
             state = lazyListState,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+              .weight(1f)
+              .fillMaxWidth()
           ) {
-            items(playlist) { item ->
+            items(filteredPlaylist) { item ->
               PlaylistTrackListItem(
                 item = item,
                 context = context,
@@ -384,28 +435,6 @@ fun PlaylistSheet(
                 onClick = { onItemClick(item) },
                 skipThumbnail = isM3UPlaylist,
                 accentColor = accentColor
-              )
-            }
-          }
-        } else {
-          // Horizontal grid mode
-          LazyRow(
-            state = lazyListState,
-            contentPadding = PaddingValues(
-              horizontal = if (isListMode) MaterialTheme.spacing.medium else 0.dp,
-              vertical = MaterialTheme.spacing.small
-            ),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-          ) {
-            items(playlist) { item ->
-              PlaylistTrackGridItem(
-                item = item,
-                context = context,
-                thumbnailCache = thumbnailCache as LRUBitmapCache,
-                onClick = {
-                  onItemClick(item)
-                },
-                skipThumbnail = isM3UPlaylist,
               )
             }
           }
@@ -615,223 +644,7 @@ fun PlaylistTrackListItem(
   }
 }
 
-@Composable
-fun PlaylistTrackGridItem(
-  item: PlaylistItem,
-  context: Context,
-  thumbnailCache: LRUBitmapCache,
-  onClick: () -> Unit,
-  skipThumbnail: Boolean = false,
-  modifier: Modifier = Modifier,
-) {
-  // Use theme colors dynamically
-  val accentColor = MaterialTheme.colorScheme.primary
-  val accentSecondary = MaterialTheme.colorScheme.tertiary
 
-  // Thumbnail state - uses cache to persist across recompositions
-  val videoPath = item.path.ifBlank { item.uri.toString() }
-  var thumbnail by remember(videoPath) {
-    mutableStateOf(thumbnailCache[videoPath])
-  }
-
-  // Load thumbnail asynchronously
-  // Skip thumbnail loading for M3U playlists (network streams)
-  LaunchedEffect(videoPath) {
-    if (!skipThumbnail && !thumbnailCache.containsKey(videoPath)) {
-      val bmp = loadMediaStoreThumbnail(context, item.uri)
-      thumbnail = bmp
-      thumbnailCache[videoPath] = bmp
-    }
-  }
-
-  val borderModifier = if (item.isPlaying) {
-    Modifier.border(
-      width = 2.dp,
-      brush = Brush.linearGradient(listOf(accentColor, accentSecondary)),
-      shape = RoundedCornerShape(12.dp),
-    )
-  } else {
-    Modifier
-  }
-
-  // YouTube-style vertical card
-  Surface(
-    modifier = modifier
-      .width(200.dp)
-      .clip(RoundedCornerShape(12.dp))
-      .then(borderModifier)
-      .clickable(onClick = onClick),
-    color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
-    shape = RoundedCornerShape(12.dp),
-  ) {
-    Column(
-      modifier = Modifier.padding(MaterialTheme.spacing.smaller),
-      verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
-    ) {
-      // Thumbnail with 16:9 aspect ratio
-      Box(
-        modifier = Modifier
-          .fillMaxWidth()
-          .height(112.dp)
-          .clip(RoundedCornerShape(8.dp))
-          .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-        contentAlignment = Alignment.Center,
-      ) {
-        // Show actual thumbnail or fallback icon
-        thumbnail?.let { bmp ->
-          Image(
-            bitmap = bmp.asImageBitmap(),
-            contentDescription = "Thumbnail",
-            modifier = Modifier.matchParentSize(),
-            contentScale = ContentScale.Crop,
-          )
-        } ?: run {
-          // Movie icon as fallback placeholder
-          Icon(
-            imageVector = Icons.Outlined.Movie,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            modifier = Modifier.size(32.dp),
-          )
-        }
-
-        // Video number badge in top-left
-        Box(
-          modifier = Modifier
-            .align(Alignment.TopStart)
-            .padding(6.dp)
-            .background(
-              color = Color.Black.copy(alpha = 0.7f),
-              shape = RoundedCornerShape(6.dp),
-            )
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        ) {
-          Text(
-            text = "${item.index + 1}",
-            style = MaterialTheme.typography.labelMedium.copy(
-              fontWeight = FontWeight.Bold,
-              fontSize = 12.sp,
-            ),
-            color = Color.White,
-          )
-        }
-
-        // Duration badge in bottom-right
-        if (item.duration.isNotEmpty()) {
-          Box(
-            modifier = Modifier
-              .align(Alignment.BottomEnd)
-              .padding(6.dp)
-              .background(
-                color = Color.Black.copy(alpha = 0.8f),
-                shape = RoundedCornerShape(4.dp),
-              )
-              .padding(horizontal = 6.dp, vertical = 2.dp),
-          ) {
-            Text(
-              text = item.duration,
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-              ),
-              color = Color.White,
-            )
-          }
-        } else {
-          // Loading duration badge
-          Box(
-            modifier = Modifier
-              .align(Alignment.BottomEnd)
-              .padding(6.dp)
-          ) {
-            LoadingChip(width = 40.dp, height = 18.dp, isDark = true)
-          }
-        }
-
-        // Playing indicator overlay
-        if (item.isPlaying) {
-          Box(
-            modifier = Modifier
-              .matchParentSize()
-              .background(
-                brush = Brush.verticalGradient(
-                  colors = listOf(
-                    accentColor.copy(alpha = 0.3f),
-                    accentColor.copy(alpha = 0.1f),
-                  )
-                )
-              )
-          )
-        }
-      }
-
-      // Title and metadata
-      Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
-        Text(
-          text = item.title,
-          modifier = Modifier.height(44.dp),
-          style = MaterialTheme.typography.bodyMedium.copy(
-            fontWeight = if (item.isPlaying) FontWeight.Bold else FontWeight.Medium,
-            fontSize = 14.sp,
-            color = if (item.isPlaying) {
-              accentColor
-            } else if (item.isWatched) {
-              MaterialTheme.colorScheme.onSurfaceVariant
-            } else {
-              MaterialTheme.colorScheme.onSurface
-            },
-          ),
-          maxLines = 2,
-          overflow = TextOverflow.Ellipsis,
-        )
-
-        // Resolution and status
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          // Resolution chip
-          if (item.resolution.isNotEmpty()) {
-            Surface(
-              color = if (item.isPlaying) accentColor.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
-              shape = RoundedCornerShape(4.dp),
-            ) {
-              Text(
-                text = item.resolution,
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 10.sp,
-                ),
-                color = if (item.isPlaying) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
-              )
-            }
-          } else {
-            LoadingChip(width = 60.dp)
-          }
-
-          if (item.isPlaying) {
-            Surface(
-              color = accentColor.copy(alpha = 0.15f),
-              shape = RoundedCornerShape(4.dp),
-            ) {
-              Text(
-                text = "Playing",
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 10.sp,
-                  fontWeight = FontWeight.SemiBold,
-                  color = accentColor,
-                ),
-              )
-            }
-          }
-        }
-      }
-    }
-  }
-}
 
 
 @Composable

@@ -352,6 +352,20 @@ object PlayerControlsPreferencesScreen : Screen {
               
               PreferenceDivider()
 
+              val showControlsOnPlay by playerPrefs.showControlsOnPlay.collectAsState()
+              SwitchPreference(
+                value = showControlsOnPlay,
+                onValueChange = { playerPrefs.showControlsOnPlay.set(it) },
+                title = {
+                  Text(text = "Show controls on play start")
+                },
+                summary = {
+                  Text(text = "Show player controls overlay when a video starts playing")
+                },
+              )
+              
+              PreferenceDivider()
+
               val playerGradientOpacity by playerPrefs.playerGradientOpacity.collectAsState()
               SliderPreference(
                 value = playerGradientOpacity,

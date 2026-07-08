@@ -2176,6 +2176,10 @@ class PlayerActivity :
 
     viewModel.unpause()
 
+    if (playerPreferences.showControlsOnPlay.get()) {
+      viewModel.showControls()
+    }
+
     if (subtitlesPreferences.autoloadMatchingSubtitles.get()) {
       lifecycleScope.launch {
         // For network files played via proxy (SMB/WebDAV/FTP), use the original network file path

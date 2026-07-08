@@ -868,6 +868,61 @@
     <string name="community_hub">Community Hub</string>
     <string name="connect_social_media">Connect with us on social media</string>
 
+    <!-- Sort Dialog UI Strings (previously hardcoded) -->
+    <string name="sort_dialog_sort_by">Sort by</string>
+    <string name="sort_dialog_filters">Filters</string>
+    <string name="sort_dialog_fields">Fields</string>
+    <string name="sort_dialog_view_mode">View Mode</string>
+    <string name="sort_dialog_layout">Layout</string>
+    <string name="sort_dialog_layout_list">List</string>
+    <string name="sort_dialog_layout_grid">Grid</string>
+    <string name="sort_dialog_view_mode_folder">Folder</string>
+    <string name="sort_dialog_view_mode_tree">Tree</string>
+    <string name="sort_dialog_view_mode_library">Library</string>
+    <string name="sort_dialog_filter_audio_files">Audio Files</string>
+    <string name="sort_dialog_field_video_thumbnails">Video Thumbnails</string>
+    <string name="sort_dialog_field_full_name">Full Name</string>
+    <string name="sort_dialog_field_path">Path</string>
+    <string name="sort_dialog_field_total_videos">Total Videos</string>
+    <string name="sort_dialog_field_total_duration">Total Duration</string>
+    <string name="sort_dialog_field_folder_size">Folder Size</string>
+    <string name="sort_dialog_field_file_size">File Size</string>
+    <string name="sort_dialog_field_resolution">Resolution</string>
+    <string name="sort_dialog_field_framerate">Framerate</string>
+    <string name="sort_dialog_field_date">Date</string>
+    <string name="sort_dialog_field_progress_bar">Progress Bar</string>
+    <string name="sort_dialog_field_subtitle_indicator">Subtitle Indicator</string>
+    <string name="sort_dialog_grid_columns">Grid Columns</string>
+    <string name="sort_dialog_folder_grid">Folder Grid</string>
+    <string name="sort_dialog_video_grid">Video Grid</string>
+    <string name="sort_dialog_columns_value">%1$d columns</string>
+    <string name="sort_dialog_grid_columns_orientation">Grid Columns (%1$s)</string>
+    <string name="sort_dialog_folder_grid_columns_orientation">Folder Grid Columns (%1$s)</string>
+    <string name="sort_dialog_video_grid_columns_orientation">Video Grid Columns (%1$s)</string>
+    <string name="sort_dialog_orientation_landscape">Landscape</string>
+    <string name="sort_dialog_orientation_portrait">Portrait</string>
+    <string name="sort_dialog_collapse">Collapse</string>
+    <string name="sort_dialog_toggle_sort_order">Toggle Sort Order</string>
+    <string name="sort_dialog_expand">Expand</string>
+    <!-- Sort order labels -->
+    <string name="sort_order_a_z">A-Z</string>
+    <string name="sort_order_z_a">Z-A</string>
+    <string name="sort_order_shortest">Shortest</string>
+    <string name="sort_order_longest">Longest</string>
+    <string name="sort_order_oldest">Oldest</string>
+    <string name="sort_order_newest">Newest</string>
+    <string name="sort_order_smallest">Smallest</string>
+    <string name="sort_order_largest">Largest</string>
+    <string name="sort_order_biggest">Biggest</string>
+    <string name="sort_order_asc">Asc</string>
+    <string name="sort_order_desc">Desc</string>
+    <!-- Sort type display names (BrowserPreferences enums) -->
+    <string name="sort_type_title">Title</string>
+    <string name="sort_type_duration">Duration</string>
+    <string name="sort_type_date">Date</string>
+    <string name="sort_type_size">Size</string>
+    <string name="sort_type_count">Count</string>
+
     <!-- Sort Dialog Strings -->
     <string name="sort_and_view_options">Sort &amp; View Options</string>
     <string name="view_options">View Options</string>

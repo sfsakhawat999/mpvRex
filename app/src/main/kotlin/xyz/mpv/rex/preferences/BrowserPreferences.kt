@@ -1,5 +1,6 @@
 package xyz.mpv.rex.preferences
 
+import xyz.mpv.rex.R
 import xyz.mpv.rex.preferences.preference.PreferenceStore
 import xyz.mpv.rex.preferences.preference.getEnum
 
@@ -66,7 +67,6 @@ class BrowserPreferences(
   val enableTabRecents = preferenceStore.getBoolean("enable_tab_recents", true)
   val enableTabPlaylists = preferenceStore.getBoolean("enable_tab_playlists", true)
   val enableTabNetwork = preferenceStore.getBoolean("enable_tab_network", true)
-  val playedNetworkLinks = preferenceStore.getString("played_network_links", "")
 }
 
 /**
@@ -101,6 +101,16 @@ enum class FolderSortType {
         Size -> "Size"
         VideoCount -> "Count"
       }
+
+  val displayNameResId: Int
+    get() =
+      when (this) {
+        Title -> R.string.sort_type_title
+        Duration -> R.string.sort_type_duration
+        Date -> R.string.sort_type_date
+        Size -> R.string.sort_type_size
+        VideoCount -> R.string.sort_type_count
+      }
 }
 
 /**
@@ -121,6 +131,15 @@ enum class VideoSortType {
         Date -> "Date"
         Size -> "Size"
       }
+
+  val displayNameResId: Int
+    get() =
+      when (this) {
+        Title -> R.string.sort_type_title
+        Duration -> R.string.sort_type_duration
+        Date -> R.string.sort_type_date
+        Size -> R.string.sort_type_size
+      }
 }
 
 /**
@@ -139,6 +158,14 @@ enum class FolderViewMode {
         FileManager -> "Tree View"
         MediaLibrary -> "Media Library"
       }
+
+  val displayNameResId: Int
+    get() =
+      when (this) {
+        AlbumView -> R.string.sort_dialog_view_mode_folder
+        FileManager -> R.string.sort_dialog_view_mode_tree
+        MediaLibrary -> R.string.sort_dialog_view_mode_library
+      }
 }
 
 enum class MediaLayoutMode {
@@ -150,5 +177,11 @@ enum class MediaLayoutMode {
     get() = when (this) {
       LIST -> "List"
       GRID -> "Grid"
+    }
+
+  val displayNameResId: Int
+    get() = when (this) {
+      LIST -> R.string.sort_dialog_layout_list
+      GRID -> R.string.sort_dialog_layout_grid
     }
 }

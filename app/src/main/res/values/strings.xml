@@ -861,6 +861,12 @@
     <string name="more_options">More options</string>
     <string name="move">Move</string>
     <string name="mark_as">Mark as</string>
+    <string name="mark_as_last_played">Last Played</string>
+    <string name="mark_as_last_played_desc">Move to top of Recently Played</string>
+    <string name="mark_as_finished">Finished</string>
+    <string name="mark_as_finished_desc">Mark as fully watched</string>
+    <string name="mark_as_none">None</string>
+    <string name="mark_as_none_desc">Remove all marks and watch history</string>
     <string name="folders_count">Folders (%1$d)</string>
     <string name="media_count">Media (%1$d)</string>
     <string name="drag_to_reorder">Drag to reorder</string>

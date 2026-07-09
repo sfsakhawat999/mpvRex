@@ -796,6 +796,12 @@
     <string name="more_options">المزيد من الخيارات</string>
     <string name="move">نقل</string>
     <string name="mark_as">وسّم بـ</string>
+    <string name="mark_as_last_played">آخر تشغيل</string>
+    <string name="mark_as_last_played_desc">نقل إلى أعلى قائمة المشغَّلة مؤخراً</string>
+    <string name="mark_as_finished">منتهي</string>
+    <string name="mark_as_finished_desc">وسّم بوصفه مشاهَداً بالكامل</string>
+    <string name="mark_as_none">بلا وسم</string>
+    <string name="mark_as_none_desc">إزالة جميع الوسوم وسجل المشاهدة</string>
     <string name="folders_count">المجلدات (%1$d)</string>
     <string name="media_count">الوسائط (%1$d)</string>
     <string name="drag_to_reorder">اسحب لإعادة الترتيب</string>

@@ -25,8 +25,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import xyz.mpv.rex.R
 import xyz.mpv.rex.utils.history.MarkAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +62,7 @@ fun MarkAsBottomSheet(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Mark as",
+                    text = stringResource(R.string.mark_as),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -71,20 +73,20 @@ fun MarkAsBottomSheet(
 
             MarkAsRow(
                 icon = Icons.Filled.History,
-                label = "Last Played",
-                description = "Move to top of Recently Played",
+                label = stringResource(R.string.mark_as_last_played),
+                description = stringResource(R.string.mark_as_last_played_desc),
                 onClick = { onMarkAs(MarkAsState.LastPlayed); onDismiss() },
             )
             MarkAsRow(
                 icon = Icons.Filled.CheckCircle,
-                label = "Finished",
-                description = "Mark as fully watched",
+                label = stringResource(R.string.mark_as_finished),
+                description = stringResource(R.string.mark_as_finished_desc),
                 onClick = { onMarkAs(MarkAsState.Finished); onDismiss() },
             )
             MarkAsRow(
                 icon = Icons.Filled.Cancel,
-                label = "None",
-                description = "Remove all marks and watch history",
+                label = stringResource(R.string.mark_as_none),
+                description = stringResource(R.string.mark_as_none_desc),
                 onClick = { onMarkAs(MarkAsState.None); onDismiss() },
             )
         }

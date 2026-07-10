@@ -64,7 +64,7 @@ fun SleepTimerSheet(
         .padding(vertical = 8.dp),
       verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-      
+
       // Title and Value display (centered Column matching PlaybackSpeedSheet)
       Column(
         modifier = Modifier
@@ -201,7 +201,7 @@ fun SleepTimerSheet(
               onDismissRequest()
             },
           ) {
-            Text(text = "Start Timer")
+            Text(text = stringResource(R.string.timer_start))
           }
           Button(
             onClick = onDismissRequest,

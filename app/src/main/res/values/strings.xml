@@ -942,4 +942,8 @@
     <string name="btn_label_ambient_mode">Ambience Mode</string>
     <string name="btn_label_sleep_timer">Sleep Timer</string>
     <string name="btn_label_none">None</string>
+
+
+    <string name="timer_start">Start Timer</string>
+    <string name="slide_to_unlock">Slide to Unlock</string>
 </resources>

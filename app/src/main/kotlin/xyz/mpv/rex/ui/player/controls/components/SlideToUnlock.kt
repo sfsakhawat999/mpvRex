@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -48,13 +49,13 @@ fun SlideToUnlock(
   onDraggingChanged: (Boolean) -> Unit = {},
 ) {
   val coroutineScope = rememberCoroutineScope()
-  
+
   var containerWidthPx by remember { mutableFloatStateOf(0f) }
   val sliderSize = 56.dp
-  
+
   val offsetX = remember { Animatable(0f) }
   var isDragging by remember { mutableStateOf(false) }
-  
+
   Box(
     modifier = modifier
       .width(200.dp)
@@ -69,7 +70,7 @@ fun SlideToUnlock(
     val sliderSizePx = containerWidthPx * (56f / 192f) // Accounting for padding (200 - 8)
     val maxOffset = if (containerWidthPx > 0f) containerWidthPx - sliderSizePx else 0f
     val unlockThreshold = if (maxOffset > 0f) maxOffset * 0.85f else Float.MAX_VALUE
-    
+
     // Background text - slightly to the right
     Box(
       modifier = Modifier
@@ -79,17 +80,17 @@ fun SlideToUnlock(
       contentAlignment = Alignment.Center,
     ) {
       Text(
-        text = "Slide to Unlock",
+        text = stringResource(R.string.slide_to_unlock),
         color = Color.White.copy(alpha = 0.7f),
         fontSize = 16.sp,
         fontWeight = FontWeight.Medium,
       )
     }
-    
+
     // Slider button
     val progress = if (maxOffset > 0f) (offsetX.value / maxOffset).coerceIn(0f, 1f) else 0f
     val showUnlockIcon = progress > 0.5f
-    
+
     Box(
       modifier = Modifier
         .offset { IntOffset(offsetX.value.roundToInt(), 0) }
@@ -98,7 +99,7 @@ fun SlideToUnlock(
         .background(MaterialTheme.colorScheme.primary)
         .pointerInput(containerWidthPx) {
           if (containerWidthPx <= 0f) return@pointerInput
-          
+
           detectHorizontalDragGestures(
             onDragStart = {
               isDragging = true
@@ -147,7 +148,7 @@ fun SlideToUnlock(
       ) { showUnlock ->
         Icon(
           imageVector = if (showUnlock) Icons.Filled.LockOpen else Icons.Filled.Lock,
-          contentDescription = "Slide to unlock",
+          contentDescription = stringResource(R.string.slide_to_unlock),
           tint = Color.White,
           modifier = Modifier.size(28.dp),
         )

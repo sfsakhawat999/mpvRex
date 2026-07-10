@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import xyz.mpv.rex.R
 
 @Composable
 fun SlideToUnlock(

@@ -869,4 +869,8 @@
     <string name="btn_label_ambient_mode">الوضع السينيمائي</string>
     <string name="btn_label_sleep_timer">مؤقت النوم</string>
     <string name="btn_label_none">لا شيء</string>
+
+
+    <string name="timer_start">بدء المؤقت</string>
+    <string name="slide_to_unlock">اسحب لفتح القفل</string>
 </resources>

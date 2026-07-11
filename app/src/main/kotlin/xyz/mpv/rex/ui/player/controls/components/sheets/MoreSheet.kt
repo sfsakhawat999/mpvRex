@@ -119,7 +119,11 @@ fun MoreSheet(
     }
   }
 
-  val tabs = listOf("Controls", "Settings", "Interaction")
+  val tabs = listOf(
+    stringResource(R.string.player_sheets_tab_controls),
+    stringResource(R.string.player_sheets_tab_settings),
+    stringResource(R.string.player_sheets_tab_interaction),
+  )
 
   PlayerSheet(
     onDismissRequest,
@@ -186,7 +190,7 @@ fun MoreSheet(
           2 -> InteractionTab()
         }
       }
-      
+
       Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
     }
   }
@@ -206,13 +210,13 @@ fun SettingsTab(
   val decoderPreferences = koinInject<DecoderPreferences>()
   val anime4kManager = koinInject<Anime4KManager>()
   val statisticsPage by advancedPreferences.enabledStatisticsPage.collectAsState()
-  
+
   val enableAnime4K by decoderPreferences.enableAnime4K.collectAsState()
   val anime4kMode by decoderPreferences.anime4kMode.collectAsState()
   val anime4kQuality by decoderPreferences.anime4kQuality.collectAsState()
   val gpuNext by decoderPreferences.gpuNext.collectAsState()
   val useVulkan by decoderPreferences.useVulkan.collectAsState()
-  
+
   val scope = rememberCoroutineScope()
   val activity = LocalContext.current as PlayerActivity
 
@@ -303,7 +307,7 @@ fun SettingsTab(
           )
         }
       }
-      
+
       // Shaders Controls
       if (enableAnime4K && (!gpuNext || useVulkan)) {
         // Auto-detect resolution to disable for 4K+
@@ -317,10 +321,10 @@ fun SettingsTab(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
-        
+
         if (isHighRes) {
             Text(
-                text = "Not available for 4K/8K video",
+                text = stringResource(R.string.anime4k_not_available_high_res),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 4.dp)
@@ -338,7 +342,7 @@ fun SettingsTab(
               leadingIcon = null,
               onClick = {
                 decoderPreferences.anime4kMode.set(mode.name)
-                
+
                 // Apply shaders immediately (runtime change)
                 scope.launch(Dispatchers.IO) {
                   runCatching {
@@ -475,16 +479,16 @@ fun ControlsTab(
   val buttons = remember(moreSheetControlsPref, visibleOnScreen, chapters, hasPlaylistSupport) {
       // Start with buttons the user explicitly wants in the More Sheet (respect order)
       val userOrderedMoreButtons = appearancePreferences.parseButtons(moreSheetControlsPref, mutableSetOf())
-      
+
       // Calculate "Orphaned" buttons: items in ALL buttons that are NOT on screen AND NOT in the More Sheet pref
       val allAvailable = xyz.mpv.rex.preferences.allPlayerButtons
       val orphanedButtons = allAvailable.filter { it !in visibleOnScreen && it !in userOrderedMoreButtons }
-      
+
       // Combine them: User Order first, then the rest
       (userOrderedMoreButtons + orphanedButtons).filter { button ->
           // Don't show if already visible on screen
           if (visibleOnScreen.contains(button)) return@filter false
-          
+
           // Functional filters (don't show buttons that can't work)
           when (button) {
               PlayerButton.SHUFFLE -> hasPlaylistSupport
@@ -503,7 +507,7 @@ fun ControlsTab(
   }
   val currentZoom by viewModel.videoZoom.collectAsState()
   val aspect by viewModel.videoAspect.collectAsState()
-  
+
   val activity = LocalContext.current as PlayerActivity
   val mpvDecoder by MPVLib.propString["hwdec-current"].collectAsState("")
   val decoder by remember { derivedStateOf { xyz.mpv.rex.ui.player.Decoder.getDecoderFromValue(mpvDecoder ?: "auto") } }
@@ -531,7 +535,7 @@ fun ControlsTab(
           .verticalScroll(rememberScrollState())
   ) {
       Text(
-          text = "Extended Controls",
+          text = stringResource(R.string.player_sheets_extended_controls_title),
           style = MaterialTheme.typography.titleLarge,
           modifier = Modifier.padding(bottom = MaterialTheme.spacing.medium)
       )
@@ -617,7 +621,7 @@ fun InteractionTab() {
       checked = showSeekBarWhenSeeking,
       onCheckedChange = { playerPreferences.showSeekBarWhenSeeking.set(it) }
     )
-    
+
     InteractionSwitch(
       label = stringResource(R.string.pref_gesture_use_single_tap_for_center_title),
       description = stringResource(R.string.pref_gesture_use_single_tap_for_center_summary),

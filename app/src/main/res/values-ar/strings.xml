@@ -874,6 +874,12 @@
     <string name="timer_start">بدء المؤقت</string>
     <string name="slide_to_unlock">اسحب لفتح القفل</string>
 
+    <string name="player_sheets_tab_controls">التحكم</string>
+    <string name="player_sheets_tab_settings">الإعدادات</string>
+    <string name="player_sheets_tab_interaction">التفاعل</string>
+    <string name="anime4k_not_available_high_res">غير متوفر لفيديو 4K/8K</string>
+    <string name="player_sheets_extended_controls_title">أدوات تحكم إضافية</string>
+
     <string name="storage_access_required">الوصول للتخزين مطلوب</string>
     <string name="allow_access">السماح بالوصول</string>
     <string name="why_do_i_see_this">لماذا أرى هذا؟</string>

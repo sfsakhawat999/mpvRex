@@ -946,4 +946,24 @@
 
     <string name="timer_start">Start Timer</string>
     <string name="slide_to_unlock">Slide to Unlock</string>
+    
+    <string name="storage_access_required">Storage Access Required</string>
+    <string name="allow_access">ALLOW ACCESS</string>
+    <string name="why_do_i_see_this">Why do I see this?</string>
+    <string name="why_this_permission_is_needed">Why this permission is needed</string>
+    <string name="permission_explanation_playstore_intro">mpvRex needs access to your video files to provide its core functionality as a media player.</string>
+    <string name="permission_used_exclusively_for">The permission is used exclusively for:</string>
+    <string name="permission_usage_bullet_list">• Discovering and displaying your video files\n• Playing media content\n• Loading subtitle files</string>
+    <string name="permission_explanation_standard_intro">mpvRex has always required storage access permission as it\'s essential for the app to find all media and subtitle files on your device, including the ones that are not supported by the system.</string>
+    <string name="permission_security_policy_change">However, due to a change in security policy, apps built for Android 11 and above now require additional permission to continue accessing the same.</string>
+    <string name="permission_privacy_assurance_standard">Please know that this permission is only used for the auto-discovery of media/subtitle files on your device and will not allow us to access the private data files stored by other apps in any way.</string>
+    <string name="opensource_github_notice">mpvRex is an open source project. You can review the source code and verify how permissions are used by visiting our GitHub repository at:</string>
+    <string name="privacy_assurance_final">Be rest assured, your privacy is our utmost priority, and we neither access your files for other purposes nor transfer or store them to our servers. They remain safe on your device.</string>
+    
+    <string name="permission_required_photos_videos">mpvRex requires \"Photos and videos\" permission to access and play your video files stored on your device.</string>
+    <string name="permission_required_storage">mpvRex requires \"Storage\" permission to access and play your media files stored on your device.</string>
+    <string name="permission_required_all_files">mpvRex requires \"All file access\" permission to discover media and subtitles on your device due to a change in security policy in Android 11 and later versions.</string>
+    <string name="permission_explanation_tiramisu_plus">On Android 13 and above, this permission allows the app to read video files from your device\'s storage, including Downloads, Movies, and DCIM folders.</string>
+    <string name="permission_explanation_pre_tiramisu">This permission allows the app to read media files from your device\'s storage to play videos and audio.</string>
+
 </resources>

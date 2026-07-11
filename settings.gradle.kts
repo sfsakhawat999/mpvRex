@@ -18,10 +18,13 @@ dependencyResolutionManagement {
   repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
   repositories {
     google()
+    mavenLocal()
     mavenCentral()
+    maven(url = "https://sfsakhawat999.github.io/mpvRex-libmpv")
     maven(url = "https://www.jitpack.io") {
       content {
         // Only use JitPack for specific dependencies to avoid unnecessary checks
+        includeGroup("com.github.sfsakhawat999")
         includeGroup("io.github.abdallahmehiz")
         includeGroup("com.github.abdallahmehiz")
         includeGroup("com.github.K1rakishou")

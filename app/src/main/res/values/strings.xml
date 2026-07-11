@@ -946,6 +946,12 @@
 
     <string name="timer_start">Start Timer</string>
     <string name="slide_to_unlock">Slide to Unlock</string>
+
+    <string name="player_sheets_tab_controls">Controls</string>
+    <string name="player_sheets_tab_settings">Settings</string>
+    <string name="player_sheets_tab_interaction">Interaction</string>
+    <string name="anime4k_not_available_high_res">Not available for 4K/8K video</string>
+    <string name="player_sheets_extended_controls_title">Extended Controls</string>
     
     <string name="storage_access_required">Storage Access Required</string>
     <string name="allow_access">ALLOW ACCESS</string>

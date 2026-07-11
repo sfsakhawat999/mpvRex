@@ -131,7 +131,7 @@ fun PermissionDeniedState(
 
         // Title
         Text(
-          text = "Storage Access Required",
+          text = stringResource(R.string.storage_access_required),
           style = MaterialTheme.typography.headlineMedium,
           fontWeight = FontWeight.Bold,
           textAlign = TextAlign.Center,
@@ -156,12 +156,12 @@ fun PermissionDeniedState(
             Text(
               text = if (isPlayStoreBuild) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                  "mpvRex requires \"Photos and videos\" permission to access and play your video files stored on your device."
+                  stringResource(R.string.permission_required_photos_videos)
                 } else {
-                  "mpvRex requires \"Storage\" permission to access and play your media files stored on your device."
+                  stringResource(R.string.permission_required_storage)
                 }
               } else {
-                "mpvRex requires \"All file access\" permission to discover media and subtitles on your device due to a change in security policy in Android 11 and later versions."
+                stringResource(R.string.permission_required_all_files)
               },
               style = MaterialTheme.typography.bodyLarge,
               color = MaterialTheme.colorScheme.onSurface,
@@ -203,7 +203,7 @@ fun PermissionDeniedState(
           shape = RoundedCornerShape(16.dp),
         ) {
           Text(
-            text = "ALLOW ACCESS",
+            text = stringResource(R.string.allow_access),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
           )
@@ -222,7 +222,7 @@ fun PermissionDeniedState(
           )
           Spacer(modifier = Modifier.width(6.dp))
           Text(
-            text = "Why do I see this?",
+            text = stringResource(R.string.why_do_i_see_this),
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
           )
@@ -249,7 +249,7 @@ fun PermissionDeniedState(
       },
       title = {
         Text(
-          text = "Why this permission is needed",
+          text = stringResource(R.string.why_this_permission_is_needed),
           style = MaterialTheme.typography.headlineSmall,
           fontWeight = FontWeight.Bold,
         )
@@ -265,56 +265,56 @@ fun PermissionDeniedState(
           if (isPlayStoreBuild) {
             // Play Store build explanation
             Text(
-              text = "mpvRex needs access to your video files to provide its core functionality as a media player.",
+              text = stringResource(R.string.permission_explanation_playstore_intro),
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             Text(
               text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                "On Android 13 and above, this permission allows the app to read video files from your device's storage, including Downloads, Movies, and DCIM folders."
+                stringResource(R.string.permission_explanation_tiramisu_plus)
               } else {
-                "This permission allows the app to read media files from your device's storage to play videos and audio."
+                stringResource(R.string.permission_explanation_pre_tiramisu)
               },
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             Text(
-              text = "The permission is used exclusively for:",
+              text = stringResource(R.string.permission_used_exclusively_for),
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
               fontWeight = FontWeight.Medium,
             )
 
             Text(
-              text = "• Discovering and displaying your video files\n• Playing media content\n• Loading subtitle files",
+              text = stringResource(R.string.permission_usage_bullet_list),
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           } else {
             // Standard build explanation
             Text(
-              text = "mpvRex has always required storage access permission as it's essential for the app to find all media and subtitle files on your device, including the ones that are not supported by the system.",
+              text = stringResource(R.string.permission_explanation_standard_intro),
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             Text(
-              text = "However, due to a change in security policy, apps built for Android 11 and above now require additional permission to continue accessing the same.",
+              text = stringResource(R.string.permission_security_policy_change),
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             Text(
-              text = "Please know that this permission is only used for the auto-discovery of media/subtitle files on your device and will not allow us to access the private data files stored by other apps in any way.",
+              text = stringResource(R.string.permission_privacy_assurance_standard),
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
 
           Text(
-            text = "mpvRex is an open source project. You can review the source code and verify how permissions are used by visiting our GitHub repository at:",
+            text = stringResource(R.string.opensource_github_notice),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
@@ -356,7 +356,7 @@ fun PermissionDeniedState(
           )
 
           Text(
-            text = "Be rest assured, your privacy is our utmost priority, and we neither access your files for other purposes nor transfer or store them to our servers. They remain safe on your device.",
+            text = stringResource(R.string.privacy_assurance_final),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Medium,

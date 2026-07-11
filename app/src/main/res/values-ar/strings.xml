@@ -873,4 +873,24 @@
 
     <string name="timer_start">بدء المؤقت</string>
     <string name="slide_to_unlock">اسحب لفتح القفل</string>
+
+    <string name="storage_access_required">الوصول للتخزين مطلوب</string>
+    <string name="allow_access">السماح بالوصول</string>
+    <string name="why_do_i_see_this">لماذا أرى هذا؟</string>
+    <string name="why_this_permission_is_needed">لماذا هذا الإذن مطلوب</string>
+    <string name="permission_explanation_playstore_intro">يحتاج mpvRex إلى الوصول لملفات الفيديو الخاصة بك لتوفير وظيفته الأساسية كمشغل وسائط.</string>
+    <string name="permission_used_exclusively_for">يُستخدم هذا الإذن حصرياً من أجل:</string>
+    <string name="permission_usage_bullet_list">• اكتشاف وعرض ملفات الفيديو الخاصة بك\n• تشغيل المحتوى الإعلامي\n• تحميل ملفات الترجمة</string>
+    <string name="permission_explanation_standard_intro">يتطلب mpvRex دائماً إذن الوصول للتخزين لأنه ضروري لعثور التطبيق على جميع ملفات الوسائط والترجمة الموجودة على جهازك، بما فيها الملفات غير المدعومة من طرف النظام.</string>
+    <string name="permission_security_policy_change">مع ذلك، بسبب تغيير في سياسة الأمان، تتطلب التطبيقات المبنية لأندرويد 11 وما فوق الآن إذناً إضافياً لمواصلة الوصول لنفس الملفات.</string>
+    <string name="permission_privacy_assurance_standard">يرجى العلم أن هذا الإذن يُستخدم فقط للاكتشاف التلقائي لملفات الوسائط/الترجمة على جهازك، ولن يسمح لنا بالوصول لملفات البيانات الخاصة المخزنة من طرف تطبيقات أخرى بأي شكل من الأشكال.</string>
+    <string name="opensource_github_notice">mpvRex مشروع مفتوح المصدر. يمكنك مراجعة الكود المصدري والتحقق من كيفية استخدام الأذونات بزيارة مستودعنا على GitHub في:</string>
+    <string name="privacy_assurance_final">كن مطمئناً، خصوصيتك هي أولويتنا القصوى، ولا نصل لملفاتك لأغراض أخرى ولا ننقلها أو نخزنها في خوادمنا. تبقى آمنة على جهازك.</string>
+    
+    <string name="permission_required_photos_videos">يحتاج mpvRex إذن \"الصور والفيديوهات\" للوصول لملفات الفيديو المخزنة على جهازك وتشغيلها.</string>
+    <string name="permission_required_storage">يحتاج mpvRex إذن \"التخزين\" للوصول لملفات الوسائط المخزنة على جهازك وتشغيلها.</string>
+    <string name="permission_required_all_files">يحتاج mpvRex إذن \"الوصول لجميع الملفات\" لاكتشاف ملفات الوسائط والترجمة على جهازك بسبب تغيير في سياسة الأمان في أندرويد 11 والإصدارات الأحدث.</string>
+    <string name="permission_explanation_tiramisu_plus">في أندرويد 13 وما فوق، يسمح هذا الإذن للتطبيق بقراءة ملفات الفيديو من تخزين جهازك، بما في ذلك مجلدات التنزيلات والأفلام و DCIM.</string>
+    <string name="permission_explanation_pre_tiramisu">يسمح هذا الإذن للتطبيق بقراءة ملفات الوسائط من تخزين جهازك لتشغيل الفيديوهات والصوتيات.</string>
+
 </resources>

@@ -296,6 +296,7 @@ object PlayerControlsPreferencesScreen : Screen {
           item {
             val enableBounceAnimation by appearancePrefs.enableBounceAnimation.collectAsState()
             val hidePlayerButtonsBackground by appearancePrefs.hidePlayerButtonsBackground.collectAsState()
+            val enableGlassPlayerControls by appearancePrefs.enableGlassPlayerControls.collectAsState()
             val playerAlwaysDarkMode by appearancePrefs.playerAlwaysDarkMode.collectAsState()
             val playerTimeToDisappear by playerPrefs.playerTimeToDisappear.collectAsState()
             val predefinedTimeValues = listOf(500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000)
@@ -337,6 +338,23 @@ object PlayerControlsPreferencesScreen : Screen {
                 },
               )
               
+              PreferenceDivider()
+
+              SwitchPreference(
+                value = enableGlassPlayerControls,
+                onValueChange = { appearancePrefs.enableGlassPlayerControls.set(it) },
+                title = {
+                  Text(
+                    text = stringResource(id = R.string.pref_appearance_enable_glass_player_controls_title),
+                  )
+                },
+                summary = {
+                  Text(
+                    text = stringResource(id = R.string.pref_appearance_enable_glass_player_controls_summary),
+                  )
+                },
+              )
+
               PreferenceDivider()
 
               SwitchPreference(

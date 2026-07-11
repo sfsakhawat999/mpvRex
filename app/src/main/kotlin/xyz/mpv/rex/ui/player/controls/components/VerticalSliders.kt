@@ -33,13 +33,14 @@ import xyz.mpv.rex.preferences.AppearancePreferences
 import xyz.mpv.rex.preferences.preference.collectAsState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import xyz.mpv.rex.ui.player.controls.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -71,6 +72,7 @@ fun VerticalSlider(
   // Read Toggle for Bounce Animation from Preferences
   val appearancePrefs = koinInject<AppearancePreferences>()
   val enableBounceAnimation by appearancePrefs.enableBounceAnimation.collectAsState()
+  val enableGlass by appearancePrefs.enableGlassPlayerControls.collectAsState()
 
   val trackWidthAnim = remember { Animatable(22f) }
 
@@ -102,6 +104,35 @@ fun VerticalSlider(
 
   val trackWidth = trackWidthAnim.value.dp
 
+  val trackModifier = if (enableGlass) {
+    Modifier.glassSurface(
+      shape = RoundedCornerShape(16.dp),
+      backgroundColor = Color.White.copy(alpha = 0.05f),
+      borderColor = Color.White.copy(alpha = 0.15f),
+      borderWidth = 1.dp,
+      outerShadowColor = Color.Black.copy(alpha = 0.00f),
+      outerShadowBlur = 0.dp,
+      outerShadowOffsetX = 0.dp,
+      outerShadowOffsetY = 0.dp,
+      innerHighlightColor = Color.White.copy(alpha = 0.35f),
+      innerHighlightBlur = 5.dp,
+      innerHighlightOffsetX = (-2).dp,
+      innerHighlightOffsetY = (-2).dp,
+      innerShadowColor = Color.Black.copy(alpha = 0.35f),
+      innerShadowBlur = 5.dp,
+      innerShadowOffsetX = 2.dp,
+      innerShadowOffsetY = 2.dp
+    )
+  } else {
+    Modifier
+      .background(MaterialTheme.colorScheme.background)
+      .border(
+        width = 1.dp,
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+        shape = RoundedCornerShape(16.dp),
+      )
+  }
+
   // Outer fixed-width container prevents layout shifts
   Box(
     modifier =
@@ -116,12 +147,7 @@ fun VerticalSlider(
         .fillMaxHeight()
         .width(trackWidth)
         .clip(RoundedCornerShape(16.dp))
-        .background(MaterialTheme.colorScheme.background)
-        .border(
-          width = 1.dp,
-          color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-          shape = RoundedCornerShape(16.dp),
-        ),
+        .then(trackModifier),
       contentAlignment = Alignment.BottomCenter,
     ) {
       val targetHeight by animateFloatAsState(percentage(coercedValue, range), label = "vsliderheight")
@@ -161,6 +187,7 @@ fun VerticalSlider(
   // Read Toggle for Bounce Animation from Preferences
   val appearancePrefs = koinInject<AppearancePreferences>()
   val enableBounceAnimation by appearancePrefs.enableBounceAnimation.collectAsState()
+  val enableGlass by appearancePrefs.enableGlassPlayerControls.collectAsState()
 
   val trackWidthAnim = remember { Animatable(22f) }
 
@@ -192,6 +219,35 @@ fun VerticalSlider(
 
   val trackWidth = trackWidthAnim.value.dp
 
+  val trackModifier = if (enableGlass) {
+    Modifier.glassSurface(
+      shape = RoundedCornerShape(16.dp),
+      backgroundColor = Color.White.copy(alpha = 0.05f),
+      borderColor = Color.White.copy(alpha = 0.15f),
+      borderWidth = 1.dp,
+      outerShadowColor = Color.Black.copy(alpha = 0.00f),
+      outerShadowBlur = 0.dp,
+      outerShadowOffsetX = 0.dp,
+      outerShadowOffsetY = 0.dp,
+      innerHighlightColor = Color.White.copy(alpha = 0.35f),
+      innerHighlightBlur = 5.dp,
+      innerHighlightOffsetX = (-2).dp,
+      innerHighlightOffsetY = (-2).dp,
+      innerShadowColor = Color.Black.copy(alpha = 0.35f),
+      innerShadowBlur = 5.dp,
+      innerShadowOffsetX = 2.dp,
+      innerShadowOffsetY = 2.dp
+    )
+  } else {
+    Modifier
+      .background(MaterialTheme.colorScheme.background)
+      .border(
+        width = 1.dp,
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+        shape = RoundedCornerShape(16.dp),
+      )
+  }
+
   // Outer fixed-width container
   Box(
     modifier = modifier
@@ -205,12 +261,7 @@ fun VerticalSlider(
         .fillMaxHeight()
         .width(trackWidth)
         .clip(RoundedCornerShape(16.dp))
-        .background(MaterialTheme.colorScheme.background)
-        .border(
-          width = 1.dp,
-          color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-          shape = RoundedCornerShape(16.dp),
-        ),
+        .then(trackModifier),
       contentAlignment = Alignment.BottomCenter,
     ) {
       val targetHeight by animateFloatAsState(percentage(coercedValue, range), label = "vsliderheight")

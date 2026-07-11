@@ -240,6 +240,24 @@ object AppearancePreferencesScreen : Screen {
 
                             PreferenceDivider()
 
+                            val enableGlassPlayerControls by preferences.enableGlassPlayerControls.collectAsState()
+                            SwitchPreference(
+                                value = enableGlassPlayerControls,
+                                onValueChange = { preferences.enableGlassPlayerControls.set(it) },
+                                title = {
+                                    Text(
+                                        text = stringResource(id = R.string.pref_appearance_enable_glass_player_controls_title),
+                                    )
+                                },
+                                summary = {
+                                    Text(
+                                        text = stringResource(id = R.string.pref_appearance_enable_glass_player_controls_summary),
+                                    )
+                                },
+                            )
+
+                            PreferenceDivider()
+
                             val playerAlwaysDarkMode by preferences.playerAlwaysDarkMode.collectAsState()
                             SwitchPreference(
                                 value = playerAlwaysDarkMode,

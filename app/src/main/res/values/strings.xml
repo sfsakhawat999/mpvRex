@@ -40,6 +40,8 @@
     <string name="pref_appearance_enable_bounce_animation_summary">Seekbar and volume/brightness sliders animate with a bounce effect</string>
     <string name="pref_appearance_hide_player_buttons_background_title">Hide player buttons background</string>
     <string name="pref_appearance_hide_player_buttons_background_summary">Hide the background of all player control buttons</string>
+    <string name="pref_appearance_enable_glass_player_controls_title">Glass player controls</string>
+    <string name="pref_appearance_enable_glass_player_controls_summary">Apply glass-morphism style to player control buttons</string>
     <string name="pref_appearance_match_player_controls_to_theme_title">Match player controls to theme</string>
     <string name="pref_appearance_match_player_controls_to_theme_summary">Color player buttons using the current theme colors</string>
     <string name="pref_appearance_player_always_dark_mode_title">Player always dark mode</string>

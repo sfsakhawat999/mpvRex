@@ -49,26 +49,47 @@ fun CurrentChapter(
   onClick: () -> Unit = {},
 ) {
   val appearancePreferences = koinInject<AppearancePreferences>()
+  val enableGlass by appearancePreferences.enableGlassPlayerControls.collectAsState()
+
+  val glassModifier = if (enableGlass) {
+    Modifier.glassSurface(
+      shape = RoundedCornerShape(50),
+      backgroundColor = Color.White.copy(alpha = 0.05f),
+      borderColor = Color.White.copy(alpha = 0.15f),
+      borderWidth = 1.dp,
+      outerShadowColor = Color.Black.copy(alpha = 0.00f),
+      outerShadowBlur = 0.dp,
+      outerShadowOffsetX = 0.dp,
+      outerShadowOffsetY = 0.dp,
+      innerHighlightColor = Color.White.copy(alpha = 0.35f),
+      innerHighlightBlur = 5.dp,
+      innerHighlightOffsetX = (-2).dp,
+      innerHighlightOffsetY = (-2).dp,
+      innerShadowColor = Color.Black.copy(alpha = 0.35f),
+      innerShadowBlur = 5.dp,
+      innerShadowOffsetX = 2.dp,
+      innerShadowOffsetY = 2.dp
+    )
+  } else {
+    Modifier
+  }
 
   Surface(
     modifier =
       modifier
+        .then(glassModifier)
         .height(40.dp)
         .widthIn(max = 220.dp)
         .clip(RoundedCornerShape(50))
         .clickable(onClick = onClick),
     shape = RoundedCornerShape(50),
-    color =
-        MaterialTheme.colorScheme.surfaceContainer.copy(
-          alpha = 0.55f,
-        ),
+    color = if (enableGlass) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.55f),
     contentColor = MaterialTheme.colorScheme.onSurface,
     tonalElevation = 0.dp,
-    border =
-        BorderStroke(
-          1.dp,
-          MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-        ),
+    border = if (enableGlass) null else BorderStroke(
+      1.dp,
+      MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+    ),
   ) {
     AnimatedContent(
       targetState = chapter,

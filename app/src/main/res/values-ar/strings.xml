@@ -929,5 +929,35 @@
     <string name="ambience_mode">وضع الإضاءة المحيطية</string>
     <string name="sleep_timer">مؤقت النوم</string>
 
+    
+         <!-- Preference section headers -->
+    <string name="pref_layout_landscape_controls_header">أدوات التحكم في وضع أفقي</string>
+    <string name="pref_layout_portrait_controls_header">أدوات التحكم في وضع عمودي</string>
+    <string name="pref_layout_more_sheet_controls_header">أدوات التحكم في القائمة الإضافية</string>
+    <string name="pref_layout_more_sheet_controls_title">الأزرار في تبويب أدوات التحكم</string>
+    <string name="pref_seekbar_style_header">شكل شريط التقدّم</string>
+    <string name="pref_controls_layout_header">تخطيط أدوات التحكم</string>
+    <string name="pref_player_appearance_header">المظهر</string>
 
+       <!-- Controls Layout: below/above seekbar -->
+    <string name="pref_controls_layout_below_seekbar_title">أدوات التحكم أسفل شريط التقدّم</string>
+    <string name="pref_controls_layout_below_seekbar_summary_true">تظهر أزرار التحكم أسفل شريط التقدّم</string>
+    <string name="pref_controls_layout_below_seekbar_summary_false">تظهر أزرار التحكم أعلى شريط التقدّم</string>
+
+        <!-- Appearance section -->
+    <string name="pref_appearance_show_controls_on_play_title">إظهار أدوات التحكم عند بدء التشغيل</string>
+    <string name="pref_appearance_show_controls_on_play_summary">إظهار طبقة أدوات التحكم عند بدء تشغيل الفيديو</string>
+    <string name="pref_appearance_player_gradient_opacity_title">شفافية التدرّج في أدوات التحكم</string>
+    <string name="pref_appearance_player_gradient_opacity_current">الحالي: %1$d%%</string>
+
+        <!-- Custom hide-time dialog -->
+    <string name="pref_player_display_custom_hide_time_dialog_message">أدخل زمن الإخفاء المخصّص بالميلي ثانية</string>
+    <string name="pref_player_display_time_ms_format">%1$d ms</string>
+    <string name="pref_player_display_custom_time_summary">مخصّص (%1$d ms)</string>
+    
+        <!-- Generic reusable strings -->
+    <string name="generic_none">بلا</string>
+    <string name="generic_custom">مخصّص</string>
+    <string name="generic_edit_content_description">تعديل %1$s</string>
+    
 </resources>

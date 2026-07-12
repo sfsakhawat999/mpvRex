@@ -972,4 +972,34 @@
     <string name="permission_explanation_tiramisu_plus">On Android 13 and above, this permission allows the app to read video files from your device\'s storage, including Downloads, Movies, and DCIM folders.</string>
     <string name="permission_explanation_pre_tiramisu">This permission allows the app to read media files from your device\'s storage to play videos and audio.</string>
 
+        <!-- PlayerControlsShared -->
+    <string name="playlist_separator">• %1$s</string>
+    <string name="chapters">Chapters</string>
+    <string name="skip_seconds">Skip %1$ds</string>
+    <string name="playback_speed">Playback Speed</string>
+    <string name="screen_rotation">Rotation</string>
+    <string name="frame_nav">Frame Nav</string>
+    <string name="frame_navigation">Frame Navigation</string>
+    <string name="pip">PiP</string>
+    <string name="video_zoom">Video Zoom</string>
+    <string name="lock">Lock</string>
+    <string name="audio">Audio</string>
+    <string name="subtitles">Subtitles</string>
+    <string name="repeat_off">Repeat Off</string>
+    <string name="repeat_one">Repeat One</string>
+    <string name="repeat_all">Repeat All</string>
+    <string name="shuffle_on">Shuffle On</string>
+    <string name="shuffle_off">Shuffle Off</string>
+    <string name="mirrored">Mirrored</string>
+    <string name="mirror">Mirror</string>
+    <string name="flipped">Flipped</string>
+    <string name="flip_vertical">Flip Vert</string>
+    <string name="flip_vertical_desc">Vertical Flip</string>
+    <string name="ab_loop_short">AB</string>
+    <string name="loop">Loop</string>
+    <string name="background_playback">Background</string>
+    <string name="ambient">Ambient</string>
+    <string name="ambience_mode">Ambience Mode</string>
+    <string name="sleep_timer">Sleep Timer</string>
+
 </resources>

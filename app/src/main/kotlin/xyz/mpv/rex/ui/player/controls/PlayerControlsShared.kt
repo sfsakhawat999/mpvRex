@@ -59,7 +59,10 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Surface as M3Surface
+import xyz.mpv.rex.ui.player.controls.components.glassSurface
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -1247,3 +1250,66 @@ fun RenderPlayerButton(
     }
   }
 }
+
+@Composable
+fun Surface(
+    modifier: Modifier = Modifier,
+    shape: androidx.compose.ui.graphics.Shape = androidx.compose.foundation.shape.CircleShape,
+    color: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified,
+    contentColor: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified,
+    tonalElevation: androidx.compose.ui.unit.Dp = 0.dp,
+    shadowElevation: androidx.compose.ui.unit.Dp = 0.dp,
+    border: androidx.compose.foundation.BorderStroke? = null,
+    content: @Composable () -> Unit
+) {
+    val appearancePreferences = org.koin.compose.koinInject<xyz.mpv.rex.preferences.AppearancePreferences>()
+    val enableGlass by appearancePreferences.enableGlassPlayerControls.collectAsState()
+    val hideBackground by appearancePreferences.hidePlayerButtonsBackground.collectAsState()
+    val matchTheme by appearancePreferences.matchPlayerControlsToTheme.collectAsState()
+
+    val activeSurfaceColor = when {
+        hideBackground -> androidx.compose.ui.graphics.Color.Transparent
+        matchTheme -> androidx.compose.material3.MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f)
+        else -> androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.75f)
+    }
+
+    val isActive = color == activeSurfaceColor
+    
+    val glassModifier = if (enableGlass && color != androidx.compose.ui.graphics.Color.Transparent) {
+        Modifier.glassSurface(
+            shape = shape as? RoundedCornerShape ?: androidx.compose.foundation.shape.CircleShape,
+            backgroundColor = if (isActive) androidx.compose.material3.MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.05f),
+            borderColor = if (isActive) androidx.compose.material3.MaterialTheme.colorScheme.primary.copy(alpha = 0.35f) else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.15f),
+            borderWidth = 1.dp,
+            outerShadowColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.00f),
+            outerShadowBlur = 0.dp,
+            outerShadowOffsetX = 0.dp,
+            outerShadowOffsetY = 0.dp,
+            innerHighlightColor = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.35f),
+            innerHighlightBlur = 5.dp,
+            innerHighlightOffsetX = (-2).dp,
+            innerHighlightOffsetY = (-2).dp,
+            innerShadowColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.35f),
+            innerShadowBlur = 5.dp,
+            innerShadowOffsetX = 2.dp,
+            innerShadowOffsetY = 2.dp
+        )
+    } else {
+        Modifier
+    }
+
+    val finalColor = if (enableGlass && color != androidx.compose.ui.graphics.Color.Transparent) androidx.compose.ui.graphics.Color.Transparent else color
+    val finalBorder = if (enableGlass && color != androidx.compose.ui.graphics.Color.Transparent) null else border
+
+    M3Surface(
+        modifier = modifier.then(glassModifier),
+        shape = shape,
+        color = finalColor,
+        contentColor = contentColor,
+        tonalElevation = tonalElevation,
+        shadowElevation = shadowElevation,
+        border = finalBorder,
+        content = content
+    )
+}
+

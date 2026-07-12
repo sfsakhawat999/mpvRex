@@ -584,6 +584,7 @@ fun InteractionTab() {
   val playerPreferences = koinInject<PlayerPreferences>()
 
   val hideBackground by appearancePreferences.hidePlayerButtonsBackground.collectAsState()
+  val enableGlass by appearancePreferences.enableGlassPlayerControls.collectAsState()
   val enableBounceAnimation by appearancePreferences.enableBounceAnimation.collectAsState()
   val preventSeekbarTap by gesturePreferences.preventSeekbarTap.collectAsState()
   val useSingleTapForCenter by gesturePreferences.useSingleTapForCenter.collectAsState()
@@ -648,6 +649,13 @@ fun InteractionTab() {
       description = stringResource(R.string.pref_appearance_hide_player_buttons_background_summary),
       checked = hideBackground,
       onCheckedChange = { appearancePreferences.hidePlayerButtonsBackground.set(it) }
+    )
+
+    InteractionSwitch(
+      label = stringResource(R.string.pref_appearance_enable_glass_player_controls_title),
+      description = stringResource(R.string.pref_appearance_enable_glass_player_controls_summary),
+      checked = enableGlass,
+      onCheckedChange = { appearancePreferences.enableGlassPlayerControls.set(it) }
     )
 
     InteractionSwitch(

@@ -899,4 +899,35 @@
     <string name="permission_explanation_tiramisu_plus">في أندرويد 13 وما فوق، يسمح هذا الإذن للتطبيق بقراءة ملفات الفيديو من تخزين جهازك، بما في ذلك مجلدات التنزيلات والأفلام و DCIM.</string>
     <string name="permission_explanation_pre_tiramisu">يسمح هذا الإذن للتطبيق بقراءة ملفات الوسائط من تخزين جهازك لتشغيل الفيديوهات والصوتيات.</string>
 
+        <!-- PlayerControlsShared -->
+    <string name="playlist_separator">• %1$s</string>
+    <string name="chapters">الفصول</string>
+    <string name="skip_seconds">تخطي %1$d ثانية</string>
+    <string name="playback_speed">سرعة التشغيل</string>
+    <string name="screen_rotation">التدوير</string>
+    <string name="frame_nav">تصفح الإطارات</string>
+    <string name="frame_navigation">التنقل بين الإطارات</string>
+    <string name="pip">صورة داخل صورة</string>
+    <string name="video_zoom">تقريب الفيديو</string>
+    <string name="lock">قفل</string>
+    <string name="audio">الصوت</string>
+    <string name="subtitles">الترجمة</string>
+    <string name="repeat_off">التكرار متوقف</string>
+    <string name="repeat_one">تكرار العنصر الواحد</string>
+    <string name="repeat_all">تكرار الكل</string>
+    <string name="shuffle_on">التشغيل العشوائي مفعّل</string>
+    <string name="shuffle_off">التشغيل العشوائي متوقف</string>
+    <string name="mirrored">معكوس أفقياً</string>
+    <string name="mirror">عكس أفقي</string>
+    <string name="flipped">معكوس عمودياً</string>
+    <string name="flip_vertical">عكس عمودي</string>
+    <string name="flip_vertical_desc">العكس العمودي</string>
+    <string name="ab_loop_short">AB</string>
+    <string name="loop">تكرار</string>
+    <string name="background_playback">التشغيل في الخلفية</string>
+    <string name="ambient">الوضع المحيطي</string>
+    <string name="ambience_mode">وضع الإضاءة المحيطية</string>
+    <string name="sleep_timer">مؤقت النوم</string>
+
+
 </resources>

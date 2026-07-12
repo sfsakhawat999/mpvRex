@@ -1,6 +1,7 @@
 package xyz.mpv.rex.ui.preferences
 
 // import androidx.compose.material.icons.outlined.VideoLabel // No longer needed here
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,491 +65,491 @@ import org.koin.compose.koinInject
 // Enum to identify which region we are editing
 @Serializable
 enum class ControlRegion {
-  TOP_RIGHT,
-  BOTTOM_RIGHT,
-  BOTTOM_LEFT,
-  PORTRAIT_BOTTOM,
-  MORE_SHEET,
+    TOP_RIGHT,
+    BOTTOM_RIGHT,
+    BOTTOM_LEFT,
+    PORTRAIT_BOTTOM,
+    MORE_SHEET,
 }
 
 @Serializable
 object PlayerControlsPreferencesScreen : Screen {
-  @OptIn(ExperimentalMaterial3Api::class)
-  @Composable
-  override fun Content() {
-    val backstack = LocalBackStack.current
-    val appearancePrefs = koinInject<AppearancePreferences>()
-    val playerPrefs = koinInject<PlayerPreferences>()
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    override fun Content() {
+        val backstack = LocalBackStack.current
+        val appearancePrefs = koinInject<AppearancePreferences>()
+        val playerPrefs = koinInject<PlayerPreferences>()
 
-    // Get the current state for all four regions
-    val topRState by appearancePrefs.topRightControls.collectAsState()
-    val bottomRState by appearancePrefs.bottomRightControls.collectAsState()
-    val bottomLState by appearancePrefs.bottomLeftControls.collectAsState()
-    val portraitBottomState by appearancePrefs.portraitBottomControls.collectAsState()
-    val moreSheetState by appearancePrefs.moreSheetControls.collectAsState()
+        // Get the current state for all four regions
+        val topRState by appearancePrefs.topRightControls.collectAsState()
+        val bottomRState by appearancePrefs.bottomRightControls.collectAsState()
+        val bottomLState by appearancePrefs.bottomLeftControls.collectAsState()
+        val portraitBottomState by appearancePrefs.portraitBottomControls.collectAsState()
+        val moreSheetState by appearancePrefs.moreSheetControls.collectAsState()
 
-    val topRightButtons = remember(topRState) {
-      appearancePrefs.parseButtons(topRState, mutableSetOf())
-    }
+        val topRightButtons = remember(topRState) {
+            appearancePrefs.parseButtons(topRState, mutableSetOf())
+        }
+        val bottomRightButtons = remember(bottomRState) {
+            appearancePrefs.parseButtons(bottomRState, mutableSetOf())
+        }
+        val bottomLeftButtons = remember(bottomLState) {
+            appearancePrefs.parseButtons(bottomLState, mutableSetOf())
+        }
+        val portraitBottomButtons = remember(portraitBottomState) {
+            appearancePrefs.parseButtons(portraitBottomState, mutableSetOf())
+        }
+        val moreSheetButtons = remember(moreSheetState, topRState, bottomRState, bottomLState, portraitBottomState) {
+            val manualOrder = appearancePrefs.parseButtons(moreSheetState, mutableSetOf())
+            val landscapeSet = (topRState.split(',') + bottomRState.split(',') + bottomLState.split(','))
+                .filter(String::isNotBlank)
+                .mapNotNull { try { PlayerButton.valueOf(it) } catch (_: Exception) { null } }
+                .toSet()
+            val portraitSet = portraitBottomState.split(',')
+                .filter(String::isNotBlank)
+                .mapNotNull { try { PlayerButton.valueOf(it) } catch (_: Exception) { null } }
+                .toSet()
 
-    val bottomRightButtons = remember(bottomRState) {
-      appearancePrefs.parseButtons(bottomRState, mutableSetOf())
-    }
+            // A button is only 'used' if it's in BOTH. If missing from EITHER, it's an orphan.
+            val intersection = landscapeSet.intersect(portraitSet)
+            val orphans = allPlayerButtons.filter { it !in intersection }
+            val orderedOrphans = manualOrder.filter { it in orphans }
+            val remainingOrphans = orphans.filter { it !in orderedOrphans }
+            orderedOrphans + remainingOrphans
+        }
 
-    val bottomLeftButtons = remember(bottomLState) {
-      appearancePrefs.parseButtons(bottomLState, mutableSetOf())
-    }
-
-    val portraitBottomButtons = remember(portraitBottomState) {
-      appearancePrefs.parseButtons(portraitBottomState, mutableSetOf())
-    }
-
-    val moreSheetButtons = remember(moreSheetState, topRState, bottomRState, bottomLState, portraitBottomState) {
-      val manualOrder = appearancePrefs.parseButtons(moreSheetState, mutableSetOf())
-      
-      val landscapeSet = (topRState.split(',') + bottomRState.split(',') + bottomLState.split(','))
-          .filter(String::isNotBlank)
-          .mapNotNull { try { PlayerButton.valueOf(it) } catch (_: Exception) { null } }
-          .toSet()
-          
-      val portraitSet = portraitBottomState.split(',')
-          .filter(String::isNotBlank)
-          .mapNotNull { try { PlayerButton.valueOf(it) } catch (_: Exception) { null } }
-          .toSet()
-
-      // A button is only 'used' if it's in BOTH. If missing from EITHER, it's an orphan.
-      val intersection = landscapeSet.intersect(portraitSet)
-      
-      val orphans = allPlayerButtons.filter { it !in intersection }
-      val orderedOrphans = manualOrder.filter { it in orphans }
-      val remainingOrphans = orphans.filter { it !in orderedOrphans }
-      
-      orderedOrphans + remainingOrphans
-    }
-
-    Scaffold(
-      topBar = {
-        TopAppBar(
-          title = { 
-            Text(
-              text = stringResource(id = R.string.pref_layout_title),
-              style = MaterialTheme.typography.headlineSmall,
-              fontWeight = FontWeight.ExtraBold,
-              color = MaterialTheme.colorScheme.primary,
-            )
-          },
-          navigationIcon = {
-            IconButton(onClick = backstack::removeLastOrNull) {
-              Icon(
-                Icons.AutoMirrored.Outlined.ArrowBack, 
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-              )
-            }
-          },
-        )
-      },
-    ) { padding ->
-      ProvidePreferenceLocals {
-        LazyColumn(
-          modifier =
-            Modifier
-              .fillMaxSize()
-              .padding(padding),
-        ) {
-          // Landscape Controls Section
-          item {
-            PreferenceSectionHeader(title = "Landscape Controls")
-          }
-          
-          item {
-            PreferenceCard {
-              PreferenceCategoryWithEditButton(
-                title = stringResource(id = R.string.pref_layout_top_right_controls),
-                onClick = {
-                  backstack.add(ControlLayoutEditorScreen(ControlRegion.TOP_RIGHT))
-                },
-              )
-              PreferenceIconSummary(buttons = topRightButtons)
-              
-              PreferenceDivider()
-              
-              PreferenceCategoryWithEditButton(
-                title = stringResource(id = R.string.pref_layout_bottom_right_controls),
-                onClick = {
-                  backstack.add(ControlLayoutEditorScreen(ControlRegion.BOTTOM_RIGHT))
-                },
-              )
-              PreferenceIconSummary(buttons = bottomRightButtons)
-              
-              PreferenceDivider()
-              
-              PreferenceCategoryWithEditButton(
-                title = stringResource(id = R.string.pref_layout_bottom_left_controls),
-                onClick = {
-                  backstack.add(ControlLayoutEditorScreen(ControlRegion.BOTTOM_LEFT))
-                },
-              )
-              PreferenceIconSummary(buttons = bottomLeftButtons)
-            }
-          }
-          
-          // Portrait Controls Section
-          item {
-            PreferenceSectionHeader(title = "Portrait Controls")
-          }
-
-          item {
-            PreferenceCard {
-
-            
-              PreferenceCategoryWithEditButton(
-                title = stringResource(id = R.string.pref_layout_portrait_bottom_controls),
-                onClick = {
-                  backstack.add(ControlLayoutEditorScreen(ControlRegion.PORTRAIT_BOTTOM))
-                },
-              )
-              PreferenceIconSummary(buttons = portraitBottomButtons)
-            }
-          }
-
-          item {
-            PreferenceSectionHeader(title = "More Sheet Controls")
-          }
-
-          item {
-            PreferenceCard {
-              PreferenceCategoryWithEditButton(
-                title = "Buttons in Controls Tab",
-                onClick = {
-                  backstack.add(ControlLayoutEditorScreen(ControlRegion.MORE_SHEET))
-                },
-              )
-              PreferenceIconSummary(buttons = moreSheetButtons)
-            }
-          }
-          
-          // Seekbar Section
-          item {
-            PreferenceSectionHeader(title = "Seekbar Style")
-          }
-
-          item {
-            val currentSeekbarStyle by appearancePrefs.seekbarStyle.collectAsState()
-            
-            PreferenceCard {
-              SeekbarStyle.entries.forEachIndexed { index, style ->
-                ListItem(
-                  headlineContent = {
-                    Text(text = style.name)
-                  },
-                  trailingContent = {
-                    RadioButton(
-                      selected = currentSeekbarStyle == style,
-                      onClick = null
-                    )
-                  },
-                  colors = androidx.compose.material3.ListItemDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                  ),
-                  modifier = Modifier
-                    .clickable { appearancePrefs.seekbarStyle.set(style) }
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(id = R.string.pref_layout_title),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = backstack::removeLastOrNull) {
+                            Icon(
+                                Icons.AutoMirrored.Outlined.ArrowBack,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                            )
+                        }
+                    },
                 )
-                if (index < SeekbarStyle.entries.size - 1) {
-                  PreferenceDivider()
+            },
+        ) { padding ->
+            ProvidePreferenceLocals {
+                LazyColumn(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                ) {
+                    // Landscape Controls Section
+                    item {
+                        PreferenceSectionHeader(title = stringResource(R.string.pref_layout_landscape_controls_header))
+                    }
+                    item {
+                        PreferenceCard {
+                            PreferenceCategoryWithEditButton(
+                                title = stringResource(id = R.string.pref_layout_top_right_controls),
+                                onClick = {
+                                    backstack.add(ControlLayoutEditorScreen(ControlRegion.TOP_RIGHT))
+                                },
+                            )
+                            PreferenceIconSummary(buttons = topRightButtons)
+
+                            PreferenceDivider()
+
+                            PreferenceCategoryWithEditButton(
+                                title = stringResource(id = R.string.pref_layout_bottom_right_controls),
+                                onClick = {
+                                    backstack.add(ControlLayoutEditorScreen(ControlRegion.BOTTOM_RIGHT))
+                                },
+                            )
+                            PreferenceIconSummary(buttons = bottomRightButtons)
+
+                            PreferenceDivider()
+
+                            PreferenceCategoryWithEditButton(
+                                title = stringResource(id = R.string.pref_layout_bottom_left_controls),
+                                onClick = {
+                                    backstack.add(ControlLayoutEditorScreen(ControlRegion.BOTTOM_LEFT))
+                                },
+                            )
+                            PreferenceIconSummary(buttons = bottomLeftButtons)
+                        }
+                    }
+
+                    // Portrait Controls Section
+                    item {
+                        PreferenceSectionHeader(title = stringResource(R.string.pref_layout_portrait_controls_header))
+                    }
+                    item {
+                        PreferenceCard {
+                            PreferenceCategoryWithEditButton(
+                                title = stringResource(id = R.string.pref_layout_portrait_bottom_controls),
+                                onClick = {
+                                    backstack.add(ControlLayoutEditorScreen(ControlRegion.PORTRAIT_BOTTOM))
+                                },
+                            )
+                            PreferenceIconSummary(buttons = portraitBottomButtons)
+                        }
+                    }
+
+                    item {
+                        PreferenceSectionHeader(title = stringResource(R.string.pref_layout_more_sheet_controls_header))
+                    }
+                    item {
+                        PreferenceCard {
+                            PreferenceCategoryWithEditButton(
+                                title = stringResource(R.string.pref_layout_more_sheet_controls_title),
+                                onClick = {
+                                    backstack.add(ControlLayoutEditorScreen(ControlRegion.MORE_SHEET))
+                                },
+                            )
+                            PreferenceIconSummary(buttons = moreSheetButtons)
+                        }
+                    }
+
+                    // Seekbar Section
+                    item {
+                        PreferenceSectionHeader(title = stringResource(R.string.pref_seekbar_style_header))
+                    }
+                    item {
+                        val currentSeekbarStyle by appearancePrefs.seekbarStyle.collectAsState()
+                        PreferenceCard {
+                            SeekbarStyle.entries.forEachIndexed { index, style ->
+                                ListItem(
+                                    headlineContent = {
+                                        // NOTE (#24 - not touched): style.name reads the raw enum
+                                        // identifier and is not localizable as-is. Needs a
+                                        // SeekbarStyle -> @StringRes mapping function; left for
+                                        // the maintainer to design.
+                                        Text(text = style.name)
+                                    },
+                                    trailingContent = {
+                                        RadioButton(
+                                            selected = currentSeekbarStyle == style,
+                                            onClick = null
+                                        )
+                                    },
+                                    colors = androidx.compose.material3.ListItemDefaults.colors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    ),
+                                    modifier = Modifier
+                                        .clickable { appearancePrefs.seekbarStyle.set(style) }
+                                )
+                                if (index < SeekbarStyle.entries.size - 1) {
+                                    PreferenceDivider()
+                                }
+                            }
+                        }
+                    }
+
+                    // Bottom Controls Layout Section
+                    item {
+                        PreferenceSectionHeader(title = stringResource(R.string.pref_controls_layout_header))
+                    }
+                    item {
+                        val bottomControlsBelowSeekbar by playerPrefs.bottomControlsBelowSeekbar.collectAsState()
+                        PreferenceCard {
+                            SwitchPreference(
+                                value = bottomControlsBelowSeekbar,
+                                onValueChange = { playerPrefs.bottomControlsBelowSeekbar.set(it) },
+                                title = {
+                                    Text(text = stringResource(R.string.pref_controls_layout_below_seekbar_title))
+                                },
+                                summary = {
+                                    Text(
+                                        text = stringResource(
+                                            if (bottomControlsBelowSeekbar)
+                                                R.string.pref_controls_layout_below_seekbar_summary_true
+                                            else
+                                                R.string.pref_controls_layout_below_seekbar_summary_false
+                                        )
+                                    )
+                                },
+                            )
+                        }
+                    }
+
+                    // Appearance Section
+                    item {
+                        PreferenceSectionHeader(title = stringResource(R.string.pref_player_appearance_header))
+                    }
+                    item {
+                        val enableBounceAnimation by appearancePrefs.enableBounceAnimation.collectAsState()
+                        val hidePlayerButtonsBackground by appearancePrefs.hidePlayerButtonsBackground.collectAsState()
+                        val enableGlassPlayerControls by appearancePrefs.enableGlassPlayerControls.collectAsState()
+                        val playerAlwaysDarkMode by appearancePrefs.playerAlwaysDarkMode.collectAsState()
+                        val playerTimeToDisappear by playerPrefs.playerTimeToDisappear.collectAsState()
+                        val predefinedTimeValues = listOf(500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000)
+                        val isCustomTimeValue = !predefinedTimeValues.contains(playerTimeToDisappear)
+                        var showCustomTimeDialog by remember { mutableStateOf(false) }
+                        var customTimeValue by remember { mutableStateOf("") }
+
+                        PreferenceCard {
+                            SwitchPreference(
+                                value = enableBounceAnimation,
+                                onValueChange = { appearancePrefs.enableBounceAnimation.set(it) },
+                                title = {
+                                    Text(
+                                        text = stringResource(id = R.string.pref_appearance_enable_bounce_animation_title)
+                                    )
+                                },
+                                summary = {
+                                    Text(
+                                        text = stringResource(id = R.string.pref_appearance_enable_bounce_animation_summary)
+                                    )
+                                },
+                            )
+
+                            PreferenceDivider()
+
+                            SwitchPreference(
+                                value = hidePlayerButtonsBackground,
+                                onValueChange = { appearancePrefs.hidePlayerButtonsBackground.set(it) },
+                                title = {
+                                    Text(
+                                        text = stringResource(id = R.string.pref_appearance_hide_player_buttons_background_title),
+                                    )
+                                },
+                                summary = {
+                                    Text(
+                                        text = stringResource(id = R.string.pref_appearance_hide_player_buttons_background_summary),
+                                    )
+                                },
+                            )
+
+                            PreferenceDivider()
+
+                            SwitchPreference(
+                                value = enableGlassPlayerControls,
+                                onValueChange = { appearancePrefs.enableGlassPlayerControls.set(it) },
+                                title = {
+                                    Text(
+                                        text = stringResource(id = R.string.pref_appearance_enable_glass_player_controls_title),
+                                    )
+                                },
+                                summary = {
+                                    Text(
+                                        text = stringResource(id = R.string.pref_appearance_enable_glass_player_controls_summary),
+                                    )
+                                },
+                            )
+
+                            PreferenceDivider()
+
+                            SwitchPreference(
+                                value = playerAlwaysDarkMode,
+                                onValueChange = { appearancePrefs.playerAlwaysDarkMode.set(it) },
+                                title = {
+                                    Text(text = stringResource(R.string.pref_appearance_player_always_dark_mode_title))
+                                },
+                                summary = {
+                                    Text(text = stringResource(R.string.pref_appearance_player_always_dark_mode_summary))
+                                },
+                            )
+
+                            PreferenceDivider()
+
+                            val showControlsOnPlay by playerPrefs.showControlsOnPlay.collectAsState()
+                            SwitchPreference(
+                                value = showControlsOnPlay,
+                                onValueChange = { playerPrefs.showControlsOnPlay.set(it) },
+                                title = {
+                                    Text(text = stringResource(R.string.pref_appearance_show_controls_on_play_title))
+                                },
+                                summary = {
+                                    Text(text = stringResource(R.string.pref_appearance_show_controls_on_play_summary))
+                                },
+                            )
+
+                            PreferenceDivider()
+
+                            val playerGradientOpacity by playerPrefs.playerGradientOpacity.collectAsState()
+                            SliderPreference(
+                                value = playerGradientOpacity,
+                                onValueChange = { playerPrefs.playerGradientOpacity.set(it.toFixed(2)) },
+                                title = { Text(stringResource(R.string.pref_appearance_player_gradient_opacity_title)) },
+                                valueRange = 0f..1f,
+                                summary = {
+                                    val opacityPercent = (playerGradientOpacity * 100).toInt()
+                                    Text(
+                                        text = stringResource(
+                                            R.string.pref_appearance_player_gradient_opacity_current,
+                                            opacityPercent
+                                        ),
+                                        color = MaterialTheme.colorScheme.outline,
+                                    )
+                                },
+                                onSliderValueChange = { playerPrefs.playerGradientOpacity.set(it.toFixed(2)) },
+                                sliderValue = playerGradientOpacity,
+                            )
+
+                            PreferenceDivider()
+
+                            ListPreference(
+                                value = if (isCustomTimeValue) -1 else playerTimeToDisappear,
+                                onValueChange = { newValue ->
+                                    if (newValue == -1) {
+                                        customTimeValue = playerTimeToDisappear.toString()
+                                        showCustomTimeDialog = true
+                                    } else {
+                                        playerPrefs.playerTimeToDisappear.set(newValue)
+                                    }
+                                },
+                                values = predefinedTimeValues + listOf(-1),
+                                valueToText = { value ->
+                                    // NOTE (#20 - not touched): needs confirmation whether this
+                                    // lambda runs in a @Composable scope in this version of
+                                    // me.zhanghai.compose.preference before calling
+                                    // stringResource() here. Left as literal for now.
+                                    if (value == -1) {
+                                        AnnotatedString("Custom")
+                                    } else {
+                                        AnnotatedString("$value ms")
+                                    }
+                                },
+                                title = { Text(text = stringResource(R.string.pref_player_display_hide_player_control_time)) },
+                                summary = {
+                                    Text(
+                                        text = if (isCustomTimeValue) {
+                                            stringResource(
+                                                R.string.pref_player_display_custom_time_summary,
+                                                playerTimeToDisappear
+                                            )
+                                        } else {
+                                            stringResource(
+                                                R.string.pref_player_display_time_ms_format,
+                                                playerTimeToDisappear
+                                            )
+                                        },
+                                        color = MaterialTheme.colorScheme.outline,
+                                    )
+                                },
+                            )
+                        }
+
+                        if (showCustomTimeDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showCustomTimeDialog = false },
+                                title = { Text(text = stringResource(R.string.pref_player_display_hide_player_control_time)) },
+                                text = {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .verticalScroll(rememberScrollState()),
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.pref_player_display_custom_hide_time_dialog_message),
+                                            modifier = Modifier.padding(bottom = 8.dp),
+                                        )
+                                        OutlinedTextField(
+                                            value = customTimeValue,
+                                            onValueChange = { customTimeValue = it },
+                                            label = { Text(stringResource(id = R.string.milliseconds)) },
+                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                            modifier = Modifier.fillMaxWidth(),
+                                            singleLine = true,
+                                        )
+                                    }
+                                },
+                                confirmButton = {
+                                    TextButton(
+                                        onClick = {
+                                            val value = customTimeValue.toIntOrNull()
+                                            if (value != null && value in 100..1000000000000) {
+                                                playerPrefs.playerTimeToDisappear.set(value)
+                                                showCustomTimeDialog = false
+                                            }
+                                        },
+                                    ) {
+                                        Text(stringResource(R.string.generic_ok))
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showCustomTimeDialog = false }) {
+                                        Text(stringResource(R.string.generic_cancel))
+                                    }
+                                },
+                            )
+                        }
+                    }
                 }
-              }
             }
-          }
-          
-          // Bottom Controls Layout Section
-          item {
-            PreferenceSectionHeader(title = "Controls Layout")
-          }
-          
-          item {
-            val bottomControlsBelowSeekbar by playerPrefs.bottomControlsBelowSeekbar.collectAsState()
-            
-            PreferenceCard {
-              SwitchPreference(
-                value = bottomControlsBelowSeekbar,
-                onValueChange = { playerPrefs.bottomControlsBelowSeekbar.set(it) },
-                title = {
-                  Text(text = "Bottom controls below seekbar")
-                },
-                summary = {
-                  Text(
-                    text = if (bottomControlsBelowSeekbar) 
-                      "Control buttons appear below the seekbar" 
-                    else 
-                      "Control buttons appear above the seekbar"
-                  )
-                },
-              )
+        }
+    }
+
+    /**
+     * Custom composable for the category header with an Edit button.
+     */
+    @Composable
+    private fun PreferenceCategoryWithEditButton(
+        title: String,
+        onClick: () -> Unit,
+    ) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+            // Apply padding to Row - minimal padding for tighter appearance
+            verticalAlignment = Alignment.CenterVertically, // Align items vertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f), // Text takes all available space, pushing button to end
+            )
+            IconButton(onClick = onClick) {
+                Icon(
+                    imageVector = Icons.Outlined.Edit,
+                    contentDescription = stringResource(R.string.generic_edit_content_description, title),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-          }
-          
-          // Appearance Section
-          item {
-            PreferenceSectionHeader(title = "Appearance")
-          }
-          
-          item {
-            val enableBounceAnimation by appearancePrefs.enableBounceAnimation.collectAsState()
-            val hidePlayerButtonsBackground by appearancePrefs.hidePlayerButtonsBackground.collectAsState()
-            val enableGlassPlayerControls by appearancePrefs.enableGlassPlayerControls.collectAsState()
-            val playerAlwaysDarkMode by appearancePrefs.playerAlwaysDarkMode.collectAsState()
-            val playerTimeToDisappear by playerPrefs.playerTimeToDisappear.collectAsState()
-            val predefinedTimeValues = listOf(500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000)
-            val isCustomTimeValue = !predefinedTimeValues.contains(playerTimeToDisappear)
-            
-            var showCustomTimeDialog by remember { mutableStateOf(false) }
-            var customTimeValue by remember { mutableStateOf("") }
-            
-            PreferenceCard {
-            SwitchPreference(
-                value = enableBounceAnimation,
-                onValueChange = { appearancePrefs.enableBounceAnimation.set(it) },
-                title = {
-                  Text(
-                    text = stringResource(id = R.string.pref_appearance_enable_bounce_animation_title)
-                  ) 
-                },
-                summary = { 
-                  Text(
-                    text = stringResource(id = R.string.pref_appearance_enable_bounce_animation_summary)
-                  ) 
-                },
-              )
-              
-              PreferenceDivider()
+        }
+    }
 
-              SwitchPreference(
-                value = hidePlayerButtonsBackground,
-                onValueChange = { appearancePrefs.hidePlayerButtonsBackground.set(it) },
-                title = {
-                  Text(
-                    text = stringResource(id = R.string.pref_appearance_hide_player_buttons_background_title),
-                  )
-                },
-                summary = {
-                  Text(
-                    text = stringResource(id = R.string.pref_appearance_hide_player_buttons_background_summary),
-                  )
-                },
-              )
-              
-              PreferenceDivider()
-
-              SwitchPreference(
-                value = enableGlassPlayerControls,
-                onValueChange = { appearancePrefs.enableGlassPlayerControls.set(it) },
-                title = {
-                  Text(
-                    text = stringResource(id = R.string.pref_appearance_enable_glass_player_controls_title),
-                  )
-                },
-                summary = {
-                  Text(
-                    text = stringResource(id = R.string.pref_appearance_enable_glass_player_controls_summary),
-                  )
-                },
-              )
-
-              PreferenceDivider()
-
-              SwitchPreference(
-                value = playerAlwaysDarkMode,
-                onValueChange = { appearancePrefs.playerAlwaysDarkMode.set(it) },
-                title = {
-                  Text(text = "Player controls always dark mode")
-                },
-                summary = {
-                  Text(text = "Keep player controls in dark theme regardless of app theme")
-                },
-              )
-              
-              PreferenceDivider()
-
-              val showControlsOnPlay by playerPrefs.showControlsOnPlay.collectAsState()
-              SwitchPreference(
-                value = showControlsOnPlay,
-                onValueChange = { playerPrefs.showControlsOnPlay.set(it) },
-                title = {
-                  Text(text = "Show controls on play start")
-                },
-                summary = {
-                  Text(text = "Show player controls overlay when a video starts playing")
-                },
-              )
-              
-              PreferenceDivider()
-
-              val playerGradientOpacity by playerPrefs.playerGradientOpacity.collectAsState()
-              SliderPreference(
-                value = playerGradientOpacity,
-                onValueChange = { playerPrefs.playerGradientOpacity.set(it.toFixed(2)) },
-                title = { Text("Player gradient opacity") },
-                valueRange = 0f..1f,
-                summary = {
-                  val opacityPercent = (playerGradientOpacity * 100).toInt()
-                  Text(
-                    text = "Current: $opacityPercent%",
+    /**
+     * Custom composable to show a row of icons for the summary.
+     */
+    @OptIn(ExperimentalLayoutApi::class)
+    @Composable
+    private fun PreferenceIconSummary(buttons: List<PlayerButton>) {
+        FlowRow(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp), // Increased spacing
+            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        ) {
+            if (buttons.isEmpty()) {
+                Text(
+                    stringResource(R.string.generic_none),
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.outline,
-                  )
-                },
-                onSliderValueChange = { playerPrefs.playerGradientOpacity.set(it.toFixed(2)) },
-                sliderValue = playerGradientOpacity,
-              )
-              
-              PreferenceDivider()
-              
-              ListPreference(
-                value = if (isCustomTimeValue) -1 else playerTimeToDisappear,
-                onValueChange = { newValue ->
-                  if (newValue == -1) {
-                    customTimeValue = playerTimeToDisappear.toString()
-                    showCustomTimeDialog = true
-                  } else {
-                    playerPrefs.playerTimeToDisappear.set(newValue)
-                  }
-                },
-                values = predefinedTimeValues + listOf(-1),
-                valueToText = { value ->
-                  if (value == -1) {
-                    AnnotatedString("Custom")
-                  } else {
-                    AnnotatedString("$value ms")
-                  }
-                },
-                title = { Text(text = stringResource(R.string.pref_player_display_hide_player_control_time)) },
-                summary = {
-                  Text(
-                    text = if (isCustomTimeValue) {
-                      "Custom ($playerTimeToDisappear ms)"
-                    } else {
-                      "$playerTimeToDisappear ms"
-                    },
-                      color = MaterialTheme.colorScheme.outline,
-                  )
-                },
-              )
-            }
-            
-            if (showCustomTimeDialog) {
-              AlertDialog(
-                onDismissRequest = { showCustomTimeDialog = false },
-                title = { Text(text = stringResource(R.string.pref_player_display_hide_player_control_time)) },
-                text = {
-                  Column(
-                    modifier = Modifier
-                      .fillMaxWidth()
-                      .verticalScroll(rememberScrollState()),
-                  ) {
-                    Text(
-                      text = "Enter custom hide time in milliseconds",
-                      modifier = Modifier.padding(bottom = 8.dp),
+                )
+            } else {
+                buttons.forEach { button ->
+                    // Use the chip in "preview mode" (no badge, enabled=true but no onClick)
+                    PlayerButtonChip(
+                        button = button,
+                        enabled = true,
+                        onClick = null,
+                        badgeIcon = null,
+                        badgeColor = null
                     )
-                    OutlinedTextField(
-                      value = customTimeValue,
-                      onValueChange = { customTimeValue = it },
-                      label = { Text(stringResource(id = R.string.milliseconds)) },
-                      keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                      modifier = Modifier.fillMaxWidth(),
-                      singleLine = true,
-                    )
-                  }
-                },
-                confirmButton = {
-                  TextButton(
-                    onClick = {
-                      val value = customTimeValue.toIntOrNull()
-                      if (value != null && value in 100..1000000000000) {
-                        playerPrefs.playerTimeToDisappear.set(value)
-                        showCustomTimeDialog = false
-                      }
-                    },
-                  ) {
-                    Text(stringResource(R.string.generic_ok))
-                  }
-                },
-                dismissButton = {
-                  TextButton(onClick = { showCustomTimeDialog = false }) {
-                    Text(stringResource(R.string.generic_cancel))
-                  }
-                },
-              )
+                }
             }
-          }
         }
-      }
     }
-  }
-
-  /**
-   * Custom composable for the category header with an Edit button.
-   */
-  @Composable
-  private fun PreferenceCategoryWithEditButton(
-    title: String,
-    onClick: () -> Unit,
-  ) {
-    Row(
-      modifier =
-        Modifier
-          .fillMaxWidth()
-          .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
-      // Apply padding to Row - minimal padding for tighter appearance
-      verticalAlignment = Alignment.CenterVertically, // Align items vertically
-    ) {
-      Text(
-        text = title,
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.weight(1f), // Text takes all available space, pushing button to end
-      )
-      IconButton(onClick = onClick) {
-        Icon(
-          imageVector = Icons.Outlined.Edit,
-          contentDescription = "Edit $title",
-          tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-    }
-  }
-
-  /**
-   * Custom composable to show a row of icons for the summary.
-   */
-  @OptIn(ExperimentalLayoutApi::class)
-  @Composable
-  private fun PreferenceIconSummary(buttons: List<PlayerButton>) {
-    FlowRow(
-      modifier =
-        Modifier
-          .fillMaxWidth()
-          .padding(horizontal = 16.dp, vertical = 8.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp), // Increased spacing
-      verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-    ) {
-      if (buttons.isEmpty()) {
-        Text(
-          "None", // TODO: strings
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.outline,
-        )
-      } else {
-        buttons.forEach { button ->
-          // Use the chip in "preview mode" (no badge, enabled=true but no onClick)
-          PlayerButtonChip(
-            button = button,
-            enabled = true,
-            onClick = null, 
-            badgeIcon = null,
-            badgeColor = null
-          )
-        }
-      }
-    }
-  }
 }

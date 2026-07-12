@@ -71,9 +71,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import xyz.mpv.rex.R
 import xyz.mpv.rex.preferences.PlayerButton
 import xyz.mpv.rex.preferences.preference.collectAsState
 import xyz.mpv.rex.ui.player.Panels
@@ -206,7 +208,7 @@ fun RenderPlayerButton(
           )
           viewModel.getPlaylistInfo()?.let { playlistInfo ->
             Text(
-              " • $playlistInfo",
+              stringResource(R.string.playlist_separator, playlistInfo),
               maxLines = 1,
               overflow = TextOverflow.Visible,
               style = MaterialTheme.typography.bodySmall,
@@ -241,7 +243,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = chapter?.name ?: "Chapters",
+                text = chapter?.name ?: stringResource(R.string.chapters),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -300,7 +302,7 @@ fun RenderPlayerButton(
           ) {
             Icon(
               imageVector = Icons.Default.Speed,
-              contentDescription = "Playback Speed",
+              contentDescription = stringResource(R.string.playback_speed),
               tint = if (isSpeedNonOne) activeContentColor else contentColor,
               modifier = Modifier.size(24.dp),
             )
@@ -390,7 +392,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Rotation",
+                text = stringResource(R.string.screen_rotation),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -434,7 +436,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Frame Nav",
+                text = stringResource(R.string.frame_nav),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -453,7 +455,7 @@ fun RenderPlayerButton(
           Box(contentAlignment = Alignment.Center) {
             Icon(
               imageVector = Icons.Default.Camera,
-              contentDescription = "Frame Navigation",
+              contentDescription = stringResource(R.string.frame_navigation),
               tint = if (isActive) activeContentColor else contentColor,
               modifier = Modifier.size(24.dp),
             )
@@ -485,7 +487,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "PiP",
+                text = stringResource(R.string.pip),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -597,7 +599,7 @@ fun RenderPlayerButton(
           ) {
             Icon(
               imageVector = Icons.Default.ZoomIn,
-              contentDescription = "Video Zoom",
+              contentDescription = stringResource(R.string.video_zoom),
               tint = if (isZoomed) activeContentColor else contentColor,
               modifier = Modifier.size(24.dp),
             )
@@ -644,7 +646,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Lock",
+                text = stringResource(R.string.lock),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -682,7 +684,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Audio",
+                text = stringResource(R.string.audio),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -721,7 +723,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Subtitles",
+                text = stringResource(R.string.subtitles),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -800,9 +802,9 @@ fun RenderPlayerButton(
               )
               Text(
                 text = when (repeatMode) {
-                    xyz.mpv.rex.ui.player.RepeatMode.OFF -> "Repeat Off"
-                    xyz.mpv.rex.ui.player.RepeatMode.ONE -> "Repeat One"
-                    xyz.mpv.rex.ui.player.RepeatMode.ALL -> "Repeat All"
+                    xyz.mpv.rex.ui.player.RepeatMode.OFF -> stringResource(R.string.repeat_off)
+                    xyz.mpv.rex.ui.player.RepeatMode.ONE -> stringResource(R.string.repeat_one)
+                    xyz.mpv.rex.ui.player.RepeatMode.ALL -> stringResource(R.string.repeat_all)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
@@ -853,7 +855,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Skip ${customSkipDuration}s",
+                text = stringResource(R.string.skip_seconds, customSkipDuration),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -899,7 +901,7 @@ fun RenderPlayerButton(
                   modifier = Modifier.size(24.dp)
                 )
                 Text(
-                  text = if (shuffleEnabled) "Shuffle On" else "Shuffle Off",
+                  text = if (shuffleEnabled) stringResource(R.string.shuffle_on) else stringResource(R.string.shuffle_off),
                   style = MaterialTheme.typography.bodyMedium,
                   maxLines = 1,
                 )
@@ -940,7 +942,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = if (isMirrored) "Mirrored" else "Mirror",
+                text = if (isMirrored) stringResource(R.string.mirrored) else stringResource(R.string.mirror),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -980,7 +982,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp).rotate(90f)
               )
               Text(
-                text = if (isVerticalFlipped) "Flipped" else "Flip Vert",
+                text = if (isVerticalFlipped) stringResource(R.string.flipped) else stringResource(R.string.flip_vertical),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -1000,7 +1002,7 @@ fun RenderPlayerButton(
             Box(contentAlignment = Alignment.Center) {
               Icon(
                 imageVector = Icons.Default.Flip,
-                contentDescription = "Vertical Flip",
+                contentDescription = stringResource(R.string.flip_vertical_desc),
                 tint = if (isVerticalFlipped) activeContentColor else contentColor,
                 modifier = Modifier
                   .padding(MaterialTheme.spacing.smaller)
@@ -1038,12 +1040,12 @@ fun RenderPlayerButton(
               modifier = Modifier.padding(horizontal = MaterialTheme.spacing.smaller)
             ) {
               Text(
-                text = "AB",
+                text = stringResource(R.string.ab_loop_short),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
               )
               Text(
-                text = "Loop",
+                text = stringResource(R.string.loop),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -1061,7 +1063,7 @@ fun RenderPlayerButton(
         ) {
           Box(contentAlignment = Alignment.Center) {
             Text(
-              text = "AB",
+              text = stringResource(R.string.ab_loop_short),
               style = MaterialTheme.typography.labelLarge,
               fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
               color = if (isActive) activeContentColor else contentColor,
@@ -1103,7 +1105,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Background",
+                text = stringResource(R.string.background_playback),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -1144,7 +1146,7 @@ fun RenderPlayerButton(
                   modifier = Modifier.size(24.dp)
                 )
                 Text(
-                  text = "Ambient",
+                  text = stringResource(R.string.ambient),
                   style = MaterialTheme.typography.bodyMedium,
                   maxLines = 1,
                 )
@@ -1172,7 +1174,7 @@ fun RenderPlayerButton(
               Box(contentAlignment = Alignment.Center) {
                 Icon(
                   imageVector = if (isAmbientEnabled) Icons.Filled.BlurOn else Icons.Outlined.BlurOn,
-                  contentDescription = "Ambience Mode",
+                  contentDescription = stringResource(R.string.ambience_mode),
                   tint = if (isAmbientEnabled) activeContentColor else contentColor,
                   modifier = Modifier.size(24.dp)
                 )
@@ -1212,7 +1214,7 @@ fun RenderPlayerButton(
                 text = if (isActive) {
                   android.text.format.DateUtils.formatElapsedTime(remainingTime.toLong())
                 } else {
-                  "Sleep Timer"
+                  stringResource(R.string.sleep_timer)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
@@ -1232,7 +1234,7 @@ fun RenderPlayerButton(
           Box(contentAlignment = Alignment.Center) {
             Icon(
               imageVector = Icons.Outlined.Timer,
-              contentDescription = "Sleep Timer",
+              contentDescription = stringResource(R.string.sleep_timer),
               tint = if (isActive) activeContentColor else contentColor,
               modifier = Modifier.size(24.dp),
             )

@@ -484,6 +484,8 @@
     <string name="pref_player_display_reduce_player_animation">Reduce player animation</string>
     <string name="pref_player_display_hide_player_control_time">Hide player control time</string>
     <string name="show_splash_ovals_on_double_tap_to_seek">Show ripple when double tap seeking</string>
+    <string name="pref_player_show_circular_double_tap_seek_title">Show circular double tap seek</string>
+    <string name="pref_player_show_circular_double_tap_seek_summary">Show a circular seek overlay with time below it</string>
     <string name="show_time_on_double_tap_to_seek">Show seek time</string>
     <string name="player_gesture_seek_indicator" translatable="false">[%1$s%2$s] (%3$s)</string>
 

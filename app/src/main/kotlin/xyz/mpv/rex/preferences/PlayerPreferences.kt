@@ -15,6 +15,7 @@ class PlayerPreferences(
   val holdForMultipleSpeed = preferenceStore.getFloat("hold_for_multiple_speed", 2f)
   val showDynamicSpeedOverlay = preferenceStore.getBoolean("show_dynamic_speed_overlay", true)
   val showDoubleTapOvals = preferenceStore.getBoolean("show_double_tap_ovals", true)
+  val showCircularDoubleTapSeek = preferenceStore.getBoolean("show_circular_double_tap_seek", true)
   val showSeekTimeWhileSeeking = preferenceStore.getBoolean("show_seek_time_while_seeking", true)
   val usePreciseSeeking = preferenceStore.getBoolean("use_precise_seeking", false)
 
@@ -63,7 +64,7 @@ class PlayerPreferences(
 
   val useWavySeekbar = preferenceStore.getBoolean("use_wavy_seekbar", true)
   val bottomControlsBelowSeekbar = preferenceStore.getBoolean("bottom_controls_below_seekbar", false)
-  val showSeekBarWhenSeeking = preferenceStore.getBoolean("show_seekbar_when_seeking", true)
+  val showSeekBarWhenSeeking = preferenceStore.getBoolean("show_seekbar_when_seeking", false)
   val hideOsdText = preferenceStore.getBoolean("hide_osd_text_v2", false)
 
   val customSkipDuration = preferenceStore.getInt("custom_skip_duration", 90)

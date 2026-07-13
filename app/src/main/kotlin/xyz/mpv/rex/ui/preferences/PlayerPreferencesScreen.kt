@@ -225,6 +225,16 @@ object PlayerPreferencesScreen : Screen {
               
               PreferenceDivider()
               
+              val showCircularDoubleTapSeek by preferences.showCircularDoubleTapSeek.collectAsState()
+              SwitchPreference(
+                value = showCircularDoubleTapSeek,
+                onValueChange = preferences.showCircularDoubleTapSeek::set,
+                title = { Text(stringResource(R.string.pref_player_show_circular_double_tap_seek_title)) },
+                summary = { Text(stringResource(R.string.pref_player_show_circular_double_tap_seek_summary)) },
+              )
+              
+              PreferenceDivider()
+              
               val showSeekTimeWhileSeeking by preferences.showSeekTimeWhileSeeking.collectAsState()
               SwitchPreference(
                 value = showSeekTimeWhileSeeking,

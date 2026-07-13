@@ -3,6 +3,7 @@ package xyz.mpv.rex.ui.player.controls
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -270,38 +271,51 @@ fun RenderPlayerButton(
         `is`.xyz.mpv.MPVLib.setPropertyFloat("speed", newSpeed)
       }
 
-      if (isSpeedNonOne || isMoreSheet) {
-        @OptIn(ExperimentalFoundationApi::class)
-        Surface(
-          shape = CircleShape,
-          color = if (isSpeedNonOne) activeSurfaceColor else surfaceColor,
-          contentColor = if (isSpeedNonOne) activeContentColor else contentColor,
-          tonalElevation = 0.dp,
-          shadowElevation = 0.dp,
-          border = if (isSpeedNonOne) activeBorderColor else borderColor,
-          modifier = Modifier
-            .height(buttonSize)
-            .clip(CircleShape)
-            .combinedClickable(
-              interactionSource = remember { MutableInteractionSource() },
-              indication = ripple(bounded = true),
-              onClick = {
-                clickEvent()
-                cycleSpeed()
-              },
-              onLongClick = {
-                clickEvent()
-                onOpenSheet(Sheets.PlaybackSpeed)
-              },
-            ),
+      val showText = isSpeedNonOne || isMoreSheet
+
+      @OptIn(ExperimentalFoundationApi::class)
+      Surface(
+        shape = CircleShape,
+        color = if (isSpeedNonOne) activeSurfaceColor else surfaceColor,
+        contentColor = if (isSpeedNonOne) activeContentColor else contentColor,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        border = if (isSpeedNonOne) activeBorderColor else borderColor,
+        modifier = Modifier
+          .height(buttonSize)
+          .animateContentSize()
+          .clip(CircleShape)
+          .combinedClickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = ripple(bounded = true),
+            onClick = {
+              clickEvent()
+              cycleSpeed()
+            },
+            onLongClick = {
+              clickEvent()
+              onOpenSheet(Sheets.PlaybackSpeed)
+            },
+          ),
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.Center,
+          modifier = Modifier.padding(
+            horizontal = MaterialTheme.spacing.smaller,
+            vertical = MaterialTheme.spacing.smaller,
+          ),
         ) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
-            modifier = Modifier.padding(
-              horizontal = MaterialTheme.spacing.smaller,
-              vertical = MaterialTheme.spacing.smaller,
-            ),
+          Icon(
+            imageVector = Icons.Default.Speed,
+            contentDescription = stringResource(R.string.playback_speed,
+            tint = if (isSpeedNonOne) activeContentColor else contentColor,
+            modifier = Modifier.size(24.dp),
+          )
+          AnimatedVisibility(
+            visible = showText,
+            enter = fadeIn() + expandHorizontally(),
+            exit = fadeOut() + shrinkHorizontally()
           ) {
             Icon(
               imageVector = Icons.Default.Speed,
@@ -313,16 +327,10 @@ fun RenderPlayerButton(
               text = String.format("%.2fx", playbackSpeed),
               maxLines = 1,
               style = MaterialTheme.typography.bodyMedium,
+              modifier = Modifier.padding(start = 4.dp),
             )
           }
         }
-      } else {
-        ControlsButton(
-          icon = Icons.Default.Speed,
-          onClick = { cycleSpeed() },
-          onLongClick = { onOpenSheet(Sheets.PlaybackSpeed) },
-          modifier = Modifier.size(buttonSize),
-        )
       }
     }
 

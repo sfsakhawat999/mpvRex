@@ -194,6 +194,7 @@ fun PlayerControls(
   val doubleTapSeekAmount by viewModel.doubleTapSeekAmount.collectAsState()
   val doubleTapSeekBasePos by viewModel.doubleTapSeekBasePos.collectAsState()
   val showDoubleTapOvals by playerPreferences.showDoubleTapOvals.collectAsState()
+  val showCircularDoubleTapSeek by playerPreferences.showCircularDoubleTapSeek.collectAsState()
   val showSeekTime by playerPreferences.showSeekTimeWhileSeeking.collectAsState()
   val hideOsdText by playerPreferences.hideOsdText.collectAsState()
   var isSeeking by remember { mutableStateOf(false) }
@@ -560,7 +561,7 @@ fun PlayerControls(
               },
         ) {
           val currentPlaybackSpeed = playbackSpeed ?: 1f
-          if (doubleTapSeekAmount != 0 && !hideOsdText) {
+          if (doubleTapSeekAmount != 0 && !hideOsdText && !showDoubleTapOvals && !showCircularDoubleTapSeek) {
             val seekAmount = doubleTapSeekAmount
             // Use the position captured before the first seek so the displayed
             // target time stays correct even after MPV's time-pos updates.

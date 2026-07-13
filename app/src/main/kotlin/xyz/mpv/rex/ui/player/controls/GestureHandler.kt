@@ -53,6 +53,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
@@ -1201,9 +1202,22 @@ fun DoubleTapToSeekOvals(
       }
     }
 
+    val overlayAlpha by animateFloatAsState(
+      targetValue = if (isVisible) 1f else 0f,
+      animationSpec = tween(durationMillis = 150),
+      label = "circular_seek_alpha"
+    )
+    val overlayScale by animateFloatAsState(
+      targetValue = if (isVisible) 1f else 0.8f,
+      animationSpec = tween(durationMillis = 150),
+      label = "circular_seek_scale"
+    )
+
+    val circleShape = RoundedCornerShape(36.dp)
+
     val glassModifier = if (enableGlass) {
       Modifier.glassSurface(
-        shape = CircleShape,
+        shape = circleShape,
         backgroundColor = Color.White.copy(alpha = 0.05f),
         borderColor = Color.White.copy(alpha = 0.15f),
         borderWidth = 1.dp,
@@ -1221,33 +1235,35 @@ fun DoubleTapToSeekOvals(
         innerShadowOffsetY = 2.dp
       )
     } else {
-      Modifier.background(Color.Black.copy(alpha = 0.55f), shape = CircleShape)
+      Modifier.background(Color.Black.copy(alpha = 0.55f), shape = circleShape)
     }
 
-    Box(
-      modifier = modifier.fillMaxSize(),
-      contentAlignment = if (isRight) Alignment.CenterEnd else Alignment.CenterStart,
-    ) {
+    if (amount != 0 || overlayAlpha > 0.01f) {
       Box(
-        modifier = Modifier
-          .fillMaxHeight()
-          .fillMaxWidth(seekAreaFraction),
-        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = if (isRight) Alignment.CenterEnd else Alignment.CenterStart,
       ) {
-        AnimatedVisibility(
-          visible = isVisible,
-          enter = fadeIn(animationSpec = tween(150)) + scaleIn(initialScale = 0.8f, animationSpec = tween(150)),
-          exit = fadeOut(animationSpec = tween(150)) + scaleOut(targetScale = 0.8f, animationSpec = tween(150))
+        Box(
+          modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth(seekAreaFraction),
+          contentAlignment = Alignment.Center,
         ) {
           Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.scale(scale)
+            modifier = Modifier
+              .graphicsLayer {
+                alpha = overlayAlpha
+                scaleX = overlayScale * scale
+                scaleY = overlayScale * scale
+              }
           ) {
             // Rounded circle around the chevrons
             Box(
               modifier = Modifier
                 .size(72.dp)
+                .clip(circleShape)
                 .then(glassModifier),
               contentAlignment = Alignment.Center
             ) {

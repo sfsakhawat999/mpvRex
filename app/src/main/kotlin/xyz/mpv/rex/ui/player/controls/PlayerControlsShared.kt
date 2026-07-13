@@ -308,7 +308,7 @@ fun RenderPlayerButton(
         ) {
           Icon(
             imageVector = Icons.Default.Speed,
-            contentDescription = stringResource(R.string.playback_speed,
+            contentDescription = stringResource(R.string.playback_speed),
             tint = if (isSpeedNonOne) activeContentColor else contentColor,
             modifier = Modifier.size(24.dp),
           )

@@ -317,12 +317,6 @@ fun RenderPlayerButton(
             enter = fadeIn() + expandHorizontally(),
             exit = fadeOut() + shrinkHorizontally()
           ) {
-            Icon(
-              imageVector = Icons.Default.Speed,
-              contentDescription = stringResource(R.string.playback_speed),
-              tint = if (isSpeedNonOne) activeContentColor else contentColor,
-              modifier = Modifier.size(24.dp),
-            )
             Text(
               text = String.format("%.2fx", playbackSpeed),
               maxLines = 1,

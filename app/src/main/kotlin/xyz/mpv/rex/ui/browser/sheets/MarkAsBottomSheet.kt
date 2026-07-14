@@ -74,8 +74,8 @@ fun MarkAsBottomSheet(
 
             MarkAsRow(
                 icon = Icons.Filled.NewReleases,
-                label = stringResource(R.string.mark_as_unplayed),
-                description = stringResource(R.string.mark_as_unplayed_desc),
+                label = stringResource(R.string.mark_as_new),
+                description = stringResource(R.string.mark_as_new_desc),
                 onClick = { onMarkAs(MarkAsState.New); onDismiss() },
             )
             MarkAsRow(

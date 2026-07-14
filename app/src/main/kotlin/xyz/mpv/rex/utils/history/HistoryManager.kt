@@ -204,11 +204,30 @@ class HistoryManager(
     suspend fun markAs(filePath: String, fileName: String, duration: Long, state: MarkAsState) {
         when (state) {
             MarkAsState.New -> {
-                // Remove progress so the card appears unplayed. RecentlyPlayed entry is kept
-                // so the file remains in history but with no position indicator.
+                // Remove progress, clear watched state, and delete from history so it gets the NEW badge.
                 playbackStateRepository.deleteByTitle(fileName)
+                recentlyPlayedRepository.deleteByFilePath(filePath)
             }
             MarkAsState.LastPlayed -> {
+                // Clear watched status and progress first when marking as last played
+                val durationSeconds = (duration / 1000).toInt().coerceAtLeast(0)
+                val existing = playbackStateRepository.getVideoDataByTitle(fileName)
+                playbackStateRepository.upsert(
+                    xyz.mpv.rex.database.entities.PlaybackStateEntity(
+                        mediaTitle = fileName,
+                        lastPosition = 0,
+                        playbackSpeed = existing?.playbackSpeed ?: 1.0,
+                        videoZoom = existing?.videoZoom ?: 0f,
+                        sid = existing?.sid ?: -1,
+                        secondarySid = existing?.secondarySid ?: -1,
+                        subDelay = existing?.subDelay ?: 0,
+                        subSpeed = existing?.subSpeed ?: 1.0,
+                        aid = existing?.aid ?: -1,
+                        audioDelay = existing?.audioDelay ?: 0,
+                        timeRemaining = durationSeconds,
+                        hasBeenWatched = false,
+                    )
+                )
                 // Upsert a RecentlyPlayed entry with timestamp = now so the file surfaces
                 // at the top of the Recently Played list.
                 recentlyPlayedRepository.addRecentlyPlayed(

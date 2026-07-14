@@ -323,12 +323,15 @@ class FileSystemBrowserViewModel(
                     if (state.savedOrientation != null) {
                       updatedVideo = updatedVideo.copy(savedOrientation = state.savedOrientation)
                     }
+                    if (state.hasBeenWatched) {
+                      basicWatchedIds.add(video.id)
+                    }
                     if (video.duration > 0) {
                       val durationSeconds = video.duration / 1000
                       val watched = durationSeconds - state.timeRemaining.toLong()
                       val progressValue = (watched.toFloat() / durationSeconds.toFloat()).coerceIn(0f, 1f)
                       
-                      if (state.hasBeenWatched || progressValue >= (basicWatchedThreshold / 100f)) {
+                      if (progressValue >= (basicWatchedThreshold / 100f)) {
                         basicWatchedIds.add(video.id)
                       }
                       
@@ -389,12 +392,15 @@ class FileSystemBrowserViewModel(
                           if (state.savedOrientation != null) {
                             video = video.copy(savedOrientation = state.savedOrientation)
                           }
+                          if (state.hasBeenWatched) {
+                            finalWatchedIds.add(video.id)
+                          }
                           if (video.duration > 0) {
                             val durationSeconds = video.duration / 1000
                             val watched = durationSeconds - state.timeRemaining.toLong()
                             val progressValue = (watched.toFloat() / durationSeconds.toFloat()).coerceIn(0f, 1f)
                             
-                            if (state.hasBeenWatched || progressValue >= (finalWatchedThreshold / 100f)) {
+                            if (progressValue >= (finalWatchedThreshold / 100f)) {
                               finalWatchedIds.add(video.id)
                             }
                             

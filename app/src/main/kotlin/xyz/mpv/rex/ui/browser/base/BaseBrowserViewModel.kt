@@ -59,6 +59,14 @@ abstract class BaseBrowserViewModel<T>(
       .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
   /**
+   * Observable set of recently played file paths for highlighting
+   */
+  val recentlyPlayedPaths: StateFlow<Set<String>> =
+    RecentlyPlayedOps
+      .observeRecentlyPlayedPaths()
+      .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
+  /**
    * Abstract load method to be implemented by subclasses
    */
   abstract fun loadData()

@@ -873,6 +873,8 @@
     <string name="mark_as_finished_desc">Mark as fully watched</string>
     <string name="mark_as_none">None</string>
     <string name="mark_as_none_desc">Remove all marks and watch history</string>
+    <string name="mark_as_unplayed">Unplayed</string>
+    <string name="mark_as_unplayed_desc">Remove playback progress and mark as unplayed</string>
     <string name="folders_count">Folders (%1$d)</string>
     <string name="media_count">Media (%1$d)</string>
     <string name="drag_to_reorder">Drag to reorder</string>

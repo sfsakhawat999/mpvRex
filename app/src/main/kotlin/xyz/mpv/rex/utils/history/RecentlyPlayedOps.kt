@@ -8,6 +8,7 @@ import xyz.mpv.rex.preferences.AdvancedPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent.inject
 
@@ -85,6 +86,10 @@ object RecentlyPlayedOps {
 
   @OptIn(ExperimentalCoroutinesApi::class)
   fun observeLastPlayedPath(): Flow<String?> = historyManager.observeLastPlayedPath()
+
+  fun observeRecentlyPlayedPaths(limit: Int = 100): Flow<Set<String>> {
+    return repository.observeRecentlyPlayed(limit).map { list -> list.map { it.filePath }.toSet() }
+  }
 
   suspend fun onVideoDeleted(filePath: String) {
     historyManager.onVideoDeleted(filePath)

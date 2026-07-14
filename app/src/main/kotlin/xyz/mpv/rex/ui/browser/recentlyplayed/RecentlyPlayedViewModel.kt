@@ -84,6 +84,10 @@ class RecentlyPlayedViewModel(application: Application) :
                   video = video.copy(savedOrientation = state.savedOrientation)
                 }
                 
+                if (state.hasBeenWatched) {
+                  isWatched = true
+                }
+                
                 if (video.duration > 0) {
                   val durationSeconds = video.duration / 1000
                   val watched = durationSeconds - state.timeRemaining.toLong()
@@ -91,7 +95,10 @@ class RecentlyPlayedViewModel(application: Application) :
                     (watched.toFloat() / durationSeconds.toFloat()).coerceIn(0f, 1f)
                   } else 0f
                   
-                  isWatched = state.hasBeenWatched || (state.timeRemaining > 0 && progressValue >= (watchedThreshold / 100f))
+                  if (state.timeRemaining > 0 && progressValue >= (watchedThreshold / 100f)) {
+                    isWatched = true
+                  }
+                  
                   if (progressValue in 0.01f..0.99f && !isWatched) {
                     progress = progressValue
                   }

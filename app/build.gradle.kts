@@ -11,7 +11,7 @@ plugins {
 
 android {
   namespace = "xyz.mpv.rex"
-  compileSdk = 36
+  compileSdk = 37
 
   defaultConfig {
     applicationId = "xyz.mpv.rex"

@@ -842,6 +842,7 @@ class PlayerActivity :
     super.finishAndRemoveTask()
   }
 
+  @RequiresApi(Build.VERSION_CODES.P)
   override fun onStop() {
     viewModel.isActivityStarted = false
     runCatching {
@@ -1864,6 +1865,7 @@ class PlayerActivity :
    *
    * @param isEof true if end of file reached
    */
+  @RequiresApi(Build.VERSION_CODES.P)
   private fun handleEndOfFile(isEof: Boolean) {
     if (isEof) {
       // Save state immediately when EOF is reached

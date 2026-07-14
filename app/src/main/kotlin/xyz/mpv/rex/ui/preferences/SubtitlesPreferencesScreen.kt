@@ -777,8 +777,8 @@ fun MultiChoicePreference(
           items(values.toList().size) { index ->
             val entry = values.toList()[index]
             val key = entry.first
-            val checked = if (hasAllOption && (selectedValues.isEmpty() || selectedValues.contains("all"))) {
-              key == "all"
+            val checked = if (hasAllOption && selectedValues.contains("all")) {
+              true
             } else {
               selectedValues.contains(key)
             }
@@ -792,6 +792,7 @@ fun MultiChoicePreference(
                     if (key == "all") {
                       newSet.clear()
                       newSet.add("all")
+                      newSet.addAll(values.keys.filter { it != "all" })
                     } else {
                       newSet.remove("all")
                       if (checked) newSet.remove(key) else newSet.add(key)

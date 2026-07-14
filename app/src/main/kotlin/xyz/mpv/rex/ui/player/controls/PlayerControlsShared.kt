@@ -1,5 +1,7 @@
 package xyz.mpv.rex.ui.player.controls
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
@@ -93,6 +95,7 @@ import xyz.mpv.rex.ui.theme.controlColor
 import xyz.mpv.rex.ui.theme.spacing
 import dev.vivvvek.seeker.Segment
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun RenderPlayerButton(
   button: PlayerButton,

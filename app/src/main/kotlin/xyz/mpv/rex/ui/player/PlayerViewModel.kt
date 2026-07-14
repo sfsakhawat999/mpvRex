@@ -4,12 +4,14 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.media.AudioManager
 import android.net.Uri
+import android.os.Build
 import android.provider.OpenableColumns
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -1706,6 +1708,7 @@ class PlayerViewModel(
     refreshPlaylistItems()
   }
 
+  @RequiresApi(Build.VERSION_CODES.P)
   fun removePlaylistItem(index: Int) {
     val wasPlaying = index == _playlistManager.currentIndex.value
     _playlistManager.removeAt(index)
@@ -1721,6 +1724,7 @@ class PlayerViewModel(
     }
   }
 
+  @RequiresApi(Build.VERSION_CODES.P)
   fun removePlaylistItems(indexes: List<Int>) {
     val currentIdx = _playlistManager.currentIndex.value
     val wasPlayingRemoved = indexes.contains(currentIdx)

@@ -55,7 +55,7 @@ class PlayerPreferences(
   val defaultVideoZoom = preferenceStore.getFloat("default_video_zoom", 0f)
   val defaultVideoPanX = preferenceStore.getFloat("default_video_pan_x", 0f)
   val defaultVideoPanY = preferenceStore.getFloat("default_video_pan_y", 0f)
-  val panAndZoomEnabled = preferenceStore.getBoolean("pan_and_zoom_enabled", true)
+  val panAndZoomEnabled = preferenceStore.getBoolean("pan_and_zoom_enabled", false)
 
   val includeSubtitlesInSnapshot = preferenceStore.getBoolean("include_subtitles_in_snapshot", false)
 

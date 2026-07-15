@@ -326,7 +326,7 @@ class FileSystemBrowserViewModel(
                     if (state.hasBeenWatched) {
                       basicWatchedIds.add(video.id)
                     }
-                    if (video.duration > 0) {
+                    if (video.duration > 0 && state.timeRemaining != -1) {
                       val durationSeconds = video.duration / 1000
                       val watched = durationSeconds - state.timeRemaining.toLong()
                       val progressValue = (watched.toFloat() / durationSeconds.toFloat()).coerceIn(0f, 1f)
@@ -338,6 +338,9 @@ class FileSystemBrowserViewModel(
                       if (progressValue in 0.01f..0.99f) {
                         basicPlaybackMap[video.id] = progressValue
                       }
+                    }
+                    if (state.timeRemaining == -1) {
+                      basicNewIds.add(video.id)
                     }
                   } else {
                     val videoAge = basicCurrentTime - (video.dateModified * 1000)
@@ -395,7 +398,7 @@ class FileSystemBrowserViewModel(
                           if (state.hasBeenWatched) {
                             finalWatchedIds.add(video.id)
                           }
-                          if (video.duration > 0) {
+                          if (video.duration > 0 && state.timeRemaining != -1) {
                             val durationSeconds = video.duration / 1000
                             val watched = durationSeconds - state.timeRemaining.toLong()
                             val progressValue = (watched.toFloat() / durationSeconds.toFloat()).coerceIn(0f, 1f)
@@ -407,6 +410,9 @@ class FileSystemBrowserViewModel(
                             if (progressValue in 0.01f..0.99f) {
                               finalPlaybackMap[video.id] = progressValue
                             }
+                          }
+                          if (state.timeRemaining == -1) {
+                            finalNewIds.add(video.id)
                           }
                         } else {
                           val videoAge = finalCurrentTime - (video.dateModified * 1000)

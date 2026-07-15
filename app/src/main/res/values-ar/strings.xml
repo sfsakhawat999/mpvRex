@@ -960,4 +960,10 @@
     <string name="generic_custom">مخصّص</string>
     <string name="generic_edit_content_description">تعديل %1$s</string>
     
+    <string name="pref_appearance_enable_glass_player_controls_title">عناصر تحكّم المشغّل الزجاجية</string>
+    <string name="pref_appearance_enable_glass_player_controls_summary">طبّق نمط الزجاج Glass-morphism على أزرار تحكّم المشغّل</string>
+    <string name="pref_appearance_enable_glass_seekbar_title">خلفية شريط التحريك الزجاجية</string>
+    <string name="pref_appearance_enable_glass_seekbar_summary">طبّق نمط الزجاج Glass-morphism على مسار شريط تقدّم الفيديو</string>
+    <string name="pref_player_show_circular_double_tap_seek_title">إظهار مؤشّر التحريك الدائري عند النقر المزدوج</string>
+    <string name="pref_player_show_circular_double_tap_seek_summary">إظهار طبقة تحريك دائرية مع عرض الوقت أسفلها</string>
 </resources>

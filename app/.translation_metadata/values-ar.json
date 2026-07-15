@@ -3062,5 +3062,441 @@
   "seconds#plural#other": {
     "source_hash": "543f1028b64338f26ab6cbbf97cd1a377616c1e860a5c1f5948608bca90a9282",
     "translated_value": "%1$d ثانية"
+  },
+  "mark_as_last_played": {
+    "source_hash": "2c37f2143918000a150ab3f00d0ad6f2f969b562ac2eec340c15354dfc21ab4a",
+    "translated_value": "آخر تشغيل"
+  },
+  "mark_as_last_played_desc": {
+    "source_hash": "0d622b1a48c9d6e27010d690f9368eb53ca03494e8573e975140523e6486611c",
+    "translated_value": "نقل إلى أعلى قائمة المشغَّلة مؤخراً"
+  },
+  "mark_as_finished": {
+    "source_hash": "7804f7a79a9eee323b6e89d3f8287c7d36076f4d76291646295f435b0dec736e",
+    "translated_value": "منتهي"
+  },
+  "mark_as_finished_desc": {
+    "source_hash": "c4efdad8074dd2af243f1e2fcbb187d774d42caecdf7278bebdd921ba2fa49a1",
+    "translated_value": "وسّم بوصفه مشاهَداً بالكامل"
+  },
+  "mark_as_none": {
+    "source_hash": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91",
+    "translated_value": "بلا وسم"
+  },
+  "mark_as_none_desc": {
+    "source_hash": "428e30c68e9ebfd30b7ab5db6d57d7ee0a260025e49724c3a35ab6d433d99aed",
+    "translated_value": "إزالة جميع الوسوم وسجل المشاهدة"
+  },
+  "btn_label_back": {
+    "source_hash": "93ad724a301da82da3b948863a348d790953a2dd2fd52d64d32b4b30835f9cf2",
+    "translated_value": "سهم الرجوع"
+  },
+  "btn_label_title": {
+    "source_hash": "dccf87e0d50546c545763ea0bdb74b64875273de2dee01e9e000184037909f4b",
+    "translated_value": "عنوان الفيديو"
+  },
+  "btn_label_bookmarks": {
+    "source_hash": "92939d86a9471a2f179a1b48c5964b84c035298badcca94ae9beab038d0d2c68",
+    "translated_value": "الفصول / الإشارات المرجعية"
+  },
+  "btn_label_speed": {
+    "source_hash": "4b2f5df8cacbf3e6f46a86e8564bedf4a682e11bdddff9dc661cceb95ded991c",
+    "translated_value": "سرعة التشغيل"
+  },
+  "btn_label_decoder": {
+    "source_hash": "36883f070fe0e9946c42420d7c6be5ad3d94b79e70bfcdcbb7091d1d8b0d775d",
+    "translated_value": "وحدة فك الترميز"
+  },
+  "btn_label_rotation": {
+    "source_hash": "e7b46c2b5307d4932d662d8613f773599653219c2ff164b98dd604d46c04987b",
+    "translated_value": "تدوير الشاشة"
+  },
+  "btn_label_frame_nav": {
+    "source_hash": "0fad97682debe3fbc2f442280ba1a6c030a8286d92582f59d59d4c80e026c606",
+    "translated_value": "التنقل بين الإطارات"
+  },
+  "btn_label_zoom": {
+    "source_hash": "394e3dc57c5ed5a712c540a32228d0e1826bebd88fa7f5be5bc4a9cb50eee7f6",
+    "translated_value": "تكبير الفيديو"
+  },
+  "btn_label_pip": {
+    "source_hash": "597820ce81c2a6370a5f0730ef01b76ea70b33385960154cc8d1dcc49c4476ac",
+    "translated_value": "صورة داخل صورة"
+  },
+  "btn_label_aspect": {
+    "source_hash": "556f85efa2beec5213eaaaa22951c73e4c0b499c9e9af875bd5c88a2f0d84583",
+    "translated_value": "نسبة العرض إلى الارتفاع"
+  },
+  "btn_label_lock": {
+    "source_hash": "4e396281db62767f9429936cffe93c90e9526b2acd3e30166d63b499c6c474ad",
+    "translated_value": "قفل عناصر التحكم"
+  },
+  "btn_label_audio": {
+    "source_hash": "f3161deff5126bba5add64db63981772ac69aa3c421685af6750fdba0d68f567",
+    "translated_value": "المسار الصوتي"
+  },
+  "btn_label_subtitles": {
+    "source_hash": "0ee695bdeb26a296117c515156ac6785099fa25450755144ccdb5fbb9b2c1841",
+    "translated_value": "الترجمة"
+  },
+  "btn_label_more": {
+    "source_hash": "6285ce5d271764bb26f5240bab1016393f6221ac98cc6662a3c0000d63ded88d",
+    "translated_value": "المزيد من الخيارات"
+  },
+  "btn_label_chapter": {
+    "source_hash": "5c07160a87ac0458fdd409e244a70fee992622bebcc725c88d6a20e44af90348",
+    "translated_value": "الفصل الحالي"
+  },
+  "btn_label_repeat_mode": {
+    "source_hash": "c1de798bbca987f690fbdf6ca9f692fb3a71f55b2162c4bff138e0db9b6a51df",
+    "translated_value": "وضع التكرار"
+  },
+  "btn_label_shuffle": {
+    "source_hash": "317cb3a7efadd989cf93430f492995c8a33f10a31ea74699f2c0152bb6c3b9fb",
+    "translated_value": "تشغيل عشوائي"
+  },
+  "btn_label_mirror": {
+    "source_hash": "37feb1fac989c6aaf03124d80279e00379368ab626ab83b51d1bd0deff64549f",
+    "translated_value": "قلب أفقي"
+  },
+  "btn_label_vertical_flip": {
+    "source_hash": "f6c8adf54e3c1dece8be391d2ab2b063b62a3084ce5c7d6c9568fd0d5227fe5e",
+    "translated_value": "قلب رأسي"
+  },
+  "btn_label_ab_loop": {
+    "source_hash": "275e53cd29165400cf735a032c387c340da55f072540fd73c1661366cc4ac0bb",
+    "translated_value": "تكرار A-B"
+  },
+  "btn_label_custom_skip": {
+    "source_hash": "399b334c37a82b638971410341f28a06345c5fe58d8c508500e288a04962bb1d",
+    "translated_value": "تخطي مخصص"
+  },
+  "btn_label_background_playback": {
+    "source_hash": "7f6f095d5b3a3c185b9f80a4a2d5c570910405e64de04b6120935ce6f184668c",
+    "translated_value": "التشغيل في الخلفية"
+  },
+  "btn_label_ambient_mode": {
+    "source_hash": "d84c3e862dd4e5cc6821b96ceb672203b1c4a55961c937c1927cc7bd9dc3c663",
+    "translated_value": "الوضع السينيمائي"
+  },
+  "btn_label_sleep_timer": {
+    "source_hash": "b0924eb31382abfe22ebe6bb357876704e1d80b057ea132195cb410a2758bb00",
+    "translated_value": "مؤقت النوم"
+  },
+  "btn_label_none": {
+    "source_hash": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91",
+    "translated_value": "لا شيء"
+  },
+  "timer_start": {
+    "source_hash": "471c8546bc05a9ed078390d71bf69a8ab941311aac7c7c57ffd7e524c5bddae4",
+    "translated_value": "بدء المؤقت"
+  },
+  "slide_to_unlock": {
+    "source_hash": "4b4ea1031569ae30beb626d0bdac3846ffe4eb9b024db53d1e56f72938a9cb6b",
+    "translated_value": "اسحب لفتح القفل"
+  },
+  "player_sheets_tab_controls": {
+    "source_hash": "799c269135742a36ae48dddf3a69c47c7d2a428a34e351f6da93ae6490101b47",
+    "translated_value": "التحكم"
+  },
+  "player_sheets_tab_settings": {
+    "source_hash": "74a883a037bc227f91891ab654a753d3a99f31ab06ae5b5d2b6e594a692b41f8",
+    "translated_value": "الإعدادات"
+  },
+  "player_sheets_tab_interaction": {
+    "source_hash": "b7d2863247e0230fc402347740098d2e3f799aae27be97da0936e97aca77e16c",
+    "translated_value": "التفاعل"
+  },
+  "anime4k_not_available_high_res": {
+    "source_hash": "ecbf27d40257b1bd6b5f75dd8e506058cda1c717bb0d9d16946402917d7af77e",
+    "translated_value": "غير متوفر لفيديو 4K/8K"
+  },
+  "player_sheets_extended_controls_title": {
+    "source_hash": "d4f8d693be530c037d42edbad30c94f3f31ca731ff6e68dda9c8c6a1929c522c",
+    "translated_value": "أدوات تحكم إضافية"
+  },
+  "storage_access_required": {
+    "source_hash": "a7cd1eb24855c9123141517e484018985cc3e38b67bbac9f6aa6e6cb3a1d54f0",
+    "translated_value": "الوصول للتخزين مطلوب"
+  },
+  "allow_access": {
+    "source_hash": "5e4a8127f761374a511498e6423721b17d83e56a5277c6b099b44ca015c9c1eb",
+    "translated_value": "السماح بالوصول"
+  },
+  "why_do_i_see_this": {
+    "source_hash": "6c719e95825e5c20332f9f5765f6147569a52cd4efd6f612eba03d246f0fdd56",
+    "translated_value": "لماذا أرى هذا؟"
+  },
+  "why_this_permission_is_needed": {
+    "source_hash": "7b06debe3014d497020a775b770a65363fcd108a886d771649b69b03db931425",
+    "translated_value": "لماذا هذا الإذن مطلوب"
+  },
+  "permission_explanation_playstore_intro": {
+    "source_hash": "7c58da3afdee9176c232d32f8820dad935e3491384934dfd4f8d1f87a0967a8c",
+    "translated_value": "يحتاج mpvRex إلى الوصول لملفات الفيديو الخاصة بك لتوفير وظيفته الأساسية كمشغل وسائط."
+  },
+  "permission_used_exclusively_for": {
+    "source_hash": "6ed4e23643e43257622b531cb481838c21b6569b17ffce10bd869b2e28d5503f",
+    "translated_value": "يُستخدم هذا الإذن حصرياً من أجل:"
+  },
+  "permission_usage_bullet_list": {
+    "source_hash": "ec91c3ef29ebadd915171056eafb01ea09f93eb2da432c8034eb9adefe559836",
+    "translated_value": "• اكتشاف وعرض ملفات الفيديو الخاصة بك\n• تشغيل المحتوى الإعلامي\n• تحميل ملفات الترجمة"
+  },
+  "permission_explanation_standard_intro": {
+    "source_hash": "b3984644043ddf9ee0874be53633a2deba9894802268407b9d62a664de32f86e",
+    "translated_value": "يتطلب mpvRex دائماً إذن الوصول للتخزين لأنه ضروري لعثور التطبيق على جميع ملفات الوسائط والترجمة الموجودة على جهازك، بما فيها الملفات غير المدعومة من طرف النظام."
+  },
+  "permission_security_policy_change": {
+    "source_hash": "e75ddded5ead1b18d34976c5d562bf8a049bb1655140974b64fcdc9df7d7a7a8",
+    "translated_value": "مع ذلك، بسبب تغيير في سياسة الأمان، تتطلب التطبيقات المبنية لأندرويد 11 وما فوق الآن إذناً إضافياً لمواصلة الوصول لنفس الملفات."
+  },
+  "permission_privacy_assurance_standard": {
+    "source_hash": "edb480f9030ebe50f01e6b89db0fc7923b2d796fa7e085f7b47ae60bc9c5f0e4",
+    "translated_value": "يرجى العلم أن هذا الإذن يُستخدم فقط للاكتشاف التلقائي لملفات الوسائط/الترجمة على جهازك، ولن يسمح لنا بالوصول لملفات البيانات الخاصة المخزنة من طرف تطبيقات أخرى بأي شكل من الأشكال."
+  },
+  "opensource_github_notice": {
+    "source_hash": "33b54a5eb9477bcf424e306dab1ef42970b4ce83bc38c015b71e233466ebb507",
+    "translated_value": "mpvRex مشروع مفتوح المصدر. يمكنك مراجعة الكود المصدري والتحقق من كيفية استخدام الأذونات بزيارة مستودعنا على GitHub في:"
+  },
+  "privacy_assurance_final": {
+    "source_hash": "6526f0743b4a35b0f23d3ecc9cadf55eaa290512bbd8dfa0c4dbecf11bba6035",
+    "translated_value": "كن مطمئناً، خصوصيتك هي أولويتنا القصوى، ولا نصل لملفاتك لأغراض أخرى ولا ننقلها أو نخزنها في خوادمنا. تبقى آمنة على جهازك."
+  },
+  "permission_required_photos_videos": {
+    "source_hash": "c52cca55c3667c09dcdf418ebc3f73c550080308f87ebc5eedbb3a487a92726a",
+    "translated_value": "يحتاج mpvRex إذن \"الصور والفيديوهات\" للوصول لملفات الفيديو المخزنة على جهازك وتشغيلها."
+  },
+  "permission_required_storage": {
+    "source_hash": "f48d86a17eb8f3a7affd9a70d8b2bce3e1c2c03a4b28425056af07bf2482d4e5",
+    "translated_value": "يحتاج mpvRex إذن \"التخزين\" للوصول لملفات الوسائط المخزنة على جهازك وتشغيلها."
+  },
+  "permission_required_all_files": {
+    "source_hash": "c7db9d1146c903832fa41d25fb5c979133cd7c69a1a76f43456e73ff67e41080",
+    "translated_value": "يحتاج mpvRex إذن \"الوصول لجميع الملفات\" لاكتشاف ملفات الوسائط والترجمة على جهازك بسبب تغيير في سياسة الأمان في أندرويد 11 والإصدارات الأحدث."
+  },
+  "permission_explanation_tiramisu_plus": {
+    "source_hash": "8937114a7104cdac78132189939889a6f577d61e72df50eff7a528c70437ff7b",
+    "translated_value": "في أندرويد 13 وما فوق، يسمح هذا الإذن للتطبيق بقراءة ملفات الفيديو من تخزين جهازك، بما في ذلك مجلدات التنزيلات والأفلام و DCIM."
+  },
+  "permission_explanation_pre_tiramisu": {
+    "source_hash": "0e3508593f87b9e10e5dd1549d3d3af6f0d435acb701338093463476dd5d15bd",
+    "translated_value": "يسمح هذا الإذن للتطبيق بقراءة ملفات الوسائط من تخزين جهازك لتشغيل الفيديوهات والصوتيات."
+  },
+  "playlist_separator": {
+    "source_hash": "ddc12498cffd2fd384a9c529b913e276311b738fe263f504b9a41539b7fb4294",
+    "translated_value": "• %1$s"
+  },
+  "chapters": {
+    "source_hash": "9831375bc65196d8c923455ec07c27aefa5761edfe4162dde1c7b36eec25a3ad",
+    "translated_value": "الفصول"
+  },
+  "skip_seconds": {
+    "source_hash": "7a4d38c987857c325a3c89416b3580084400861f9382e9f780ee939d7990614d",
+    "translated_value": "تخطي %1$d ثانية"
+  },
+  "playback_speed": {
+    "source_hash": "4b2f5df8cacbf3e6f46a86e8564bedf4a682e11bdddff9dc661cceb95ded991c",
+    "translated_value": "سرعة التشغيل"
+  },
+  "screen_rotation": {
+    "source_hash": "57b5e2fc1bba18bb4f54084af57ffe86b3bb3d925c281043e84a05eb4b19317c",
+    "translated_value": "التدوير"
+  },
+  "frame_nav": {
+    "source_hash": "b57294d46d1135f95121b6b0a4b9f70b7b2da18d9f81a15602fb27a5e5f31a82",
+    "translated_value": "تصفح الإطارات"
+  },
+  "frame_navigation": {
+    "source_hash": "0fad97682debe3fbc2f442280ba1a6c030a8286d92582f59d59d4c80e026c606",
+    "translated_value": "التنقل بين الإطارات"
+  },
+  "pip": {
+    "source_hash": "5c3ef1bbc4081eeb41ea18197f019f465faa5b81a9f5f4ecefd6e9ac777db697",
+    "translated_value": "صورة داخل صورة"
+  },
+  "video_zoom": {
+    "source_hash": "394e3dc57c5ed5a712c540a32228d0e1826bebd88fa7f5be5bc4a9cb50eee7f6",
+    "translated_value": "تقريب الفيديو"
+  },
+  "lock": {
+    "source_hash": "db44b8db4f05d720ef1a57abadeed0c164d47b17416c7dd7d136d8f10fba91c9",
+    "translated_value": "قفل"
+  },
+  "audio": {
+    "source_hash": "bc1b88907d3b748af99cb9d4ffc07a0118dad5dab21a9dbdcc5a17a09641364a",
+    "translated_value": "الصوت"
+  },
+  "subtitles": {
+    "source_hash": "0ee695bdeb26a296117c515156ac6785099fa25450755144ccdb5fbb9b2c1841",
+    "translated_value": "الترجمة"
+  },
+  "repeat_off": {
+    "source_hash": "6272a4d216c314cb8e37eebfec7c83385d19c3bbda49853d673b33f6fd3f9683",
+    "translated_value": "التكرار متوقف"
+  },
+  "repeat_one": {
+    "source_hash": "506d84a414d970baa5b2feeaa85749d11a0b25e289f279b1b1565332455541fb",
+    "translated_value": "تكرار العنصر الواحد"
+  },
+  "repeat_all": {
+    "source_hash": "4de9791ce99828b02e054ab2ec6e48b05d531196c7fb26143d0a68a3d6443a20",
+    "translated_value": "تكرار الكل"
+  },
+  "shuffle_on": {
+    "source_hash": "5b2864ae15ab4c32aac189812190054ca2280f2b8dee35aef36fd060584d4139",
+    "translated_value": "التشغيل العشوائي مفعّل"
+  },
+  "shuffle_off": {
+    "source_hash": "845a907e2fa42a873ec7f85e20a6df627a3aac0d1ddda3f47a849a3f8c28763a",
+    "translated_value": "التشغيل العشوائي متوقف"
+  },
+  "mirrored": {
+    "source_hash": "ed059fe4e0d0ec250b57a8d8fb2fd08fa91776f8a20404b1fa1d78e43b9ba280",
+    "translated_value": "معكوس أفقياً"
+  },
+  "mirror": {
+    "source_hash": "90fade6fb78eaa0e6a7ca3cbe357fc645498c39e1207dbb915bd6aeddcdb4e15",
+    "translated_value": "عكس أفقي"
+  },
+  "flipped": {
+    "source_hash": "1cd73897d21841e05b0d065a7fea89ce2271c7d00e5f3a35677525b561fb9d31",
+    "translated_value": "معكوس عمودياً"
+  },
+  "flip_vertical": {
+    "source_hash": "493a9dd18b231aceaac77e6729b797a9a6094a37fa7120b8dca87ab26f5d406d",
+    "translated_value": "عكس عمودي"
+  },
+  "flip_vertical_desc": {
+    "source_hash": "f6c8adf54e3c1dece8be391d2ab2b063b62a3084ce5c7d6c9568fd0d5227fe5e",
+    "translated_value": "العكس العمودي"
+  },
+  "ab_loop_short": {
+    "source_hash": "38164fbd17603d73f696b8b4d72664d735bb6a7c88577687fd2ae33fd6964153",
+    "translated_value": "AB"
+  },
+  "loop": {
+    "source_hash": "f2f6a01889951edcdb1dc93a152a36d1b40e778f2bc6ff90cd5a83ebaed79201",
+    "translated_value": "تكرار"
+  },
+  "background_playback": {
+    "source_hash": "ea2b8a878841df5955c78edc6cae47446483b86e3f5ccb04e1a8d940cf7e59fd",
+    "translated_value": "التشغيل في الخلفية"
+  },
+  "ambient": {
+    "source_hash": "44bb0e5fb3702293c83edb7bdaefd20b9521497b1648f0db735696698e8950de",
+    "translated_value": "الوضع المحيطي"
+  },
+  "ambience_mode": {
+    "source_hash": "d84c3e862dd4e5cc6821b96ceb672203b1c4a55961c937c1927cc7bd9dc3c663",
+    "translated_value": "وضع الإضاءة المحيطية"
+  },
+  "sleep_timer": {
+    "source_hash": "b0924eb31382abfe22ebe6bb357876704e1d80b057ea132195cb410a2758bb00",
+    "translated_value": "مؤقت النوم"
+  },
+  "pref_layout_landscape_controls_header": {
+    "source_hash": "2f9e7c6d97e3eac7c0e59f2eca440af9c9febc36e34ea1d941a54df1b66a8a27",
+    "translated_value": "أدوات التحكم في وضع أفقي"
+  },
+  "pref_layout_portrait_controls_header": {
+    "source_hash": "afb4bb2fc90e16fe9b8e6a87df4db698f533498dd46b34b97ecac1b870d5d4bf",
+    "translated_value": "أدوات التحكم في وضع عمودي"
+  },
+  "pref_layout_more_sheet_controls_header": {
+    "source_hash": "8f00d977636403acf92930e3b48d5830ef9786e98a8293d7bf12cba09cdfb268",
+    "translated_value": "أدوات التحكم في القائمة الإضافية"
+  },
+  "pref_layout_more_sheet_controls_title": {
+    "source_hash": "a7359d2cd4e82071abe966e4cc3e2dd8d3737827c9d6e67efef0ecb45d5de9f6",
+    "translated_value": "الأزرار في تبويب أدوات التحكم"
+  },
+  "pref_seekbar_style_header": {
+    "source_hash": "168ff8a4fd682edaa970fa2d0434bfd4aa391dceb9e85f7e593dae8c4d1b0eb5",
+    "translated_value": "شكل شريط التقدّم"
+  },
+  "pref_controls_layout_header": {
+    "source_hash": "501c96afb0c8f15ac0f058fac31018692acd4057f20d7746023c695866477bc4",
+    "translated_value": "تخطيط أدوات التحكم"
+  },
+  "pref_player_appearance_header": {
+    "source_hash": "3907fa7f80722a6fc58cd8c1bd30abf7638095d6774f183b6e831b7093957d1b",
+    "translated_value": "المظهر"
+  },
+  "pref_controls_layout_below_seekbar_title": {
+    "source_hash": "254c216794b2687869307cd8ee0ef6b4cbb138a0642738a36cebb7765296b6a9",
+    "translated_value": "أدوات التحكم أسفل شريط التقدّم"
+  },
+  "pref_controls_layout_below_seekbar_summary_true": {
+    "source_hash": "7d3533de58119a710d91dd35920f5d01c883e6d9be5e634ce750cf68c13f82c5",
+    "translated_value": "تظهر أزرار التحكم أسفل شريط التقدّم"
+  },
+  "pref_controls_layout_below_seekbar_summary_false": {
+    "source_hash": "1a32905a221e9af8c6b09d23759535c4615d524cd391ff08399ca2f8eb252953",
+    "translated_value": "تظهر أزرار التحكم أعلى شريط التقدّم"
+  },
+  "pref_appearance_show_controls_on_play_title": {
+    "source_hash": "a6322a384d4a5a506b7b3d569755b2b81da2c6e9fac1b21be1594ce07ff043a2",
+    "translated_value": "إظهار أدوات التحكم عند بدء التشغيل"
+  },
+  "pref_appearance_show_controls_on_play_summary": {
+    "source_hash": "34d0640c8b794f8a72ae5e695ccb1f5890836d1e1e0a02aa44becf469dfa9d63",
+    "translated_value": "إظهار طبقة أدوات التحكم عند بدء تشغيل الفيديو"
+  },
+  "pref_appearance_player_gradient_opacity_title": {
+    "source_hash": "801812c065dc13a10fb3812e50a91d2c004e8bf7ef1479c4a217035459421bb1",
+    "translated_value": "شفافية التدرّج في أدوات التحكم"
+  },
+  "pref_appearance_player_gradient_opacity_current": {
+    "source_hash": "99b25699f27ca413ab488316655169940501e8eee694c344bebb90057a9405a7",
+    "translated_value": "الحالي: %1$d%%"
+  },
+  "pref_player_display_custom_hide_time_dialog_message": {
+    "source_hash": "0a7dd22fd01494f95b95e4054834b923a08887031fe7ac9a03c599b4560b12e3",
+    "translated_value": "أدخل زمن الإخفاء المخصّص بالميلي ثانية"
+  },
+  "pref_player_display_time_ms_format": {
+    "source_hash": "75af193daf4978cdec2eef1d9bea483318636ea430715f28bba6a09f048503d6",
+    "translated_value": "%1$d ms"
+  },
+  "pref_player_display_custom_time_summary": {
+    "source_hash": "32652a58260ef6c5df5bffdff893f7951d7b37443f8e0a5d6770961c3c21b741",
+    "translated_value": "مخصّص (%1$d ms)"
+  },
+  "generic_none": {
+    "source_hash": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91",
+    "translated_value": "بلا"
+  },
+  "generic_custom": {
+    "source_hash": "494ca78f7374e46fb2de9ad9f2dbd4aaae89b50b2ca044177a1566a59e06627e",
+    "translated_value": "مخصّص"
+  },
+  "generic_edit_content_description": {
+    "source_hash": "261e9c17ca741ee88bebb327a5066b8be8a8e5cfec39abb5da1d47dc167aa157",
+    "translated_value": "تعديل %1$s"
+  },
+  "pref_appearance_enable_glass_player_controls_title": {
+    "source_hash": "0bd4a6552b82ba469a14b6b764a541bd1d2fe7ba84701a02aa629ab5667d01c8",
+    "translated_value": "عناصر تحكّم المشغّل الزجاجية"
+  },
+  "pref_appearance_enable_glass_player_controls_summary": {
+    "source_hash": "268db21f74610c193dfac831f88a33afdb7a56e6de456ce398be661ba033ab4c",
+    "translated_value": "طبّق نمط الزجاج Glass-morphism على أزرار تحكّم المشغّل"
+  },
+  "pref_appearance_enable_glass_seekbar_title": {
+    "source_hash": "3c3294ddf3a619756b7967dc41b6d73e2bf9212f66669e4c593513714178fca5",
+    "translated_value": "خلفية شريط التحريك الزجاجية"
+  },
+  "pref_appearance_enable_glass_seekbar_summary": {
+    "source_hash": "902b37910dcd5b47e70bb6a570b13316572a302671280eaf15deaed9f3393beb",
+    "translated_value": "طبّق نمط الزجاج Glass-morphism على مسار شريط تقدّم الفيديو"
+  },
+  "pref_player_show_circular_double_tap_seek_title": {
+    "source_hash": "748e129e21ca9ce935c95151b6140768aebf1db61ec9d14501cfa310d07a224e",
+    "translated_value": "إظهار مؤشّر التحريك الدائري عند النقر المزدوج"
+  },
+  "pref_player_show_circular_double_tap_seek_summary": {
+    "source_hash": "387cef4690ac5d6521546724c29ad3fb5ac3a9f979a5aa95ea7b8230fbe5f6e8",
+    "translated_value": "إظهار طبقة تحريك دائرية مع عرض الوقت أسفلها"
   }
 }

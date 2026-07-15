@@ -208,6 +208,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
   val itemsWereDeletedOrMoved by viewModel.itemsWereDeletedOrMoved.collectAsState()
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
   val recentlyPlayedFilePath by viewModel.recentlyPlayedFilePath.collectAsState()
+  val recentlyPlayedPaths by viewModel.recentlyPlayedPaths.collectAsState()
   val autoScrollToLastPlayed by browserPreferences.autoScrollToLastPlayed.collectAsState()
 
   // Use standalone local states instead of CompositionLocal to avoid scroll issues with predictive back gesture
@@ -929,6 +930,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 navigationBarHeight = navigationBarHeight,
                 isFabVisible = isFabVisible, // Pass FAB visibility state
                 recentlyPlayedFilePath = recentlyPlayedFilePath,
+                recentlyPlayedPaths = recentlyPlayedPaths,
                 onVideoClick = { video ->
                   MediaUtils.playFile(video, context, "search")
                 },
@@ -956,6 +958,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 itemsWereDeletedOrMoved = itemsWereDeletedOrMoved,
                 showSubtitleIndicator = showSubtitleIndicator,
                 recentlyPlayedFilePath = recentlyPlayedFilePath,
+                recentlyPlayedPaths = recentlyPlayedPaths,
                 autoScrollToLastPlayed = autoScrollToLastPlayed,
                 navigationBarHeight = navigationBarHeight,
                 onRefresh = { viewModel.refresh() },
@@ -1389,6 +1392,7 @@ private fun FileSystemBrowserContent(
   itemsWereDeletedOrMoved: Boolean,
   showSubtitleIndicator: Boolean,
   recentlyPlayedFilePath: String?,
+  recentlyPlayedPaths: Set<String> = emptySet(),
   autoScrollToLastPlayed: Boolean,
   navigationBarHeight: Dp,
   onRefresh: suspend () -> Unit,
@@ -1482,6 +1486,7 @@ private fun FileSystemBrowserContent(
       onRefresh = onRefresh,
       isInSelectionMode = isInSelectionMode,
       recentlyPlayedFilePath = recentlyPlayedFilePath,
+      recentlyPlayedPaths = recentlyPlayedPaths,
       autoScrollToLastPlayed = autoScrollToLastPlayed,
       listState = listState,
       newVideoIds = newVideoIds,
@@ -1508,6 +1513,7 @@ private fun FileSystemSearchContent(
   navigationBarHeight: Dp,
   isFabVisible: androidx.compose.runtime.MutableState<Boolean>, // Add FAB visibility state
   recentlyPlayedFilePath: String?,
+  recentlyPlayedPaths: Set<String> = emptySet(),
   onVideoClick: (xyz.mpv.rex.domain.media.model.Video) -> Unit,
   onFolderClick: (FileSystemItem.Folder) -> Unit,
   modifier: Modifier = Modifier,
@@ -1623,9 +1629,19 @@ private fun FileSystemSearchContent(
                 folder = folderModel,
                 uiSettings = uiSettings,
                 isSelected = false,
-                isRecentlyPlayed = recentlyPlayedFilePath?.let {
-                  java.io.File(it).parent == folder.path
-                } ?: false,
+                isRecentlyPlayed = if (recentlyPlayedPaths.isNotEmpty()) {
+                  recentlyPlayedPaths.any { path ->
+                    try {
+                      java.io.File(path).parent == folder.path
+                    } catch (_: Exception) {
+                      false
+                    }
+                  }
+                } else {
+                  recentlyPlayedFilePath?.let {
+                    java.io.File(it).parent == folder.path
+                  } ?: false
+                },
                 isWatched = (folder.videoCount > 0 || folder.audioCount > 0) && folder.unwatchedVideoCount == 0,
                 newVideoCount = folder.newCount,
                 onClick = { onFolderClick(folder) },
@@ -1646,7 +1662,11 @@ private fun FileSystemSearchContent(
                 progressPercentage = videoFilesWithPlayback[videoFile.video.id],
                 isOldAndUnplayed = newVideoIds.contains(videoFile.video.id),
                 isWatched = watchedVideoIds.contains(videoFile.video.id),
-                isRecentlyPlayed = recentlyPlayedFilePath == videoFile.video.path,
+                isRecentlyPlayed = if (recentlyPlayedPaths.isNotEmpty()) {
+                  recentlyPlayedPaths.contains(videoFile.video.path)
+                } else {
+                  recentlyPlayedFilePath == videoFile.video.path
+                },
                 isSelected = false,
                 isNeverPlayed = videoFilesWithPlayback[videoFile.video.id] == null,
                 onClick = { onVideoClick(videoFile.video) },

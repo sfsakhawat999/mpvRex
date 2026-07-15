@@ -92,7 +92,7 @@ fun BaseMediaCard(
                         else Color.Transparent
                     )
                     .then(if (gridColumns == 1) Modifier.padding(horizontal = 12.dp, vertical = 4.dp) else Modifier.padding(4.dp)),
-                horizontalAlignment = if (gridColumns == 1) Alignment.Start else Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.Start,
             ) {
                 // Thumbnail Box
                 Box(
@@ -163,16 +163,16 @@ fun BaseMediaCard(
                 // Title
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = when {
-                        isRecentlyPlayed -> MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
                         isWatched -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        isRecentlyPlayed -> MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
                         else -> MaterialTheme.colorScheme.onSurface
                     },
                     maxLines = maxTitleLines,
                     overflow = TextOverflow.Ellipsis,
-                    textAlign = if (gridColumns == 1) TextAlign.Start else TextAlign.Center,
-                    fontWeight = if (isRecentlyPlayed) FontWeight.Black else FontWeight.Medium,
+                    textAlign = TextAlign.Start,
+                    fontWeight = if (isRecentlyPlayed && !isWatched) FontWeight.Black else FontWeight.Normal,
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -182,7 +182,7 @@ fun BaseMediaCard(
                         modifier = Modifier.fillMaxWidth().then(
                             if (gridColumns == 1) Modifier.padding(vertical = 2.dp) else Modifier
                         ),
-                        horizontalArrangement = if (gridColumns == 1) Arrangement.Start else Arrangement.Center,
+                        horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         infoContent()
@@ -283,13 +283,13 @@ fun BaseMediaCard(
                         text = title,
                         style = listTitleStyle ?: MaterialTheme.typography.titleMedium,
                         color = when {
-                            isRecentlyPlayed -> MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
                             isWatched -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            isRecentlyPlayed -> MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
                             else -> MaterialTheme.colorScheme.onSurface
                         },
                         maxLines = maxTitleLines,
                         overflow = TextOverflow.Ellipsis,
-                        fontWeight = if (isRecentlyPlayed) FontWeight.Black else FontWeight.Normal,
+                        fontWeight = if (isRecentlyPlayed && !isWatched) FontWeight.Black else FontWeight.Normal,
                     )
 
                     if (infoContent != null) {

@@ -197,6 +197,7 @@ object FolderListScreen : Screen {
     val foldersWithNewCount by viewModel.foldersWithNewCount.collectAsState()
     val uiSettings by viewModel.uiSettings.collectAsState()
     val recentlyPlayedFilePath by viewModel.recentlyPlayedFilePath.collectAsState()
+    val recentlyPlayedPaths by viewModel.recentlyPlayedPaths.collectAsState()
     val playedFolderPaths by viewModel.playedFolderPaths.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val scanStatus by viewModel.scanStatus.collectAsState()
@@ -756,6 +757,7 @@ object FolderListScreen : Screen {
               hasCompletedInitialLoad = hasCompletedInitialLoad,
               foldersWereDeleted = foldersWereDeleted,
               recentlyPlayedFilePath = recentlyPlayedFilePath,
+              recentlyPlayedPaths = recentlyPlayedPaths,
               playedFolderPaths = playedFolderPaths,
               onRefresh = { viewModel.refresh() },
               mediaLayoutMode = mediaLayoutMode,
@@ -986,6 +988,7 @@ private fun FolderListContent(
   foldersWithNewCount: List<xyz.mpv.rex.ui.browser.folderlist.FolderWithNewCount>,
   uiSettings: UiSettings,
   recentlyPlayedFilePath: String?,
+  recentlyPlayedPaths: Set<String> = emptySet(),
   playedFolderPaths: Set<String>,
   isLoading: Boolean,
   scanStatus: String?,
@@ -1021,6 +1024,7 @@ private fun FolderListContent(
     onRefresh = onRefresh,
     isInSelectionMode = selectionManager.isInSelectionMode,
     recentlyPlayedFilePath = recentlyPlayedFilePath,
+    recentlyPlayedPaths = recentlyPlayedPaths,
     playedFolderPaths = playedFolderPaths,
     autoScrollToLastPlayed = autoScrollToLastPlayed,
     listState = listState,

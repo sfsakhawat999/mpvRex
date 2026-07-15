@@ -102,7 +102,7 @@ class MediaLibraryViewModel(
         }
 
         // Calculate watch progress (0.0 to 1.0)
-        val progress = if (playbackState != null && video.duration > 0) {
+        val progress = if (playbackState != null && video.duration > 0 && playbackState.timeRemaining != -1) {
           val durationSeconds = video.duration / 1000
           val watched = durationSeconds - playbackState.timeRemaining.toLong()
           val progressValue = (watched.toFloat() / durationSeconds.toFloat()).coerceIn(0f, 1f)
@@ -113,16 +113,21 @@ class MediaLibraryViewModel(
 
         // Correct logic for "NEW" label
         val videoAge = currentTime - (video.dateModified * 1000)
-        val isOldAndUnplayed = playbackState == null && videoAge <= thresholdMillis
+        val isOldAndUnplayed = (playbackState == null && videoAge <= thresholdMillis) || (playbackState != null && playbackState.timeRemaining == -1)
 
-        val isWatched = if (playbackState != null && video.duration > 0) {
-           val durationSeconds = video.duration / 1000
-           val watched = durationSeconds - playbackState.timeRemaining.toLong()
-           val progressValue = (watched.toFloat() / durationSeconds.toFloat()).coerceIn(0f, 1f)
-           val calculatedWatched = progressValue >= (watchedThreshold / 100f)
-           playbackState.hasBeenWatched || calculatedWatched
+        val isWatched = if (playbackState != null) {
+          if (playbackState.hasBeenWatched) {
+            true
+          } else if (video.duration > 0 && playbackState.timeRemaining != -1) {
+            val durationSeconds = video.duration / 1000
+            val watched = durationSeconds - playbackState.timeRemaining.toLong()
+            val progressValue = (watched.toFloat() / durationSeconds.toFloat()).coerceIn(0f, 1f)
+            progressValue >= (watchedThreshold / 100f)
+          } else {
+            false
+          }
         } else {
-           false
+          false
         }
 
         VideoWithPlaybackInfo(

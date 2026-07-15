@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -71,6 +72,12 @@ fun MarkAsBottomSheet(
 
             Spacer(modifier = Modifier.height(4.dp))
 
+            MarkAsRow(
+                icon = Icons.Filled.NewReleases,
+                label = stringResource(R.string.mark_as_new),
+                description = stringResource(R.string.mark_as_new_desc),
+                onClick = { onMarkAs(MarkAsState.New); onDismiss() },
+            )
             MarkAsRow(
                 icon = Icons.Filled.History,
                 label = stringResource(R.string.mark_as_last_played),

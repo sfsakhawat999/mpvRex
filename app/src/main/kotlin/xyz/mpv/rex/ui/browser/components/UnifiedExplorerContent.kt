@@ -44,6 +44,9 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.ui.res.stringResource
 import xyz.mpv.rex.R
+import my.nanihadesuka.compose.LazyColumnScrollbar
+import my.nanihadesuka.compose.LazyVerticalGridScrollbar
+import my.nanihadesuka.compose.ScrollbarSettings
 
 @Composable
 fun <T> UnifiedExplorerContent(
@@ -63,6 +66,7 @@ fun <T> UnifiedExplorerContent(
   onRefresh: (suspend () -> Unit)? = null,
   isInSelectionMode: Boolean = false,
   recentlyPlayedFilePath: String? = null,
+  recentlyPlayedPaths: Set<String> = emptySet(),
   playedFolderPaths: Set<String> = emptySet(),
   newVideoIds: Set<Long> = emptySet(),
   watchedVideoIds: Set<Long> = emptySet(),
@@ -290,6 +294,7 @@ fun <T> UnifiedExplorerContent(
                         onLongClick = { onLongClick(item) },
                         onThumbClick = effectiveOnThumbClick,
                         recentlyPlayedFilePath = recentlyPlayedFilePath,
+                        recentlyPlayedPaths = recentlyPlayedPaths,
                         playedFolderPaths = playedFolderPaths,
                         newVideoIds = newVideoIds,
                         watchedVideoIds = watchedVideoIds,
@@ -336,6 +341,7 @@ fun <T> UnifiedExplorerContent(
                   onLongClick = { onLongClick(item) },
                   onThumbClick = effectiveOnThumbClick,
                   recentlyPlayedFilePath = recentlyPlayedFilePath,
+                  recentlyPlayedPaths = recentlyPlayedPaths,
                   playedFolderPaths = playedFolderPaths,
                   newVideoIds = newVideoIds,
                   watchedVideoIds = watchedVideoIds,
@@ -397,6 +403,7 @@ fun <T> UnifiedExplorerContent(
                         onLongClick = { onLongClick(item) },
                         onThumbClick = effectiveOnThumbClick,
                         recentlyPlayedFilePath = recentlyPlayedFilePath,
+                        recentlyPlayedPaths = recentlyPlayedPaths,
                         playedFolderPaths = playedFolderPaths,
                         newVideoIds = newVideoIds,
                         watchedVideoIds = watchedVideoIds,
@@ -443,6 +450,7 @@ fun <T> UnifiedExplorerContent(
                   onLongClick = { onLongClick(item) },
                   onThumbClick = effectiveOnThumbClick,
                   recentlyPlayedFilePath = recentlyPlayedFilePath,
+                  recentlyPlayedPaths = recentlyPlayedPaths,
                   playedFolderPaths = playedFolderPaths,
                   newVideoIds = newVideoIds,
                   watchedVideoIds = watchedVideoIds,
@@ -497,6 +505,7 @@ fun <T> UnifiedExplorerContent(
               onLongClick = { onLongClick(item) },
               onThumbClick = effectiveOnThumbClick,
               recentlyPlayedFilePath = recentlyPlayedFilePath,
+              recentlyPlayedPaths = recentlyPlayedPaths,
               playedFolderPaths = playedFolderPaths,
               newVideoIds = newVideoIds,
               watchedVideoIds = watchedVideoIds,
@@ -560,6 +569,7 @@ fun <T> UnifiedExplorerContent(
                       onLongClick = { onLongClick(item) },
                       onThumbClick = effectiveOnThumbClick,
                       recentlyPlayedFilePath = recentlyPlayedFilePath,
+                      recentlyPlayedPaths = recentlyPlayedPaths,
                       playedFolderPaths = playedFolderPaths,
                       newVideoIds = newVideoIds,
                       watchedVideoIds = watchedVideoIds,
@@ -593,12 +603,48 @@ fun <T> UnifiedExplorerContent(
                 onLongClick = { onLongClick(item) },
                 onThumbClick = effectiveOnThumbClick,
                 recentlyPlayedFilePath = recentlyPlayedFilePath,
+                recentlyPlayedPaths = recentlyPlayedPaths,
                 playedFolderPaths = playedFolderPaths,
                 newVideoIds = newVideoIds,
                 watchedVideoIds = watchedVideoIds,
                 videoPlaybackProgress = videoPlaybackProgress,
                 showSections = showSections
               )
+            }
+          }
+        }
+      }
+
+      // Scrollbar overlay with bottom padding to avoid overlap with navigation
+      if (items.size > 20) {
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = navigationBarHeight)
+        ) {
+          if (mediaLayoutMode == MediaLayoutMode.GRID && !showSections) {
+            LazyVerticalGridScrollbar(
+              state = gridState,
+              settings = ScrollbarSettings(
+                thumbUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                thumbSelectedColor = MaterialTheme.colorScheme.primary,
+                thumbMinLength = 0.08f,
+                thumbMaxLength = 0.08f,
+              ),
+            ) {
+              // Empty content - scrollbar only
+            }
+          } else {
+            LazyColumnScrollbar(
+              state = listState,
+              settings = ScrollbarSettings(
+                thumbUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                thumbSelectedColor = MaterialTheme.colorScheme.primary,
+                thumbMinLength = 0.08f,
+                thumbMaxLength = 0.08f,
+              ),
+            ) {
+              // Empty content - scrollbar only
             }
           }
         }
@@ -648,6 +694,7 @@ private fun <T> ExplorerItemCard(
   onLongClick: () -> Unit,
   onThumbClick: (() -> Unit)? = null,
   recentlyPlayedFilePath: String? = null,
+  recentlyPlayedPaths: Set<String> = emptySet(),
   playedFolderPaths: Set<String> = emptySet(),
   newVideoIds: Set<Long> = emptySet(),
   watchedVideoIds: Set<Long> = emptySet(),
@@ -656,13 +703,23 @@ private fun <T> ExplorerItemCard(
 ) {
   when (item) {
     is VideoFolder -> {
-      val isRecentlyPlayed = recentlyPlayedFilePath?.let {
-        if (showSections) {
-          it.startsWith(item.path + "/") || it == item.path || java.io.File(it).parent == item.path
-        } else {
-          java.io.File(it).parent == item.path
+      val isRecentlyPlayed = if (recentlyPlayedPaths.isNotEmpty()) {
+        recentlyPlayedPaths.any { path ->
+          if (showSections) {
+            path.startsWith(item.path + "/") || path == item.path || java.io.File(path).parent == item.path
+          } else {
+            java.io.File(path).parent == item.path
+          }
         }
-      } ?: false
+      } else {
+        recentlyPlayedFilePath?.let {
+          if (showSections) {
+            it.startsWith(item.path + "/") || it == item.path || java.io.File(it).parent == item.path
+          } else {
+            java.io.File(it).parent == item.path
+          }
+        } ?: false
+      }
       val isNeverPlayed = item.path !in playedFolderPaths
       val isWatched = (item.videoCount > 0 || item.audioCount > 0) && item.unwatchedVideoCount == 0
 
@@ -684,7 +741,11 @@ private fun <T> ExplorerItemCard(
     is Video -> {
       val isOldAndUnplayed = newVideoIds.contains(item.id)
       val isWatched = watchedVideoIds.contains(item.id)
-      val isRecentlyPlayed = recentlyPlayedFilePath == item.path
+      val isRecentlyPlayed = if (recentlyPlayedPaths.isNotEmpty()) {
+        recentlyPlayedPaths.contains(item.path)
+      } else {
+        recentlyPlayedFilePath == item.path
+      }
 
       VideoCard(
         video = item,
@@ -702,7 +763,11 @@ private fun <T> ExplorerItemCard(
       )
     }
     is VideoWithPlaybackInfo -> {
-      val isRecentlyPlayed = recentlyPlayedFilePath == item.video.path
+      val isRecentlyPlayed = if (recentlyPlayedPaths.isNotEmpty()) {
+        recentlyPlayedPaths.contains(item.video.path)
+      } else {
+        recentlyPlayedFilePath == item.video.path
+      }
 
       VideoCard(
         video = item.video,
@@ -735,7 +800,11 @@ private fun <T> ExplorerItemCard(
       )
     }
     is RecentlyPlayedItem.VideoItem -> {
-      val isRecentlyPlayed = recentlyPlayedFilePath == item.video.path
+      val isRecentlyPlayed = if (recentlyPlayedPaths.isNotEmpty()) {
+        recentlyPlayedPaths.contains(item.video.path)
+      } else {
+        recentlyPlayedFilePath == item.video.path
+      }
 
       VideoCard(
         video = item.video,
@@ -778,13 +847,23 @@ private fun <T> ExplorerItemCard(
         newCount = item.newCount,
         unwatchedVideoCount = item.unwatchedVideoCount,
       )
-      val isRecentlyPlayed = recentlyPlayedFilePath?.let {
-        if (showSections) {
-          it.startsWith(item.path + "/") || it == item.path || java.io.File(it).parent == item.path
-        } else {
-          java.io.File(it).parent == item.path
+      val isRecentlyPlayed = if (recentlyPlayedPaths.isNotEmpty()) {
+        recentlyPlayedPaths.any { path ->
+          if (showSections) {
+            path.startsWith(item.path + "/") || path == item.path || java.io.File(path).parent == item.path
+          } else {
+            java.io.File(path).parent == item.path
+          }
         }
-      } ?: false
+      } else {
+        recentlyPlayedFilePath?.let {
+          if (showSections) {
+            it.startsWith(item.path + "/") || it == item.path || java.io.File(it).parent == item.path
+          } else {
+            java.io.File(it).parent == item.path
+          }
+        } ?: false
+      }
       val isNeverPlayed = item.path !in playedFolderPaths
       val isWatched = (item.videoCount > 0 || item.audioCount > 0) && item.unwatchedVideoCount == 0
 
@@ -806,7 +885,11 @@ private fun <T> ExplorerItemCard(
     is FileSystemItem.VideoFile -> {
       val isOldAndUnplayed = newVideoIds.contains(item.video.id)
       val isWatched = watchedVideoIds.contains(item.video.id)
-      val isRecentlyPlayed = recentlyPlayedFilePath == item.video.path
+      val isRecentlyPlayed = if (recentlyPlayedPaths.isNotEmpty()) {
+        recentlyPlayedPaths.contains(item.video.path)
+      } else {
+        recentlyPlayedFilePath == item.video.path
+      }
 
       VideoCard(
         video = item.video,

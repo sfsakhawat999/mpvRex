@@ -107,9 +107,9 @@ object NetworkStreamingScreen : Screen {
     // Track scroll direction to show/hide FAB
     var previousFirstVisibleItemIndex by remember { mutableIntStateOf(0) }
     var previousFirstVisibleItemScrollOffset by remember { mutableIntStateOf(0) }
-    
+
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
-    
+
     val isFabVisible by remember {
       derivedStateOf {
         val currentIndex = listState.firstVisibleItemIndex
@@ -200,7 +200,7 @@ object NetworkStreamingScreen : Screen {
             item {
               Spacer(modifier = Modifier.height(24.dp))
               Text(
-                text = "Recent Links",
+                text = stringResource(R.string.network_recent_links),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -262,7 +262,7 @@ object NetworkStreamingScreen : Screen {
                   ) {
                     Icon(
                       imageVector = Icons.Filled.Close,
-                      contentDescription = "Remove Link",
+                      contentDescription = stringResource(R.string.network_remove_link_action),
                       tint = MaterialTheme.colorScheme.onSurfaceVariant,
                       modifier = Modifier.size(16.dp)
                     )
@@ -276,7 +276,7 @@ object NetworkStreamingScreen : Screen {
           item {
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-              text = "Local Network",
+              text = stringResource(R.string.network_local_network),
               style = MaterialTheme.typography.titleLarge,
               fontWeight = FontWeight.Bold,
               color = MaterialTheme.colorScheme.primary,
@@ -307,14 +307,14 @@ object NetworkStreamingScreen : Screen {
                   )
                   Spacer(modifier = Modifier.height(16.dp))
                   Text(
-                    text = "No network connections",
+                    text = stringResource(R.string.network_empty_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface, // a
                   )
                   Spacer(modifier = Modifier.height(8.dp))
                   Text(
-                    text = "Add SMB, FTP, or WebDAV connections to browse network files",
+                    text = stringResource(R.string.network_empty_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,

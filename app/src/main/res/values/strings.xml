@@ -1044,5 +1044,41 @@
     <string name="generic_custom">Custom</string>
     <string name="generic_edit_content_description">Edit %1$s</string>
 
+            <!-- Network Streaming Screen — new keys -->
+    <string name="network_recent_links">Recent Links</string>
+    <string name="network_local_network">Local Network</string>
+    <string name="network_empty_title">No network connections</string>
+    <string name="network_empty_description">Add SMB, FTP, or WebDAV connections to browse network files</string>
+    <string name="network_remove_link_action">Remove Link</string>
+
+           <!-- Appearance Preferences Screen — new keys -->
+    <string name="pref_appearance_network_thumbnails_dialog_title">Enable Network Thumbnails?</string>
+    <string name="pref_appearance_network_thumbnails_dialog_message">Generating thumbnails for network streams (M3U/HTTP) may significantly increase background data usage and loading times. Proceed?</string>
+    <string name="pref_appearance_thumbnail_strategy_dialog_title">Change Thumbnail Strategy?</string>
+    <string name="pref_appearance_thumbnail_strategy_dialog_message">Changing the extraction strategy will clear your currently saved thumbnail cache. New thumbnails will be generated automatically as you browse.</string>
+    <string name="pref_appearance_thumbnail_position_dialog_title">Update Thumbnail Position?</string>
+    <string name="pref_appearance_thumbnail_position_reset_confirm">Reset thumbnail at %1$d%% of the video duration.</string>
+    <string name="pref_appearance_thumbnail_position_dialog_message">Changing the extraction position will clear your currently saved thumbnail cache. New thumbnails will be generated automatically as you browse.</string>
+
+           <!-- Control Layout Editor Screen — new keys -->
+    <string name="control_layout_edit_title_top_right">Edit Top Right</string>
+    <string name="control_layout_edit_title_bottom_right">Edit Bottom Right</string>
+    <string name="control_layout_edit_title_bottom_left">Edit Bottom Left</string>
+    <string name="control_layout_edit_title_portrait_bottom">Edit Portrait Bottom</string>
+    <string name="control_layout_edit_title_more_sheet">Edit More Sheet Buttons</string>
+    <string name="control_layout_back">Back</string>
+    <string name="control_layout_reset_to_default">Reset to default</string>
+    <string name="control_layout_reset_dialog_title">Reset Layout</string>
+    <string name="control_layout_reset_dialog_message">Are you sure you want to reset this region to defaults?</string>
+    <string name="control_layout_reorder_hint">Long press to reorder items. Tap the \'-\' icon to remove them.</string>
+    <string name="control_layout_drop_zone_empty">Drop zone is empty</string>
+    <string name="control_layout_drop_zone_hint">Tap buttons from the \'Available Palette\' below</string>
+    <string name="control_layout_all_buttons_in_use">All available buttons are in use.</string>
+    <string name="control_layout_icons_legend_title">Icons Legend</string>
+
+           <!-- Gesture Preferences Screen — new keys -->
+    <string name="pref_gesture_custom_value">Custom</string>
+    <string name="pref_gesture_double_tap_seek_area_width_title">Double Tap Seek Area Width</string>
+    <string name="pref_gesture_custom_seek_dialog_hint">Enter custom seek duration in seconds (1-120)</string>
 
 </resources>

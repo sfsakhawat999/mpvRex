@@ -94,12 +94,15 @@ object GesturePreferencesScreen : Screen {
           item {
             PreferenceSectionHeader(title = stringResource(R.string.pref_gesture_double_tap_title))
           }
-          
+
           item {
             PreferenceCard {
           val doubleTapSeekDuration by preferences.doubleTapToSeekDuration.collectAsState()
           val predefinedValues = listOf(3, 5, 10, 15, 20, 25, 30)
           val isCustomValue = !predefinedValues.contains(doubleTapSeekDuration)
+          // يجب استدعاء stringResource هنا (داخل الـ @Composable) وليس داخل
+          // valueToText، لأن valueToText lambda عادي وليس @Composable
+          val customValueLabel = stringResource(R.string.pref_gesture_custom_value)
 
           ListPreference(
             value = if (isCustomValue) -1 else doubleTapSeekDuration,
@@ -114,7 +117,7 @@ object GesturePreferencesScreen : Screen {
             values = predefinedValues + listOf(-1),
             valueToText = { value ->
               if (value == -1) {
-                AnnotatedString("Custom")
+                AnnotatedString(customValueLabel)
               } else {
                 AnnotatedString("${value}s")
               }
@@ -131,7 +134,7 @@ object GesturePreferencesScreen : Screen {
               )
             },
           )
-          
+
           PreferenceDivider()
 
           if (showCustomSeekDialog) {
@@ -141,7 +144,7 @@ object GesturePreferencesScreen : Screen {
               text = {
                 Column {
                   Text(
-                    text = "Enter custom seek duration in seconds (1-120)",
+                    text = stringResource(R.string.pref_gesture_custom_seek_dialog_hint),
                     modifier = Modifier.padding(bottom = 8.dp),
                   )
                   OutlinedTextField(
@@ -183,7 +186,7 @@ object GesturePreferencesScreen : Screen {
             onValueChange = { preferences.doubleTapSeekAreaWidth.set(it) },
             values = seekAreaValues,
             valueToText = { AnnotatedString("${it}%") },
-            title = { Text(text = "Double Tap Seek Area Width") },
+            title = { Text(text = stringResource(R.string.pref_gesture_double_tap_seek_area_width_title)) },
             summary = {
               Text(
                 text = "Current: ${doubleTapSeekAreaWidth}%",
@@ -191,7 +194,7 @@ object GesturePreferencesScreen : Screen {
               )
             },
           )
-          
+
           PreferenceDivider()
 
           val reverseDoubleTap by preferences.reverseDoubleTap.collectAsState()
@@ -221,7 +224,7 @@ object GesturePreferencesScreen : Screen {
               color = MaterialTheme.colorScheme.outline,
             ) },
           )
-          
+
           PreferenceDivider()
 
           val centerDoubleTap by preferences.centerSingleActionGesture.collectAsState()
@@ -248,7 +251,7 @@ object GesturePreferencesScreen : Screen {
               color = MaterialTheme.colorScheme.outline,
             ) },
           )
-          
+
           PreferenceDivider()
 
           val rightDoubleTap by preferences.rightSingleActionGesture.collectAsState()
@@ -270,7 +273,7 @@ object GesturePreferencesScreen : Screen {
               color = MaterialTheme.colorScheme.outline,
             ) },
           )
-          
+
           PreferenceDivider()
 
           val useSingleTapForCenter by preferences.useSingleTapForCenter.collectAsState()
@@ -301,7 +304,6 @@ object GesturePreferencesScreen : Screen {
             summary = {
               Text(
                 text = stringResource(id = R.string.pref_gesture_use_single_tap_for_left_right_summary),
-                color = MaterialTheme.colorScheme.outline,
               )
             },
           )
@@ -373,11 +375,11 @@ object GesturePreferencesScreen : Screen {
           )
             }
           }
-          
+
           item {
             PreferenceSectionHeader(title = stringResource(R.string.pref_gesture_media_title))
           }
-          
+
           item {
             PreferenceCard {
           val mediaPreviousGesture by preferences.mediaPreviousGesture.collectAsState()
@@ -392,7 +394,7 @@ object GesturePreferencesScreen : Screen {
               color = MaterialTheme.colorScheme.outline,
             ) },
           )
-          
+
           PreferenceDivider()
           val mediaPlayGesture by preferences.mediaPlayGesture.collectAsState()
           ListPreference(
@@ -411,7 +413,7 @@ object GesturePreferencesScreen : Screen {
               color = MaterialTheme.colorScheme.outline,
             ) },
           )
-          
+
           PreferenceDivider()
           val mediaNextGesture by preferences.mediaNextGesture.collectAsState()
           ListPreference(

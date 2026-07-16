@@ -89,6 +89,9 @@ object AppearancePreferencesScreen : Screen {
         var pendingStrategyChange by remember { mutableStateOf<ThumbnailStrategy?>(null) }
         var pendingPositionChange by remember { mutableStateOf<Int?>(null) }
 
+        // ملاحظة: النصوص أدناه (Toast) لم تُلمس عمداً — stringResource() لا يعمل
+        // خارج composition، وتحتاج تعديل توقيع الدالة (تمرير Context.getString
+        // أو نص جاهز من الطبقة العليا). تُركت للمطور الأصلي.
         fun clearCacheAndApply(onSuccess: () -> Unit, onFailure: () -> Unit = {}) {
             scope.launch(Dispatchers.IO) {
                 runCatching { thumbnailRepository.clearLocalThumbnailCache() }
@@ -533,7 +536,6 @@ object AppearancePreferencesScreen : Screen {
                                 summary = {
                                     Text(
                                         text = stringResource(id = R.string.pref_show_tree_view_path_summary),
-                                        color = MaterialTheme.colorScheme.outline,
                                     )
                                 }
                             )
@@ -589,11 +591,11 @@ object AppearancePreferencesScreen : Screen {
                             if (showNetworkWarning) {
                                 AlertDialog(
                                     onDismissRequest = { showNetworkWarning = false },
-                                    title = { Text("Enable Network Thumbnails?") },
+                                    title = { Text(stringResource(R.string.pref_appearance_network_thumbnails_dialog_title)) },
                                     text = {
-                                        Column{
+                                        Column {
                                             Text(
-                                                text = "Generating thumbnails for network streams (M3U/HTTP) may significantly increase background data usage and loading times. Proceed?",
+                                                text = stringResource(R.string.pref_appearance_network_thumbnails_dialog_message),
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -659,7 +661,7 @@ object AppearancePreferencesScreen : Screen {
                             pendingStrategyChange?.let { newStrategy ->
                                 AlertDialog(
                                     onDismissRequest = { pendingStrategyChange = null },
-                                    title = { Text("Change Thumbnail Strategy?") },
+                                    title = { Text(stringResource(R.string.pref_appearance_thumbnail_strategy_dialog_title)) },
                                     text = {
                                         Column {
                                             val summaryText = if (newStrategy == ThumbnailStrategy.FirstFrame) {
@@ -674,7 +676,7 @@ object AppearancePreferencesScreen : Screen {
                                             )
                                             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                                             Text(
-                                                text = "Changing the extraction strategy will clear your currently saved thumbnail cache. New thumbnails will be generated automatically as you browse.",
+                                                text = stringResource(R.string.pref_appearance_thumbnail_strategy_dialog_message),
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -704,13 +706,13 @@ object AppearancePreferencesScreen : Screen {
                             }
 
                             PreferenceDivider()
-                            
+
                             val thumbnailPositionPercent by preferences.thumbnailPositionPercent.collectAsState()
                             val isPositionStrategy = thumbnailStrategy == ThumbnailStrategy.Position
-                            
+
                             // Track the drag visually without saving it to the backend yet
                             var draftPosition by remember(thumbnailPositionPercent) { mutableStateOf(thumbnailPositionPercent.toFloat()) }
-                            
+
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -770,24 +772,27 @@ object AppearancePreferencesScreen : Screen {
                                     )
                                 }
                             }
-                            
+
                             pendingPositionChange?.let { newPosition ->
                                 AlertDialog(
                                     onDismissRequest = { 
                                         pendingPositionChange = null 
                                         draftPosition = thumbnailPositionPercent.toFloat()
                                     },
-                                    title = { Text("Update Thumbnail Position?") },
+                                    title = { Text(stringResource(R.string.pref_appearance_thumbnail_position_dialog_title)) },
                                     text = {
                                         Column {
                                             Text(
-                                                text = "Reset thumbnail at $newPosition% of the video duration.",
+                                                text = stringResource(
+                                                    R.string.pref_appearance_thumbnail_position_reset_confirm,
+                                                    newPosition,
+                                                ),
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                                             Text(
-                                                text = "Changing the extraction position will clear your currently saved thumbnail cache. New thumbnails will be generated automatically as you browse.",
+                                                text = stringResource(R.string.pref_appearance_thumbnail_position_dialog_message),
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )

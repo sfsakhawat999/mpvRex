@@ -3498,5 +3498,193 @@
   "pref_player_show_circular_double_tap_seek_summary": {
     "source_hash": "387cef4690ac5d6521546724c29ad3fb5ac3a9f979a5aa95ea7b8230fbe5f6e8",
     "translated_value": "إظهار طبقة تحريك دائرية مع عرض الوقت أسفلها"
+  },
+  "network_recent_links": {
+    "source_hash": "1ca6d43b54b38af9c69409d84452ce6931d30ce4e4aca552221d91059c4d242e",
+    "translated_value": "الروابط الأخيرة"
+  },
+  "network_local_network": {
+    "source_hash": "3a2a10b4bb269adc740fb99a8b1228777b45e21efd0d23ba4a574a7eb902dee8",
+    "translated_value": "الشبكة المحلية"
+  },
+  "network_empty_title": {
+    "source_hash": "9ccab344d68e1f3087557bb02bf0af82fbc0b74f076bb53859f47d5a00e3f7e3",
+    "translated_value": "لا توجد اتصالات شبكية"
+  },
+  "network_empty_description": {
+    "source_hash": "072c80280103396a8f957607367efa45fe23dc2909cb9560ea0c3da45278e989",
+    "translated_value": "أضف اتصالات SMB أو FTP أو WebDAV لتصفح ملفات الشبكة"
+  },
+  "network_remove_link_action": {
+    "source_hash": "e3e0591b816f37fcfc06386476c1db296ecafd460b0a515069e2c09f0c8192f5",
+    "translated_value": "حذف الرابط"
+  },
+  "pref_appearance_network_thumbnails_dialog_title": {
+    "source_hash": "24223b7e1981aa1bd65c5a8435dae69c904eb3b7bbfd1223357681c04305ec77",
+    "translated_value": "تفعيل الصور المصغّرة للشبكة؟"
+  },
+  "pref_appearance_network_thumbnails_dialog_message": {
+    "source_hash": "45e93f0599bafca1969aee33e2c03a0db174629e020313a01a82278567def356",
+    "translated_value": "توليد الصور المصغّرة لبثوث الشبكة (M3U/HTTP) قد يزيد بشكل ملحوظ من استهلاك البيانات في الخلفية وأوقات التحميل. هل تريد المتابعة؟"
+  },
+  "pref_appearance_thumbnail_strategy_dialog_title": {
+    "source_hash": "f65d3ca03cd131677027aed4e1fac3d17447c7e6c1bb677a9d2b9058d8142e2c",
+    "translated_value": "تغيير استراتيجية الصور المصغّرة؟"
+  },
+  "pref_appearance_thumbnail_strategy_dialog_message": {
+    "source_hash": "fd46ecbf6ae7ddc0c92ad81524c008c4b3b431c0b361fd4a574f75978ea86d06",
+    "translated_value": "تغيير استراتيجية الاستخراج سيمسح ذاكرة التخزين المؤقت الحالية للصور المصغّرة. سيتم توليد صور جديدة تلقائياً أثناء التصفح."
+  },
+  "pref_appearance_thumbnail_position_dialog_title": {
+    "source_hash": "0edf7c79e051eff1fff5b2116b3f264ea7db67f8400aff7bd7463f5ee54a8096",
+    "translated_value": "تحديث موضع الصورة المصغّرة؟"
+  },
+  "pref_appearance_thumbnail_position_reset_confirm": {
+    "source_hash": "423417bad7abd443d35a57da713055f4120b764061d25328f210d4c77a5b98f6",
+    "translated_value": "إعادة ضبط الصورة المصغّرة عند %1$d%% من مدة الفيديو."
+  },
+  "pref_appearance_thumbnail_position_dialog_message": {
+    "source_hash": "e58407666d6891e59dac60c9aacb69dff84390bebf4da5eb229084e375e14d37",
+    "translated_value": "تغيير موضع الاستخراج سيمسح ذاكرة التخزين المؤقت الحالية للصور المصغّرة. سيتم توليد صور جديدة تلقائياً أثناء التصفح."
+  },
+  "control_layout_edit_title_top_right": {
+    "source_hash": "f5018f8718ac16521d7ca359b0d141452cd37d055f53e7f9ca54343b4427c933",
+    "translated_value": "تعديل الزاوية العلوية اليمنى"
+  },
+  "control_layout_edit_title_bottom_right": {
+    "source_hash": "b1f59998f6f2709cdea53c2b4a09206ec56aeccf57f2017091dea4e3c1d8ce2e",
+    "translated_value": "تعديل الزاوية السفلية اليمنى"
+  },
+  "control_layout_edit_title_bottom_left": {
+    "source_hash": "0bc60ddae61ba71df99dac9a5dcdcbd1b853208dbdee80b151616dc1721d18b5",
+    "translated_value": "تعديل الزاوية السفلية اليسرى"
+  },
+  "control_layout_edit_title_portrait_bottom": {
+    "source_hash": "79182071809fa2d47a215421a2208ad957c42b603098eb5b6bfdc8b9e855599e",
+    "translated_value": "تعديل الأسفل (الوضع الرأسي)"
+  },
+  "control_layout_edit_title_more_sheet": {
+    "source_hash": "0f7ffa75914dc14ad55453b27884191eede91404eedc0be3ca989f527b9c487e",
+    "translated_value": "تعديل أزرار قائمة \"المزيد\""
+  },
+  "control_layout_back": {
+    "source_hash": "76900f1bfd16c8d4dd3d25e6f46638d7165aee23883ccea6bfe071c514421769",
+    "translated_value": "رجوع"
+  },
+  "control_layout_reset_to_default": {
+    "source_hash": "bc5b45ae7b60692ade0bb26ebe5b6830f150d97134153e3c3091882eb72e7c25",
+    "translated_value": "إعادة الضبط الافتراضي"
+  },
+  "control_layout_reset_dialog_title": {
+    "source_hash": "a4c510e209e0047bf1547aac9a3dd29ef758b9689e7061a46dc2ebbbedafac33",
+    "translated_value": "إعادة ضبط التخطيط"
+  },
+  "control_layout_reset_dialog_message": {
+    "source_hash": "8428d7fb728e4144bdae1ab66055802295ae56cc2e15353914d7c8f320af8917",
+    "translated_value": "هل أنت متأكد أنك تريد إعادة ضبط هذه المنطقة إلى الإعدادات الافتراضية؟"
+  },
+  "control_layout_reorder_hint": {
+    "source_hash": "695d8662ea4742018bae86173360694b1b5caef036d0ada55ed479546c757cc7",
+    "translated_value": "اضغط مطولاً لإعادة ترتيب العناصر. اضغط على علامة الناقص الحمراء لإزالتهم."
+  },
+  "control_layout_drop_zone_empty": {
+    "source_hash": "8e9f7aa2fcaee292259548b9c2d29d26a4be3dc2846461ca2c0438f50182f432",
+    "translated_value": "منطقة الإفلات فارغة"
+  },
+  "control_layout_drop_zone_hint": {
+    "source_hash": "ab90f1bfe7c60318ee7cc66a0614ad5117827968129e97557c087699b975d5a0",
+    "translated_value": "اضغط على الأزرار من \"اللوحة المتاحة\" أدناه"
+  },
+  "control_layout_all_buttons_in_use": {
+    "source_hash": "d9948d39c1dfc9a0884120e97bb469afcf5a626c4f30c15ffdd0d9817daca5f5",
+    "translated_value": "جميع الأزرار المتاحة قيد الاستخدام حالياً."
+  },
+  "control_layout_icons_legend_title": {
+    "source_hash": "9d379433db6ebf8b810727d49a37e4e2d154a34591ec87df45b96d07bc0bf499",
+    "translated_value": "دليل الأيقونات"
+  },
+  "pref_gesture_custom_value": {
+    "source_hash": "494ca78f7374e46fb2de9ad9f2dbd4aaae89b50b2ca044177a1566a59e06627e",
+    "translated_value": "مخصص"
+  },
+  "pref_gesture_double_tap_seek_area_width_title": {
+    "source_hash": "285e702f0d5747d2ac987d3f5f75c29cb4fce55a28503fab65aa0c4fee5601e3",
+    "translated_value": "عرض منطقة التقديم بالنقر المزدوج"
+  },
+  "pref_gesture_custom_seek_dialog_hint": {
+    "source_hash": "50a6ae700b505d4c58ae1098a52f3e028bf37d9a5e647a0fc9f7564b05dff9fb",
+    "translated_value": "أدخل مدة تقديم مخصصة بالثواني (1-120)"
+  },
+  "player_sheets_aspect_ratio_vertical_offset_value": {
+    "source_hash": "e13b37ac5b0f199cb9e0df8b672fdf53421d85c704b0c2f6e9449a62b66e4657",
+    "translated_value": "الإزاحة العمودية: %1$.3f"
+  },
+  "player_sheets_aspect_ratio_advanced_zoom_toggle": {
+    "source_hash": "717dcc5b7c5c794ddae68875a8ffe2181844307322e63cda738b7a99842fd03f",
+    "translated_value": "التكبير المتقدم"
+  },
+  "player_sheets_aspect_ratio_advanced_zoom_description": {
+    "source_hash": "683259b43318a4f7379814ebfb1eab45b48276c7bed5eccee973b1756a5ebe82",
+    "translated_value": "تمديد أو اقتصاص المحورين الأفقي والعمودي بشكل مستقل، مفيد لإزالة الأشرطة السوداء"
+  },
+  "player_sheets_aspect_ratio_horizontal_zoom_value": {
+    "source_hash": "0f52563dd98586b437b2cbf9e3ebad559c61a7e87b2463cf088bb571e3857aa1",
+    "translated_value": "التكبير الأفقي: %1$.2fx"
+  },
+  "player_sheets_aspect_ratio_vertical_zoom_value": {
+    "source_hash": "30d818871dcff2c41e42bb17a731618b956522dc16d020d30693f8e841219a51",
+    "translated_value": "التكبير العمودي: %1$.2fx"
+  },
+  "player_sheets_aspect_ratio_reset_horizontal_zoom": {
+    "source_hash": "22bb3889347193e3d07f2ad531b17a3eed02e4db35d293a0f037e0c3c354d08a",
+    "translated_value": "إعادة تعيين التكبير الأفقي"
+  },
+  "player_sheets_aspect_ratio_reset_vertical_zoom": {
+    "source_hash": "49f5f801863414ac7bee54a0bc1b12163b82fe5a4e90e1054a2c76d051ae2e24",
+    "translated_value": "إعادة تعيين التكبير العمودي"
+  },
+  "player_sheets_aspect_ratio_decrease_horizontal_zoom": {
+    "source_hash": "ee185a40ae27678296b250ff1d44514a61c6869149d683693eb1919c9a5727bb",
+    "translated_value": "تقليل التكبير الأفقي"
+  },
+  "player_sheets_aspect_ratio_increase_horizontal_zoom": {
+    "source_hash": "50a2a2d09038900ab3009b45bceb6343fa1f05abf8eae3aafa02e4b12cbdb380",
+    "translated_value": "زيادة التكبير الأفقي"
+  },
+  "player_sheets_aspect_ratio_decrease_vertical_zoom": {
+    "source_hash": "3802e035b7373ca05cbbf701b84802b39bbac318605fff305aff4a5bfc58dd73",
+    "translated_value": "تقليل التكبير العمودي"
+  },
+  "player_sheets_aspect_ratio_increase_vertical_zoom": {
+    "source_hash": "97bfebf99d6f9229000017742f2e3784d79d5623b27677e08ee74222f9468569",
+    "translated_value": "زيادة التكبير العمودي"
+  },
+  "player_sheets_aspect_ratio_reset_advanced_zoom": {
+    "source_hash": "a4a992dbdb1461d26af6f3512b2d17360d609f3b6c5221a79c68d153594cdf7b",
+    "translated_value": "إعادة تعيين التكبير المتقدم"
+  },
+  "mark_as_new": {
+    "source_hash": "18fdd549b2ed367ac0c74cbec1214644728515b30edbcb78e7d322757a7c8359",
+    "translated_value": "جديد"
+  },
+  "mark_as_new_desc": {
+    "source_hash": "073e0b59856dc45771ca92c6abd16236d493845f32bfda54124404cd7a4f90b1",
+    "translated_value": "إزالة كل العلامات والتعليم كجديد"
+  },
+  "pref_enable_glass_shorts_controls": {
+    "source_hash": "d6efc502444fe2fdb335902330df34e9610e1ef839ebf2531cdf6d8a734e6b81",
+    "translated_value": "عناصر التحكم زجاجية للمقاطع القصيرة"
+  },
+  "pref_enable_glass_shorts_controls_summary": {
+    "source_hash": "f2a9d90064da2118bf97971aeb12330c4d31a91efd578fbeca6afc5ad4c167e9",
+    "translated_value": "تطبيق نمط الزجاج Glass-morphism على أزرار التحكم في المقاطع القصيرة"
+  },
+  "pref_show_shorts_back_button": {
+    "source_hash": "91ebe6a73e65e915b39955dd1353682888b8fa966f2e9e7806bd221e0d05b2ca",
+    "translated_value": "إظهار زر الرجوع"
+  },
+  "pref_show_shorts_back_button_summary": {
+    "source_hash": "1b046a0eb669dc0add1ceb84213a49e0780c0aec0d87765a1b9a889c0f281377",
+    "translated_value": "إظهار زر الرجوع في لوحة التحكم الجانبية للمقاطع القصيرة"
   }
 }

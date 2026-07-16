@@ -100,6 +100,9 @@ object GesturePreferencesScreen : Screen {
           val doubleTapSeekDuration by preferences.doubleTapToSeekDuration.collectAsState()
           val predefinedValues = listOf(3, 5, 10, 15, 20, 25, 30)
           val isCustomValue = !predefinedValues.contains(doubleTapSeekDuration)
+          // يجب استدعاء stringResource هنا (داخل الـ @Composable) وليس داخل
+          // valueToText، لأن valueToText lambda عادي وليس @Composable
+          val customValueLabel = stringResource(R.string.pref_gesture_custom_value)
 
           ListPreference(
             value = if (isCustomValue) -1 else doubleTapSeekDuration,
@@ -114,7 +117,7 @@ object GesturePreferencesScreen : Screen {
             values = predefinedValues + listOf(-1),
             valueToText = { value ->
               if (value == -1) {
-                AnnotatedString(stringResource(R.string.pref_gesture_custom_value))
+                AnnotatedString(customValueLabel)
               } else {
                 AnnotatedString("${value}s")
               }

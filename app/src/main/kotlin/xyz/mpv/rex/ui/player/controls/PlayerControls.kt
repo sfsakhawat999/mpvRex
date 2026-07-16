@@ -1164,7 +1164,7 @@ fun PlayerControls(
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
                     end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    bottom = navBarPadding.calculateBottomPadding()
+                    bottom = if (!bottomControlsBelowSeekbar) navBarPadding.calculateBottomPadding() else 0.dp
                   )
                 } else {
                   Modifier
@@ -1303,7 +1303,7 @@ fun PlayerControls(
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
                     end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    bottom = navBarPadding.calculateBottomPadding()
+                    bottom = 0.dp
                   )
                 } else {
                   Modifier
@@ -1371,7 +1371,7 @@ fun PlayerControls(
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
                     end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    bottom = navBarPadding.calculateBottomPadding()
+                    bottom = 0.dp
                   )
                 } else {
                   Modifier
@@ -1425,7 +1425,7 @@ fun PlayerControls(
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
                     end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    bottom = navBarPadding.calculateBottomPadding()
+                    bottom = if (bottomControlsBelowSeekbar) navBarPadding.calculateBottomPadding() else 0.dp
                   )
                 } else {
                   Modifier
@@ -1515,7 +1515,7 @@ fun PlayerControls(
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
                     end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    bottom = navBarPadding.calculateBottomPadding()
+                    bottom = if (bottomControlsBelowSeekbar) navBarPadding.calculateBottomPadding() else 0.dp
                   )
                 } else {
                   Modifier

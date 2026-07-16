@@ -161,19 +161,20 @@ fun BaseMediaCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
+                val shouldHighlight = isRecentlyPlayed && !(isWatched && isNeverPlayed)
                 // Title
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     color = when {
-                        isRecentlyPlayed -> MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                        shouldHighlight -> MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
                         isWatched -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         else -> MaterialTheme.colorScheme.onSurface
                     },
                     maxLines = maxTitleLines,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = titleTextAlign,
-                    fontWeight = if (isRecentlyPlayed) FontWeight.Black else FontWeight.Normal,
+                    fontWeight = if (shouldHighlight) FontWeight.Black else FontWeight.Normal,
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -280,17 +281,18 @@ fun BaseMediaCard(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
+                    val shouldHighlight = isRecentlyPlayed && !(isWatched && isNeverPlayed)
                     Text(
                         text = title,
                         style = listTitleStyle ?: MaterialTheme.typography.titleMedium,
                         color = when {
-                            isRecentlyPlayed -> MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                            shouldHighlight -> MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
                             isWatched -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             else -> MaterialTheme.colorScheme.onSurface
                         },
                         maxLines = maxTitleLines,
                         overflow = TextOverflow.Ellipsis,
-                        fontWeight = if (isRecentlyPlayed) FontWeight.Black else FontWeight.Normal,
+                        fontWeight = if (shouldHighlight) FontWeight.Black else FontWeight.Normal,
                     )
 
                     if (infoContent != null) {

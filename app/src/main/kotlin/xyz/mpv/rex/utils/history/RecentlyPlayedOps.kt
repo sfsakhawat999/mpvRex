@@ -87,6 +87,25 @@ object RecentlyPlayedOps {
   @OptIn(ExperimentalCoroutinesApi::class)
   fun observeLastPlayedPath(): Flow<String?> = historyManager.observeLastPlayedPath()
 
+  fun observeLastPlayedPathsForHighlight(): Flow<Set<String>> {
+    return repository.observeRecentlyPlayed(50).map { list ->
+      val filteredList = list.filter { 
+        !(it.filePath.endsWith(".m3u") || it.filePath.endsWith(".m3u8"))
+      }
+      val newestHighlight = filteredList.firstOrNull { it.launchSource != "mark_as" } ?: return@map emptySet()
+      
+      if (newestHighlight.launchSource == "mark_as_last_played") {
+        val newestTimestamp = newestHighlight.timestamp
+        filteredList.filter { 
+          it.launchSource == "mark_as_last_played" && 
+          kotlin.math.abs(it.timestamp - newestTimestamp) <= 5000 
+        }.map { it.filePath }.toSet()
+      } else {
+        setOf(newestHighlight.filePath)
+      }
+    }
+  }
+
   fun observeRecentlyPlayedPaths(limit: Int = 100): Flow<Set<String>> {
     return repository.observeRecentlyPlayed(limit).map { list -> list.map { it.filePath }.toSet() }
   }

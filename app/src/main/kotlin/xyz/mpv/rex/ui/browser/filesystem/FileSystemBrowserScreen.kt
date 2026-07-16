@@ -209,6 +209,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
   val recentlyPlayedFilePath by viewModel.recentlyPlayedFilePath.collectAsState()
   val recentlyPlayedPaths by viewModel.recentlyPlayedPaths.collectAsState()
+  val recentlyPlayedFilePaths by viewModel.recentlyPlayedFilePaths.collectAsState()
   val autoScrollToLastPlayed by browserPreferences.autoScrollToLastPlayed.collectAsState()
 
   // Use standalone local states instead of CompositionLocal to avoid scroll issues with predictive back gesture
@@ -931,6 +932,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 isFabVisible = isFabVisible, // Pass FAB visibility state
                 recentlyPlayedFilePath = recentlyPlayedFilePath,
                 recentlyPlayedPaths = recentlyPlayedPaths,
+                recentlyPlayedFilePaths = recentlyPlayedFilePaths,
                 onVideoClick = { video ->
                   MediaUtils.playFile(video, context, "search")
                 },
@@ -958,6 +960,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 itemsWereDeletedOrMoved = itemsWereDeletedOrMoved,
                 showSubtitleIndicator = showSubtitleIndicator,
                 recentlyPlayedFilePath = recentlyPlayedFilePath,
+                recentlyPlayedFilePaths = recentlyPlayedFilePaths,
                 recentlyPlayedPaths = recentlyPlayedPaths,
                 autoScrollToLastPlayed = autoScrollToLastPlayed,
                 navigationBarHeight = navigationBarHeight,
@@ -1393,6 +1396,7 @@ private fun FileSystemBrowserContent(
   showSubtitleIndicator: Boolean,
   recentlyPlayedFilePath: String?,
   recentlyPlayedPaths: Set<String> = emptySet(),
+  recentlyPlayedFilePaths: Set<String> = emptySet(),
   autoScrollToLastPlayed: Boolean,
   navigationBarHeight: Dp,
   onRefresh: suspend () -> Unit,
@@ -1486,6 +1490,7 @@ private fun FileSystemBrowserContent(
       onRefresh = onRefresh,
       isInSelectionMode = isInSelectionMode,
       recentlyPlayedFilePath = recentlyPlayedFilePath,
+      recentlyPlayedFilePaths = recentlyPlayedFilePaths,
       recentlyPlayedPaths = recentlyPlayedPaths,
       autoScrollToLastPlayed = autoScrollToLastPlayed,
       listState = listState,
@@ -1514,6 +1519,7 @@ private fun FileSystemSearchContent(
   isFabVisible: androidx.compose.runtime.MutableState<Boolean>, // Add FAB visibility state
   recentlyPlayedFilePath: String?,
   recentlyPlayedPaths: Set<String> = emptySet(),
+  recentlyPlayedFilePaths: Set<String> = emptySet(),
   onVideoClick: (xyz.mpv.rex.domain.media.model.Video) -> Unit,
   onFolderClick: (FileSystemItem.Folder) -> Unit,
   modifier: Modifier = Modifier,
@@ -1589,10 +1595,15 @@ private fun FileSystemSearchContent(
       }
 
       else -> {
-        val lastPlayedVideoPathInFolder = remember(searchResults, recentlyPlayedPaths, recentlyPlayedFilePath) {
+        val lastPlayedVideoPathsInFolder = remember(searchResults, recentlyPlayedPaths, recentlyPlayedFilePaths) {
           val pathsInSearch = searchResults.filterIsInstance<FileSystemItem.VideoFile>().map { it.video.path }.toSet()
-          val overallLastPlayed = recentlyPlayedFilePath?.takeIf { it in pathsInSearch }
-          overallLastPlayed ?: recentlyPlayedPaths.firstOrNull { it in pathsInSearch }
+          val overallLastPlayed = pathsInSearch.filter { it in recentlyPlayedFilePaths }.toSet()
+          if (overallLastPlayed.isNotEmpty()) {
+            overallLastPlayed
+          } else {
+            val fallbackPath = recentlyPlayedPaths.firstOrNull { it in pathsInSearch }
+            if (fallbackPath != null) setOf(fallbackPath) else emptySet()
+          }
         }
 
         Box(
@@ -1635,13 +1646,13 @@ private fun FileSystemSearchContent(
                 folder = folderModel,
                 uiSettings = uiSettings,
                 isSelected = false,
-                isRecentlyPlayed = recentlyPlayedFilePath?.let {
+                isRecentlyPlayed = recentlyPlayedFilePaths.any { path ->
                   try {
-                    java.io.File(it).parent == folder.path
+                    java.io.File(path).parent == folder.path
                   } catch (_: Exception) {
                     false
                   }
-                } ?: false,
+                },
                 isWatched = (folder.videoCount > 0 || folder.audioCount > 0) && folder.unwatchedVideoCount == 0,
                 newVideoCount = folder.newCount,
                 onClick = { onFolderClick(folder) },
@@ -1662,7 +1673,7 @@ private fun FileSystemSearchContent(
                 progressPercentage = videoFilesWithPlayback[videoFile.video.id],
                 isOldAndUnplayed = newVideoIds.contains(videoFile.video.id),
                 isWatched = watchedVideoIds.contains(videoFile.video.id),
-                isRecentlyPlayed = videoFile.video.path == lastPlayedVideoPathInFolder,
+                isRecentlyPlayed = videoFile.video.path in lastPlayedVideoPathsInFolder,
                 isSelected = false,
                 isNeverPlayed = videoFilesWithPlayback[videoFile.video.id] == null,
                 onClick = { onVideoClick(videoFile.video) },

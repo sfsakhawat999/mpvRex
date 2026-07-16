@@ -198,6 +198,7 @@ object FolderListScreen : Screen {
     val uiSettings by viewModel.uiSettings.collectAsState()
     val recentlyPlayedFilePath by viewModel.recentlyPlayedFilePath.collectAsState()
     val recentlyPlayedPaths by viewModel.recentlyPlayedPaths.collectAsState()
+    val recentlyPlayedFilePaths by viewModel.recentlyPlayedFilePaths.collectAsState()
     val playedFolderPaths by viewModel.playedFolderPaths.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val scanStatus by viewModel.scanStatus.collectAsState()
@@ -757,6 +758,7 @@ object FolderListScreen : Screen {
               hasCompletedInitialLoad = hasCompletedInitialLoad,
               foldersWereDeleted = foldersWereDeleted,
               recentlyPlayedFilePath = recentlyPlayedFilePath,
+              recentlyPlayedFilePaths = recentlyPlayedFilePaths,
               recentlyPlayedPaths = recentlyPlayedPaths,
               playedFolderPaths = playedFolderPaths,
               onRefresh = { viewModel.refresh() },
@@ -989,6 +991,7 @@ private fun FolderListContent(
   uiSettings: UiSettings,
   recentlyPlayedFilePath: String?,
   recentlyPlayedPaths: Set<String> = emptySet(),
+  recentlyPlayedFilePaths: Set<String> = emptySet(),
   playedFolderPaths: Set<String>,
   isLoading: Boolean,
   scanStatus: String?,
@@ -1024,6 +1027,7 @@ private fun FolderListContent(
     onRefresh = onRefresh,
     isInSelectionMode = selectionManager.isInSelectionMode,
     recentlyPlayedFilePath = recentlyPlayedFilePath,
+    recentlyPlayedFilePaths = recentlyPlayedFilePaths,
     recentlyPlayedPaths = recentlyPlayedPaths,
     playedFolderPaths = playedFolderPaths,
     autoScrollToLastPlayed = autoScrollToLastPlayed,

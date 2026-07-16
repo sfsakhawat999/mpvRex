@@ -250,7 +250,7 @@ class HistoryManager(
                     filePath = filePath,
                     fileName = fileName,
                     duration = duration,
-                    launchSource = "mark_as",
+                    launchSource = "mark_as_last_played",
                 )
             }
             MarkAsState.Finished -> {

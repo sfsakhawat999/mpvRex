@@ -161,6 +161,7 @@ data class VideoListScreen(
     val uiSettings by viewModel.uiSettings.collectAsState()
     val recentlyPlayedFilePath by viewModel.recentlyPlayedFilePath.collectAsState()
     val recentlyPlayedPaths by viewModel.recentlyPlayedPaths.collectAsState()
+    val recentlyPlayedFilePaths by viewModel.recentlyPlayedFilePaths.collectAsState()
     val lastPlayedInFolderPath by viewModel.lastPlayedInFolderPath.collectAsState()
     val playlistMode by playerPreferences.playlistMode.collectAsState()
     val videosWereDeletedOrMoved by viewModel.videosWereDeletedOrMoved.collectAsState()
@@ -471,6 +472,7 @@ data class VideoListScreen(
           uiSettings = uiSettings,
           isRefreshing = isRefreshing,
           recentlyPlayedFilePath = lastPlayedInFolderPath ?: recentlyPlayedFilePath,
+          recentlyPlayedFilePaths = recentlyPlayedFilePaths,
           recentlyPlayedPaths = recentlyPlayedPaths,
           videosWereDeletedOrMoved = videosWereDeletedOrMoved,
           autoScrollToLastPlayed = autoScrollToLastPlayed,
@@ -711,6 +713,7 @@ fun VideoListContent(
   isRefreshing: androidx.compose.runtime.MutableState<Boolean>,
   recentlyPlayedFilePath: String?,
   recentlyPlayedPaths: Set<String> = emptySet(),
+  recentlyPlayedFilePaths: Set<String> = emptySet(),
   videosWereDeletedOrMoved: Boolean,
   autoScrollToLastPlayed: Boolean,
   onRefresh: suspend () -> Unit,
@@ -771,6 +774,7 @@ fun VideoListContent(
     onRefresh = onRefresh,
     isInSelectionMode = selectionManager.isInSelectionMode,
     recentlyPlayedFilePath = recentlyPlayedFilePath,
+    recentlyPlayedFilePaths = recentlyPlayedFilePaths,
     recentlyPlayedPaths = recentlyPlayedPaths,
     autoScrollToLastPlayed = autoScrollToLastPlayed,
     scrollTriggerKey = "${sortType.name}:${sortOrder.name}",

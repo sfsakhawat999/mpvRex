@@ -119,6 +119,7 @@ fun MediaLibraryContent() {
   val isLoading by viewModel.isLoading.collectAsState()
   val uiSettings by viewModel.uiSettings.collectAsState()
   val recentlyPlayedFilePath by viewModel.recentlyPlayedFilePath.collectAsState()
+  val recentlyPlayedFilePaths by viewModel.recentlyPlayedFilePaths.collectAsState()
 
   // Sorting
   val videoSortType by browserPreferences.videoSortType.collectAsState()
@@ -440,6 +441,7 @@ fun MediaLibraryContent() {
         uiSettings = uiSettings,
         isRefreshing = isRefreshing,
         recentlyPlayedFilePath = recentlyPlayedFilePath,
+        recentlyPlayedFilePaths = recentlyPlayedFilePaths,
         videosWereDeletedOrMoved = videosWereDeletedOrMoved,
         autoScrollToLastPlayed = autoScrollToLastPlayed,
         onRefresh = { viewModel.refresh() },

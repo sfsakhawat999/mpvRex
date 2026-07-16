@@ -1005,4 +1005,22 @@
     <string name="pref_gesture_double_tap_seek_area_width_title">عرض منطقة التقديم بالنقر المزدوج</string>
     <string name="pref_gesture_custom_seek_dialog_hint">أدخل مدة تقديم مخصصة بالثواني (1-120)</string>
 
+    <string name="player_sheets_aspect_ratio_vertical_offset_value">الإزاحة العمودية: %1$.3f</string>
+    <string name="player_sheets_aspect_ratio_advanced_zoom_toggle">التكبير المتقدم</string>
+    <string name="player_sheets_aspect_ratio_advanced_zoom_description">تمديد أو اقتصاص المحورين الأفقي والعمودي بشكل مستقل، مفيد لإزالة الأشرطة السوداء</string>
+    <string name="player_sheets_aspect_ratio_horizontal_zoom_value">التكبير الأفقي: %1$.2fx</string>
+    <string name="player_sheets_aspect_ratio_vertical_zoom_value">التكبير العمودي: %1$.2fx</string>
+    <string name="player_sheets_aspect_ratio_reset_horizontal_zoom">إعادة تعيين التكبير الأفقي</string>
+    <string name="player_sheets_aspect_ratio_reset_vertical_zoom">إعادة تعيين التكبير العمودي</string>
+    <string name="player_sheets_aspect_ratio_decrease_horizontal_zoom">تقليل التكبير الأفقي</string>
+    <string name="player_sheets_aspect_ratio_increase_horizontal_zoom">زيادة التكبير الأفقي</string>
+    <string name="player_sheets_aspect_ratio_decrease_vertical_zoom">تقليل التكبير العمودي</string>
+    <string name="player_sheets_aspect_ratio_increase_vertical_zoom">زيادة التكبير العمودي</string>
+    <string name="player_sheets_aspect_ratio_reset_advanced_zoom">إعادة تعيين التكبير المتقدم</string>
+    <string name="mark_as_new">جديد</string>
+    <string name="mark_as_new_desc">إزالة كل العلامات والتعليم كجديد</string>
+    <string name="pref_enable_glass_shorts_controls">عناصر التحكم زجاجية للمقاطع القصيرة</string>
+    <string name="pref_enable_glass_shorts_controls_summary">تطبيق نمط الزجاج Glass-morphism على أزرار التحكم في المقاطع القصيرة</string>
+    <string name="pref_show_shorts_back_button">إظهار زر الرجوع</string>
+    <string name="pref_show_shorts_back_button_summary">إظهار زر الرجوع في لوحة التحكم الجانبية للمقاطع القصيرة</string>
 </resources>

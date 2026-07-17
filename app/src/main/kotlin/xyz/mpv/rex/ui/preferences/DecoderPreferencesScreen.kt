@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -103,10 +104,11 @@ object DecoderPreferencesScreen : Screen {
                 value = currentProfile,
                 onValueChange = { preferences.profile.set(it.value) },
                 values = MPVProfile.entries,
+                valueToText = { AnnotatedString(context.getString(it.displayNameRes)) },
                 title = { Text(stringResource(R.string.pref_decoder_profile_title)) },
                 summary = {
                   Text(
-                    currentProfile.displayName,
+                    stringResource(currentProfile.displayNameRes),
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
@@ -156,7 +158,7 @@ object DecoderPreferencesScreen : Screen {
                           Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                               Text(stringResource(R.string.pref_decoder_gpu_next_warning))
                               Text(stringResource(R.string.pref_decoder_gpu_next_purple_screen_fix))
-                              
+
                               Surface(
                                   color = MaterialTheme.colorScheme.errorContainer,
                                   shape = MaterialTheme.shapes.small
@@ -211,7 +213,14 @@ object DecoderPreferencesScreen : Screen {
                   }
                 },
                 enabled = isVulkanSupported,
-                title = { Text(stringResource(R.string.pref_decoder_vulkan_title) + " (Experimental)") },
+                title = {
+                  Text(
+                    stringResource(
+                      R.string.pref_decoder_vulkan_experimental_title,
+                      stringResource(R.string.pref_decoder_vulkan_title),
+                    )
+                  )
+                },
                 summary = {
                   Text(
                     stringResource(
@@ -258,7 +267,7 @@ object DecoderPreferencesScreen : Screen {
               )
 
               PreferenceDivider()
-              
+
               val enableAnime4K by preferences.enableAnime4K.collectAsState()
               SwitchPreference(
                 value = enableAnime4K,
@@ -304,11 +313,11 @@ object DecoderPreferencesScreen : Screen {
                     preferences.enableAnime4K.set(false)
                   }
                 },
-                title = { Text("HDR-to-SDR Tone Mapping (hdr-toys)") },
+                title = { Text(stringResource(R.string.player_hdr_toys_title)) },
                 summary = {
                   Column {
                     Text(
-                      "Apply high quality GLSL shaders for HDR-to-SDR conversion. Requires gpu-next.",
+                      stringResource(R.string.player_hdr_toys_summary),
                       color = MaterialTheme.colorScheme.outline,
                     )
                     Text(
@@ -332,11 +341,17 @@ object DecoderPreferencesScreen : Screen {
                   value = currentTone,
                   onValueChange = { preferences.hdrToysToneMapping.set(it.name) },
                   values = HdrToysManager.ToneMapping.entries,
-                  title = { Text("  Tone Mapping Algorithm") },
+                  title = {
+                    Text(
+                      stringResource(R.string.player_hdr_toys_tone_mapping_title),
+                      modifier = Modifier.padding(start = 12.dp),
+                    )
+                  },
                   summary = {
                     Text(
-                      "  " + currentTone.name,
+                      currentTone.name,
                       color = MaterialTheme.colorScheme.outline,
+                      modifier = Modifier.padding(start = 12.dp),
                     )
                   }
                 )
@@ -347,11 +362,17 @@ object DecoderPreferencesScreen : Screen {
                   value = currentGamut,
                   onValueChange = { preferences.hdrToysGamutMapping.set(it.name) },
                   values = HdrToysManager.GamutMapping.entries,
-                  title = { Text("  Gamut Mapping Algorithm") },
+                  title = {
+                    Text(
+                      stringResource(R.string.player_hdr_toys_gamut_mapping_title),
+                      modifier = Modifier.padding(start = 12.dp),
+                    )
+                  },
                   summary = {
                     Text(
-                      "  " + currentGamut.name,
+                      currentGamut.name,
                       color = MaterialTheme.colorScheme.outline,
+                      modifier = Modifier.padding(start = 12.dp),
                     )
                   }
                 )

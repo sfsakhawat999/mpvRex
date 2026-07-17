@@ -1143,4 +1143,37 @@
         <item quantity="other">This action cannot be undone. The selected items will be permanently deleted.</item>
     </plurals>
 
+        <!-- MPVProfile.displayNameRes -->
+    <string name="player_profile_fast">Fast</string>
+    <string name="player_profile_default">Default</string>
+    <string name="player_profile_high_quality">High Quality</string>
+    <string name="player_profile_gpu_hq">GPU HQ</string>
+    <string name="player_profile_low_latency">Low Latency</string>
+    <string name="player_profile_sw_fast">SW Fast</string>
+
+        <!-- DecoderPreferencesScreen -->
+    <string name="player_hdr_toys_title">HDR-to-SDR Tone Mapping (hdr-toys)</string>
+    <string name="player_hdr_toys_summary">Apply high quality GLSL shaders for HDR-to-SDR conversion. Requires gpu-next.</string>
+    <string name="pref_decoder_vulkan_experimental_title">%1$s (Experimental)</string>
+    <string name="player_hdr_toys_tone_mapping_title">Tone Mapping Algorithm</string>
+    <string name="player_hdr_toys_gamut_mapping_title">Gamut Mapping Algorithm</string>
+
+    <string name="no_blocked_videos_found">No blocked videos found</string>
+    <string name="no_vertical_videos_found">No vertical videos found</string>
+    <string name="all_videos_finished">All videos finished</string>
+    <string name="all_videos_finished_desc">You\'ve seen all vertical videos for now.</string>
+    <string name="video_info">Video Info</string>
+    <string name="loved">Loved</string>
+    <string name="love">Love</string>
+    <string name="blocked">Blocked</string>
+    <string name="block">Block</string>
+    <string name="free">Free</string>
+    <string name="back">Back</string>
+    <string name="more">More</string>
+
+    <string name="name_label">Name: %1$s</string>
+    <string name="resolution_label">Resolution: %1$dx%2$d</string>
+    <string name="path_label">Path: %1$s</string>
+    <string name="path_colon_label">Path:</string>
+    
 </resources>

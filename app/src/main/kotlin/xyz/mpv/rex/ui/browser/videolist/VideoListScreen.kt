@@ -554,7 +554,7 @@ data class VideoListScreen(
         isOpen = deleteDialogOpen.value,
         onDismiss = { deleteDialogOpen.value = false },
         onConfirm = { selectionManager.deleteSelected() },
-        itemType = "video",
+        itemTypePluralRes = R.plurals.item_type_video_plural,
         itemCount = selectionManager.selectedCount,
         itemNames = selectionManager.getSelectedItems().map { it.displayName },
       )
@@ -570,7 +570,7 @@ data class VideoListScreen(
             onDismiss = { renameDialogOpen.value = false },
             onConfirm = { newName -> selectionManager.renameSelected(newName) },
             currentName = baseName,
-            itemType = "file",
+            itemTypeRes = R.string.item_type_file,
             extension = if (extension != ".") extension else null,
           )
         }
@@ -762,12 +762,12 @@ fun VideoListContent(
     emptyTitle = if (searchQuery != null) {
       if (searchQuery.isBlank()) stringResource(R.string.search_empty_title) else stringResource(R.string.search_no_results_title)
     } else {
-      "No videos in this folder"
+      stringResource(R.string.no_videos_in_folder)
     },
     emptyMessage = if (searchQuery != null) {
       if (searchQuery.isBlank()) stringResource(R.string.search_empty_message) else stringResource(R.string.search_no_results_message)
     } else {
-      "Videos you add to this folder will appear here"
+      stringResource(R.string.no_videos_in_folder_desc)
     },
     emptyIcon = if (searchQuery != null) Icons.Filled.Search else Icons.Filled.VideoLibrary,
     isRefreshing = isRefreshing,

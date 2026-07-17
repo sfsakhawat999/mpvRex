@@ -1032,6 +1032,8 @@
     <string name="no_videos_in_folder">لا توجد فيديوهات في هذا المجلد</string>
     <string name="no_videos_in_folder_desc">الفيديوهات التي تضيفها لهذا المجلد ستظهر هنا</string>
 
+    <string name="tree_view">العرض الشجري</string>
+
     <plurals name="item_type_video_plural">
         <item quantity="zero">فيديو</item>
         <item quantity="one">فيديو</item>

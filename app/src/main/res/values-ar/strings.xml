@@ -1029,5 +1029,47 @@
     <string name="item_type_file">ملف</string>
     <string name="item_type_playlist">قائمة تشغيل</string>
     <string name="item_type_item">عنصر</string>
+
+    <plurals name="item_type_video_plural">
+        <item quantity="zero">فيديو</item>
+        <item quantity="one">فيديو</item>
+        <item quantity="two">فيديوهين</item>
+        <item quantity="few">فيديوهات</item>
+        <item quantity="many">فيديو</item>
+        <item quantity="other">فيديو</item>
+    </plurals>
+    <plurals name="item_type_folder_plural">
+        <item quantity="zero">مجلد</item>
+        <item quantity="one">مجلد</item>
+        <item quantity="two">مجلدين</item>
+        <item quantity="few">مجلدات</item>
+        <item quantity="many">مجلد</item>
+        <item quantity="other">مجلد</item>
+    </plurals>
+    <plurals name="item_type_file_plural">
+        <item quantity="zero">ملف</item>
+        <item quantity="one">ملف</item>
+        <item quantity="two">ملفين</item>
+        <item quantity="few">ملفات</item>
+        <item quantity="many">ملف</item>
+        <item quantity="other">ملف</item>
+    </plurals>
+    <plurals name="item_type_playlist_plural">
+        <item quantity="zero">قائمة تشغيل</item>
+        <item quantity="one">قائمة تشغيل</item>
+        <item quantity="two">قائمتي تشغيل</item>
+        <item quantity="few">قوائم تشغيل</item>
+        <item quantity="many">قائمة تشغيل</item>
+        <item quantity="other">قائمة تشغيل</item>
+    </plurals>
+    <plurals name="item_type_item_plural">
+        <item quantity="zero">عنصر</item>
+        <item quantity="one">عنصر</item>
+        <item quantity="two">عنصرين</item>
+        <item quantity="few">عناصر</item>
+        <item quantity="many">عنصر</item>
+        <item quantity="other">عنصر</item>
+    </plurals>
+    <string name="rename_failed">فشلت إعادة التسمية</string>
     
 </resources>

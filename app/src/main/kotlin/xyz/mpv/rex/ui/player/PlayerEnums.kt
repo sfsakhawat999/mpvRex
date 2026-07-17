@@ -75,18 +75,16 @@ enum class Debanding(
 }
 
 enum class MPVProfile(
-  val displayName: String,
+  @StringRes val displayNameRes: Int,
   val value: String,
 ) {
-  Fast("Fast", "fast"),
-  Default("Default", "default"),
-  HighQuality("High Quality", "high-quality"),
-  GpuHQ("GPU HQ", "gpu-hq"),
-  LowLatency("Low Latency", "low-latency"),
-  SwFast("SW Fast", "sw-fast"),
+  Fast(R.string.player_profile_fast, "fast"),
+  Default(R.string.player_profile_default, "default"),
+  HighQuality(R.string.player_profile_high_quality, "high-quality"),
+  GpuHQ(R.string.player_profile_gpu_hq, "gpu-hq"),
+  LowLatency(R.string.player_profile_low_latency, "low-latency"),
+  SwFast(R.string.player_profile_sw_fast, "sw-fast"),
   ;
-
-  override fun toString(): String = displayName
 
   companion object {
     fun fromValue(value: String): MPVProfile = entries.firstOrNull { it.value == value } ?: Fast

@@ -34,7 +34,7 @@ fun RenameDialog(
   onDismiss: () -> Unit,
   onConfirm: (String) -> Unit,
   currentName: String,
-  itemType: String,
+  @androidx.annotation.StringRes itemTypeRes: Int,
   extension: String? = null,
 ) {
   if (!isOpen) return
@@ -75,7 +75,7 @@ fun RenameDialog(
     onDismissRequest = onDismiss,
     title = {
       Text(
-        text = stringResource(R.string.rename_item, itemType),
+        text = stringResource(R.string.rename_item, stringResource(itemTypeRes)),
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
       )

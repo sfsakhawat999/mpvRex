@@ -1099,4 +1099,26 @@
     <string name="item_type_playlist">playlist</string>
     <string name="item_type_item">item</string>
 
+    <plurals name="item_type_video_plural">
+        <item quantity="one">video</item>
+        <item quantity="other">videos</item>
+    </plurals>
+    <plurals name="item_type_folder_plural">
+        <item quantity="one">folder</item>
+        <item quantity="other">folders</item>
+    </plurals>
+    <plurals name="item_type_file_plural">
+        <item quantity="one">file</item>
+        <item quantity="other">files</item>
+    </plurals>
+    <plurals name="item_type_playlist_plural">
+        <item quantity="one">playlist</item>
+        <item quantity="other">playlists</item>
+    </plurals>
+    <plurals name="item_type_item_plural">
+        <item quantity="one">item</item>
+        <item quantity="other">items</item>
+    </plurals>
+    <string name="rename_failed">Rename failed</string>
+
 </resources>

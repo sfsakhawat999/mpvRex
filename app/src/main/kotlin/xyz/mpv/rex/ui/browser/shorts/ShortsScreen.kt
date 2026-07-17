@@ -151,10 +151,10 @@ data class ShortsScreen(
         val blockedPaths by viewModel.blockedPaths.collectAsState()
         val autoSwipe by viewModel.autoSwipe.collectAsState()
         val currentSpeed by viewModel.currentSpeed.collectAsState()
-        
+
         val view = LocalView.current
         val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-        
+
         if (!view.isInEditMode) {
             DisposableEffect(Unit) {
                 val window = (view.context as Activity).window
@@ -188,7 +188,7 @@ data class ShortsScreen(
                 )
             } else if (shorts.isEmpty()) {
                 Text(
-                    text = if (blockedOnly) "No blocked videos found" else "No vertical videos found",
+                    text = if (blockedOnly) stringResource(R.string.no_blocked_videos_found) else stringResource(R.string.no_vertical_videos_found),
                     color = Color.White,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -196,12 +196,12 @@ data class ShortsScreen(
                 var mpvView by remember { mutableStateOf<MPVView?>(null) }
                 var isPlayerReady by remember { mutableStateOf(false) }
                 var playingPageIndex by remember { mutableIntStateOf(0) }
-                
+
                 var currentPlaybackProgress by remember { mutableFloatStateOf(0f) }
                 var currentPlaybackPaused by remember { mutableStateOf(false) }
                 var isManuallyPaused by remember { mutableStateOf(false) }
                 var isFreeModeEnabled by remember { mutableStateOf(false) }
-                
+
                 val pagerState = rememberPagerState(pageCount = { 
                     if (isExhausted) shorts.size + 1 else shorts.size 
                 })
@@ -213,7 +213,7 @@ data class ShortsScreen(
                     val heightPx = with(density) { maxHeight.toPx() }
                     val totalScroll = pagerState.currentPage + pagerState.currentPageOffsetFraction
                     val scrollOffset = totalScroll * heightPx
-                    
+
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -293,7 +293,7 @@ data class ShortsScreen(
                                 MPVLib.setPropertyBoolean("pause", false)
                                 isManuallyPaused = false
                                 viewModel.syncPlaybackSpeed()
-                                
+
                                 // Phase B: Mark as seen in current session
                                 viewModel.markAsSeen(video)
                             } else {
@@ -390,14 +390,14 @@ private fun FinishedPageItem(onBack: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "All videos finished",
+                text = stringResource(R.string.all_videos_finished),
                 color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "You've seen all vertical videos for now.",
+                text = stringResource(R.string.all_videos_finished_desc),
                 color = Color.White.copy(alpha = 0.7f),
                 fontSize = 16.sp
             )
@@ -500,7 +500,7 @@ private fun ShortPageItem(
     val playerPreferences = koinInject<PlayerPreferences>()
     val playerTutorialManager = koinInject<PlayerTutorialManager>()
     val holdForMultipleSpeed by playerPreferences.holdForMultipleSpeed.collectAsState()
-    
+
     var isLongPressSpeedActive by remember { mutableStateOf(false) }
     var isSpeedLockedState by remember { mutableStateOf(false) }
     var showSpeedLockHint by remember { mutableStateOf(false) }
@@ -521,19 +521,19 @@ private fun ShortPageItem(
             MPVLib.setPropertyFloat("speed", 1.0f)
         }
     }
-    
+
     // --- Visual Refinements ---
     var heartTapOffset by remember { mutableStateOf(Offset.Zero) }
     var loveButtonCenter by remember { mutableStateOf(Offset.Zero) }
     val heartScale = remember { Animatable(0f) }
     val heartAlpha = remember { Animatable(0f) }
     val confettiTrigger = remember { mutableStateOf(0L) }
-    
+
     var isSeeking by remember { mutableStateOf(false) }
     var seekProgress by remember { mutableFloatStateOf(0f) }
-    
+
     var playPauseTrigger by remember { mutableStateOf(0L) }
-    
+
     LaunchedEffect(video.path) {
         thumbnail = viewModel.getThumbnail(video)
     }
@@ -555,7 +555,7 @@ private fun ShortPageItem(
             isPaused = false
         }
     }
-    
+
     LaunchedEffect(isPaused) {
         if (isPlayerReady) {
             playPauseTrigger = System.currentTimeMillis()
@@ -609,7 +609,7 @@ private fun ShortPageItem(
                         val startX = down.position.x
                         val screenWidth = size.width.toFloat()
                         val isLeftOrRight = startX < screenWidth * 0.35f || startX > screenWidth * 0.65f
-                        
+
                         if (isLeftOrRight && isSettled && isPlaying && !isPaused) {
                             var longPressTriggered = false
                             val job = coroutineScope.launch {
@@ -619,7 +619,7 @@ private fun ShortPageItem(
                                 MPVLib.setPropertyFloat("speed", holdForMultipleSpeed)
                                 view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
                             }
-                            
+
                             var pointerId = down.id
                             do {
                                 val event = awaitPointerEvent()
@@ -675,7 +675,7 @@ private fun ShortPageItem(
             }
     ) {
         val showThumbnail = !isPlaying || !isPlayerReady
-        
+
         Crossfade(
             targetState = showThumbnail,
             animationSpec = tween(300),
@@ -719,7 +719,7 @@ private fun ShortPageItem(
                     }
             )
         }
-        
+
         // Central Play/Pause Animation Overlay
         if (playPauseTrigger > 0L) {
             val scale = remember { Animatable(0.6f) }
@@ -833,14 +833,14 @@ private fun ShortPageItem(
         if (showInfo) {
             AlertDialog(
                 onDismissRequest = { showInfo = false },
-                title = { Text(text = "Video Info") },
+                title = { Text(text = stringResource(R.string.video_info)) },
                 text = {
                     Column {
-                        Text(text = stringResource(R.string.name) + ": ${video.displayName}", fontWeight = FontWeight.Bold)
+                        Text(text = stringResource(R.string.name_label, video.displayName), fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = "Resolution: ${video.width}x${video.height}")
+                        Text(text = stringResource(R.string.resolution_label, video.width, video.height))
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = stringResource(R.string.path) + ": ${video.path}", fontSize = 12.sp)
+                        Text(text = stringResource(R.string.path_label, video.path), fontSize = 12.sp)
                     }
                 },
                 confirmButton = {
@@ -888,7 +888,7 @@ private fun ShortPageItem(
                 text = {
                     Column {
                         Text(text = stringResource(R.string.delete_short_confirm_message), modifier = Modifier.padding(bottom = 8.dp))
-                        Text(text = stringResource(R.string.path) + ":", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        Text(text = stringResource(R.string.path_colon_label), fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         Text(text = video.path, fontSize = 12.sp, color = MaterialTheme.colorScheme.outline)
                     }
                 },
@@ -905,13 +905,13 @@ private fun ShortPageItem(
                             } else {
                                 null
                             }
-                            
+
                             if (nextVideo != null) {
                                 MPVLib.command("loadfile", nextVideo.path)
                             } else {
                                 MPVLib.command("stop")
                             }
-                            
+
                             viewModel.deleteShort(video)
                         }
                     ) {
@@ -930,7 +930,7 @@ private fun ShortPageItem(
 @Composable
 private fun ConfettiBurst(trigger: Long, center: Offset) {
     if (trigger == 0L || center == Offset.Zero) return
-    
+
     val particles = remember(trigger) {
         List(15) {
             val angle = Random.nextFloat() * 360f
@@ -947,7 +947,7 @@ private fun ConfettiBurst(trigger: Long, center: Offset) {
         LaunchedEffect(trigger) {
             animProgress.animateTo(1f, tween(600))
         }
-        
+
         if (animProgress.value < 1f) {
             Box(
                 modifier = Modifier
@@ -1035,7 +1035,7 @@ private fun MoreActionsSheet(
                 modifier = Modifier.clickable { onToggleAutoSwipe() },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent)
             )
-            
+
             ListItem(
                 headlineContent = { Text(stringResource(R.string.long_press_speed)) },
                 supportingContent = { 
@@ -1056,7 +1056,7 @@ private fun MoreActionsSheet(
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = if (isSpeedLocked) "${holdForMultipleSpeed}x 🔒" else "${holdForMultipleSpeed}x",
+                            text = if (isSpeedLocked) stringResource(R.string.speed_multiplier_locked, holdForMultipleSpeed) else stringResource(R.string.speed_multiplier, holdForMultipleSpeed),
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp
@@ -1138,7 +1138,7 @@ private fun ActionColumn(
         Box(modifier = Modifier.alpha(0.8f)) {
             ActionButton(
                 icon = if (isLoved) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                label = if (isLoved) "Loved" else "Love",
+                label = if (isLoved) stringResource(R.string.loved) else stringResource(R.string.love),
                 iconColor = if (isLoved) Color.Red else Color.White,
                 onClick = onLove,
                 modifier = Modifier.onGloballyPositioned { coords ->
@@ -1152,40 +1152,40 @@ private fun ActionColumn(
                 }
             )
         }
-        
+
         Spacer(modifier = Modifier.height(12.dp))
-        
+
         ActionButton(
             icon = Icons.Filled.Block, 
-            label = if (isBlocked) "Blocked" else "Block", 
+            label = if (isBlocked) stringResource(R.string.blocked) else stringResource(R.string.block), 
             iconColor = if (isBlocked) Color.Red else Color.White,
             onClick = onBlock
         )
-        
+
         Spacer(modifier = Modifier.height(12.dp))
-        
+
         // Free button (Clean UI Toggle)
         ActionButton(
             icon = if (isFreeModeEnabled) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen, 
-            label = "Free", 
+            label = stringResource(R.string.free), 
             iconColor = if (isFreeModeEnabled) MaterialTheme.colorScheme.primary else Color.White,
             onClick = onFreeModeToggle
         )
-        
+
         if (showBackButton) {
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             // Back Button (replaces speed button)
             ActionButton(
                 icon = Icons.AutoMirrored.Filled.ArrowBack, 
-                label = "Back", 
+                label = stringResource(R.string.back), 
                 onClick = onBack
             )
         }
-        
+
         Spacer(modifier = Modifier.height(12.dp))
-        
-        ActionButton(icon = Icons.Filled.MoreVert, label = "More", onClick = onMore)
+
+        ActionButton(icon = Icons.Filled.MoreVert, label = stringResource(R.string.more), onClick = onMore)
     }
 }
 

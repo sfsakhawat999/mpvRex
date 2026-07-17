@@ -1097,5 +1097,38 @@
         <item quantity="many">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
         <item quantity="other">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
     </plurals>
+
+        <!-- MPVProfile.displayNameRes -->
+    <string name="player_profile_fast">سريع</string>
+    <string name="player_profile_default">افتراضي</string>
+    <string name="player_profile_high_quality">جودة عالية</string>
+    <string name="player_profile_gpu_hq">GPU HQ</string>
+    <string name="player_profile_low_latency">أقل زمن تأخير</string>
+    <string name="player_profile_sw_fast">برمجي سريع (SW)</string>
+
+        <!-- DecoderPreferencesScreen.kt -->
+    <string name="player_hdr_toys_title">تحويل HDR إلى SDR (hdr-toys)</string>
+    <string name="player_hdr_toys_summary">تطبيق شادرات GLSL عالية الجودة لتحويل HDR إلى SDR. يتطلب تفعيل gpu-next.</string>
+    <string name="pref_decoder_vulkan_experimental_title">%1$s (تجريبي)</string>
+    <string name="player_hdr_toys_tone_mapping_title">خوارزمية تدرج الألوان</string>
+    <string name="player_hdr_toys_gamut_mapping_title">خوارزمية مطابقة النطاق اللوني</string>
+
+    <string name="no_blocked_videos_found">لا توجد فيديوهات محظورة</string>
+    <string name="no_vertical_videos_found">لا توجد فيديوهات عمودية</string>
+    <string name="all_videos_finished">انتهت جميع الفيديوهات</string>
+    <string name="all_videos_finished_desc">لقد شاهدت جميع الفيديوهات العمودية المتاحة حاليًا.</string>
+    <string name="video_info">معلومات الفيديو</string>
+    <string name="loved">مُفضّل</string>
+    <string name="love">إعجاب</string>
+    <string name="blocked">محظور</string>
+    <string name="block">حظر</string>
+    <string name="free">وضع حر</string>
+    <string name="back">رجوع</string>
+    <string name="more">المزيد</string>
+
+    <string name="name_label">الاسم: %1$s</string>
+    <string name="resolution_label">الدقة: %1$dx%2$d</string>
+    <string name="path_label">المسار: %1$s</string>
+    <string name="path_colon_label">المسار:</string>
     
 </resources>

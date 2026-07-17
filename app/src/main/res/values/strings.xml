@@ -1093,4 +1093,10 @@
     <string name="pref_gesture_double_tap_seek_area_width_title">Double Tap Seek Area Width</string>
     <string name="pref_gesture_custom_seek_dialog_hint">Enter custom seek duration in seconds (1-120)</string>
 
+    <string name="item_type_video">video</string>
+    <string name="item_type_folder">folder</string>
+    <string name="item_type_file">file</string>
+    <string name="item_type_playlist">playlist</string>
+    <string name="item_type_item">item</string>
+
 </resources>

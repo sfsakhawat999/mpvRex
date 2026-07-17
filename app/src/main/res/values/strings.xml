@@ -838,7 +838,6 @@
     <string name="file_bytes_progress">%1$s of %2$s</string>
     <string name="files_processed">Files processed</string>
     <string name="total_size">Total size</string>
-    <string name="delete_items_warning">This action cannot be undone. The selected item%1$s will be permanently deleted.</string>
 
     <!-- File Picker Dialog Strings -->
     <string name="select_storage_location">Select a storage location</string>
@@ -1092,5 +1091,56 @@
     <string name="pref_gesture_custom_value">Custom</string>
     <string name="pref_gesture_double_tap_seek_area_width_title">Double Tap Seek Area Width</string>
     <string name="pref_gesture_custom_seek_dialog_hint">Enter custom seek duration in seconds (1-120)</string>
+
+    <string name="item_type_video">video</string>
+    <string name="item_type_folder">folder</string>
+    <string name="item_type_file">file</string>
+    <string name="item_type_playlist">playlist</string>
+    <string name="item_type_item">item</string>
+
+    <string name="no_videos_in_folder">No videos in this folder</string>
+    <string name="no_videos_in_folder_desc">Videos you add to this folder will appear here</string>
+    <string name="tree_view">Tree View</string>
+
+    <string name="pref_player_general">General</string>
+    <string name="pref_player_autoplay_next_video">Autoplay next video</string>
+    <string name="pref_player_autoplay_next_video_summary_on">Automatically play next video when current ends</string>
+    <string name="pref_player_autoplay_next_video_summary_off">Stay on current video when it ends</string>
+    <string name="pref_player_playlist_mode_summary_on">Show next/previous buttons for all videos in folder</string>
+    <string name="pref_player_playlist_mode_summary_off">Play videos individually (select multiple for playlist)</string>
+    <string name="pref_player_keep_screen_on_when_paused_summary_on">Screen stays awake while video is paused</string>
+    <string name="pref_player_keep_screen_on_when_paused_summary_off">Screen can turn off while video is paused</string>
+    <string name="pref_player_auto_pip">Auto Picture-in-Picture</string>
+    <string name="pref_player_auto_pip_summary">Automatically enter PIP mode when pressing home or back</string>
+    <string name="pref_player_dynamic_speed_overlay">Dynamic Speed Overlay</string>
+    <string name="pref_player_dynamic_speed_overlay_summary">Show advance overlay for speed control during long press and swipe</string>
+    <string name="pref_player_display_show_navigation_bar">Show navigation bar with controls</string>
+
+    <plurals name="item_type_video_plural">
+        <item quantity="one">video</item>
+        <item quantity="other">videos</item>
+    </plurals>
+    <plurals name="item_type_folder_plural">
+        <item quantity="one">folder</item>
+        <item quantity="other">folders</item>
+    </plurals>
+    <plurals name="item_type_file_plural">
+        <item quantity="one">file</item>
+        <item quantity="other">files</item>
+    </plurals>
+    <plurals name="item_type_playlist_plural">
+        <item quantity="one">playlist</item>
+        <item quantity="other">playlists</item>
+    </plurals>
+    <plurals name="item_type_item_plural">
+        <item quantity="one">item</item>
+        <item quantity="other">items</item>
+    </plurals>
+    <string name="rename_failed">Rename failed</string>
+
+    <plurals name="delete_items_warning">
+        <item quantity="one">This action cannot be undone. The selected item will be permanently deleted.</item>
+        <item quantity="other">This action cannot be undone. The selected items will be permanently deleted.</item>
+    </plurals>
 
 </resources>

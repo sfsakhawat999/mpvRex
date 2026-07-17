@@ -605,7 +605,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
             title = if (isAtRoot) {
               stringResource(xyz.mpv.rex.R.string.app_name)
             } else {
-              breadcrumbs.lastOrNull()?.name ?: "Tree View"
+              breadcrumbs.lastOrNull()?.name ?: stringResource(xyz.mpv.rex.R.string.tree_view)
             },
             isInSelectionMode = isInSelectionMode,
             selectedCount = selectedCount,
@@ -882,7 +882,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 filePicker.launch(arrayOf("video/*"))
               },
               icon = { Icon(Icons.Filled.FileOpen, contentDescription = null) },
-              text = { Text(text = "Open File") },
+              text = { Text(text = stringResource(R.string.open_file)) },
             )
 
             FloatingActionButtonMenuItem(
@@ -897,7 +897,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 }
               },
               icon = { Icon(Icons.Filled.History, contentDescription = null) },
-              text = { Text(text = "Recently Played") },
+              text = { Text(text = stringResource(R.string.recently_played)) },
             )
 
             FloatingActionButtonMenuItem(
@@ -906,7 +906,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 showLinkDialog.value = true
               },
               icon = { Icon(Icons.Filled.Link, contentDescription = null) },
-              text = { Text(text = "Open Link") },
+              text = { Text(text = stringResource(R.string.open_link)) },
             )
           }
         }
@@ -1109,10 +1109,10 @@ fun FileSystemBrowserScreen(path: String? = null) {
           videoSelectionManager.deleteSelected()
         }
       },
-      itemType = when {
-        folderSelectionManager.isInSelectionMode && videoSelectionManager.isInSelectionMode -> "item"
-        folderSelectionManager.isInSelectionMode -> "folder"
-        else -> "video"
+      itemTypePluralRes = when {
+        folderSelectionManager.isInSelectionMode && videoSelectionManager.isInSelectionMode -> R.plurals.item_type_item_plural
+        folderSelectionManager.isInSelectionMode -> R.plurals.item_type_folder_plural
+        else -> R.plurals.item_type_video_plural
       },
       itemCount = selectedCount,
       itemNames = (folderSelectionManager.getSelectedItems().map { it.name } +
@@ -1132,14 +1132,14 @@ fun FileSystemBrowserScreen(path: String? = null) {
               coroutineScope.launch {
                 val ok = viewModel.renameFolder(folder, newName)
                 if (!ok) {
-                  android.widget.Toast.makeText(context, "Rename failed", android.widget.Toast.LENGTH_SHORT).show()
+                  android.widget.Toast.makeText(context, context.getString(R.string.rename_failed), android.widget.Toast.LENGTH_SHORT).show()
                 }
                 folderSelectionManager.clear()
                 viewModel.refresh()
               }
             },
             currentName = folder.name,
-            itemType = "folder",
+            itemTypeRes = R.string.item_type_folder,
           )
         }
       } else if (videoSelectionManager.isSingleSelection) {
@@ -1152,7 +1152,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
             onDismiss = { renameDialogOpen.value = false },
             onConfirm = { newName -> videoSelectionManager.renameSelected(newName) },
             currentName = baseName,
-            itemType = "file",
+            itemTypeRes = R.string.item_type_file,
             extension = if (extension != ".") extension else null,
           )
         }

@@ -394,8 +394,8 @@ object PlaylistScreen : Screen {
             selectionManager.deleteSelected()
             showDeleteDialog = false
           },
+          itemTypePluralRes = R.plurals.item_type_playlist_plural,
           itemCount = selectionManager.selectedCount,
-          itemType = "playlist",
           itemNames = selectionManager.getSelectedItems().map { it.playlist.name },
         )
       }

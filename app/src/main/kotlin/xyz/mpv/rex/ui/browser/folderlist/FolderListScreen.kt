@@ -950,14 +950,14 @@ object FolderListScreen : Screen {
               coroutineScope.launch {
                 val ok = viewModel.renameFolder(folder, newName)
                 if (!ok) {
-                  android.widget.Toast.makeText(context, "Rename failed", android.widget.Toast.LENGTH_SHORT).show()
+                  android.widget.Toast.makeText(context, context.getString(R.string.rename_failed), android.widget.Toast.LENGTH_SHORT).show()
                 }
                 selectionManager.clear()
                 viewModel.refresh()
               }
             },
             currentName = folder.name,
-            itemType = "folder",
+            itemTypeRes = R.string.item_type_folder,
           )
         }
       }
@@ -966,7 +966,7 @@ object FolderListScreen : Screen {
         isOpen = deleteDialogOpen.value,
         onDismiss = { deleteDialogOpen.value = false },
         onConfirm = { selectionManager.deleteSelected() },
-        itemType = "folder",
+        itemTypePluralRes = R.plurals.item_type_folder_plural,
         itemCount = selectionManager.selectedCount,
         itemNames = selectionManager.getSelectedItems().map { it.name },
       )

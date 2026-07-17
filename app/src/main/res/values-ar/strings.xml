@@ -765,7 +765,6 @@
     <string name="file_bytes_progress">%1$s من %2$s</string>
     <string name="files_processed">الملفات المعالَجة</string>
     <string name="total_size">الحجم الإجمالي</string>
-    <string name="delete_items_warning">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر (أو العناصر) المحددة نهائياً.%1$s.</string>
     <string name="select_storage_location">اختر موقع التخزين</string>
     <string name="go_to_internal_storage">الانتقال إلى التخزين الداخلي</string>
     <string name="create_folder">إنشاء مجلد</string>
@@ -1023,4 +1022,80 @@
     <string name="pref_enable_glass_shorts_controls_summary">تطبيق نمط الزجاج Glass-morphism على أزرار التحكم في المقاطع القصيرة</string>
     <string name="pref_show_shorts_back_button">إظهار زر الرجوع</string>
     <string name="pref_show_shorts_back_button_summary">إظهار زر الرجوع في لوحة التحكم الجانبية للمقاطع القصيرة</string>
+
+    <string name="item_type_video">فيديو</string>
+    <string name="item_type_folder">مجلد</string>
+    <string name="item_type_file">ملف</string>
+    <string name="item_type_playlist">قائمة تشغيل</string>
+    <string name="item_type_item">عنصر</string>
+
+    <string name="no_videos_in_folder">لا توجد فيديوهات في هذا المجلد</string>
+    <string name="no_videos_in_folder_desc">الفيديوهات التي تضيفها لهذا المجلد ستظهر هنا</string>
+    <string name="tree_view">العرض الشجري</string>
+
+    <string name="pref_player_general">عام</string>
+    <string name="pref_player_autoplay_next_video">تشغيل الفيديو التالي تلقائياً</string>
+    <string name="pref_player_autoplay_next_video_summary_on">تشغيل الفيديو التالي تلقائياً عند انتهاء الحالي</string>
+    <string name="pref_player_autoplay_next_video_summary_off">البقاء على الفيديو الحالي عند انتهائه</string>
+    <string name="pref_player_playlist_mode_summary_on">إظهار أزرار التالي/السابق لكل فيديوهات المجلد</string>
+    <string name="pref_player_playlist_mode_summary_off">تشغيل الفيديوهات بشكل منفرد (اختر عدة فيديوهات لقائمة تشغيل)</string>
+    <string name="pref_player_keep_screen_on_when_paused_summary_on">تبقى الشاشة مضاءة أثناء إيقاف الفيديو مؤقتاً</string>
+    <string name="pref_player_keep_screen_on_when_paused_summary_off">يمكن للشاشة أن تُطفأ أثناء إيقاف الفيديو مؤقتاً</string>
+    <string name="pref_player_auto_pip">صورة داخل صورة تلقائية</string>
+    <string name="pref_player_auto_pip_summary">الدخول تلقائياً لوضع الصورة داخل الصورة عند الضغط على الرئيسية أو الرجوع</string>
+    <string name="pref_player_dynamic_speed_overlay">عرض السرعة الديناميكي</string>
+    <string name="pref_player_dynamic_speed_overlay_summary">إظهار قيمة السرعة متغيرة أثناء الضغط المطوّل والسحب</string>
+    <string name="pref_player_display_show_navigation_bar">إظهار شريط التنقل مع عناصر التحكم</string>
+
+    <plurals name="item_type_video_plural">
+        <item quantity="zero">فيديو</item>
+        <item quantity="one">فيديو</item>
+        <item quantity="two">فيديوهين</item>
+        <item quantity="few">فيديوهات</item>
+        <item quantity="many">فيديو</item>
+        <item quantity="other">فيديو</item>
+    </plurals>
+    <plurals name="item_type_folder_plural">
+        <item quantity="zero">مجلد</item>
+        <item quantity="one">مجلد</item>
+        <item quantity="two">مجلدين</item>
+        <item quantity="few">مجلدات</item>
+        <item quantity="many">مجلد</item>
+        <item quantity="other">مجلد</item>
+    </plurals>
+    <plurals name="item_type_file_plural">
+        <item quantity="zero">ملف</item>
+        <item quantity="one">ملف</item>
+        <item quantity="two">ملفين</item>
+        <item quantity="few">ملفات</item>
+        <item quantity="many">ملف</item>
+        <item quantity="other">ملف</item>
+    </plurals>
+    <plurals name="item_type_playlist_plural">
+        <item quantity="zero">قائمة تشغيل</item>
+        <item quantity="one">قائمة تشغيل</item>
+        <item quantity="two">قائمتي تشغيل</item>
+        <item quantity="few">قوائم تشغيل</item>
+        <item quantity="many">قائمة تشغيل</item>
+        <item quantity="other">قائمة تشغيل</item>
+    </plurals>
+    <plurals name="item_type_item_plural">
+        <item quantity="zero">عنصر</item>
+        <item quantity="one">عنصر</item>
+        <item quantity="two">عنصرين</item>
+        <item quantity="few">عناصر</item>
+        <item quantity="many">عنصر</item>
+        <item quantity="other">عنصر</item>
+    </plurals>
+    <string name="rename_failed">فشلت إعادة التسمية</string>
+
+    <plurals name="delete_items_warning">
+        <item quantity="zero">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
+        <item quantity="one">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر المحدد نهائياً.</item>
+        <item quantity="two">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصرين المحددين نهائياً.</item>
+        <item quantity="few">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
+        <item quantity="many">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
+        <item quantity="other">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
+    </plurals>
+    
 </resources>

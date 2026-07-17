@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import xyz.mpv.rex.R
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -30,13 +31,13 @@ fun DeleteConfirmationDialog(
   isOpen: Boolean,
   onDismiss: () -> Unit,
   onConfirm: () -> Unit,
-  itemType: String,
+  @androidx.annotation.PluralsRes itemTypePluralRes: Int,
   itemCount: Int,
   itemNames: List<String> = emptyList(),
 ) {
   if (!isOpen) return
 
-  val itemText = if (itemCount == 1) itemType else "${itemType}s"
+  val itemText = pluralStringResource(itemTypePluralRes, itemCount)
 
   AlertDialog(
     onDismissRequest = onDismiss,
@@ -60,7 +61,7 @@ fun DeleteConfirmationDialog(
           modifier = Modifier.fillMaxWidth(),
         ) {
           Text(
-            text = stringResource(R.string.delete_items_warning, if (itemCount == 1) "" else "s"),
+            text = pluralStringResource(R.plurals.delete_items_warning, itemCount),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onErrorContainer,

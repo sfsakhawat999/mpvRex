@@ -1101,6 +1101,8 @@
     <string name="no_videos_in_folder">No videos in this folder</string>
     <string name="no_videos_in_folder_desc">Videos you add to this folder will appear here</string>
 
+    <string name="tree_view">Tree View</string>
+
     <plurals name="item_type_video_plural">
         <item quantity="one">video</item>
         <item quantity="other">videos</item>

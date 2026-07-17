@@ -1031,8 +1031,21 @@
 
     <string name="no_videos_in_folder">لا توجد فيديوهات في هذا المجلد</string>
     <string name="no_videos_in_folder_desc">الفيديوهات التي تضيفها لهذا المجلد ستظهر هنا</string>
-
     <string name="tree_view">العرض الشجري</string>
+
+    <string name="pref_player_general">عام</string>
+    <string name="pref_player_autoplay_next_video">تشغيل الفيديو التالي تلقائياً</string>
+    <string name="pref_player_autoplay_next_video_summary_on">تشغيل الفيديو التالي تلقائياً عند انتهاء الحالي</string>
+    <string name="pref_player_autoplay_next_video_summary_off">البقاء على الفيديو الحالي عند انتهائه</string>
+    <string name="pref_player_playlist_mode_summary_on">إظهار أزرار التالي/السابق لكل فيديوهات المجلد</string>
+    <string name="pref_player_playlist_mode_summary_off">تشغيل الفيديوهات بشكل منفرد (اختر عدة فيديوهات لقائمة تشغيل)</string>
+    <string name="pref_player_keep_screen_on_when_paused_summary_on">تبقى الشاشة مضاءة أثناء إيقاف الفيديو مؤقتاً</string>
+    <string name="pref_player_keep_screen_on_when_paused_summary_off">يمكن للشاشة أن تُطفأ أثناء إيقاف الفيديو مؤقتاً</string>
+    <string name="pref_player_auto_pip">صورة داخل صورة تلقائية</string>
+    <string name="pref_player_auto_pip_summary">الدخول تلقائياً لوضع الصورة داخل الصورة عند الضغط على الرئيسية أو الرجوع</string>
+    <string name="pref_player_dynamic_speed_overlay">عرض السرعة الديناميكي</string>
+    <string name="pref_player_dynamic_speed_overlay_summary">إظهار قيمة السرعة متغيرة أثناء الضغط المطوّل والسحب</string>
+    <string name="pref_player_display_show_navigation_bar">إظهار شريط التنقل مع عناصر التحكم</string>
 
     <plurals name="item_type_video_plural">
         <item quantity="zero">فيديو</item>

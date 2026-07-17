@@ -395,6 +395,7 @@ object PlaylistScreen : Screen {
             showDeleteDialog = false
           },
           itemTypePluralRes = R.plurals.item_type_playlist_plural,
+          itemCount = selectionManager.selectedCount,
           itemNames = selectionManager.getSelectedItems().map { it.playlist.name },
         )
       }
@@ -433,3 +434,4 @@ object PlaylistScreen : Screen {
       gridState = gridState,
     )
   }
+}

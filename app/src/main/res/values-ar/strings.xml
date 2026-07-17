@@ -765,7 +765,6 @@
     <string name="file_bytes_progress">%1$s من %2$s</string>
     <string name="files_processed">الملفات المعالَجة</string>
     <string name="total_size">الحجم الإجمالي</string>
-    <string name="delete_items_warning">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر (أو العناصر) المحددة نهائياً.%1$s.</string>
     <string name="select_storage_location">اختر موقع التخزين</string>
     <string name="go_to_internal_storage">الانتقال إلى التخزين الداخلي</string>
     <string name="create_folder">إنشاء مجلد</string>
@@ -1071,5 +1070,14 @@
         <item quantity="other">عنصر</item>
     </plurals>
     <string name="rename_failed">فشلت إعادة التسمية</string>
+
+    <plurals name="delete_items_warning">
+        <item quantity="zero">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
+        <item quantity="one">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر المحدد نهائياً.</item>
+        <item quantity="two">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصرين المحددين نهائياً.</item>
+        <item quantity="few">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
+        <item quantity="many">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
+        <item quantity="other">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
+    </plurals>
     
 </resources>

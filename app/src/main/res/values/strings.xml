@@ -1100,8 +1100,21 @@
 
     <string name="no_videos_in_folder">No videos in this folder</string>
     <string name="no_videos_in_folder_desc">Videos you add to this folder will appear here</string>
-
     <string name="tree_view">Tree View</string>
+
+    <string name="pref_player_general">General</string>
+    <string name="pref_player_autoplay_next_video">Autoplay next video</string>
+    <string name="pref_player_autoplay_next_video_summary_on">Automatically play next video when current ends</string>
+    <string name="pref_player_autoplay_next_video_summary_off">Stay on current video when it ends</string>
+    <string name="pref_player_playlist_mode_summary_on">Show next/previous buttons for all videos in folder</string>
+    <string name="pref_player_playlist_mode_summary_off">Play videos individually (select multiple for playlist)</string>
+    <string name="pref_player_keep_screen_on_when_paused_summary_on">Screen stays awake while video is paused</string>
+    <string name="pref_player_keep_screen_on_when_paused_summary_off">Screen can turn off while video is paused</string>
+    <string name="pref_player_auto_pip">Auto Picture-in-Picture</string>
+    <string name="pref_player_auto_pip_summary">Automatically enter PIP mode when pressing home or back</string>
+    <string name="pref_player_dynamic_speed_overlay">Dynamic Speed Overlay</string>
+    <string name="pref_player_dynamic_speed_overlay_summary">Show advance overlay for speed control during long press and swipe</string>
+    <string name="pref_player_display_show_navigation_bar">Show navigation bar with controls</string>
 
     <plurals name="item_type_video_plural">
         <item quantity="one">video</item>

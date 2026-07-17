@@ -838,7 +838,6 @@
     <string name="file_bytes_progress">%1$s of %2$s</string>
     <string name="files_processed">Files processed</string>
     <string name="total_size">Total size</string>
-    <string name="delete_items_warning">This action cannot be undone. The selected item%1$s will be permanently deleted.</string>
 
     <!-- File Picker Dialog Strings -->
     <string name="select_storage_location">Select a storage location</string>
@@ -1120,5 +1119,10 @@
         <item quantity="other">items</item>
     </plurals>
     <string name="rename_failed">Rename failed</string>
+
+    <plurals name="delete_items_warning">
+        <item quantity="one">This action cannot be undone. The selected item will be permanently deleted.</item>
+        <item quantity="other">This action cannot be undone. The selected items will be permanently deleted.</item>
+    </plurals>
 
 </resources>

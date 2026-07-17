@@ -434,4 +434,3 @@ object PlaylistScreen : Screen {
       gridState = gridState,
     )
   }
-}

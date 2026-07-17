@@ -1023,4 +1023,11 @@
     <string name="pref_enable_glass_shorts_controls_summary">تطبيق نمط الزجاج Glass-morphism على أزرار التحكم في المقاطع القصيرة</string>
     <string name="pref_show_shorts_back_button">إظهار زر الرجوع</string>
     <string name="pref_show_shorts_back_button_summary">إظهار زر الرجوع في لوحة التحكم الجانبية للمقاطع القصيرة</string>
+
+    <string name="item_type_video">فيديو</string>
+    <string name="item_type_folder">مجلد</string>
+    <string name="item_type_file">ملف</string>
+    <string name="item_type_playlist">قائمة تشغيل</string>
+    <string name="item_type_item">عنصر</string>
+    
 </resources>

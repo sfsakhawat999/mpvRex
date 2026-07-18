@@ -1123,5 +1123,8 @@
     <string name="pref_advanced_remove_cached_fonts_summary">إزالة جميع خطوط الترجمة المخزّنة</string>
     <string name="pref_advanced_enable_media_info_title">تفعيل نشاط معلومات الوسائط</string>
     <string name="pref_advanced_enable_media_info_summary">إظهار "معلومات الوسائط" كخيار في قوائم "فتح باستخدام" على مستوى النظام</string>
+
+    <string name="blocked_shorts_empty_state">لا توجد فيديوهات محظورة</string>
+    <string name="blocked_shorts_unblock_button">محظور</string>
     
 </resources>

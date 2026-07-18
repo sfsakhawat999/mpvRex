@@ -1143,4 +1143,30 @@
         <item quantity="other">This action cannot be undone. The selected items will be permanently deleted.</item>
     </plurals>
 
+    <string name="export_failed">Export failed: %1$s</string>
+    <string name="import_failed">Import failed: %1$s</string>
+    <string name="clear_failed">Failed to clear: %1$s</string>
+    <string name="export_complete_details">Successfully exported %1$d items!\n\n</string>
+    <string name="import_complete_details">Successfully imported: %1$d\nFailed: %2$d\nVersion: %3$s\n\nPlease restart the app for all changes to take effect.</string>
+    <string name="pref_advanced_section_backup_restore">Backup &amp; Restore</string>
+    <string name="pref_advanced_section_mpv_configuration">MPV Configuration</string>
+    <string name="pref_advanced_section_scripts">Scripts</string>
+    <string name="pref_advanced_section_history">History</string>
+    <string name="pref_advanced_section_cache">Cache</string>
+    <string name="pref_advanced_section_system_integration">System Integration</string>
+    <string name="pref_advanced_section_logging">Logging</string>
+    <string name="pref_advanced_tap_to_edit_configuration">Tap to edit configuration</string>
+    <string name="pref_advanced_mpv_directory_ready">MPV directory ready ✓</string>
+    <string name="pref_advanced_lua_set_storage_first">Set storage location and enable Lua scripts first</string>
+    <string name="pref_advanced_no_scripts_enabled">No scripts enabled</string>
+    <string name="pref_advanced_custom_lua_summary">Create and manage custom Lua buttons</string>
+    <string name="pref_advanced_config_cache_cleared">Config cache cleared</string>
+    <string name="pref_advanced_delete_thumbnails_summary">Delete all cached video thumbnails (will regenerate as you browse folders)</string>
+    <string name="pref_advanced_clear_thumbnail_cache_confirm_title">Clear thumbnail cache?</string>
+    <string name="pref_advanced_clear_thumbnail_cache_confirm_subtitle">This will delete all cached thumbnails (local and network) from storage and memory.</string>
+    <string name="pref_advanced_thumbnail_cache_cleared">Thumbnail cache cleared</string>
+    <string name="pref_advanced_remove_cached_fonts_summary">Remove all cached subtitle fonts</string>
+    <string name="pref_advanced_enable_media_info_title">Enable Media Info Activity</string>
+    <string name="pref_advanced_enable_media_info_summary">Show \'Media Info\' as an option in system-wide \'Open with\' menus</string>
+
 </resources>

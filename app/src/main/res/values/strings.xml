@@ -1168,7 +1168,6 @@
     <string name="blocked">Blocked</string>
     <string name="block">Block</string>
     <string name="free">Free</string>
-    <string name="back">Back</string>
     <string name="more">More</string>
 
     <string name="name_label">Name: %1$s</string>

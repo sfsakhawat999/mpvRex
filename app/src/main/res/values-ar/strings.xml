@@ -1097,5 +1097,31 @@
         <item quantity="many">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
         <item quantity="other">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
     </plurals>
+
+    <string name="export_failed">فشل التصدير: %1$s</string>
+    <string name="import_failed">فشل الاستيراد: %1$s</string>
+    <string name="clear_failed">فشل المسح: %1$s</string>
+    <string name="export_complete_details">تم تصدير %1$d عنصراً بنجاح!\n\n</string>
+    <string name="import_complete_details">تم استيراد: %1$d\nفشل: %2$d\nالإصدار: %3$s\n\nيرجى إعادة تشغيل التطبيق لتطبيق كل التغييرات.</string>
+    <string name="pref_advanced_section_backup_restore">النسخ الاحتياطي والاستعادة</string>
+    <string name="pref_advanced_section_mpv_configuration">إعدادات MPV</string>
+    <string name="pref_advanced_section_scripts">السكربتات</string>
+    <string name="pref_advanced_section_history">السجل</string>
+    <string name="pref_advanced_section_cache">التخزين المؤقت</string>
+    <string name="pref_advanced_section_system_integration">تكامل النظام</string>
+    <string name="pref_advanced_section_logging">السجلات</string>
+    <string name="pref_advanced_tap_to_edit_configuration">اضغط لتحرير الإعدادات</string>
+    <string name="pref_advanced_mpv_directory_ready">مجلد MPV جاهز ✓</string>
+    <string name="pref_advanced_lua_set_storage_first">حدّد موقع التخزين وفعّل سكربتات Lua أولاً</string>
+    <string name="pref_advanced_no_scripts_enabled">لا توجد سكربتات مفعّلة</string>
+    <string name="pref_advanced_custom_lua_summary">إنشاء وإدارة أزرار Lua المخصصة</string>
+    <string name="pref_advanced_config_cache_cleared">تم مسح ذاكرة تخزين الإعدادات المؤقتة</string>
+    <string name="pref_advanced_delete_thumbnails_summary">حذف جميع الصور المصغّرة المخزّنة (ستُنشأ من جديد عند تصفّح المجلدات)</string>
+    <string name="pref_advanced_clear_thumbnail_cache_confirm_title">مسح ذاكرة تخزين الصور المصغّرة؟</string>
+    <string name="pref_advanced_clear_thumbnail_cache_confirm_subtitle">سيؤدي هذا إلى حذف جميع الصور المصغّرة المخزّنة (المحلية والشبكية) من التخزين والذاكرة.</string>
+    <string name="pref_advanced_thumbnail_cache_cleared">تم مسح ذاكرة تخزين الصور المصغّرة</string>
+    <string name="pref_advanced_remove_cached_fonts_summary">إزالة جميع خطوط الترجمة المخزّنة</string>
+    <string name="pref_advanced_enable_media_info_title">تفعيل نشاط معلومات الوسائط</string>
+    <string name="pref_advanced_enable_media_info_summary">إظهار "معلومات الوسائط" كخيار في قوائم "فتح باستخدام" على مستوى النظام</string>
     
 </resources>

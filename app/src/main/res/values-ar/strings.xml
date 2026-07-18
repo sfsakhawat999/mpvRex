@@ -734,7 +734,6 @@
     <string name="auto_swipe_to_next_short">التمرير التلقائي للمقطع القصير التالي</string>
     <string name="auto_swipe_to_next_short_desc">التمرير تلقائياً عند انتهاء الفيديو</string>
     <string name="long_press_speed">سرعة الضغط المطوّل</string>
-    <string name="video_information">معلومات الفيديو</string>
     <string name="blocked_videos_manager">مدير الفيديوهات المحجوبة</string>
     <string name="delete_short">حذف المقطع القصير</string>
     <string name="delete_short_desc">حذف هذا الملف نهائياً من الجهاز</string>
@@ -833,7 +832,7 @@
     <string name="pref_category_content_management">إدارة المحتوى</string>
     <string name="pref_blocked_videos">الفيديوهات المحجوبة</string>
     <string name="pref_blocked_videos_summary">عرض وإدارة المقاطع القصيرة المحجوبة</string>
-    <string name="pref_select_sourced_folders">اختيار المجلدات المصدر</string>
+    <string name="pref_select_sourced_folders">اختيار المجلدات مصدر</string>
     <string name="pref_select_sourced_folders_desc">اختر المجلدات التي يتم جلب المقاطع القصيرة منها. إذا لم يتم اختيار أي مجلد، سيتم جلبها من جميع المجلدات.</string>
     <string name="pref_category_updates">التحديثات</string>
     <string name="pref_about_auto_check_updates">التحقق التلقائي من التحديثات</string>
@@ -1127,5 +1126,5 @@
     <string name="resolution_label">الدقة: %1$dx%2$d</string>
     <string name="path_label">المسار: %1$s</string>
     <string name="path_colon_label">المسار:</string>
-
+    
 </resources>

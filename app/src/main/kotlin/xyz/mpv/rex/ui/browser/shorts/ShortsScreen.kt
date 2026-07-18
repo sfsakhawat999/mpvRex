@@ -833,7 +833,7 @@ private fun ShortPageItem(
         if (showInfo) {
             AlertDialog(
                 onDismissRequest = { showInfo = false },
-                title = { Text(text = stringResource(R.string.video_info)) },
+                title = { Text(text = stringResource(R.string.video_information)) },
                 text = {
                     Column {
                         Text(text = stringResource(R.string.name_label, video.displayName), fontWeight = FontWeight.Bold)

@@ -45,6 +45,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.stringResource
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -371,7 +372,7 @@ fun PlaylistSheet(
                 )
               }
               Text(
-                text = "${selectedIndexes.size} selected",
+                text = stringResource(R.string.playlist_selected_count, selectedIndexes.size),
                 style = MaterialTheme.typography.titleMedium.copy(
                   fontWeight = FontWeight.Bold,
                 ),
@@ -401,7 +402,7 @@ fun PlaylistSheet(
               modifier = Modifier.weight(1f)
             ) {
               Text(
-                text = "Reorder Playlist",
+                text = stringResource(R.string.playlist_reorder),
                 style = MaterialTheme.typography.titleMedium.copy(
                   fontWeight = FontWeight.Bold,
                   color = accentColor,
@@ -438,7 +439,7 @@ fun PlaylistSheet(
                 ) {
                   if (searchQuery.isEmpty()) {
                     Text(
-                      text = "Search...",
+                      text = stringResource(R.string.playlist_search_placeholder),
                       style = MaterialTheme.typography.bodyMedium,
                       color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                     )
@@ -471,7 +472,7 @@ fun PlaylistSheet(
                 val playingIndex = playlist.indexOfFirst { it.isPlaying }
                 val playingNumber = if (playingIndex != -1) playingIndex + 1 else 1
                 Text(
-                  text = "Now Playing",
+                  text = stringResource(R.string.playlist_now_playing),
                   style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold,
                     color = accentColor,
@@ -483,13 +484,13 @@ fun PlaylistSheet(
                   color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                  text = "$playingNumber of $totalCount items",
+                  text = stringResource(R.string.playlist_items_count, playingNumber, totalCount),
                   style = MaterialTheme.typography.bodyMedium,
                   color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
               } else {
                 Text(
-                  text = "${filteredPlaylist.size} of $totalCount items",
+                  text = stringResource(R.string.playlist_items_count, filteredPlaylist.size, totalCount),
                   style = MaterialTheme.typography.bodyMedium,
                   color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -532,7 +533,7 @@ fun PlaylistSheet(
             contentAlignment = Alignment.Center
           ) {
             Text(
-              text = "No items found",
+              text = stringResource(R.string.playlist_no_items),
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -813,7 +814,7 @@ fun PlaylistTrackListItem(
             shape = RoundedCornerShape(16.dp),
           ) {
             Text(
-              text = "Playing",
+              text = stringResource(R.string.playlist_playing),
               modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
               style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.SemiBold,

@@ -114,7 +114,7 @@
     <string name="settings_search_no_results">No settings found</string>
     <string name="settings_search_title">Search</string>
 
-    <!-- Player Preferences Hardcoded -->
+    <!-- Player Preferences -->
     <string name="pref_autoplay_title">Enable next/previous navigation</string>
     <string name="pref_autoplay_summary">Show next/previous buttons for all videos in folder</string>
     <string name="pref_autoplay_next_video_title">Autoplay next video</string>
@@ -128,11 +128,11 @@
     <string name="pref_dynamic_speed_overlay_summary">Show advance overlay for speed control during long press and swipe</string>
     <string name="pref_show_navigation_bar_title">Show navigation bar with controls</string>
 
-    <!-- Gesture Preferences Hardcoded -->
+    <!-- Gesture Preferences -->
     <string name="pref_double_tap_seek_area_width_title">Double Tap Seek Area Width</string>
     <string name="pref_double_tap_seek_area_width_summary">Current: %d%%</string>
 
-    <!-- Advanced Preferences Hardcoded -->
+    <!-- Advanced Preferences -->
     <string name="pref_export_settings_title">Export Settings</string>
     <string name="pref_export_settings_summary">Export settings to an XML file</string>
     <string name="pref_import_settings_title">Import Settings</string>
@@ -437,15 +437,11 @@
     <string name="player_sheets_filters_hue">Hue</string>
     <string name="player_sheets_filters_sharpness">Sharpness</string>
     <string name="player_sheets_filters_warning">Some filters may not work on your current video driver</string>
-
     <string name="player_sheets_speed_slider_label">Speed</string>
     <string name="player_sheets_speed_make_default">Make default speed</string>
-
     <string name="player_sheets_decoder_formatted" formatted="false">%s (%s)</string>
-
     <string name="numeric_chooser_value_too_big">Value too big</string>
     <string name="numeric_chooser_value_too_small">Value too small</string>
-
     <string name="player_sheets_more_title">More</string>
     <string name="player_sheets_stats_page_title">Default statistics page</string>
     <string name="player_sheets_stats_page_chip">Page %d</string>
@@ -456,6 +452,14 @@
     <string name="player_sheets_stats_page_4_desc">Current keybindings. List of mapped keyboard shortcuts.</string>
     <string name="player_sheets_stats_page_5_desc">Track list. Details of video, audio and subtitle tracks.</string>
     <string name="player_speed" translatable="false">%.2fx</string>
+
+    <string name="playlist_now_playing">Now Playing</string>
+    <string name="playlist_playing">Playing</string>
+    <string name="playlist_reorder">Reorder Playlist</string>
+    <string name="playlist_search_placeholder">Search...</string>
+    <string name="playlist_no_items">No items found</string>
+    <string name="playlist_items_count">%1$d of %2$d items</string>
+    <string name="playlist_selected_count">%1$d selected</string>
 
     <string name="player_aspect_fit">Fit Screen</string>
     <string name="player_aspect_crop">Crop</string>
@@ -474,11 +478,8 @@
     <string name="timer_picker_pick_time">Pick time</string>
     <string name="timer_title">Sleep timer</string>
     <string name="timer_remaining">%s remaining</string>
-
     <string name="toast_sleep_timer_ended">Sleep timer ended</string>
-
     <string name="volume_slider_absolute_value" translatable="false">%d</string>
-
     <string name="value_percentage_int" translatable="false">%d%%</string>
 
     <string name="github_repo_url" translatable="false">https://github.com/sfsakhawat999/mpvRex</string>
@@ -585,7 +586,6 @@
     <string name="notification_playing">Playing</string>
 
     <!-- Media Info Activity -->
-
     <string name="pref_player_use_precise_seeking">Use precise seeking</string>
     <string name="pref_player_show_seekbar_when_seeking_title">Show seekbar when seeking</string>
     <string name="pref_player_show_seekbar_when_seeking_summary">Display the video progress bar during gesture seeking</string>
@@ -755,7 +755,7 @@
     <string name="no_playlists_yet_desc">Create a playlist or add one from an m3u URL</string>
     <string name="empty_playlists_desc">Create a playlist to see it listed here</string>
 
-    <!-- Recently Played Screen Strings -->
+    <!-- Recently Played Screen -->
     <string name="recently_played_disabled_title">Recently Played is disabled</string>
     <string name="recently_played_disabled_message">Enable it in Advanced Settings to track your playback history</string>
     <string name="no_recently_played_videos">No recently played videos</string>
@@ -1071,7 +1071,7 @@
     <string name="pref_appearance_thumbnail_position_reset_confirm">Reset thumbnail at %1$d%% of the video duration.</string>
     <string name="pref_appearance_thumbnail_position_dialog_message">Changing the extraction position will clear your currently saved thumbnail cache. New thumbnails will be generated automatically as you browse.</string>
 
-           <!-- Control Layout Editor Screen — new keys -->
+           <!-- Control Layout Editor Screen -->
     <string name="control_layout_edit_title_top_right">Edit Top Right</string>
     <string name="control_layout_edit_title_bottom_right">Edit Bottom Right</string>
     <string name="control_layout_edit_title_bottom_left">Edit Bottom Left</string>
@@ -1087,7 +1087,7 @@
     <string name="control_layout_all_buttons_in_use">All available buttons are in use.</string>
     <string name="control_layout_icons_legend_title">Icons Legend</string>
 
-           <!-- Gesture Preferences Screen — new keys -->
+           <!-- Gesture Preferences Screen -->
     <string name="pref_gesture_custom_value">Custom</string>
     <string name="pref_gesture_double_tap_seek_area_width_title">Double Tap Seek Area Width</string>
     <string name="pref_gesture_custom_seek_dialog_hint">Enter custom seek duration in seconds (1-120)</string>

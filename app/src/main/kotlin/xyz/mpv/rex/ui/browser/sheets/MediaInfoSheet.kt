@@ -69,7 +69,12 @@ fun MediaInfoSheet(uri: Uri, onDismiss: () -> Unit) {
     var error by remember { mutableStateOf<String?>(null) }
     var textContent by remember { mutableStateOf<String?>(null) }
     var fullMediaInfoText by remember { mutableStateOf<String?>(null) }
-    var fileName by remember { mutableStateOf("Media File") }
+    val defaultFileName = stringResource(R.string.media_info_default_file_name)
+    val unknownFileName = stringResource(R.string.media_info_unknown_file_name)
+    val failedToLoadText = stringResource(R.string.media_info_failed_to_load)
+    val unknownErrorText = stringResource(R.string.media_info_unknown_error)
+    val analyzingText = stringResource(R.string.media_info_analyzing)
+    var fileName by remember { mutableStateOf(defaultFileName) }
     var mediaInfo by remember { mutableStateOf<MediaInfoOps.MediaInfoData?>(null) }
 
     LaunchedEffect(uri) {
@@ -77,13 +82,13 @@ fun MediaInfoSheet(uri: Uri, onDismiss: () -> Unit) {
             context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                 val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
                 if (nameIndex >= 0 && cursor.moveToFirst()) {
-                    cursor.getString(nameIndex) ?: uri.lastPathSegment ?: "Unknown"
+                    cursor.getString(nameIndex) ?: uri.lastPathSegment ?: unknownFileName
                 } else {
-                    uri.lastPathSegment ?: "Unknown"
+                    uri.lastPathSegment ?: unknownFileName
                 }
-            } ?: uri.lastPathSegment ?: "Unknown"
+            } ?: uri.lastPathSegment ?: unknownFileName
         } catch (e: Exception) {
-            uri.lastPathSegment ?: "Unknown"
+            uri.lastPathSegment ?: unknownFileName
         }
 
         scope.launch {
@@ -98,11 +103,11 @@ fun MediaInfoSheet(uri: Uri, onDismiss: () -> Unit) {
                     }
                     isLoading = false
                 }.onFailure { e ->
-                    error = e.message ?: "Failed to load media information"
+                    error = e.message ?: failedToLoadText
                     isLoading = false
                 }
             } catch (e: Exception) {
-                error = e.message ?: "Unknown error"
+                error = e.message ?: unknownErrorText
                 isLoading = false
             }
         }
@@ -149,7 +154,10 @@ fun MediaInfoSheet(uri: Uri, onDismiss: () -> Unit) {
                     FilledTonalIconButton(
                         onClick = {
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            val clip = ClipData.newPlainText(context.getString(R.string.media_info_title) + " - $fileName", textContent!!)
+                            val clip = ClipData.newPlainText(
+                                context.getString(R.string.media_info_clipboard_label, fileName),
+                                textContent!!,
+                            )
                             clipboard.setPrimaryClip(clip)
                             Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
                         },
@@ -192,7 +200,7 @@ fun MediaInfoSheet(uri: Uri, onDismiss: () -> Unit) {
                     ) {
                         CircularProgressIndicator(modifier = Modifier.size(40.dp))
                         Text(
-                            text = "Analyzing media file...",
+                            text = analyzingText,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -211,7 +219,7 @@ fun MediaInfoSheet(uri: Uri, onDismiss: () -> Unit) {
                         shape = MaterialTheme.shapes.extraLarge,
                     ) {
                         Text(
-                            text = "Error: $error",
+                            text = stringResource(R.string.media_info_error_prefix, error ?: ""),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.padding(24.dp),
@@ -323,6 +331,7 @@ private fun MediaInfoSectionCard(section: InfoSection) {
 private suspend fun shareMediaInfo(context: Context, content: String, fileName: String) {
     withContext(Dispatchers.IO) {
         try {
+            // Internal cache file name, not user-facing UI text — intentionally not localized.
             val textFileName = "mediainfo_${fileName.substringBeforeLast('.')}.txt"
             val file = File(context.cacheDir, textFileName)
             file.writeText(content)
@@ -331,15 +340,21 @@ private suspend fun shareMediaInfo(context: Context, content: String, fileName: 
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
                     putExtra(Intent.EXTRA_STREAM, fileUri)
-                    putExtra(Intent.EXTRA_SUBJECT, "Media Info - $fileName")
-                    putExtra(Intent.EXTRA_TEXT, "Media information for: $fileName")
+                    putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.media_info_share_subject, fileName))
+                    putExtra(Intent.EXTRA_TEXT, context.getString(R.string.media_info_share_text, fileName))
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-                context.startActivity(Intent.createChooser(shareIntent, "Share Media Info"))
+                context.startActivity(
+                    Intent.createChooser(shareIntent, context.getString(R.string.media_info_share_chooser_title)),
+                )
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Failed to share: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.media_info_share_failed, e.message ?: ""),
+                    Toast.LENGTH_LONG,
+                ).show()
             }
         }
     }
@@ -349,6 +364,16 @@ private suspend fun shareMediaInfo(context: Context, content: String, fileName: 
 @Composable
 fun MultiSelectionInfoSheet(count: Int, totalBytes: Long, totalDurationMs: Long, onDismiss: () -> Unit, unit: String = "file") {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val context = LocalContext.current
+
+    val unitPluralRes = when (unit) {
+        "folder" -> R.plurals.item_type_folder_plural
+        "video" -> R.plurals.item_type_video_plural
+        "playlist" -> R.plurals.item_type_playlist_plural
+        "item" -> R.plurals.item_type_item_plural
+        else -> R.plurals.item_type_file_plural
+    }
+    val countWithUnit = "$count ${context.resources.getQuantityString(unitPluralRes, count)}"
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -373,7 +398,7 @@ fun MultiSelectionInfoSheet(count: Int, totalBytes: Long, totalDurationMs: Long,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Selection Info",
+                text = stringResource(R.string.media_info_selection_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
             )
@@ -391,13 +416,13 @@ fun MultiSelectionInfoSheet(count: Int, totalBytes: Long, totalDurationMs: Long,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text(
-                            text = "Selected",
+                            text = stringResource(R.string.media_info_selected_label),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Text(
-                            text = if (count == 1) "1 $unit" else "$count ${unit}s",
+                            text = countWithUnit,
                             style = MaterialTheme.typography.bodyMedium,
                             fontFamily = FontFamily.Monospace,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -408,7 +433,7 @@ fun MultiSelectionInfoSheet(count: Int, totalBytes: Long, totalDurationMs: Long,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text(
-                            text = "Total size",
+                            text = stringResource(R.string.total_size),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -425,7 +450,7 @@ fun MultiSelectionInfoSheet(count: Int, totalBytes: Long, totalDurationMs: Long,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text(
-                            text = "Total length",
+                            text = stringResource(R.string.media_info_total_length),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

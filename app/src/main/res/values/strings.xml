@@ -312,6 +312,9 @@
     <string name="pref_advanced">Advanced</string>
     <string name="pref_advanced_summary">Configuration location, mpv.conf</string>
     <string name="pref_advanced_mpv_conf_storage_location">Pick configuration storage location</string>
+    <string name="config_editor_unsaved_changes">Unsaved changes</string>
+    <string name="config_editor_no_storage_location">No storage location set</string>
+    <string name="config_editor_create_failed">Failed to create file</string>
     <string name="pref_advanced_mpv_conf">Edit mpv.conf</string>
     <string name="pref_advanced_input_conf">Edit input.conf</string>
     <string name="pref_advanced_dump_logs_title">Dump logs</string>
@@ -355,6 +358,7 @@
     <string name="pref_about_title">About</string>
     <string name="pref_about_summary">Acknowledgments, licenses</string>
     <string name="pref_about_oss_libraries">Libraries</string>
+    <string name="pref_about_device_info">Device Info</string>
     <string name="pref_about_donate_title">Donate</string>
     <string name="pref_about_donate_kofi">Ko-fi</string>
     <string name="pref_about_donate_kofi_summary">Support the developer on Ko-fi</string>
@@ -938,6 +942,8 @@
     <string name="pref_about_check_updates">Check for Updates</string>
     <string name="pref_about_checking">Checking…</string>
     <string name="pref_about_check_updates_summary">Manually check for new versions on GitHub</string>
+    <string name="pref_about_up_to_date">You are up to date!</string>
+    <string name="pref_about_check_updates_failed">Failed to check for updates</string>
 
     <!-- Player Button Labels -->
     <string name="btn_label_back">Back Arrow</string>

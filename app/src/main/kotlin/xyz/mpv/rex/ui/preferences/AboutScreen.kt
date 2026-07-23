@@ -103,11 +103,11 @@ object AboutScreen : Screen {
     LaunchedEffect(updateState) {
         when (updateState) {
             is UpdateViewModel.UpdateState.NoUpdate -> {
-                Toast.makeText(context, "You are up to date!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.pref_about_up_to_date), Toast.LENGTH_SHORT).show()
                 updateViewModel?.dismissNoUpdate()
             }
             is UpdateViewModel.UpdateState.Error -> {
-                Toast.makeText(context, "Failed to check for updates", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.pref_about_check_updates_failed), Toast.LENGTH_SHORT).show()
                 updateViewModel?.dismissNoUpdate()
             }
             else -> {}
@@ -291,13 +291,13 @@ object AboutScreen : Screen {
                 ) {
                   Icon(
                     imageVector = Icons.Filled.Info,
-                    contentDescription = "Device Info",
+                    contentDescription = stringResource(id = R.string.pref_about_device_info),
                     modifier = Modifier.size(20.dp),
                     tint = cs.onPrimaryContainer,
                   )
                   Spacer(modifier = Modifier.width(8.dp))
                   Text(
-                    text = "Device Info",
+                    text = stringResource(id = R.string.pref_about_device_info),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = cs.onPrimaryContainer,

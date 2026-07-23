@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
+import xyz.mpv.rex.R
 import xyz.mpv.rex.preferences.AdvancedPreferences
 import xyz.mpv.rex.preferences.preference.collectAsState
 import xyz.mpv.rex.presentation.Screen
@@ -117,7 +119,7 @@ data class ConfigEditorScreen(
             val tree = DocumentFile.fromTreeUri(context, mpvConfStorageLocation.toUri())
             if (tree == null) {
               withContext(Dispatchers.Main) {
-                Toast.makeText(context, "No storage location set", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, context.getString(R.string.config_editor_no_storage_location), Toast.LENGTH_LONG).show()
               }
               return@launch
             }
@@ -125,7 +127,7 @@ data class ConfigEditorScreen(
             val confFile = existing ?: tree.createFile("text/plain", fileName)?.also { it.renameTo(fileName) }
             val uri = confFile?.uri ?: run {
               withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Failed to create file", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, context.getString(R.string.config_editor_create_failed), Toast.LENGTH_LONG).show()
               }
               return@launch
             }
@@ -163,7 +165,7 @@ data class ConfigEditorScreen(
             )
             if (hasUnsavedChanges) {
               Text(
-                text  = "Unsaved changes",
+                text  = stringResource(id = R.string.config_editor_unsaved_changes),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary,
               )
@@ -174,7 +176,7 @@ data class ConfigEditorScreen(
           IconButton(onClick = backStack::removeLastOrNull) {
             Icon(
               Icons.AutoMirrored.Default.ArrowBack,
-              contentDescription = "Back",
+              contentDescription = stringResource(id = R.string.back),
               tint = MaterialTheme.colorScheme.secondary,
             )
           }
@@ -194,11 +196,11 @@ data class ConfigEditorScreen(
             ),
             shape = RoundedCornerShape(8.dp),
           ) {
-            Icon(Icons.Default.Check, contentDescription = "Save")
+            Icon(Icons.Default.Check, contentDescription = stringResource(id = R.string.save))
           }
         },
       )
-      
+
       // Editor content with IME padding
       val scrollState = rememberScrollState()
       Box(

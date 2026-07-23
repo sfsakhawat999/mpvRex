@@ -1134,5 +1134,13 @@
     <string name="playlist_no_items">لم يتم العثور على عناصر</string>
     <string name="playlist_items_count">%1$d من %2$d عنصر</string>
     <string name="playlist_selected_count">%1$d محددة</string>
+
+    <string name="pref_about_up_to_date">أنت تستخدم آخر إصدار!</string>
+    <string name="pref_about_check_updates_failed">فشل التحقق من التحديثات</string>
+    <string name="pref_about_device_info">معلومات الجهاز</string>
+
+    <string name="config_editor_unsaved_changes">تغييرات غير محفوظة</string>
+    <string name="config_editor_no_storage_location">لم يتم تحديد موقع التخزين</string>
+    <string name="config_editor_create_failed">فشل إنشاء الملف</string>
     
 </resources>

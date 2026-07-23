@@ -65,6 +65,7 @@ fun BaseMediaCard(
     gridColumns: Int = 1,
     progressPercentage: Float? = null,
     maxTitleLines: Int = 2,
+    titleTextAlign: TextAlign = TextAlign.Start,
     thumbnailSize: Dp = 64.dp,
     thumbnailAspectRatio: Float = 16f / 9f,
     listTitleStyle: TextStyle? = null,
@@ -91,8 +92,8 @@ fun BaseMediaCard(
                         if (isSelected) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f) 
                         else Color.Transparent
                     )
-                    .then(if (gridColumns == 1) Modifier.padding(horizontal = 12.dp, vertical = 5.dp) else Modifier.padding(12.dp)),
-                horizontalAlignment = if (gridColumns == 1) Alignment.Start else Alignment.CenterHorizontally,
+                    .then(if (gridColumns == 1) Modifier.padding(horizontal = 12.dp, vertical = 4.dp) else Modifier.padding(4.dp)),
+                horizontalAlignment = Alignment.Start,
             ) {
                 // Thumbnail Box
                 Box(
@@ -160,19 +161,20 @@ fun BaseMediaCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
+                val shouldHighlight = isRecentlyPlayed && !(isWatched && isNeverPlayed)
                 // Title
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = when {
-                        isRecentlyPlayed -> MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                        shouldHighlight -> MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
                         isWatched -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         else -> MaterialTheme.colorScheme.onSurface
                     },
                     maxLines = maxTitleLines,
                     overflow = TextOverflow.Ellipsis,
-                    textAlign = if (gridColumns == 1) TextAlign.Start else TextAlign.Center,
-                    fontWeight = if (isRecentlyPlayed) FontWeight.Black else FontWeight.Medium,
+                    textAlign = titleTextAlign,
+                    fontWeight = if (shouldHighlight) FontWeight.Black else FontWeight.Normal,
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -182,7 +184,7 @@ fun BaseMediaCard(
                         modifier = Modifier.fillMaxWidth().then(
                             if (gridColumns == 1) Modifier.padding(vertical = 2.dp) else Modifier
                         ),
-                        horizontalArrangement = if (gridColumns == 1) Arrangement.Start else Arrangement.Center,
+                        horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         infoContent()
@@ -209,7 +211,7 @@ fun BaseMediaCard(
                         if (isSelected) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)
                         else Color.Transparent
                     )
-                    .padding(vertical = 10.dp, horizontal = 16.dp),
+                    .padding(vertical = 4.dp, horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
         // Thumbnail Box
@@ -279,17 +281,18 @@ fun BaseMediaCard(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
+                    val shouldHighlight = isRecentlyPlayed && !(isWatched && isNeverPlayed)
                     Text(
                         text = title,
                         style = listTitleStyle ?: MaterialTheme.typography.titleMedium,
                         color = when {
-                            isRecentlyPlayed -> MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                            shouldHighlight -> MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
                             isWatched -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             else -> MaterialTheme.colorScheme.onSurface
                         },
                         maxLines = maxTitleLines,
                         overflow = TextOverflow.Ellipsis,
-                        fontWeight = if (isRecentlyPlayed) FontWeight.Black else FontWeight.Normal,
+                        fontWeight = if (shouldHighlight) FontWeight.Black else FontWeight.Normal,
                     )
 
                     if (infoContent != null) {

@@ -262,7 +262,7 @@ object CoreMediaScanner {
                     if (playbackState != null) {
                         if (playbackState.hasBeenWatched) {
                             isWatched = true
-                        } else if (item.duration > 0) {
+                        } else if (item.duration > 0 && playbackState.timeRemaining != -1) {
                             val durationSeconds = item.duration / 1000
                             val watched = durationSeconds - playbackState.timeRemaining.toLong()
                             val progressValue = (watched.toFloat() / durationSeconds.toFloat()).coerceIn(0f, 1f)
@@ -278,7 +278,8 @@ object CoreMediaScanner {
 
                     // Calculate NEW status
                     val videoAge = currentTime - (item.dateModified * 1000)
-                    if (playbackState == null && videoAge <= thresholdMillis) {
+                    val isNew = (playbackState == null && videoAge <= thresholdMillis) || (playbackState != null && playbackState.timeRemaining == -1)
+                    if (isNew) {
                         newCount++
                     }
                 }

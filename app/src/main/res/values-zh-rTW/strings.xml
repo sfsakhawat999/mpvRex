@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">mpvRex</string>
-    <string name="author_name" translatable="false">Sakhawat</string>
 
     <string name="generic_reset">重設</string>
     <string name="generic_share">分享</string>
@@ -181,7 +179,6 @@
 
     <string name="pref_player_display">顯示</string>
     <string name="pref_player_display_panel_opacity">面板透明度</string>
-    <string name="pref_player_display_panel_transparency_summary" translatable="false">%d%%</string>
 
     <string name="pref_gesture">手勢</string>
     <string name="pref_gesture_summary">雙擊、媒體控制</string>
@@ -323,21 +320,13 @@
     <string name="pref_about_donate_title">贊助</string>
     <string name="pref_about_donate_kofi">Ko-fi</string>
     <string name="pref_about_donate_kofi_summary">在 Ko-fi 上支持開發者</string>
-    <string name="pref_about_donate_kofi_url" translatable="false">https://ko-fi.com/adityanarvekar</string>
     <string name="pref_about_donate_paypal">PayPal</string>
     <string name="pref_about_donate_paypal_summary">在 PayPal 上支持開發者</string>
-    <string name="pref_about_donate_paypal_url" translatable="false">https://paypal.me/aadinarvekar</string>
     <string name="pref_about_donate_upi">UPI</string>
-    <string name="pref_about_donate_upi_id" translatable="false">aadiinarvekar@upi</string>
 
     <string name="player_sheets_add_ext_sub">新增外部字幕</string>
     <string name="player_sheets_add_ext_audio">新增外部音軌</string>
     <string name="player_sheets_tracks_off">關閉</string>
-    <string name="player_sheets_track_title_w_lang" translatable="false">#%d: %s (%s)</string>
-    <string name="player_sheets_track_title_wo_lang" translatable="false">#%d: %s</string>
-    <string name="player_sheets_track_lang_wo_title" translatable="false">#%d: %s</string>
-    <string name="player_sheets_chapter_title_substitute_subtitle" translatable="false">Subtitle #%d</string>
-    <string name="player_sheets_chapter_title_substitute_audio" translatable="false">Audio #%d</string>
     <string name="player_sheets_subtitles_settings_title">字幕設定</string>
     <string name="player_sheets_subtitles_color_text">文字</string>
     <string name="player_sheets_subtitles_color_border">邊框</string>
@@ -410,7 +399,6 @@
     <string name="player_sheets_stats_page_3_desc">快取狀態。緩衝區健康度、解複用器 (Demuxer) 快取、可搜尋範圍。</string>
     <string name="player_sheets_stats_page_4_desc">目前按鍵綁定。已映射的鍵盤快捷鍵列表。</string>
     <string name="player_sheets_stats_page_5_desc">軌道列表。影片、音訊和字幕軌道的詳細資訊。</string>
-    <string name="player_speed" translatable="false">%.2fx</string>
 
     <string name="player_aspect_fit">配合螢幕</string>
     <string name="player_aspect_crop">裁剪</string>
@@ -432,17 +420,13 @@
 
     <string name="toast_sleep_timer_ended">睡眠定時器結束</string>
 
-    <string name="volume_slider_absolute_value" translatable="false">%d</string>
 
-    <string name="value_percentage_int" translatable="false">%d%%</string>
 
-    <string name="github_repo_url" translatable="false">https://github.com/sfsakhawat999/mpvRex</string>
     <string name="swap_the_volume_and_brightness_slider">交換音量和亮度滑動條</string>
     <string name="pref_player_display_reduce_player_animation">減少播放程式動畫</string>
     <string name="pref_player_display_hide_player_control_time">隱藏播放控制時間</string>
     <string name="show_splash_ovals_on_double_tap_to_seek">雙擊搜尋時顯示漣漪效果</string>
     <string name="show_time_on_double_tap_to_seek">顯示搜尋時間</string>
-    <string name="player_gesture_seek_indicator" translatable="false">[%1$s%2$s] (%3$s)</string>
 
     <string name="pref_audio_channels_auto_safe_desc">預設，安全自動選擇</string>
     <string name="pref_audio_channels_auto_desc">自動選擇</string>
@@ -451,7 +435,6 @@
     <string name="pref_audio_channels_reverse_stereo_desc">交換左右聲道</string>
 
     <string name="player_sheets_frame_navigation_title">影格導航</string>
-    <string name="player_sheets_frame_navigation_snapshot_saved" translatable="false">Saved to Pictures/mpvSnaps</string>
     <string name="player_sheets_frame_navigation_include_subtitles">快照中包含字幕</string>
 
     <string name="player_sheets_zoom_slider_label">影片縮放</string>
@@ -581,7 +564,7 @@
     <string name="recents">最近</string>
     <string name="playlists">播放清單</string>
     <string name="network">網路</string>
-    <string name="seconds">秒</string>
+    <string name="unit_seconds">秒</string>
     <string name="milliseconds">毫秒</string>
     <string name="name">名稱</string>
     <string name="protocol">協定</string>

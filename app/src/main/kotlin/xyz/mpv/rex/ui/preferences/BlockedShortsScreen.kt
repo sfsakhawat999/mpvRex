@@ -29,9 +29,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import xyz.mpv.rex.R
 import xyz.mpv.rex.database.dao.ShortsMediaDao
 import xyz.mpv.rex.presentation.Screen
 import xyz.mpv.rex.ui.browser.shorts.ShortsScreen
@@ -58,7 +60,7 @@ object BlockedShortsScreen : Screen {
                 TopAppBar(
                     title = {
                         Text(
-                            text = "Blocked Videos",
+                            text = stringResource(R.string.pref_blocked_videos),
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary,
@@ -82,7 +84,7 @@ object BlockedShortsScreen : Screen {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No blocked videos",
+                        text = stringResource(R.string.blocked_shorts_empty_state),
                         color = MaterialTheme.colorScheme.outline
                     )
                 }
@@ -147,7 +149,7 @@ object BlockedShortsScreen : Screen {
                                         contentDescription = null,
                                         modifier = Modifier.padding(end = 4.dp)
                                     )
-                                    Text("Blocked", fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.blocked_shorts_unblock_button), fontWeight = FontWeight.Bold)
                                 }
                             }
                         }

@@ -42,6 +42,7 @@ import xyz.mpv.rex.preferences.FolderViewMode
 import xyz.mpv.rex.preferences.MediaLayoutMode
 import xyz.mpv.rex.preferences.preference.collectAsState
 import org.koin.compose.koinInject
+import xyz.mpv.rex.ui.utils.LocalBackStack
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Switch
 import androidx.compose.material3.FilterChipDefaults
@@ -62,6 +63,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.ui.draw.scale
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import xyz.mpv.rex.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -820,6 +823,7 @@ fun FolderSortDialog(
   onSortTypeChange: (FolderSortType) -> Unit,
   onSortOrderChange: (SortOrder) -> Unit,
 ) {
+  val backstack = LocalBackStack.current
   val browserPreferences = koinInject<BrowserPreferences>()
   val appearancePreferences = koinInject<AppearancePreferences>()
   val showTotalVideosChip by browserPreferences.showTotalVideosChip.collectAsState()
@@ -831,6 +835,10 @@ fun FolderSortDialog(
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
   val showAudioFiles by browserPreferences.showAudioFiles.collectAsState()
   val unlimitedNameLines by appearancePreferences.unlimitedNameLines.collectAsState()
+  val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
+  val showSizeChip by browserPreferences.showSizeChip.collectAsState()
+  val showResolutionChip by browserPreferences.showResolutionChip.collectAsState()
+  val showFramerateInResolution by browserPreferences.showFramerateInResolution.collectAsState()
   val folderViewMode by browserPreferences.folderViewMode.collectAsState()
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
   val folderGridColumnsPortrait by browserPreferences.folderGridColumnsPortrait.collectAsState()
@@ -875,7 +883,7 @@ fun FolderSortDialog(
   SortDialog(
     isOpen = isOpen,
     onDismiss = onDismiss,
-    title = if (isAlbumView) "Sort & View Options" else "View Options",
+    title = if (isAlbumView) stringResource(R.string.sort_and_view_options) else stringResource(R.string.view_options),
     sortType = sortType.displayName,
     onSortTypeChange = { typeName ->
       FolderSortType.entries
@@ -915,19 +923,34 @@ fun FolderSortDialog(
           label = "Folder",
           icon = Icons.Filled.ViewModule,
           isSelected = folderViewMode == FolderViewMode.AlbumView,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.AlbumView) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.AlbumView)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         ),
         ViewModeOption(
           label = "Tree",
           icon = Icons.Filled.AccountTree,
           isSelected = folderViewMode == FolderViewMode.FileManager,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.FileManager) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.FileManager)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         ),
         ViewModeOption(
           label = "Library",
           icon = Icons.Filled.VideoLibrary,
           isSelected = folderViewMode == FolderViewMode.MediaLibrary,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         )
       )
     ),
@@ -953,6 +976,11 @@ fun FolderSortDialog(
     ),
     visibilityToggles = listOf(
       VisibilityToggle(
+        label = "Video Thumbnails",
+        checked = showVideoThumbnails,
+        onCheckedChange = { browserPreferences.showVideoThumbnails.set(it) },
+      ),
+      VisibilityToggle(
         label = "Full Name",
         checked = unlimitedNameLines,
         onCheckedChange = { appearancePreferences.unlimitedNameLines.set(it) },
@@ -976,6 +1004,21 @@ fun FolderSortDialog(
         label = "Folder Size",
         checked = showTotalSizeChip,
         onCheckedChange = { browserPreferences.showTotalSizeChip.set(it) },
+      ),
+      VisibilityToggle(
+        label = "File Size",
+        checked = showSizeChip,
+        onCheckedChange = { browserPreferences.showSizeChip.set(it) },
+      ),
+      VisibilityToggle(
+        label = "Resolution",
+        checked = showResolutionChip,
+        onCheckedChange = { browserPreferences.showResolutionChip.set(it) },
+      ),
+      VisibilityToggle(
+        label = "Framerate",
+        checked = showFramerateInResolution,
+        onCheckedChange = { browserPreferences.showFramerateInResolution.set(it) },
       ),
       VisibilityToggle(
         label = "Date",
@@ -1007,6 +1050,7 @@ fun VideoSortDialog(
   onSortTypeChange: (VideoSortType) -> Unit,
   onSortOrderChange: (SortOrder) -> Unit,
 ) {
+  val backstack = LocalBackStack.current
   val browserPreferences = koinInject<BrowserPreferences>()
   val videoGridColumnsPortrait by browserPreferences.videoGridColumnsPortrait.collectAsState()
   val videoGridColumnsLandscape by browserPreferences.videoGridColumnsLandscape.collectAsState()
@@ -1020,7 +1064,7 @@ fun VideoSortDialog(
   val folderGridColumns = if (isLandscape) folderGridColumnsLandscape else folderGridColumnsPortrait
   val appearancePreferences = koinInject<AppearancePreferences>()
   val showAudioFiles by browserPreferences.showAudioFiles.collectAsState()
-  val showThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
+  val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
   val showSizeChip by browserPreferences.showSizeChip.collectAsState()
   val showResolutionChip by browserPreferences.showResolutionChip.collectAsState()
   val showFramerateInResolution by browserPreferences.showFramerateInResolution.collectAsState()
@@ -1028,6 +1072,10 @@ fun VideoSortDialog(
   val showDateChip by browserPreferences.showDateChip.collectAsState()
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
   val unlimitedNameLines by appearancePreferences.unlimitedNameLines.collectAsState()
+  val showFolderPath by browserPreferences.showFolderPath.collectAsState()
+  val showTotalVideosChip by browserPreferences.showTotalVideosChip.collectAsState()
+  val showTotalDurationChip by browserPreferences.showTotalDurationChip.collectAsState()
+  val showTotalSizeChip by browserPreferences.showTotalSizeChip.collectAsState()
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
   val folderViewMode by browserPreferences.folderViewMode.collectAsState()
 
@@ -1060,7 +1108,7 @@ fun VideoSortDialog(
   SortDialog(
     isOpen = isOpen,
     onDismiss = onDismiss,
-    title = "Sort & View Options",
+    title = stringResource(R.string.sort_and_view_options),
     sortType = sortType.displayName,
     onSortTypeChange = { typeName ->
       VideoSortType.entries.find { it.displayName == typeName }?.let(onSortTypeChange)
@@ -1099,19 +1147,34 @@ fun VideoSortDialog(
           label = "Folder",
           icon = Icons.Filled.ViewModule,
           isSelected = folderViewMode == FolderViewMode.AlbumView,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.AlbumView) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.AlbumView)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         ),
         ViewModeOption(
           label = "Tree",
           icon = Icons.Filled.AccountTree,
           isSelected = folderViewMode == FolderViewMode.FileManager,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.FileManager) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.FileManager)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         ),
         ViewModeOption(
           label = "Library",
           icon = Icons.Filled.VideoLibrary,
           isSelected = folderViewMode == FolderViewMode.MediaLibrary,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         )
       )
     ),
@@ -1138,14 +1201,9 @@ fun VideoSortDialog(
     visibilityToggles =
       listOf(
         VisibilityToggle(
-          label = "Thumbnails",
-          checked = showThumbnails,
+          label = "Video Thumbnails",
+          checked = showVideoThumbnails,
           onCheckedChange = { browserPreferences.showVideoThumbnails.set(it) },
-        ),
-        VisibilityToggle(
-          label = "Subtitle Indicator",
-          checked = showSubtitleIndicator,
-          onCheckedChange = { browserPreferences.showSubtitleIndicator.set(it) },
         ),
         VisibilityToggle(
           label = "Full Name",
@@ -1153,7 +1211,27 @@ fun VideoSortDialog(
           onCheckedChange = { appearancePreferences.unlimitedNameLines.set(it) },
         ),
         VisibilityToggle(
-          label = "Size",
+          label = "Path",
+          checked = showFolderPath,
+          onCheckedChange = { browserPreferences.showFolderPath.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Total Videos",
+          checked = showTotalVideosChip,
+          onCheckedChange = { browserPreferences.showTotalVideosChip.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Total Duration",
+          checked = showTotalDurationChip,
+          onCheckedChange = { browserPreferences.showTotalDurationChip.set(it) },
+        ),
+        VisibilityToggle(
+          label = "Folder Size",
+          checked = showTotalSizeChip,
+          onCheckedChange = { browserPreferences.showTotalSizeChip.set(it) },
+        ),
+        VisibilityToggle(
+          label = "File Size",
           checked = showSizeChip,
           onCheckedChange = { browserPreferences.showSizeChip.set(it) },
         ),
@@ -1177,6 +1255,11 @@ fun VideoSortDialog(
           checked = showProgressBar,
           onCheckedChange = { browserPreferences.showProgressBar.set(it) },
         ),
+        VisibilityToggle(
+          label = "Subtitle Indicator",
+          checked = showSubtitleIndicator,
+          onCheckedChange = { browserPreferences.showSubtitleIndicator.set(it) },
+        ),
       ),
     folderGridColumnSelector = folderGridColumnSelector,
     videoGridColumnSelector = videoGridColumnSelector,
@@ -1189,6 +1272,7 @@ fun FileSystemSortDialog(
   onDismiss: () -> Unit,
   isAtRoot: Boolean = true,
 ) {
+  val backstack = LocalBackStack.current
   val browserPreferences = koinInject<BrowserPreferences>()
   val appearancePreferences = koinInject<AppearancePreferences>()
   val folderViewMode by browserPreferences.folderViewMode.collectAsState()
@@ -1205,6 +1289,8 @@ fun FileSystemSortDialog(
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
   val unlimitedNameLines by appearancePreferences.unlimitedNameLines.collectAsState()
   val showAudioFiles by browserPreferences.showAudioFiles.collectAsState()
+  val showTotalDurationChip by browserPreferences.showTotalDurationChip.collectAsState()
+  val showDateChip by browserPreferences.showDateChip.collectAsState()
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
   val folderGridColumnsPortrait by browserPreferences.folderGridColumnsPortrait.collectAsState()
   val folderGridColumnsLandscape by browserPreferences.folderGridColumnsLandscape.collectAsState()
@@ -1245,7 +1331,7 @@ fun FileSystemSortDialog(
   SortDialog(
     isOpen = isOpen,
     onDismiss = onDismiss,
-    title = "Sort & View Options",
+    title = stringResource(R.string.sort_and_view_options),
     sortType = folderSortType.displayName,
     onSortTypeChange = { typeName ->
       FolderSortType.entries.find { it.displayName == typeName }?.let {
@@ -1288,19 +1374,34 @@ fun FileSystemSortDialog(
           label = "Folder",
           icon = Icons.Filled.ViewModule,
           isSelected = folderViewMode == FolderViewMode.AlbumView,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.AlbumView) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.AlbumView)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         ),
         ViewModeOption(
           label = "Tree",
           icon = Icons.Filled.AccountTree,
           isSelected = folderViewMode == FolderViewMode.FileManager,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.FileManager) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.FileManager)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         ),
         ViewModeOption(
           label = "Library",
           icon = Icons.Filled.VideoLibrary,
           isSelected = folderViewMode == FolderViewMode.MediaLibrary,
-          onClick = { browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary) }
+          onClick = {
+            browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary)
+            while (backstack.size > 1) {
+              backstack.removeLastOrNull()
+            }
+          }
         )
       )
     ),
@@ -1320,7 +1421,6 @@ fun FileSystemSortDialog(
     ),
     folderGridColumnSelector = folderGridColumnSelector,
     videoGridColumnSelector = videoGridColumnSelector,
-    enableViewModeOptions = isAtRoot,
     enableLayoutModeOptions = true, // Enabled for FileSystem/Tree view too!
     contentToggles = listOf(
       ContentToggle(
@@ -1351,12 +1451,17 @@ fun FileSystemSortDialog(
         onCheckedChange = { browserPreferences.showTotalVideosChip.set(it) },
       ),
       VisibilityToggle(
+        label = "Total Duration",
+        checked = showTotalDurationChip,
+        onCheckedChange = { browserPreferences.showTotalDurationChip.set(it) },
+      ),
+      VisibilityToggle(
         label = "Folder Size",
         checked = showTotalSizeChip,
         onCheckedChange = { browserPreferences.showTotalSizeChip.set(it) },
       ),
       VisibilityToggle(
-        label = "Size",
+        label = "File Size",
         checked = showSizeChip,
         onCheckedChange = { browserPreferences.showSizeChip.set(it) },
       ),
@@ -1371,16 +1476,20 @@ fun FileSystemSortDialog(
         onCheckedChange = { browserPreferences.showFramerateInResolution.set(it) },
       ),
       VisibilityToggle(
-        label = "Subtitle",
-        checked = showSubtitleIndicator,
-        onCheckedChange = { browserPreferences.showSubtitleIndicator.set(it) },
+        label = "Date",
+        checked = showDateChip,
+        onCheckedChange = { browserPreferences.showDateChip.set(it) },
       ),
       VisibilityToggle(
         label = "Progress Bar",
         checked = showProgressBar,
         onCheckedChange = { browserPreferences.showProgressBar.set(it) },
       ),
+      VisibilityToggle(
+        label = "Subtitle Indicator",
+        checked = showSubtitleIndicator,
+        onCheckedChange = { browserPreferences.showSubtitleIndicator.set(it) },
+      ),
     )
   )
 }
-

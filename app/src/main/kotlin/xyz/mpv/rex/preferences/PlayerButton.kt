@@ -17,16 +17,16 @@ import androidx.compose.material.icons.outlined.Subtitles
 import androidx.compose.material.icons.outlined.Title
 import androidx.compose.material.icons.outlined.Flip
 import androidx.compose.material.icons.outlined.Repeat
-import androidx.compose.material.icons.outlined.Segment
 import androidx.compose.material.icons.outlined.ZoomIn
 import androidx.compose.material.icons.outlined.FastForward
 import androidx.compose.material.icons.outlined.Shuffle
-import androidx.compose.material.icons.outlined.SwapVert
-import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Headset
 import androidx.compose.material.icons.outlined.BlurOn
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import xyz.mpv.rex.R
 
 /**
  * Represents a customizable button in the player controls.
@@ -58,6 +58,7 @@ enum class PlayerButton(
   CUSTOM_SKIP(Icons.Outlined.FastForward),
   BACKGROUND_PLAYBACK(Icons.Outlined.Headset),
   AMBIENT_MODE(Icons.Outlined.BlurOn),
+  SLEEP_TIMER(Icons.Outlined.Timer),
   NONE(Icons.Outlined.Bookmarks),
 }
 
@@ -74,33 +75,33 @@ val allPlayerButtons =
 
 /**
  * Gets the human-readable label for a player button.
- * TODO: You must add these string resources to your `strings.xml` file.
  */
 @Composable
 fun getPlayerButtonLabel(button: PlayerButton): String =
   when (button) {
-    PlayerButton.BACK_ARROW -> "Back Arrow" // stringResource(R.string.btn_label_back)
-    PlayerButton.VIDEO_TITLE -> "Video Title" // stringResource(R.string.btn_label_title)
-    PlayerButton.BOOKMARKS_CHAPTERS -> "Chapters / Bookmarks" // stringResource(R.string.btn_label_bookmarks)
-    PlayerButton.PLAYBACK_SPEED -> "Playback Speed" // stringResource(R.string.btn_label_speed)
-    PlayerButton.DECODER -> "Decoder" // stringResource(R.string.btn_label_decoder)
-    PlayerButton.SCREEN_ROTATION -> "Screen Rotation" // stringResource(R.string.btn_label_rotation)
-    PlayerButton.FRAME_NAVIGATION -> "Frame Navigation" // stringResource(R.string.btn_label_frame_nav)
-    PlayerButton.VIDEO_ZOOM -> "Video Zoom" // stringResource(R.string.btn_label_zoom)
-    PlayerButton.PICTURE_IN_PICTURE -> "Picture-in-Picture" // stringResource(R.string.btn_label_pip)
-    PlayerButton.ASPECT_RATIO -> "Aspect Ratio" // stringResource(R.string.btn_label_aspect)
-    PlayerButton.LOCK_CONTROLS -> "Lock Controls" // stringResource(R.string.btn_label_lock)
-    PlayerButton.AUDIO_TRACK -> "Audio Track" // stringResource(R.string.btn_label_audio)
-    PlayerButton.SUBTITLES -> "Subtitles" // stringResource(R.string.btn_label_subtitles)
-    PlayerButton.MORE_OPTIONS -> "More Options" // stringResource(R.string.btn_label_more)
-    PlayerButton.CURRENT_CHAPTER -> "Current Chapter" // stringResource(R.string.btn_label_chapter)
-    PlayerButton.REPEAT_MODE -> "Repeat Mode" // stringResource(R.string.btn_label_repeat_mode)
-    PlayerButton.SHUFFLE -> "Shuffle" // stringResource(R.string.btn_label_shuffle)
-    PlayerButton.MIRROR -> "Horizontal Flip"
-    PlayerButton.VERTICAL_FLIP -> "Vertical Flip"
-    PlayerButton.AB_LOOP -> "A-B Loop"
-    PlayerButton.CUSTOM_SKIP -> "Custom Skip"
-    PlayerButton.BACKGROUND_PLAYBACK -> "Background Playback"
-    PlayerButton.AMBIENT_MODE -> "Ambience Mode"
-    PlayerButton.NONE -> "None"
+    PlayerButton.BACK_ARROW -> stringResource(R.string.btn_label_back)
+    PlayerButton.VIDEO_TITLE -> stringResource(R.string.btn_label_title)
+    PlayerButton.BOOKMARKS_CHAPTERS -> stringResource(R.string.btn_label_bookmarks)
+    PlayerButton.PLAYBACK_SPEED -> stringResource(R.string.btn_label_speed)
+    PlayerButton.DECODER -> stringResource(R.string.btn_label_decoder)
+    PlayerButton.SCREEN_ROTATION -> stringResource(R.string.btn_label_rotation)
+    PlayerButton.FRAME_NAVIGATION -> stringResource(R.string.btn_label_frame_nav)
+    PlayerButton.VIDEO_ZOOM -> stringResource(R.string.btn_label_zoom)
+    PlayerButton.PICTURE_IN_PICTURE -> stringResource(R.string.btn_label_pip)
+    PlayerButton.ASPECT_RATIO -> stringResource(R.string.btn_label_aspect)
+    PlayerButton.LOCK_CONTROLS -> stringResource(R.string.btn_label_lock)
+    PlayerButton.AUDIO_TRACK -> stringResource(R.string.btn_label_audio)
+    PlayerButton.SUBTITLES -> stringResource(R.string.btn_label_subtitles)
+    PlayerButton.MORE_OPTIONS -> stringResource(R.string.btn_label_more)
+    PlayerButton.CURRENT_CHAPTER -> stringResource(R.string.btn_label_chapter)
+    PlayerButton.REPEAT_MODE -> stringResource(R.string.btn_label_repeat_mode)
+    PlayerButton.SHUFFLE -> stringResource(R.string.btn_label_shuffle)
+    PlayerButton.MIRROR -> stringResource(R.string.btn_label_mirror)
+    PlayerButton.VERTICAL_FLIP -> stringResource(R.string.btn_label_vertical_flip)
+    PlayerButton.AB_LOOP -> stringResource(R.string.btn_label_ab_loop)
+    PlayerButton.CUSTOM_SKIP -> stringResource(R.string.btn_label_custom_skip)
+    PlayerButton.BACKGROUND_PLAYBACK -> stringResource(R.string.btn_label_background_playback)
+    PlayerButton.AMBIENT_MODE -> stringResource(R.string.btn_label_ambient_mode)
+    PlayerButton.SLEEP_TIMER -> stringResource(R.string.btn_label_sleep_timer)
+    PlayerButton.NONE -> stringResource(R.string.btn_label_none)
   }

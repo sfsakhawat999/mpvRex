@@ -114,6 +114,20 @@ object SearchablePreferences {
                 screen = PlayerControlsPreferencesScreen,
             ))
             add(SearchablePreference(
+                titleRes = R.string.pref_appearance_enable_glass_player_controls_title,
+                summaryRes = R.string.pref_appearance_enable_glass_player_controls_summary,
+                keywords = listOf("glass", "glassmorphism", "buttons", "shadow", "inner shadow", "highlight", "player", "appearance"),
+                category = "Appearance",
+                screen = PlayerControlsPreferencesScreen,
+            ))
+            add(SearchablePreference(
+                titleRes = R.string.pref_appearance_enable_glass_seekbar_title,
+                summaryRes = R.string.pref_appearance_enable_glass_seekbar_summary,
+                keywords = listOf("glass", "glassmorphism", "seekbar", "progress", "slider", "player", "appearance"),
+                category = "Appearance",
+                screen = PlayerControlsPreferencesScreen,
+            ))
+            add(SearchablePreference(
                 titleRes = R.string.pref_player_display_hide_player_control_time,
                 keywords = listOf("time", "hide", "controls", "disappear", "timeout", "ms"),
                 category = "Appearance",
@@ -212,6 +226,12 @@ object SearchablePreferences {
             add(SearchablePreference(
                 titleRes = R.string.pref_player_gestures_pinch_to_zoom,
                 keywords = listOf("zoom", "pinch", "gesture", "scale", "crop", "video"),
+                category = "Player",
+                screen = PlayerPreferencesScreen,
+            ))
+            add(SearchablePreference(
+                titleRes = R.string.pref_player_gestures_pan_and_zoom,
+                keywords = listOf("pan", "zoom", "drag", "scale", "pinch", "gesture", "video"),
                 category = "Player",
                 screen = PlayerPreferencesScreen,
             ))

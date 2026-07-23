@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,7 +29,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.koin.compose.koinInject
 import xyz.mpv.rex.R
+import xyz.mpv.rex.preferences.AppearancePreferences
+import xyz.mpv.rex.preferences.preference.collectAsState
 import xyz.mpv.rex.ui.theme.spacing
 
 @Composable
@@ -36,17 +40,44 @@ fun PlayerUpdate(
   modifier: Modifier = Modifier,
   content: @Composable () -> Unit = {},
 ) {
+  val appearancePreferences = koinInject<AppearancePreferences>()
+  val enableGlass by appearancePreferences.enableGlassPlayerControls.collectAsState()
+
+  val glassModifier = if (enableGlass) {
+    Modifier.glassSurface(
+      shape = RoundedCornerShape(100.dp),
+      backgroundColor = Color.White.copy(alpha = 0.05f),
+      borderColor = Color.White.copy(alpha = 0.15f),
+      borderWidth = 1.dp,
+      outerShadowColor = Color.Black.copy(alpha = 0.00f),
+      outerShadowBlur = 0.dp,
+      outerShadowOffsetX = 0.dp,
+      outerShadowOffsetY = 0.dp,
+      innerHighlightColor = Color.White.copy(alpha = 0.35f),
+      innerHighlightBlur = 5.dp,
+      innerHighlightOffsetX = (-2).dp,
+      innerHighlightOffsetY = (-2).dp,
+      innerShadowColor = Color.Black.copy(alpha = 0.35f),
+      innerShadowBlur = 5.dp,
+      innerShadowOffsetX = 2.dp,
+      innerShadowOffsetY = 2.dp
+    )
+  } else {
+    Modifier
+  }
+
   Surface(
     shape = RoundedCornerShape(100.dp),
-    color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.55f),
+    color = if (enableGlass) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.55f),
     contentColor = MaterialTheme.colorScheme.onSurface,
     tonalElevation = 0.dp,
     shadowElevation = 0.dp,
-    border = BorderStroke(
+    border = if (enableGlass) null else BorderStroke(
       1.dp,
       MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
     ),
     modifier = modifier
+      .then(glassModifier)
       .animateContentSize(),
   ) {
     Box(

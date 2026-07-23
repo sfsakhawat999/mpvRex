@@ -49,6 +49,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.draw.alpha
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -119,7 +120,11 @@ fun MoreSheet(
     }
   }
 
-  val tabs = listOf("Controls", "Settings", "Interaction")
+  val tabs = listOf(
+    stringResource(R.string.player_sheets_tab_controls),
+    stringResource(R.string.player_sheets_tab_settings),
+    stringResource(R.string.player_sheets_tab_interaction),
+  )
 
   PlayerSheet(
     onDismissRequest,
@@ -180,12 +185,13 @@ fun MoreSheet(
             onStartTimer = onStartTimer,
             onEnterFiltersPanel = onEnterFiltersPanel,
             onAnime4KChanged = onAnime4KChanged,
-            onDismissRequest = onDismissRequest
+            onDismissRequest = onDismissRequest,
+            onShowSheet = onShowSheet,
           )
           2 -> InteractionTab()
         }
       }
-      
+
       Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
     }
   }
@@ -199,18 +205,19 @@ fun SettingsTab(
   onEnterFiltersPanel: () -> Unit,
   onAnime4KChanged: () -> Unit,
   onDismissRequest: () -> Unit,
+  onShowSheet: (Sheets) -> Unit,
 ) {
   val advancedPreferences = koinInject<AdvancedPreferences>()
   val decoderPreferences = koinInject<DecoderPreferences>()
   val anime4kManager = koinInject<Anime4KManager>()
   val statisticsPage by advancedPreferences.enabledStatisticsPage.collectAsState()
-  
+
   val enableAnime4K by decoderPreferences.enableAnime4K.collectAsState()
   val anime4kMode by decoderPreferences.anime4kMode.collectAsState()
   val anime4kQuality by decoderPreferences.anime4kQuality.collectAsState()
   val gpuNext by decoderPreferences.gpuNext.collectAsState()
   val useVulkan by decoderPreferences.useVulkan.collectAsState()
-  
+
   val scope = rememberCoroutineScope()
   val activity = LocalContext.current as PlayerActivity
 
@@ -234,8 +241,7 @@ fun SettingsTab(
         Row(
           verticalAlignment = Alignment.CenterVertically,
         ) {
-          var isSleepTimerDialogShown by remember { mutableStateOf(false) }
-          TextButton(onClick = { isSleepTimerDialogShown = true }) {
+          TextButton(onClick = { onShowSheet(Sheets.SleepTimer) }) {
             Row(
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
@@ -252,13 +258,6 @@ fun SettingsTab(
                     )
                   },
               )
-              if (isSleepTimerDialogShown) {
-                TimePickerDialog(
-                  remainingTime = remainingTime,
-                  onDismissRequest = { isSleepTimerDialogShown = false },
-                  onTimeSelect = onStartTimer,
-                )
-              }
             }
           }
           TextButton(onClick = onEnterFiltersPanel) {
@@ -309,7 +308,7 @@ fun SettingsTab(
           )
         }
       }
-      
+
       // Shaders Controls
       if (enableAnime4K && (!gpuNext || useVulkan)) {
         // Auto-detect resolution to disable for 4K+
@@ -323,10 +322,10 @@ fun SettingsTab(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
-        
+
         if (isHighRes) {
             Text(
-                text = "Not available for 4K/8K video",
+                text = stringResource(R.string.anime4k_not_available_high_res),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 4.dp)
@@ -344,7 +343,7 @@ fun SettingsTab(
               leadingIcon = null,
               onClick = {
                 decoderPreferences.anime4kMode.set(mode.name)
-                
+
                 // Apply shaders immediately (runtime change)
                 scope.launch(Dispatchers.IO) {
                   runCatching {
@@ -481,16 +480,16 @@ fun ControlsTab(
   val buttons = remember(moreSheetControlsPref, visibleOnScreen, chapters, hasPlaylistSupport) {
       // Start with buttons the user explicitly wants in the More Sheet (respect order)
       val userOrderedMoreButtons = appearancePreferences.parseButtons(moreSheetControlsPref, mutableSetOf())
-      
+
       // Calculate "Orphaned" buttons: items in ALL buttons that are NOT on screen AND NOT in the More Sheet pref
       val allAvailable = xyz.mpv.rex.preferences.allPlayerButtons
       val orphanedButtons = allAvailable.filter { it !in visibleOnScreen && it !in userOrderedMoreButtons }
-      
+
       // Combine them: User Order first, then the rest
       (userOrderedMoreButtons + orphanedButtons).filter { button ->
           // Don't show if already visible on screen
           if (visibleOnScreen.contains(button)) return@filter false
-          
+
           // Functional filters (don't show buttons that can't work)
           when (button) {
               PlayerButton.SHUFFLE -> hasPlaylistSupport
@@ -509,15 +508,24 @@ fun ControlsTab(
   }
   val currentZoom by viewModel.videoZoom.collectAsState()
   val aspect by viewModel.videoAspect.collectAsState()
-  
+
   val activity = LocalContext.current as PlayerActivity
   val mpvDecoder by MPVLib.propString["hwdec-current"].collectAsState("")
   val decoder by remember { derivedStateOf { xyz.mpv.rex.ui.player.Decoder.getDecoderFromValue(mpvDecoder ?: "auto") } }
 
   val mediaTitle by remember(activity) {
       derivedStateOf {
-          MPVLib.getPropertyString("media-title")?.takeIf { it.isNotBlank() }
-              ?: activity.getTitleForControls()
+          val title = activity.getTitleForControls()
+          if (title.startsWith("http://") || title.startsWith("https://") || title.contains(".m3u8") || title.contains(".m3u")) {
+              val raw = MPVLib.getPropertyString("media-title")
+              if (raw != null && raw.isNotBlank() && !raw.startsWith("http://") && !raw.startsWith("https://") && !raw.contains(".m3u8") && !raw.contains(".m3u")) {
+                  raw
+              } else {
+                  title
+              }
+          } else {
+              title
+          }
       }
   }
 
@@ -528,7 +536,7 @@ fun ControlsTab(
           .verticalScroll(rememberScrollState())
   ) {
       Text(
-          text = "Extended Controls",
+          text = stringResource(R.string.player_sheets_extended_controls_title),
           style = MaterialTheme.typography.titleLarge,
           modifier = Modifier.padding(bottom = MaterialTheme.spacing.medium)
       )
@@ -577,6 +585,8 @@ fun InteractionTab() {
   val playerPreferences = koinInject<PlayerPreferences>()
 
   val hideBackground by appearancePreferences.hidePlayerButtonsBackground.collectAsState()
+  val enableGlass by appearancePreferences.enableGlassPlayerControls.collectAsState()
+  val enableGlassSeekbar by appearancePreferences.enableGlassSeekbarBackground.collectAsState()
   val enableBounceAnimation by appearancePreferences.enableBounceAnimation.collectAsState()
   val preventSeekbarTap by gesturePreferences.preventSeekbarTap.collectAsState()
   val useSingleTapForCenter by gesturePreferences.useSingleTapForCenter.collectAsState()
@@ -614,7 +624,7 @@ fun InteractionTab() {
       checked = showSeekBarWhenSeeking,
       onCheckedChange = { playerPreferences.showSeekBarWhenSeeking.set(it) }
     )
-    
+
     InteractionSwitch(
       label = stringResource(R.string.pref_gesture_use_single_tap_for_center_title),
       description = stringResource(R.string.pref_gesture_use_single_tap_for_center_summary),
@@ -641,6 +651,21 @@ fun InteractionTab() {
       description = stringResource(R.string.pref_appearance_hide_player_buttons_background_summary),
       checked = hideBackground,
       onCheckedChange = { appearancePreferences.hidePlayerButtonsBackground.set(it) }
+    )
+
+    InteractionSwitch(
+      label = stringResource(R.string.pref_appearance_enable_glass_player_controls_title),
+      description = stringResource(R.string.pref_appearance_enable_glass_player_controls_summary),
+      checked = enableGlass,
+      onCheckedChange = { appearancePreferences.enableGlassPlayerControls.set(it) }
+    )
+
+    InteractionSwitch(
+      label = stringResource(R.string.pref_appearance_enable_glass_seekbar_title),
+      description = stringResource(R.string.pref_appearance_enable_glass_seekbar_summary),
+      checked = enableGlassSeekbar,
+      onCheckedChange = { appearancePreferences.enableGlassSeekbarBackground.set(it) },
+      enabled = enableGlass
     )
 
     InteractionSwitch(
@@ -686,15 +711,18 @@ private fun InteractionSwitch(
   description: String,
   checked: Boolean,
   onCheckedChange: (Boolean) -> Unit,
+  enabled: Boolean = true,
 ) {
+  val alpha = if (enabled) 1.0f else 0.5f
   Surface(
     shape = MaterialTheme.shapes.medium,
     color = MaterialTheme.colorScheme.surfaceContainerLow,
-    modifier = Modifier.fillMaxWidth()
+    modifier = Modifier.fillMaxWidth().alpha(alpha)
   ) {
     SwitchPreference(
       value = checked,
       onValueChange = onCheckedChange,
+      enabled = enabled,
       title = { Text(label, style = MaterialTheme.typography.bodyLarge) },
       summary = { 
         Text(
@@ -704,124 +732,5 @@ private fun InteractionSwitch(
         ) 
       }
     )
-  }
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
-@Composable
-fun TimePickerDialog(
-  onDismissRequest: () -> Unit,
-  onTimeSelect: (Int) -> Unit,
-  modifier: Modifier = Modifier,
-  remainingTime: Int = 0,
-) {
-  Dialog(
-    onDismissRequest = onDismissRequest,
-    properties = DialogProperties(usePlatformDefaultWidth = false),
-  ) {
-    Surface(
-      shape = MaterialTheme.shapes.extraLarge,
-      color = MaterialTheme.colorScheme.surfaceContainerHigh,
-      tonalElevation = 6.dp,
-      modifier = modifier
-          .width(360.dp) // Fixed wide width to fit presets
-          .padding(MaterialTheme.spacing.medium),
-    ) {
-      Column(
-        modifier =
-          Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-      ) {
-        // Header
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-              text = stringResource(R.string.timer_title), // "Sleep Timer"
-              style = MaterialTheme.typography.labelMedium,
-              color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-              text = stringResource(R.string.timer_picker_enter_timer),
-              style = MaterialTheme.typography.headlineSmall,
-              color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        val state =
-          rememberTimePickerState(
-            remainingTime / 3600,
-            (remainingTime % 3600) / 60,
-            is24Hour = true,
-          )
-
-        TimeInput(state = state)
-        
-        // Quick Presets
-        Column(
-            horizontalAlignment = Alignment.Start,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                "Quick Presets",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                val presets = listOf(15, 30, 45, 60)
-                presets.forEach { minutes ->
-                    FilterChip(
-                        selected = false,
-                        onClick = { 
-                            onTimeSelect(minutes * 60)
-                            onDismissRequest()
-                        },
-                        label = { Text("${minutes}m") },
-                        leadingIcon = null,
-                    )
-                }
-            }
-        }
-
-        // Actions
-        Row(
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-          modifier = Modifier.fillMaxWidth(),
-        ) {
-          TextButton(onClick = {
-             onTimeSelect(0)
-             onDismissRequest()
-          }) {
-              Text(stringResource(id = R.string.generic_reset))
-          }
-          Spacer(Modifier.weight(1f))
-          Row(
-              horizontalArrangement = Arrangement.spacedBy(8.dp)
-          ) {
-            TextButton(onClick = onDismissRequest) {
-              Text(stringResource(id = R.string.generic_cancel))
-            }
-            Button(
-              onClick = {
-                onTimeSelect(state.hour * 3600 + state.minute * 60)
-                onDismissRequest()
-              },
-            ) {
-              Text(stringResource(id = R.string.generic_ok))
-            }
-          }
-        }
-      }
-    }
   }
 }

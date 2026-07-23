@@ -15,6 +15,7 @@ class PlayerPreferences(
   val holdForMultipleSpeed = preferenceStore.getFloat("hold_for_multiple_speed", 2f)
   val showDynamicSpeedOverlay = preferenceStore.getBoolean("show_dynamic_speed_overlay", true)
   val showDoubleTapOvals = preferenceStore.getBoolean("show_double_tap_ovals", true)
+  val showCircularDoubleTapSeek = preferenceStore.getBoolean("show_circular_double_tap_seek", true)
   val showSeekTimeWhileSeeking = preferenceStore.getBoolean("show_seek_time_while_seeking", true)
   val usePreciseSeeking = preferenceStore.getBoolean("use_precise_seeking", false)
 
@@ -22,7 +23,7 @@ class PlayerPreferences(
   val volumeGesture = preferenceStore.getBoolean("volume_brightness", true)
   val pinchToZoomGesture = preferenceStore.getBoolean("pinch_to_zoom_gesture", true)
   val horizontalSwipeToSeek = preferenceStore.getBoolean("horizontal_swipe_to_seek", true)
-  val swipeToSubtitleSeek = preferenceStore.getBoolean("swipe_to_subtitle_seek", false)
+  val swipeToSubtitleSeek = preferenceStore.getBoolean("swipe_to_subtitle_seek", true)
   val moveSubtitleByDragging = preferenceStore.getBoolean("move_subtitle_by_dragging", true)
   val horizontalSwipeSensitivity = preferenceStore.getFloat("horizontal_swipe_sensitivity", 0.05f)
 
@@ -52,7 +53,13 @@ class PlayerPreferences(
   val playerTimeToDisappear = preferenceStore.getInt("player_time_to_disappear", 4000)
 
   val defaultVideoZoom = preferenceStore.getFloat("default_video_zoom", 0f)
+  val defaultVideoPanX = preferenceStore.getFloat("default_video_pan_x", 0f)
+  val defaultVideoPanY = preferenceStore.getFloat("default_video_pan_y", 0f)
   val panAndZoomEnabled = preferenceStore.getBoolean("pan_and_zoom_enabled", false)
+
+  val advancedZoomEnabled = preferenceStore.getBoolean("advanced_zoom_enabled", false)
+  val defaultVideoScaleX = preferenceStore.getFloat("default_video_scale_x", 1f)
+  val defaultVideoScaleY = preferenceStore.getFloat("default_video_scale_y", 1f)
 
   val includeSubtitlesInSnapshot = preferenceStore.getBoolean("include_subtitles_in_snapshot", false)
 
@@ -61,8 +68,8 @@ class PlayerPreferences(
 
   val useWavySeekbar = preferenceStore.getBoolean("use_wavy_seekbar", true)
   val bottomControlsBelowSeekbar = preferenceStore.getBoolean("bottom_controls_below_seekbar", false)
-  val showSeekBarWhenSeeking = preferenceStore.getBoolean("show_seekbar_when_seeking", true)
-  val hideOsdText = preferenceStore.getBoolean("hide_osd_text", true)
+  val showSeekBarWhenSeeking = preferenceStore.getBoolean("show_seekbar_when_seeking", false)
+  val hideOsdText = preferenceStore.getBoolean("hide_osd_text_v2", false)
 
   val customSkipDuration = preferenceStore.getInt("custom_skip_duration", 90)
 
@@ -71,6 +78,7 @@ class PlayerPreferences(
 
   // New: autoplay next video when current file ends
   val autoplayNextVideo = preferenceStore.getBoolean("autoplay_next_video", true)
+  val showControlsOnPlay = preferenceStore.getBoolean("show_controls_on_play", true)
 
   val autoPiPOnNavigation = preferenceStore.getBoolean("auto_pip_on_navigation", false)
 

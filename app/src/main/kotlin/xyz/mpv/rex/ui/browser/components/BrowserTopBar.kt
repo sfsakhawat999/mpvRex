@@ -227,6 +227,7 @@ private fun NormalTopBar(
               themeTransition?.startTransition(windowOffset)
               // Delay theme change to allow overlay to display first
               coroutineScope.launch {
+                kotlinx.coroutines.delay(50)
                 toggleDarkMode()
               }
             },
@@ -281,7 +282,7 @@ private fun NormalTopBar(
         ) {
           Icon(
             Icons.Filled.Search,
-            contentDescription = "Search",
+            contentDescription = stringResource(R.string.search_empty_title),
             modifier = Modifier.size(24.dp),
             tint = MaterialTheme.colorScheme.secondary,
           )
@@ -320,7 +321,7 @@ private fun NormalTopBar(
         ) {
           Icon(
             imageVector = CommunityIcon,
-            contentDescription = "Community Links",
+            contentDescription = stringResource(R.string.community_links),
             modifier = Modifier.size(24.dp),
             tint = MaterialTheme.colorScheme.secondary,
           )
@@ -346,7 +347,7 @@ private fun NormalTopBar(
         ) {
           Icon(
             Icons.Filled.Settings,
-            contentDescription = "Settings",
+            contentDescription = stringResource(R.string.settings),
             modifier = Modifier.size(24.dp),
             tint = MaterialTheme.colorScheme.secondary,
           )
@@ -361,7 +362,7 @@ private fun NormalTopBar(
           ) {
             Icon(
               Icons.Filled.MoreVert,
-              contentDescription = "More options",
+              contentDescription = stringResource(R.string.more_options),
               modifier = Modifier.size(24.dp),
               tint = MaterialTheme.colorScheme.secondary,
             )
@@ -509,7 +510,7 @@ private fun SelectionTopBar(
         ) {
           Icon(
             Icons.Filled.PlayArrow,
-            contentDescription = "Play",
+            contentDescription = stringResource(R.string.play),
             modifier = Modifier.size(28.dp),
             tint = MaterialTheme.colorScheme.primary,
           )
@@ -591,7 +592,7 @@ private fun SelectionTopBar(
           ) {
             Icon(
               Icons.Filled.MoreVert,
-              contentDescription = "More options",
+              contentDescription = stringResource(R.string.more_options),
               modifier = Modifier.size(24.dp),
               tint = MaterialTheme.colorScheme.secondary,
             )

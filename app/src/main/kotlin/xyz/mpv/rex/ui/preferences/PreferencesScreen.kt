@@ -114,7 +114,7 @@ object PreferencesScreen : Screen {
           
           // UI & Appearance Section
           item {
-            PreferenceSectionHeader(title = "UI & Appearance")
+            PreferenceSectionHeader(title = stringResource(R.string.pref_category_ui_appearance))
           }
           
           item {
@@ -162,7 +162,7 @@ object PreferencesScreen : Screen {
           
           // Playback & Controls Section
           item {
-            PreferenceSectionHeader(title = "Playback & Controls")
+            PreferenceSectionHeader(title = stringResource(R.string.pref_category_playback_controls))
           }
           
           item {
@@ -211,7 +211,7 @@ object PreferencesScreen : Screen {
           
           // File Management Section
           item {
-            PreferenceSectionHeader(title = "File Management")
+            PreferenceSectionHeader(title = stringResource(R.string.pref_category_file_management))
           }
           
           item {
@@ -239,7 +239,7 @@ object PreferencesScreen : Screen {
           
           // Media Settings Section
           item {
-            PreferenceSectionHeader(title = "Media Settings")
+            PreferenceSectionHeader(title = stringResource(R.string.pref_category_media_settings))
           }
           
           item {
@@ -309,16 +309,16 @@ object PreferencesScreen : Screen {
 
           // RexShorts Section
           item {
-            PreferenceSectionHeader(title = "RexShorts")
+            PreferenceSectionHeader(title = stringResource(R.string.pref_category_rexshorts))
           }
 
           item {
             PreferenceCard {
               Preference(
-                title = { Text(text = "RexShorts Settings") },
+                title = { Text(text = stringResource(R.string.pref_category_rexshorts_settings)) },
                 summary = {
                   Text(
-                    text = "Manage enable/disable, shuffle, and blocked content",
+                    text = stringResource(R.string.pref_category_rexshorts_settings_desc),
                     color = MaterialTheme.colorScheme.outline
                   )
                 },
@@ -336,7 +336,7 @@ object PreferencesScreen : Screen {
           
           // Advanced & About Section
           item {
-            PreferenceSectionHeader(title = "Advanced & About")
+            PreferenceSectionHeader(title = stringResource(R.string.pref_category_advanced_about))
           }
           
           item {

@@ -46,6 +46,7 @@ class FileSystemBrowserViewModel(
   private val STORAGE_ROOTS_MARKER = "__STORAGE_ROOTS__"
 
   private var homeDirectory: String? = null
+  private var isRootResolved = false
 
   private val _currentPath = MutableStateFlow(initialPath ?: STORAGE_ROOTS_MARKER)
   val currentPath: StateFlow<String> = _currentPath.asStateFlow()
@@ -108,10 +109,12 @@ class FileSystemBrowserViewModel(
         } else {
           homeDirectory = null
         }
+        isRootResolved = true
         loadData()
       }
     } else {
       homeDirectory = initialPath
+      isRootResolved = true
       loadData()
     }
 
@@ -270,6 +273,7 @@ class FileSystemBrowserViewModel(
   }
 
   private fun loadCurrentDirectory() {
+    if (!isRootResolved) return
     viewModelScope.launch(Dispatchers.IO) {
       _isLoading.value = true
       _error.value = null
@@ -319,18 +323,24 @@ class FileSystemBrowserViewModel(
                     if (state.savedOrientation != null) {
                       updatedVideo = updatedVideo.copy(savedOrientation = state.savedOrientation)
                     }
-                    if (video.duration > 0) {
+                    if (state.hasBeenWatched) {
+                      basicWatchedIds.add(video.id)
+                    }
+                    if (video.duration > 0 && state.timeRemaining != -1) {
                       val durationSeconds = video.duration / 1000
                       val watched = durationSeconds - state.timeRemaining.toLong()
                       val progressValue = (watched.toFloat() / durationSeconds.toFloat()).coerceIn(0f, 1f)
                       
-                      if (state.hasBeenWatched || progressValue >= (basicWatchedThreshold / 100f)) {
+                      if (progressValue >= (basicWatchedThreshold / 100f)) {
                         basicWatchedIds.add(video.id)
                       }
                       
                       if (progressValue in 0.01f..0.99f) {
                         basicPlaybackMap[video.id] = progressValue
                       }
+                    }
+                    if (state.timeRemaining == -1) {
+                      basicNewIds.add(video.id)
                     }
                   } else {
                     val videoAge = basicCurrentTime - (video.dateModified * 1000)
@@ -385,18 +395,24 @@ class FileSystemBrowserViewModel(
                           if (state.savedOrientation != null) {
                             video = video.copy(savedOrientation = state.savedOrientation)
                           }
-                          if (video.duration > 0) {
+                          if (state.hasBeenWatched) {
+                            finalWatchedIds.add(video.id)
+                          }
+                          if (video.duration > 0 && state.timeRemaining != -1) {
                             val durationSeconds = video.duration / 1000
                             val watched = durationSeconds - state.timeRemaining.toLong()
                             val progressValue = (watched.toFloat() / durationSeconds.toFloat()).coerceIn(0f, 1f)
                             
-                            if (state.hasBeenWatched || progressValue >= (finalWatchedThreshold / 100f)) {
+                            if (progressValue >= (finalWatchedThreshold / 100f)) {
                               finalWatchedIds.add(video.id)
                             }
                             
                             if (progressValue in 0.01f..0.99f) {
                               finalPlaybackMap[video.id] = progressValue
                             }
+                          }
+                          if (state.timeRemaining == -1) {
+                            finalNewIds.add(video.id)
                           }
                         } else {
                           val videoAge = finalCurrentTime - (video.dateModified * 1000)

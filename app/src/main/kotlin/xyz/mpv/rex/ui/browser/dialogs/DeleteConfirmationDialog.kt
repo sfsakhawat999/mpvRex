@@ -18,6 +18,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import xyz.mpv.rex.R
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,19 +31,19 @@ fun DeleteConfirmationDialog(
   isOpen: Boolean,
   onDismiss: () -> Unit,
   onConfirm: () -> Unit,
-  itemType: String,
+  @androidx.annotation.PluralsRes itemTypePluralRes: Int,
   itemCount: Int,
   itemNames: List<String> = emptyList(),
 ) {
   if (!isOpen) return
 
-  val itemText = if (itemCount == 1) itemType else "${itemType}s"
+  val itemText = pluralStringResource(itemTypePluralRes, itemCount)
 
   AlertDialog(
     onDismissRequest = onDismiss,
     title = {
       Text(
-        text = "Delete $itemCount $itemText?",
+        text = stringResource(R.string.delete_files_title, itemCount, itemText),
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
       )
@@ -58,7 +61,7 @@ fun DeleteConfirmationDialog(
           modifier = Modifier.fillMaxWidth(),
         ) {
           Text(
-            text = "This action cannot be undone. The selected item${if (itemCount == 1) "" else "s"} will be permanently deleted.",
+            text = pluralStringResource(R.plurals.delete_items_warning, itemCount),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onErrorContainer,
@@ -125,7 +128,7 @@ fun DeleteConfirmationDialog(
         shape = MaterialTheme.shapes.extraLarge,
       ) {
         Text(
-          text = "Delete",
+          text = stringResource(R.string.delete),
           fontWeight = FontWeight.Bold,
         )
       }
@@ -135,7 +138,7 @@ fun DeleteConfirmationDialog(
         onClick = onDismiss,
         shape = MaterialTheme.shapes.extraLarge,
       ) {
-        Text("Cancel", fontWeight = FontWeight.Medium)
+        Text(stringResource(R.string.generic_cancel), fontWeight = FontWeight.Medium)
       }
     },
     containerColor = MaterialTheme.colorScheme.surface,

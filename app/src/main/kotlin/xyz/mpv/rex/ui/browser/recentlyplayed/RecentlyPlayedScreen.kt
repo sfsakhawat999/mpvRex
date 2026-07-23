@@ -28,21 +28,20 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingActionButtonMenu
-import androidx.compose.material3.FloatingActionButtonMenuItem
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.ToggleFloatingActionButton
-import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import xyz.mpv.rex.R
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -78,7 +77,6 @@ import xyz.mpv.rex.ui.browser.components.BrowserTopBar
 import xyz.mpv.rex.ui.browser.components.UnifiedExplorerContent
 import xyz.mpv.rex.ui.browser.playlist.PlaylistDetailScreen
 import xyz.mpv.rex.ui.browser.selection.rememberSelectionManager
-import xyz.mpv.rex.ui.browser.sheets.PlayLinkSheet
 import xyz.mpv.rex.ui.browser.states.EmptyState
 import xyz.mpv.rex.ui.utils.LocalBackStack
 import xyz.mpv.rex.utils.media.MediaUtils
@@ -112,8 +110,6 @@ object RecentlyPlayedScreen : Screen {
     val navigationBarHeight = xyz.mpv.rex.ui.browser.LocalNavigationBarHeight.current
 
     val isFabVisible = remember { mutableStateOf(true) }
-    val isFabExpanded = remember { mutableStateOf(false) }
-    val showLinkDialog = remember { mutableStateOf(false) }
     val isRefreshing = remember { mutableStateOf(false) }
     
     val coroutineScope = rememberCoroutineScope()
@@ -135,26 +131,10 @@ object RecentlyPlayedScreen : Screen {
         onOperationComplete = { },
       )
 
-    // Handle back button during selection mode or FAB menu expanded
-    BackHandler(enabled = selectionManager.isInSelectionMode || isFabExpanded.value) {
-      when {
-        isFabExpanded.value -> isFabExpanded.value = false
-        selectionManager.isInSelectionMode -> selectionManager.clear()
-      }
-    }
-    
-    // File picker for opening external files
-    val filePicker = rememberLauncherForActivityResult(
-      contract = ActivityResultContracts.OpenDocument(),
-    ) { uri ->
-      uri?.let {
-        runCatching {
-          context.contentResolver.takePersistableUriPermission(
-            it,
-            Intent.FLAG_GRANT_READ_URI_PERMISSION,
-          )
-        }
-        MediaUtils.playFile(it.toString(), context, "open_file")
+    // Handle back button during selection mode
+    BackHandler(enabled = selectionManager.isInSelectionMode) {
+      if (selectionManager.isInSelectionMode) {
+        selectionManager.clear()
       }
     }
 
@@ -167,8 +147,8 @@ object RecentlyPlayedScreen : Screen {
       listState = listState,
       gridState = if (mediaLayoutMode == MediaLayoutMode.GRID) gridState else null,
       isFabVisible = isFabVisible,
-      expanded = isFabExpanded.value,
-      onExpandedChange = { isFabExpanded.value = it },
+      expanded = false,
+      onExpandedChange = { },
     )
 
     LaunchedEffect(Unit) {
@@ -188,7 +168,7 @@ object RecentlyPlayedScreen : Screen {
     Scaffold(
         topBar = {
           BrowserTopBar(
-            title = "Recently Played",
+            title = stringResource(R.string.recently_played),
             isInSelectionMode = selectionManager.isInSelectionMode,
             selectedCount = selectionManager.selectedCount,
             totalCount = recentItems.size,
@@ -208,77 +188,34 @@ object RecentlyPlayedScreen : Screen {
           )
         },
       floatingActionButton = {
-        FloatingActionButtonMenu(
-          modifier = Modifier
-            .padding(bottom = navigationBarHeight + 8.dp),
-          expanded = isFabExpanded.value,
-          button = {
-            TooltipBox(
-              positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
-                if (isFabExpanded.value) {
-                  TooltipAnchorPosition.Start
-                } else {
-                  TooltipAnchorPosition.Above
-                }
-              ),
-              tooltip = { PlainTooltip { Text("Toggle menu") } },
-              state = rememberTooltipState(),
-            ) {
-              ToggleFloatingActionButton(
-                modifier = Modifier
-                  .animateFloatingActionButton(
-                    visible = !selectionManager.isInSelectionMode && isFabVisible.value,
-                    alignment = Alignment.BottomEnd,
-                  ),
-                checked = isFabExpanded.value,
-                onCheckedChange = { isFabExpanded.value = !isFabExpanded.value },
-              ) {
-                val imageVector by remember {
-                  derivedStateOf {
-                    if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.PlayArrow
+        if (!selectionManager.isInSelectionMode && isFabVisible.value && recentItems.isNotEmpty()) {
+          TooltipBox(
+            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+            tooltip = { PlainTooltip { Text(stringResource(R.string.play_recently_played_or_first)) } },
+            state = rememberTooltipState(),
+          ) {
+            FloatingActionButton(
+              modifier = Modifier
+                .padding(bottom = navigationBarHeight + 8.dp)
+                .animateFloatingActionButton(
+                  visible = true,
+                  alignment = Alignment.BottomEnd,
+                ),
+              onClick = {
+                coroutineScope.launch {
+                  val recentlyPlayedVideos = xyz.mpv.rex.utils.history.RecentlyPlayedOps.getRecentlyPlayed(limit = 1)
+                  val lastPlayed = recentlyPlayedVideos.firstOrNull()
+                  if (lastPlayed != null) {
+                    MediaUtils.playFile(lastPlayed.filePath, context, "recently_played_button")
+                  } else {
+                    android.widget.Toast.makeText(context, context.getString(R.string.no_recently_played_videos), android.widget.Toast.LENGTH_SHORT).show()
                   }
                 }
-                Icon(
-                  painter = rememberVectorPainter(imageVector),
-                  contentDescription = null,
-                  modifier = Modifier.animateIcon({ checkedProgress }),
-                )
-              }
+              },
+            ) {
+              Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.play_recently_played_or_first))
             }
-          },
-        ) {
-          FloatingActionButtonMenuItem(
-            onClick = {
-              isFabExpanded.value = false
-              filePicker.launch(arrayOf("video/*"))
-            },
-            icon = { Icon(Icons.Filled.FileOpen, contentDescription = null) },
-            text = { Text(text = "Open File") },
-          )
-
-          FloatingActionButtonMenuItem(
-            onClick = {
-              isFabExpanded.value = false
-              coroutineScope.launch {
-                val recentlyPlayedVideos = xyz.mpv.rex.utils.history.RecentlyPlayedOps.getRecentlyPlayed(limit = 1)
-                val lastPlayed = recentlyPlayedVideos.firstOrNull()
-                if (lastPlayed != null) {
-                  MediaUtils.playFile(lastPlayed.filePath, context, "recently_played_button")
-                }
-              }
-            },
-            icon = { Icon(Icons.Filled.History, contentDescription = null) },
-            text = { Text(text = "Recently Played") },
-          )
-
-          FloatingActionButtonMenuItem(
-            onClick = {
-              isFabExpanded.value = false
-              showLinkDialog.value = true
-            },
-            icon = { Icon(Icons.Filled.Link, contentDescription = null) },
-            text = { Text(text = "Open Link") },
-          )
+          }
         }
       },
     ) { padding ->
@@ -292,8 +229,8 @@ object RecentlyPlayedScreen : Screen {
           ) {
             EmptyState(
               icon = Icons.Filled.History,
-              title = "Recently Played is disabled",
-              message = "Enable it in Advanced Settings to track your playback history",
+              title = stringResource(R.string.recently_played_disabled_title),
+              message = stringResource(R.string.recently_played_disabled_message),
             )
           }
         }
@@ -321,8 +258,8 @@ object RecentlyPlayedScreen : Screen {
           ) {
             EmptyState(
               icon = Icons.Filled.History,
-              title = "No recently played videos",
-              message = "Videos you play will appear here",
+              title = stringResource(R.string.no_recently_played_videos),
+              message = stringResource(R.string.no_recently_played_videos_message),
             )
           }
         }
@@ -361,19 +298,15 @@ object RecentlyPlayedScreen : Screen {
         val deleteFiles = deleteFilesCheckbox.value
 
         val title = if (deleteFiles) {
-          "Delete $itemCount $itemText?"
+          stringResource(R.string.delete_files_title, itemCount, itemText)
         } else {
-          "Remove $itemCount $itemText from history?"
+          stringResource(R.string.remove_from_history_title, itemCount, itemText)
         }
 
-        val subtitle = buildString {
-          if (deleteFiles) {
-            append("This will permanently delete the original video file(s) from your device storage.\n\n")
-            append("This action cannot be undone.")
-          } else {
-            append("This will remove the selected $itemText from your recently played list. ")
-            append("The original video files will not be deleted.")
-          }
+        val subtitle = if (deleteFiles) {
+          stringResource(R.string.delete_files_msg)
+        } else {
+          stringResource(R.string.remove_from_history_msg, itemText)
         }
 
         ConfirmDialog(
@@ -391,7 +324,7 @@ object RecentlyPlayedScreen : Screen {
                 },
               )
               Text(
-                text = "Also delete original file(s)",
+                text = stringResource(R.string.also_delete_files),
                 modifier = Modifier.padding(start = 8.dp),
                 style = MaterialTheme.typography.bodyMedium,
               )
@@ -409,12 +342,6 @@ object RecentlyPlayedScreen : Screen {
         )
       }
       
-      // Link dialog
-      PlayLinkSheet(
-        isOpen = showLinkDialog.value,
-        onDismiss = { showLinkDialog.value = false },
-        onPlayLink = { url -> MediaUtils.playFile(url, context, "play_link") },
-      )
     }
   }
 }
@@ -454,8 +381,8 @@ private fun RecentItemsContent(
     },
     onLongClick = { item -> selectionManager.handleLongClick(item) },
     onToggleSelection = { selectionManager.toggle(it) },
-    emptyTitle = "No recently played items",
-    emptyMessage = "Your recently played videos and playlists will appear here",
+    emptyTitle = stringResource(R.string.no_recently_played_items),
+    emptyMessage = stringResource(R.string.no_recently_played_items_message),
     isRefreshing = isRefreshing,
     onRefresh = onRefresh,
     modifier = modifier,

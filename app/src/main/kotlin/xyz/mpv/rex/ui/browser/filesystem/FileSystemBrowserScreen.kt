@@ -6,6 +6,8 @@ import android.net.Uri
 import android.util.Log
 import java.io.File
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -206,15 +208,18 @@ fun FileSystemBrowserScreen(path: String? = null) {
   val itemsWereDeletedOrMoved by viewModel.itemsWereDeletedOrMoved.collectAsState()
   val showSubtitleIndicator by browserPreferences.showSubtitleIndicator.collectAsState()
   val recentlyPlayedFilePath by viewModel.recentlyPlayedFilePath.collectAsState()
+  val recentlyPlayedPaths by viewModel.recentlyPlayedPaths.collectAsState()
+  val recentlyPlayedFilePaths by viewModel.recentlyPlayedFilePaths.collectAsState()
   val autoScrollToLastPlayed by browserPreferences.autoScrollToLastPlayed.collectAsState()
 
   // Use standalone local states instead of CompositionLocal to avoid scroll issues with predictive back gesture
   val rememberedIndex = rememberSaveable { mutableIntStateOf(0) }
   val rememberedOffset = rememberSaveable { mutableIntStateOf(0) }
+  val hasAutoScrolled = rememberSaveable(inputs = arrayOf(recentlyPlayedFilePath ?: "")) { mutableStateOf(false) }
 
   val initialIndex = if (rememberedIndex.intValue > 0) {
     rememberedIndex.intValue
-  } else if (autoScrollToLastPlayed && recentlyPlayedFilePath != null && items.isNotEmpty()) {
+  } else if (autoScrollToLastPlayed && !hasAutoScrolled.value && recentlyPlayedFilePath != null && items.isNotEmpty()) {
     var foundIndex = 0
     for (i in items.indices) {
       val item = items[i]
@@ -228,7 +233,9 @@ fun FileSystemBrowserScreen(path: String? = null) {
       }
     }
     foundIndex
-  } else 0
+  } else {
+    rememberedIndex.intValue
+  }
 
   val listState = rememberLazyListState(
     initialFirstVisibleItemIndex = initialIndex,
@@ -251,6 +258,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
   LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
     rememberedIndex.intValue = listState.firstVisibleItemIndex
     rememberedOffset.intValue = listState.firstVisibleItemScrollOffset
+    hasAutoScrolled.value = true
   }
   
   // UI state
@@ -546,12 +554,16 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 expanded = false,
                 onExpandedChange = { },
                 placeholder = {
+                  val placeholderText = if (isAtRoot) {
+                    stringResource(R.string.search_in_all_storage_volumes)
+                  } else {
+                    stringResource(
+                      R.string.search_in_folder_placeholder,
+                      breadcrumbs.lastOrNull()?.name ?: stringResource(R.string.search_default_folder_name)
+                    )
+                  }
                   Text(
-                    text = if (isAtRoot) {
-                      "Search in all storage volumes..."
-                    } else {
-                      "Search in ${breadcrumbs.lastOrNull()?.name ?: "folder"}..."
-                    },
+                    text = placeholderText,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                   )
@@ -559,7 +571,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 leadingIcon = {
                   Icon(
                     imageVector = Icons.Filled.Search,
-                    contentDescription = "Search",
+                    contentDescription = stringResource(R.string.search_empty_title),
                   )
                 },
                 trailingIcon = {
@@ -571,7 +583,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                   ) {
                     Icon(
                       imageVector = Icons.Filled.Close,
-                      contentDescription = "Cancel",
+                      contentDescription = stringResource(R.string.generic_cancel),
                     )
                   }
                 },
@@ -593,7 +605,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
             title = if (isAtRoot) {
               stringResource(xyz.mpv.rex.R.string.app_name)
             } else {
-              breadcrumbs.lastOrNull()?.name ?: "Tree View"
+              breadcrumbs.lastOrNull()?.name ?: stringResource(xyz.mpv.rex.R.string.tree_view)
             },
             isInSelectionMode = isInSelectionMode,
             selectedCount = selectedCount,
@@ -722,7 +734,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
             selectionOverflowActions = buildList {
               add(SelectionOverflowAction(
                 icon = Icons.Filled.Share,
-                label = "Share",
+                label = stringResource(R.string.generic_share),
                 onClick = {
                   when {
                     isMixedSelection -> {
@@ -754,7 +766,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
               if (folderSelectionManager.isInSelectionMode && !videoSelectionManager.isInSelectionMode) {
                 add(SelectionOverflowAction(
                   icon = Icons.Filled.Block,
-                  label = "Blacklist",
+                  label = stringResource(R.string.pref_folders_blacklist),
                   onClick = {
                     viewModel.blacklistFolders(folderSelectionManager.getSelectedItems())
                     folderSelectionManager.clear()
@@ -806,29 +818,61 @@ fun FileSystemBrowserScreen(path: String? = null) {
                     TooltipAnchorPosition.Above
                   }
                 ),
-                tooltip = { PlainTooltip { Text("Toggle menu") } },
+                tooltip = { PlainTooltip { Text(stringResource(R.string.toggle_menu)) } },
                 state = rememberTooltipState(),
               ) {
-                ToggleFloatingActionButton(
-                  modifier = Modifier
-                    .animateFloatingActionButton(
-                      visible = !isInSelectionMode && isFabVisible.value && !xyz.mpv.rex.ui.browser.MainScreen.getPermissionDeniedState(),
-                      alignment = Alignment.BottomEnd,
-                    ),
-                  checked = isFabExpanded.value,
-                  onCheckedChange = { isFabExpanded.value = !isFabExpanded.value },
-                ) {
-                  val imageVector by remember {
-                    derivedStateOf {
-                      if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.PlayArrow
-                    }
+            Box(
+              modifier = Modifier.animateFloatingActionButton(
+                visible = !isInSelectionMode && isFabVisible.value && !xyz.mpv.rex.ui.browser.MainScreen.getPermissionDeniedState(),
+                alignment = Alignment.BottomEnd,
+              )
+            ) {
+              ToggleFloatingActionButton(
+                checked = isFabExpanded.value,
+                onCheckedChange = { /* handled by overlay */ },
+              ) {
+                val imageVector by remember {
+                  derivedStateOf {
+                    if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.PlayArrow
                   }
-                  Icon(
-                    painter = rememberVectorPainter(imageVector),
-                    contentDescription = null,
-                    modifier = Modifier.animateIcon({ checkedProgress }),
-                  )
                 }
+                Icon(
+                  painter = rememberVectorPainter(imageVector),
+                  contentDescription = null,
+                  modifier = Modifier.animateIcon({ checkedProgress }),
+                )
+              }
+
+              // Overlay to capture clicks and long-presses without internal interference
+              Box(
+                modifier = Modifier
+                  .matchParentSize()
+                  .pointerInput(Unit) {
+                    detectTapGestures(
+                      onTap = {
+                        if (isFabExpanded.value) {
+                          isFabExpanded.value = false
+                        } else {
+                          coroutineScope.launch {
+                            val recentlyPlayedVideos = xyz.mpv.rex.utils.history.RecentlyPlayedOps.getRecentlyPlayed(limit = 1)
+                            val lastPlayed = recentlyPlayedVideos.firstOrNull()
+                            if (lastPlayed != null) {
+                              MediaUtils.playFile(lastPlayed.filePath, context, "recently_played_button")
+                            } else {
+                              Toast.makeText(context, context.getString(R.string.no_recently_played_videos), Toast.LENGTH_SHORT).show()
+                            }
+                          }
+                        }
+                      },
+                      onLongPress = {
+                        if (!isFabExpanded.value) {
+                          isFabExpanded.value = true
+                        }
+                      }
+                    )
+                  }
+              )
+            }
               }
             },
           ) {
@@ -838,7 +882,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 filePicker.launch(arrayOf("video/*"))
               },
               icon = { Icon(Icons.Filled.FileOpen, contentDescription = null) },
-              text = { Text(text = "Open File") },
+              text = { Text(text = stringResource(R.string.open_file)) },
             )
 
             FloatingActionButtonMenuItem(
@@ -853,7 +897,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 }
               },
               icon = { Icon(Icons.Filled.History, contentDescription = null) },
-              text = { Text(text = "Recently Played") },
+              text = { Text(text = stringResource(R.string.recently_played)) },
             )
 
             FloatingActionButtonMenuItem(
@@ -862,7 +906,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 showLinkDialog.value = true
               },
               icon = { Icon(Icons.Filled.Link, contentDescription = null) },
-              text = { Text(text = "Open Link") },
+              text = { Text(text = stringResource(R.string.open_link)) },
             )
           }
         }
@@ -887,6 +931,8 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 navigationBarHeight = navigationBarHeight,
                 isFabVisible = isFabVisible, // Pass FAB visibility state
                 recentlyPlayedFilePath = recentlyPlayedFilePath,
+                recentlyPlayedPaths = recentlyPlayedPaths,
+                recentlyPlayedFilePaths = recentlyPlayedFilePaths,
                 onVideoClick = { video ->
                   MediaUtils.playFile(video, context, "search")
                 },
@@ -914,6 +960,8 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 itemsWereDeletedOrMoved = itemsWereDeletedOrMoved,
                 showSubtitleIndicator = showSubtitleIndicator,
                 recentlyPlayedFilePath = recentlyPlayedFilePath,
+                recentlyPlayedFilePaths = recentlyPlayedFilePaths,
+                recentlyPlayedPaths = recentlyPlayedPaths,
                 autoScrollToLastPlayed = autoScrollToLastPlayed,
                 navigationBarHeight = navigationBarHeight,
                 onRefresh = { viewModel.refresh() },
@@ -1061,10 +1109,10 @@ fun FileSystemBrowserScreen(path: String? = null) {
           videoSelectionManager.deleteSelected()
         }
       },
-      itemType = when {
-        folderSelectionManager.isInSelectionMode && videoSelectionManager.isInSelectionMode -> "item"
-        folderSelectionManager.isInSelectionMode -> "folder"
-        else -> "video"
+      itemTypePluralRes = when {
+        folderSelectionManager.isInSelectionMode && videoSelectionManager.isInSelectionMode -> R.plurals.item_type_item_plural
+        folderSelectionManager.isInSelectionMode -> R.plurals.item_type_folder_plural
+        else -> R.plurals.item_type_video_plural
       },
       itemCount = selectedCount,
       itemNames = (folderSelectionManager.getSelectedItems().map { it.name } +
@@ -1084,14 +1132,14 @@ fun FileSystemBrowserScreen(path: String? = null) {
               coroutineScope.launch {
                 val ok = viewModel.renameFolder(folder, newName)
                 if (!ok) {
-                  android.widget.Toast.makeText(context, "Rename failed", android.widget.Toast.LENGTH_SHORT).show()
+                  android.widget.Toast.makeText(context, context.getString(R.string.rename_failed), android.widget.Toast.LENGTH_SHORT).show()
                 }
                 folderSelectionManager.clear()
                 viewModel.refresh()
               }
             },
             currentName = folder.name,
-            itemType = "folder",
+            itemTypeRes = R.string.item_type_folder,
           )
         }
       } else if (videoSelectionManager.isSingleSelection) {
@@ -1104,7 +1152,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
             onDismiss = { renameDialogOpen.value = false },
             onConfirm = { newName -> videoSelectionManager.renameSelected(newName) },
             currentName = baseName,
-            itemType = "file",
+            itemTypeRes = R.string.item_type_file,
             extension = if (extension != ".") extension else null,
           )
         }
@@ -1347,6 +1395,8 @@ private fun FileSystemBrowserContent(
   itemsWereDeletedOrMoved: Boolean,
   showSubtitleIndicator: Boolean,
   recentlyPlayedFilePath: String?,
+  recentlyPlayedPaths: Set<String> = emptySet(),
+  recentlyPlayedFilePaths: Set<String> = emptySet(),
   autoScrollToLastPlayed: Boolean,
   navigationBarHeight: Dp,
   onRefresh: suspend () -> Unit,
@@ -1434,16 +1484,19 @@ private fun FileSystemBrowserContent(
         }
       },
       modifier = Modifier.weight(1f),
-      emptyTitle = "Empty folder",
-      emptyMessage = "This folder contains no videos or subfolders",
+      emptyTitle = stringResource(R.string.empty_folder_title),
+      emptyMessage = stringResource(R.string.empty_folder_message),
       isRefreshing = isRefreshing,
       onRefresh = onRefresh,
       isInSelectionMode = isInSelectionMode,
       recentlyPlayedFilePath = recentlyPlayedFilePath,
+      recentlyPlayedFilePaths = recentlyPlayedFilePaths,
+      recentlyPlayedPaths = recentlyPlayedPaths,
       autoScrollToLastPlayed = autoScrollToLastPlayed,
       listState = listState,
       newVideoIds = newVideoIds,
       watchedVideoIds = watchedVideoIds,
+      videoPlaybackProgress = videoFilesWithPlayback,
       scrollTriggerKey = scrollTriggerKey,
       showSections = true,
     )
@@ -1465,6 +1518,8 @@ private fun FileSystemSearchContent(
   navigationBarHeight: Dp,
   isFabVisible: androidx.compose.runtime.MutableState<Boolean>, // Add FAB visibility state
   recentlyPlayedFilePath: String?,
+  recentlyPlayedPaths: Set<String> = emptySet(),
+  recentlyPlayedFilePaths: Set<String> = emptySet(),
   onVideoClick: (xyz.mpv.rex.domain.media.model.Video) -> Unit,
   onFolderClick: (FileSystemItem.Folder) -> Unit,
   modifier: Modifier = Modifier,
@@ -1540,6 +1595,17 @@ private fun FileSystemSearchContent(
       }
 
       else -> {
+        val lastPlayedVideoPathsInFolder = remember(searchResults, recentlyPlayedPaths, recentlyPlayedFilePaths) {
+          val pathsInSearch = searchResults.filterIsInstance<FileSystemItem.VideoFile>().map { it.video.path }.toSet()
+          val overallLastPlayed = pathsInSearch.filter { it in recentlyPlayedFilePaths }.toSet()
+          if (overallLastPlayed.isNotEmpty()) {
+            overallLastPlayed
+          } else {
+            val fallbackPath = recentlyPlayedPaths.firstOrNull { it in pathsInSearch }
+            if (fallbackPath != null) setOf(fallbackPath) else emptySet()
+          }
+        }
+
         Box(
           modifier = Modifier.fillMaxSize()
         ) {
@@ -1580,9 +1646,13 @@ private fun FileSystemSearchContent(
                 folder = folderModel,
                 uiSettings = uiSettings,
                 isSelected = false,
-                isRecentlyPlayed = recentlyPlayedFilePath?.let {
-                  java.io.File(it).parent == folder.path
-                } ?: false,
+                isRecentlyPlayed = recentlyPlayedFilePaths.any { path ->
+                  try {
+                    java.io.File(path).parent == folder.path
+                  } catch (_: Exception) {
+                    false
+                  }
+                },
                 isWatched = (folder.videoCount > 0 || folder.audioCount > 0) && folder.unwatchedVideoCount == 0,
                 newVideoCount = folder.newCount,
                 onClick = { onFolderClick(folder) },
@@ -1603,7 +1673,7 @@ private fun FileSystemSearchContent(
                 progressPercentage = videoFilesWithPlayback[videoFile.video.id],
                 isOldAndUnplayed = newVideoIds.contains(videoFile.video.id),
                 isWatched = watchedVideoIds.contains(videoFile.video.id),
-                isRecentlyPlayed = recentlyPlayedFilePath == videoFile.video.path,
+                isRecentlyPlayed = videoFile.video.path in lastPlayedVideoPathsInFolder,
                 isSelected = false,
                 isNeverPlayed = videoFilesWithPlayback[videoFile.video.id] == null,
                 onClick = { onVideoClick(videoFile.video) },

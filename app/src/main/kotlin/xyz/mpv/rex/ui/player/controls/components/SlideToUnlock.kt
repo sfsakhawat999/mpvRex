@@ -23,10 +23,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import org.koin.compose.koinInject
+import xyz.mpv.rex.preferences.AppearancePreferences
+import xyz.mpv.rex.preferences.preference.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -40,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import xyz.mpv.rex.R
 
 @Composable
 fun SlideToUnlock(
@@ -49,18 +54,67 @@ fun SlideToUnlock(
 ) {
   val coroutineScope = rememberCoroutineScope()
   
+  val appearancePrefs = koinInject<AppearancePreferences>()
+  val enableGlass by appearancePrefs.enableGlassPlayerControls.collectAsState()
+
   var containerWidthPx by remember { mutableFloatStateOf(0f) }
   val sliderSize = 56.dp
-  
+
   val offsetX = remember { Animatable(0f) }
   var isDragging by remember { mutableStateOf(false) }
   
+  val containerModifier = if (enableGlass) {
+    Modifier.glassSurface(
+      shape = RoundedCornerShape(32.dp),
+      backgroundColor = Color.White.copy(alpha = 0.05f),
+      borderColor = Color.White.copy(alpha = 0.15f),
+      borderWidth = 1.dp,
+      outerShadowColor = Color.Black.copy(alpha = 0.00f),
+      outerShadowBlur = 0.dp,
+      outerShadowOffsetX = 0.dp,
+      outerShadowOffsetY = 0.dp,
+      innerHighlightColor = Color.White.copy(alpha = 0.35f),
+      innerHighlightBlur = 5.dp,
+      innerHighlightOffsetX = (-2).dp,
+      innerHighlightOffsetY = (-2).dp,
+      innerShadowColor = Color.Black.copy(alpha = 0.35f),
+      innerShadowBlur = 5.dp,
+      innerShadowOffsetX = 2.dp,
+      innerShadowOffsetY = 2.dp
+    )
+  } else {
+    Modifier.background(Color.Black.copy(alpha = 0.6f))
+  }
+
+  val sliderModifier = if (enableGlass) {
+    Modifier.glassSurface(
+      shape = CircleShape,
+      backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+      borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+      borderWidth = 1.dp,
+      outerShadowColor = Color.Black.copy(alpha = 0.00f),
+      outerShadowBlur = 0.dp,
+      outerShadowOffsetX = 0.dp,
+      outerShadowOffsetY = 0.dp,
+      innerHighlightColor = Color.White.copy(alpha = 0.35f),
+      innerHighlightBlur = 5.dp,
+      innerHighlightOffsetX = (-2).dp,
+      innerHighlightOffsetY = (-2).dp,
+      innerShadowColor = Color.Black.copy(alpha = 0.35f),
+      innerShadowBlur = 5.dp,
+      innerShadowOffsetX = 2.dp,
+      innerShadowOffsetY = 2.dp
+    )
+  } else {
+    Modifier.background(MaterialTheme.colorScheme.primary)
+  }
+
   Box(
     modifier = modifier
       .width(200.dp)
       .height(64.dp)
       .clip(RoundedCornerShape(32.dp))
-      .background(Color.Black.copy(alpha = 0.6f))
+      .then(containerModifier)
       .padding(4.dp)
       .onSizeChanged { size ->
         containerWidthPx = size.width.toFloat()
@@ -69,7 +123,7 @@ fun SlideToUnlock(
     val sliderSizePx = containerWidthPx * (56f / 192f) // Accounting for padding (200 - 8)
     val maxOffset = if (containerWidthPx > 0f) containerWidthPx - sliderSizePx else 0f
     val unlockThreshold = if (maxOffset > 0f) maxOffset * 0.85f else Float.MAX_VALUE
-    
+
     // Background text - slightly to the right
     Box(
       modifier = Modifier
@@ -79,26 +133,26 @@ fun SlideToUnlock(
       contentAlignment = Alignment.Center,
     ) {
       Text(
-        text = "Slide to Unlock",
+        text = stringResource(R.string.slide_to_unlock),
         color = Color.White.copy(alpha = 0.7f),
         fontSize = 16.sp,
         fontWeight = FontWeight.Medium,
       )
     }
-    
+
     // Slider button
     val progress = if (maxOffset > 0f) (offsetX.value / maxOffset).coerceIn(0f, 1f) else 0f
     val showUnlockIcon = progress > 0.5f
-    
+
     Box(
       modifier = Modifier
         .offset { IntOffset(offsetX.value.roundToInt(), 0) }
         .size(sliderSize)
         .clip(CircleShape)
-        .background(MaterialTheme.colorScheme.primary)
+        .then(sliderModifier)
         .pointerInput(containerWidthPx) {
           if (containerWidthPx <= 0f) return@pointerInput
-          
+
           detectHorizontalDragGestures(
             onDragStart = {
               isDragging = true
@@ -147,7 +201,7 @@ fun SlideToUnlock(
       ) { showUnlock ->
         Icon(
           imageVector = if (showUnlock) Icons.Filled.LockOpen else Icons.Filled.Lock,
-          contentDescription = "Slide to unlock",
+          contentDescription = stringResource(R.string.slide_to_unlock),
           tint = Color.White,
           modifier = Modifier.size(28.dp),
         )

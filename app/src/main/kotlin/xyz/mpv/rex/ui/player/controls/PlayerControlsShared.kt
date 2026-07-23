@@ -3,6 +3,7 @@ package xyz.mpv.rex.ui.player.controls
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -53,12 +54,16 @@ import androidx.compose.material.icons.filled.Headset
 import androidx.compose.material.icons.filled.HeadsetOff
 import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.outlined.BlurOn
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.ui.draw.rotate
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Surface as M3Surface
+import xyz.mpv.rex.ui.player.controls.components.glassSurface
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -70,9 +75,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import xyz.mpv.rex.R
 import xyz.mpv.rex.preferences.PlayerButton
 import xyz.mpv.rex.preferences.preference.collectAsState
 import xyz.mpv.rex.ui.player.Panels
@@ -205,7 +212,7 @@ fun RenderPlayerButton(
           )
           viewModel.getPlaylistInfo()?.let { playlistInfo ->
             Text(
-              " • $playlistInfo",
+              stringResource(R.string.playlist_separator, playlistInfo),
               maxLines = 1,
               overflow = TextOverflow.Visible,
               style = MaterialTheme.typography.bodySmall,
@@ -240,7 +247,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = chapter?.name ?: "Chapters",
+                text = chapter?.name ?: stringResource(R.string.chapters),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -264,59 +271,60 @@ fun RenderPlayerButton(
         `is`.xyz.mpv.MPVLib.setPropertyFloat("speed", newSpeed)
       }
 
-      if (isSpeedNonOne || isMoreSheet) {
-        @OptIn(ExperimentalFoundationApi::class)
-        Surface(
-          shape = CircleShape,
-          color = if (isSpeedNonOne) activeSurfaceColor else surfaceColor,
-          contentColor = if (isSpeedNonOne) activeContentColor else contentColor,
-          tonalElevation = 0.dp,
-          shadowElevation = 0.dp,
-          border = if (isSpeedNonOne) activeBorderColor else borderColor,
-          modifier = Modifier
-            .height(buttonSize)
-            .clip(CircleShape)
-            .combinedClickable(
-              interactionSource = remember { MutableInteractionSource() },
-              indication = ripple(bounded = true),
-              onClick = {
-                clickEvent()
-                cycleSpeed()
-              },
-              onLongClick = {
-                clickEvent()
-                onOpenSheet(Sheets.PlaybackSpeed)
-              },
-            ),
+      val showText = isSpeedNonOne || isMoreSheet
+
+      @OptIn(ExperimentalFoundationApi::class)
+      Surface(
+        shape = CircleShape,
+        color = if (isSpeedNonOne) activeSurfaceColor else surfaceColor,
+        contentColor = if (isSpeedNonOne) activeContentColor else contentColor,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        border = if (isSpeedNonOne) activeBorderColor else borderColor,
+        modifier = Modifier
+          .height(buttonSize)
+          .animateContentSize()
+          .clip(CircleShape)
+          .combinedClickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = ripple(bounded = true),
+            onClick = {
+              clickEvent()
+              cycleSpeed()
+            },
+            onLongClick = {
+              clickEvent()
+              onOpenSheet(Sheets.PlaybackSpeed)
+            },
+          ),
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.Center,
+          modifier = Modifier.padding(
+            horizontal = MaterialTheme.spacing.smaller,
+            vertical = MaterialTheme.spacing.smaller,
+          ),
         ) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
-            modifier = Modifier.padding(
-              horizontal = MaterialTheme.spacing.smaller,
-              vertical = MaterialTheme.spacing.smaller,
-            ),
+          Icon(
+            imageVector = Icons.Default.Speed,
+            contentDescription = stringResource(R.string.playback_speed),
+            tint = if (isSpeedNonOne) activeContentColor else contentColor,
+            modifier = Modifier.size(24.dp),
+          )
+          AnimatedVisibility(
+            visible = showText,
+            enter = fadeIn() + expandHorizontally(),
+            exit = fadeOut() + shrinkHorizontally()
           ) {
-            Icon(
-              imageVector = Icons.Default.Speed,
-              contentDescription = "Playback Speed",
-              tint = if (isSpeedNonOne) activeContentColor else contentColor,
-              modifier = Modifier.size(24.dp),
-            )
             Text(
               text = String.format("%.2fx", playbackSpeed),
               maxLines = 1,
               style = MaterialTheme.typography.bodyMedium,
+              modifier = Modifier.padding(start = 4.dp),
             )
           }
         }
-      } else {
-        ControlsButton(
-          icon = Icons.Default.Speed,
-          onClick = { cycleSpeed() },
-          onLongClick = { onOpenSheet(Sheets.PlaybackSpeed) },
-          modifier = Modifier.size(buttonSize),
-        )
       }
     }
 
@@ -389,7 +397,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Rotation",
+                text = stringResource(R.string.screen_rotation),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -406,19 +414,21 @@ fun RenderPlayerButton(
 
     PlayerButton.FRAME_NAVIGATION -> {
       val isExpanded by viewModel.isFrameNavigationExpanded.collectAsState()
-      val isSnapshotLoading by viewModel.isSnapshotLoading.collectAsState()
-      val context = LocalContext.current
+      val isActive = isExpanded
 
       if (isMoreSheet) {
           Surface(
             shape = CircleShape,
-            color = surfaceColor,
-            contentColor = contentColor,
-            border = borderColor,
+            color = if (isActive) activeSurfaceColor else surfaceColor,
+            contentColor = if (isActive) activeContentColor else contentColor,
+            border = if (isActive) activeBorderColor else borderColor,
             modifier = Modifier
               .height(buttonSize)
               .clip(CircleShape)
-              .clickable { onOpenSheet(Sheets.FrameNavigation) }
+              .clickable {
+                viewModel.toggleFrameNavigationExpanded()
+                onOpenSheet(Sheets.None)
+              }
           ) {
             Row(
               verticalAlignment = Alignment.CenterVertically,
@@ -431,194 +441,31 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Frame Nav",
+                text = stringResource(R.string.frame_nav),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
             }
           }
       } else {
-          AnimatedContent(
-            targetState = isExpanded,
-            transitionSpec = {
-              (fadeIn(animationSpec = tween(200)) + expandHorizontally(animationSpec = tween(250)))
-                .togetherWith(fadeOut(animationSpec = tween(200)) + shrinkHorizontally(animationSpec = tween(250)))
-                .using(SizeTransform(clip = false))
-            },
-            label = "FrameNavExpandCollapse",
-          ) { expanded ->
-            if (expanded) {
-              Surface(
-                shape = MaterialTheme.shapes.extraLarge,
-                color = surfaceColor,
-                border = borderColor,
-                modifier = Modifier.height(buttonSize),
-              ) {
-                Row(
-                  horizontalArrangement = Arrangement.spacedBy(2.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                  modifier = Modifier.padding(horizontal = 4.dp),
-                ) {
-                  // Previous frame button
-                  Surface(
-                    shape = CircleShape,
-                    color = Color.Transparent,
-                    modifier = Modifier
-                      .size(buttonSize - 4.dp)
-                      .clip(CircleShape)
-                      .clickable(onClick = {
-                        viewModel.frameStepBackward()
-                        viewModel.resetFrameNavigationTimer()
-                      }),
-                  ) {
-                    Box(contentAlignment = Alignment.Center) {
-                      Icon(
-                        imageVector = Icons.Default.FastRewind,
-                        contentDescription = "Previous Frame",
-                        tint = contentColor,
-                        modifier = Modifier.size(24.dp),
-                      )
-                    }
-                  }
-
-                  // Camera / Loading button
-                  if (isSnapshotLoading) {
-                    Surface(
-                      shape = CircleShape,
-                      color = surfaceColor,
-                      border = borderColor,
-                      modifier = Modifier.size(buttonSize - 4.dp),
-                    ) {
-                      Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        CircularProgressIndicator(
-                          modifier = Modifier.size(16.dp),
-                          strokeWidth = 2.dp,
-                          color = contentColor,
-                        )
-                      }
-                    }
-                  } else {
-                    @OptIn(ExperimentalFoundationApi::class)
-                    Surface(
-                      shape = CircleShape,
-                      color = surfaceColor,
-                      border = borderColor,
-                      modifier = Modifier
-                        .size(buttonSize - 4.dp)
-                        .clip(CircleShape)
-                        .combinedClickable(
-                          onClick = {
-                            viewModel.takeSnapshot(context)
-                            viewModel.resetFrameNavigationTimer()
-                          },
-                          onLongClick = { onOpenSheet(Sheets.FrameNavigation) },
-                        ),
-                    ) {
-                      Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                          imageVector = Icons.Default.CameraAlt,
-                          contentDescription = "Take Screenshot",
-                          tint = contentColor,
-                          modifier = Modifier.size(24.dp),
-                        )
-                      }
-                    }
-                  }
-
-                  // Next frame button
-                  Surface(
-                    shape = CircleShape,
-                    color = Color.Transparent,
-                    modifier = Modifier
-                      .size(buttonSize - 4.dp)
-                      .clip(CircleShape)
-                      .clickable(onClick = {
-                        viewModel.frameStepForward()
-                        viewModel.resetFrameNavigationTimer()
-                      }),
-                  ) {
-                    Box(contentAlignment = Alignment.Center) {
-                      Icon(
-                        imageVector = Icons.Default.FastForward,
-                        contentDescription = "Next Frame",
-                        tint = contentColor,
-                        modifier = Modifier.size(24.dp),
-                      )
-                    }
-                  }
-                }
-              }
-            } else {
-              // Collapsed: Show camera icon button
-              ControlsButton(
-                icon = Icons.Default.Camera,
-                onClick = viewModel::toggleFrameNavigationExpanded,
-                onLongClick = { onOpenSheet(Sheets.FrameNavigation) },
-                modifier = Modifier.size(buttonSize),
-              )
-            }
-          }
-      }
-    }
-
-    PlayerButton.VIDEO_ZOOM -> {
-      val isZoomed = kotlin.math.abs(currentZoom) >= 0.005f
-      if (isZoomed || isMoreSheet) {
-        @OptIn(ExperimentalFoundationApi::class)
         Surface(
           shape = CircleShape,
-          color = if (isZoomed) activeSurfaceColor else surfaceColor,
-          contentColor = if (isZoomed) activeContentColor else contentColor,
-          tonalElevation = 0.dp,
-          shadowElevation = 0.dp,
-          border = if (isZoomed) activeBorderColor else borderColor,
+          color = if (isActive) activeSurfaceColor else surfaceColor,
+          border = if (isActive) activeBorderColor else borderColor,
           modifier = Modifier
-            .height(buttonSize)
+            .size(buttonSize)
             .clip(CircleShape)
-            .combinedClickable(
-              interactionSource = remember { MutableInteractionSource() },
-              indication = ripple(bounded = true),
-              onClick = {
-                clickEvent()
-                onOpenSheet(Sheets.VideoZoom)
-              },
-              onLongClick = {
-                clickEvent()
-                viewModel.resetVideoZoom()
-              },
-            ),
+            .clickable(onClick = viewModel::toggleFrameNavigationExpanded),
         ) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
-            modifier = Modifier.padding(
-              horizontal = MaterialTheme.spacing.small,
-              vertical = MaterialTheme.spacing.small,
-            ),
-          ) {
+          Box(contentAlignment = Alignment.Center) {
             Icon(
-              imageVector = Icons.Default.ZoomIn,
-              contentDescription = "Video Zoom",
-              tint = if (isZoomed) activeContentColor else contentColor,
+              imageVector = Icons.Default.Camera,
+              contentDescription = stringResource(R.string.frame_navigation),
+              tint = if (isActive) activeContentColor else contentColor,
               modifier = Modifier.size(24.dp),
-            )
-            Text(
-              text = String.format("%.0f%%", currentZoom * 100),
-              maxLines = 1,
-              style = MaterialTheme.typography.bodyMedium,
             )
           }
         }
-      } else {
-        ControlsButton(
-          Icons.Default.ZoomIn,
-          onClick = {
-            clickEvent()
-            onOpenSheet(Sheets.VideoZoom)
-          },
-          onLongClick = { viewModel.resetVideoZoom() },
-          modifier = Modifier.size(buttonSize),
-        )
       }
     }
 
@@ -645,7 +492,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "PiP",
+                text = stringResource(R.string.pip),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -720,6 +567,67 @@ fun RenderPlayerButton(
       }
     }
 
+    PlayerButton.VIDEO_ZOOM -> {
+      val isZoomed = kotlin.math.abs(currentZoom) >= 0.005f
+      if (isZoomed || isMoreSheet) {
+        @OptIn(ExperimentalFoundationApi::class)
+        Surface(
+          shape = CircleShape,
+          color = if (isZoomed) activeSurfaceColor else surfaceColor,
+          contentColor = if (isZoomed) activeContentColor else contentColor,
+          tonalElevation = 0.dp,
+          shadowElevation = 0.dp,
+          border = if (isZoomed) activeBorderColor else borderColor,
+          modifier = Modifier
+            .height(buttonSize)
+            .clip(CircleShape)
+            .combinedClickable(
+              interactionSource = remember { MutableInteractionSource() },
+              indication = ripple(bounded = true),
+              onClick = {
+                clickEvent()
+                onOpenSheet(Sheets.VideoZoom)
+              },
+              onLongClick = {
+                clickEvent()
+                viewModel.setVideoZoom(0f)
+              },
+            ),
+        ) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
+            modifier = Modifier.padding(
+              horizontal = MaterialTheme.spacing.small,
+              vertical = MaterialTheme.spacing.small,
+            ),
+          ) {
+            Icon(
+              imageVector = Icons.Default.ZoomIn,
+              contentDescription = stringResource(R.string.video_zoom),
+              tint = if (isZoomed) activeContentColor else contentColor,
+              modifier = Modifier.size(24.dp),
+            )
+            Text(
+              text = String.format("%.0f%%", currentZoom * 100),
+              maxLines = 1,
+              style = MaterialTheme.typography.bodyMedium,
+            )
+          }
+        }
+      } else {
+        ControlsButton(
+          Icons.Default.ZoomIn,
+          onClick = {
+            clickEvent()
+            onOpenSheet(Sheets.VideoZoom)
+          },
+          onLongClick = { viewModel.setVideoZoom(0f) },
+          modifier = Modifier.size(buttonSize),
+        )
+      }
+    }
+
     PlayerButton.LOCK_CONTROLS -> {
       if (isMoreSheet) {
           Surface(
@@ -743,7 +651,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Lock",
+                text = stringResource(R.string.lock),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -781,7 +689,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Audio",
+                text = stringResource(R.string.audio),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -820,7 +728,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Subtitles",
+                text = stringResource(R.string.subtitles),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -899,9 +807,9 @@ fun RenderPlayerButton(
               )
               Text(
                 text = when (repeatMode) {
-                    xyz.mpv.rex.ui.player.RepeatMode.OFF -> "Repeat Off"
-                    xyz.mpv.rex.ui.player.RepeatMode.ONE -> "Repeat One"
-                    xyz.mpv.rex.ui.player.RepeatMode.ALL -> "Repeat All"
+                    xyz.mpv.rex.ui.player.RepeatMode.OFF -> stringResource(R.string.repeat_off)
+                    xyz.mpv.rex.ui.player.RepeatMode.ONE -> stringResource(R.string.repeat_one)
+                    xyz.mpv.rex.ui.player.RepeatMode.ALL -> stringResource(R.string.repeat_all)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
@@ -952,7 +860,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Skip ${customSkipDuration}s",
+                text = stringResource(R.string.skip_seconds, customSkipDuration),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -998,7 +906,7 @@ fun RenderPlayerButton(
                   modifier = Modifier.size(24.dp)
                 )
                 Text(
-                  text = if (shuffleEnabled) "Shuffle On" else "Shuffle Off",
+                  text = if (shuffleEnabled) stringResource(R.string.shuffle_on) else stringResource(R.string.shuffle_off),
                   style = MaterialTheme.typography.bodyMedium,
                   maxLines = 1,
                 )
@@ -1039,7 +947,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = if (isMirrored) "Mirrored" else "Mirror",
+                text = if (isMirrored) stringResource(R.string.mirrored) else stringResource(R.string.mirror),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -1079,7 +987,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp).rotate(90f)
               )
               Text(
-                text = if (isVerticalFlipped) "Flipped" else "Flip Vert",
+                text = if (isVerticalFlipped) stringResource(R.string.flipped) else stringResource(R.string.flip_vertical),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -1099,7 +1007,7 @@ fun RenderPlayerButton(
             Box(contentAlignment = Alignment.Center) {
               Icon(
                 imageVector = Icons.Default.Flip,
-                contentDescription = "Vertical Flip",
+                contentDescription = stringResource(R.string.flip_vertical_desc),
                 tint = if (isVerticalFlipped) activeContentColor else contentColor,
                 modifier = Modifier
                   .padding(MaterialTheme.spacing.smaller)
@@ -1137,12 +1045,12 @@ fun RenderPlayerButton(
               modifier = Modifier.padding(horizontal = MaterialTheme.spacing.smaller)
             ) {
               Text(
-                text = "AB",
+                text = stringResource(R.string.ab_loop_short),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
               )
               Text(
-                text = "Loop",
+                text = stringResource(R.string.loop),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -1160,7 +1068,7 @@ fun RenderPlayerButton(
         ) {
           Box(contentAlignment = Alignment.Center) {
             Text(
-              text = "AB",
+              text = stringResource(R.string.ab_loop_short),
               style = MaterialTheme.typography.labelLarge,
               fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
               color = if (isActive) activeContentColor else contentColor,
@@ -1202,7 +1110,7 @@ fun RenderPlayerButton(
                 modifier = Modifier.size(24.dp)
               )
               Text(
-                text = "Background",
+                text = stringResource(R.string.background_playback),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
               )
@@ -1243,7 +1151,7 @@ fun RenderPlayerButton(
                   modifier = Modifier.size(24.dp)
                 )
                 Text(
-                  text = "Ambient",
+                  text = stringResource(R.string.ambient),
                   style = MaterialTheme.typography.bodyMedium,
                   maxLines = 1,
                 )
@@ -1271,7 +1179,7 @@ fun RenderPlayerButton(
               Box(contentAlignment = Alignment.Center) {
                 Icon(
                   imageVector = if (isAmbientEnabled) Icons.Filled.BlurOn else Icons.Outlined.BlurOn,
-                  contentDescription = "Ambience Mode",
+                  contentDescription = stringResource(R.string.ambience_mode),
                   tint = if (isAmbientEnabled) activeContentColor else contentColor,
                   modifier = Modifier.size(24.dp)
                 )
@@ -1280,7 +1188,130 @@ fun RenderPlayerButton(
         }
     }
 
+    PlayerButton.SLEEP_TIMER -> {
+      val remainingTime by viewModel.remainingTime.collectAsState()
+      val isActive = remainingTime > 0
+
+      if (isMoreSheet) {
+          Surface(
+            shape = CircleShape,
+            color = if (isActive) activeSurfaceColor else surfaceColor,
+            contentColor = if (isActive) activeContentColor else contentColor,
+            border = if (isActive) activeBorderColor else borderColor,
+            modifier = Modifier
+              .height(buttonSize)
+              .clip(CircleShape)
+              .clickable {
+                onOpenSheet(Sheets.SleepTimer)
+              }
+          ) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
+              modifier = Modifier.padding(horizontal = MaterialTheme.spacing.smaller)
+            ) {
+              Icon(
+                imageVector = Icons.Outlined.Timer,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+              )
+              Text(
+                text = if (isActive) {
+                  android.text.format.DateUtils.formatElapsedTime(remainingTime.toLong())
+                } else {
+                  stringResource(R.string.sleep_timer)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+              )
+            }
+          }
+      } else {
+        Surface(
+          shape = CircleShape,
+          color = if (isActive) activeSurfaceColor else surfaceColor,
+          border = if (isActive) activeBorderColor else borderColor,
+          modifier = Modifier
+            .size(buttonSize)
+            .clip(CircleShape)
+            .clickable(onClick = { onOpenSheet(Sheets.SleepTimer) }),
+        ) {
+          Box(contentAlignment = Alignment.Center) {
+            Icon(
+              imageVector = Icons.Outlined.Timer,
+              contentDescription = stringResource(R.string.sleep_timer),
+              tint = if (isActive) activeContentColor else contentColor,
+              modifier = Modifier.size(24.dp),
+            )
+          }
+        }
+      }
+    }
+
     PlayerButton.NONE -> { /* Do nothing */
     }
   }
 }
+
+@Composable
+fun Surface(
+    modifier: Modifier = Modifier,
+    shape: androidx.compose.ui.graphics.Shape = androidx.compose.foundation.shape.CircleShape,
+    color: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified,
+    contentColor: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified,
+    tonalElevation: androidx.compose.ui.unit.Dp = 0.dp,
+    shadowElevation: androidx.compose.ui.unit.Dp = 0.dp,
+    border: androidx.compose.foundation.BorderStroke? = null,
+    content: @Composable () -> Unit
+) {
+    val appearancePreferences = org.koin.compose.koinInject<xyz.mpv.rex.preferences.AppearancePreferences>()
+    val enableGlass by appearancePreferences.enableGlassPlayerControls.collectAsState()
+    val hideBackground by appearancePreferences.hidePlayerButtonsBackground.collectAsState()
+    val matchTheme by appearancePreferences.matchPlayerControlsToTheme.collectAsState()
+
+    val activeSurfaceColor = when {
+        hideBackground -> androidx.compose.ui.graphics.Color.Transparent
+        matchTheme -> androidx.compose.material3.MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f)
+        else -> androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.75f)
+    }
+
+    val isActive = color == activeSurfaceColor
+    
+    val glassModifier = if (enableGlass && color != androidx.compose.ui.graphics.Color.Transparent) {
+        Modifier.glassSurface(
+            shape = shape as? RoundedCornerShape ?: androidx.compose.foundation.shape.CircleShape,
+            backgroundColor = if (isActive) androidx.compose.material3.MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.05f),
+            borderColor = if (isActive) androidx.compose.material3.MaterialTheme.colorScheme.primary.copy(alpha = 0.35f) else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.15f),
+            borderWidth = 1.dp,
+            outerShadowColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.00f),
+            outerShadowBlur = 0.dp,
+            outerShadowOffsetX = 0.dp,
+            outerShadowOffsetY = 0.dp,
+            innerHighlightColor = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.35f),
+            innerHighlightBlur = 5.dp,
+            innerHighlightOffsetX = (-2).dp,
+            innerHighlightOffsetY = (-2).dp,
+            innerShadowColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.35f),
+            innerShadowBlur = 5.dp,
+            innerShadowOffsetX = 2.dp,
+            innerShadowOffsetY = 2.dp
+        )
+    } else {
+        Modifier
+    }
+
+    val finalColor = if (enableGlass && color != androidx.compose.ui.graphics.Color.Transparent) androidx.compose.ui.graphics.Color.Transparent else color
+    val finalBorder = if (enableGlass && color != androidx.compose.ui.graphics.Color.Transparent) null else border
+
+    M3Surface(
+        modifier = modifier.then(glassModifier),
+        shape = shape,
+        color = finalColor,
+        contentColor = contentColor,
+        tonalElevation = tonalElevation,
+        shadowElevation = shadowElevation,
+        border = finalBorder,
+        content = content
+    )
+}
+

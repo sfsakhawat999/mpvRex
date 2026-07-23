@@ -55,6 +55,11 @@ import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.FastRewind
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -62,7 +67,8 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Surface as M3Surface
+import xyz.mpv.rex.ui.player.controls.components.glassSurface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -188,6 +194,7 @@ fun PlayerControls(
   val doubleTapSeekAmount by viewModel.doubleTapSeekAmount.collectAsState()
   val doubleTapSeekBasePos by viewModel.doubleTapSeekBasePos.collectAsState()
   val showDoubleTapOvals by playerPreferences.showDoubleTapOvals.collectAsState()
+  val showCircularDoubleTapSeek by playerPreferences.showCircularDoubleTapSeek.collectAsState()
   val showSeekTime by playerPreferences.showSeekTimeWhileSeeking.collectAsState()
   val hideOsdText by playerPreferences.hideOsdText.collectAsState()
   var isSeeking by remember { mutableStateOf(false) }
@@ -213,6 +220,8 @@ fun PlayerControls(
   val abLoopA by viewModel.abLoopA.collectAsState()
   val abLoopB by viewModel.abLoopB.collectAsState()
   val isABLoopExpanded by viewModel.isABLoopExpanded.collectAsState()
+  val isFrameNavigationExpanded by viewModel.isFrameNavigationExpanded.collectAsState()
+  val isSnapshotLoading by viewModel.isSnapshotLoading.collectAsState()
 
   val isGestureSeeking by viewModel.isGestureSeeking.collectAsState()
   val isVerticalGestureActive by viewModel.isVerticalGestureActive.collectAsState()
@@ -358,6 +367,7 @@ fun PlayerControls(
         val (customLeftButtonsRef, customRightButtonsRef) = createRefs()
         val customButtonsPortraitRef = createRef()
         val floatingABLoop = createRef()
+        val floatingFrameNav = createRef()
 
         val bottomControlsBelowSeekbar by playerPreferences.bottomControlsBelowSeekbar.collectAsState()
 
@@ -376,8 +386,17 @@ fun PlayerControls(
         val rawMediaTitle by MPVLib.propString["media-title"].collectAsState()
         val mediaTitle by remember(rawMediaTitle, activity) {
           derivedStateOf {
-            rawMediaTitle?.takeIf { it.isNotBlank() }
-              ?: activity.getTitleForControls()
+            val title = activity.getTitleForControls()
+            if (title.startsWith("http://") || title.startsWith("https://") || title.contains(".m3u8") || title.contains(".m3u")) {
+              val raw = rawMediaTitle
+              if (raw != null && raw.isNotBlank() && !raw.startsWith("http://") && !raw.startsWith("https://") && !raw.contains(".m3u8") && !raw.contains(".m3u")) {
+                raw
+              } else {
+                title
+              }
+            } else {
+              title
+            }
           }
         }
 
@@ -404,6 +423,23 @@ fun PlayerControls(
 
         val areSlidersShown = isBrightnessSliderShown || isVolumeSliderShown
         val areButtonsVisible = controlsShown && !areControlsLocked && !areSlidersShown
+
+        val abLoopVerticalBias by animateFloatAsState(
+          targetValue = if (areButtonsVisible) {
+            if (isPortrait) 0.80f else 0.65f
+          } else {
+            if (isPortrait) 0.86f else 0.78f
+          },
+          label = "abLoopVerticalBias"
+        )
+
+        val abLoopActive = isABLoopExpanded
+        val frameNavActive = isFrameNavigationExpanded
+
+        val frameNavYOffset by animateDpAsState(
+          targetValue = if (abLoopActive && frameNavActive) -48.dp else 0.dp,
+          label = "frameNavYOffset"
+        )
 
         val osdTopMargin by animateDpAsState(
           targetValue = if (areButtonsVisible) {
@@ -525,7 +561,7 @@ fun PlayerControls(
               },
         ) {
           val currentPlaybackSpeed = playbackSpeed ?: 1f
-          if (doubleTapSeekAmount != 0 && !hideOsdText) {
+          if (doubleTapSeekAmount != 0 && !hideOsdText && !showDoubleTapOvals && !showCircularDoubleTapSeek) {
             val seekAmount = doubleTapSeekAmount
             // Use the position captured before the first seek so the displayed
             // target time stays correct even after MPV's time-pos updates.
@@ -637,7 +673,7 @@ fun PlayerControls(
                 xyz.mpv.rex.ui.player.RepeatMode.OFF -> "Repeat: Off"
                 xyz.mpv.rex.ui.player.RepeatMode.ONE -> "Repeat: Current file"
                 xyz.mpv.rex.ui.player.RepeatMode.ALL -> {
-                  if (playlistMode && viewModel.hasPlaylistSupport()) {
+                  if (viewModel.hasPlaylistSupport()) {
                     "Repeat: All playlist"
                   } else {
                     "Repeat: Current file"
@@ -650,7 +686,7 @@ fun PlayerControls(
             is PlayerUpdates.Shuffle -> {
               val enabled = (currentPlayerUpdate as PlayerUpdates.Shuffle).enabled
               val text = if (enabled) {
-                if (playlistMode && viewModel.hasPlaylistSupport()) {
+                if (viewModel.hasPlaylistSupport()) {
                   "Shuffle: On"
                 } else {
                   "Shuffle: Not available"
@@ -948,7 +984,7 @@ fun PlayerControls(
                 else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
               )
 
-              if (playlistMode && viewModel.hasPlaylistSupport()) {
+              if (viewModel.hasPlaylistSupport()) {
                 androidx.compose.foundation.layout.Row(
                   horizontalArrangement = Arrangement.spacedBy(24.dp),
                   verticalAlignment = Alignment.CenterVertically,
@@ -1128,7 +1164,7 @@ fun PlayerControls(
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
                     end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    bottom = navBarPadding.calculateBottomPadding()
+                    bottom = if (!bottomControlsBelowSeekbar) navBarPadding.calculateBottomPadding() else 0.dp
                   )
                 } else {
                   Modifier
@@ -1146,7 +1182,7 @@ fun PlayerControls(
                     val bottomMargin = 45.dp + spacing.medium + spacing.small
                     bottom.linkTo(parent.bottom, bottomMargin)
                   } else {
-                    bottom.linkTo(parent.bottom, spacing.extraSmall)
+                    bottom.linkTo(parent.bottom, spacing.medium)
                   }
                 }
                 start.linkTo(parent.start, spacing.large)
@@ -1157,7 +1193,8 @@ fun PlayerControls(
           val seekbarStyle by appearancePreferences.seekbarStyle.collectAsState()
 
           // Calculate read-ahead position (current position + buffered cache time)
-          val readAheadPosition by remember(position, demuxerCacheDuration, cacheBufferingState, duration) {
+          // No keys for remember, derivedStateOf reactively tracks read dependencies
+          val readAheadPosition by remember {
             derivedStateOf {
               val currentPos = position?.toFloat() ?: 0f
               val cacheDuration = demuxerCacheDuration ?: 0f
@@ -1266,7 +1303,7 @@ fun PlayerControls(
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
                     end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    bottom = navBarPadding.calculateBottomPadding()
+                    bottom = 0.dp
                   )
                 } else {
                   Modifier
@@ -1334,7 +1371,7 @@ fun PlayerControls(
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
                     end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    bottom = navBarPadding.calculateBottomPadding()
+                    bottom = 0.dp
                   )
                 } else {
                   Modifier
@@ -1388,7 +1425,7 @@ fun PlayerControls(
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
                     end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    bottom = navBarPadding.calculateBottomPadding()
+                    bottom = if (bottomControlsBelowSeekbar) navBarPadding.calculateBottomPadding() else 0.dp
                   )
                 } else {
                   Modifier
@@ -1431,7 +1468,9 @@ fun PlayerControls(
               onOpenPanel = onOpenPanel,
               viewModel = viewModel,
               activity = activity,
-            )          } else {
+              bottomPadding = if (bottomControlsBelowSeekbar) spacing.medium else 0.dp,
+            )
+          } else {
             BottomRightPlayerControlsLandscape(
               buttons = bottomRightButtons,
               chapters = chapters,
@@ -1476,7 +1515,7 @@ fun PlayerControls(
                   Modifier.padding(
                     start = navBarPadding.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
                     end = navBarPadding.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    bottom = navBarPadding.calculateBottomPadding()
+                    bottom = if (bottomControlsBelowSeekbar) navBarPadding.calculateBottomPadding() else 0.dp
                   )
                 } else {
                   Modifier
@@ -1537,7 +1576,7 @@ fun PlayerControls(
             end.linkTo(parent.end, spacing.extraLarge)
             top.linkTo(parent.top)
             bottom.linkTo(parent.bottom)
-            verticalBias = 0.7f
+            verticalBias = abLoopVerticalBias
           }
         ) {
           val buttonSize = 40.dp
@@ -1615,6 +1654,139 @@ fun PlayerControls(
             }
           }
         }
+
+        AnimatedVisibility(
+          visible = isFrameNavigationExpanded,
+          enter = fadeIn(tween(200)) + slideInHorizontally(initialOffsetX = { it }),
+          exit = fadeOut(tween(200)) + slideOutHorizontally(targetOffsetX = { it }),
+          modifier = Modifier
+            .constrainAs(floatingFrameNav) {
+              end.linkTo(parent.end, spacing.extraLarge)
+              top.linkTo(parent.top)
+              bottom.linkTo(parent.bottom)
+              verticalBias = abLoopVerticalBias
+            }
+            .offset(y = frameNavYOffset)
+        ) {
+          val buttonSize = 40.dp
+          val context = LocalContext.current
+          Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.55f),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+            modifier = Modifier.height(buttonSize),
+          ) {
+            Row(
+              horizontalArrangement = Arrangement.spacedBy(2.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              modifier = Modifier.padding(horizontal = 4.dp),
+            ) {
+              // Previous frame button
+              Surface(
+                shape = CircleShape,
+                color = Color.Transparent,
+                modifier = Modifier
+                  .size(buttonSize - 4.dp)
+                  .clip(CircleShape)
+                  .clickable(onClick = {
+                    viewModel.frameStepBackward()
+                  }),
+              ) {
+                Box(contentAlignment = Alignment.Center) {
+                  Icon(
+                    imageVector = Icons.Default.FastRewind,
+                    contentDescription = "Previous Frame",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(24.dp),
+                  )
+                }
+              }
+
+              // Camera / Loading button
+              if (isSnapshotLoading) {
+                Surface(
+                  shape = CircleShape,
+                  color = Color.Transparent,
+                  modifier = Modifier.size(buttonSize - 4.dp),
+                ) {
+                  Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    CircularProgressIndicator(
+                      modifier = Modifier.size(16.dp),
+                      strokeWidth = 2.dp,
+                      color = MaterialTheme.colorScheme.onSurface,
+                    )
+                  }
+                }
+              } else {
+                @OptIn(ExperimentalFoundationApi::class)
+                Surface(
+                  shape = CircleShape,
+                  color = Color.Transparent,
+                  modifier = Modifier
+                    .size(buttonSize - 4.dp)
+                    .clip(CircleShape)
+                    .combinedClickable(
+                      onClick = {
+                        viewModel.takeSnapshot(context)
+                      },
+                      onLongClick = { onOpenSheet(Sheets.FrameNavigation) },
+                    ),
+                ) {
+                  Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                      imageVector = Icons.Default.CameraAlt,
+                      contentDescription = "Take Screenshot",
+                      tint = MaterialTheme.colorScheme.onSurface,
+                      modifier = Modifier.size(24.dp),
+                    )
+                  }
+                }
+              }
+
+              // Next frame button
+              Surface(
+                shape = CircleShape,
+                color = Color.Transparent,
+                modifier = Modifier
+                  .size(buttonSize - 4.dp)
+                  .clip(CircleShape)
+                  .clickable(onClick = {
+                    viewModel.frameStepForward()
+                  }),
+              ) {
+                Box(contentAlignment = Alignment.Center) {
+                  Icon(
+                    imageVector = Icons.Default.FastForward,
+                    contentDescription = "Next Frame",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(24.dp),
+                  )
+                }
+              }
+
+              // Close button
+              Surface(
+                shape = CircleShape,
+                color = Color.Transparent,
+                modifier = Modifier
+                  .size(buttonSize - 4.dp)
+                  .clip(CircleShape)
+                  .clickable(onClick = {
+                    viewModel.toggleFrameNavigationExpanded()
+                  }),
+              ) {
+                Box(contentAlignment = Alignment.Center) {
+                  Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close Frame Nav",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(16.dp),
+                  )
+                }
+              }
+            }
+          }
+        }
       }
      }
     }
@@ -1674,3 +1846,4 @@ fun PlayerControls(
     )
   }
 }
+

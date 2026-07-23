@@ -108,6 +108,11 @@ object M3UParser {
         return M3UParseResult.Error("Playlist is empty")
       }
       
+      // Check if it's an HLS stream playlist (should not be parsed as an M3U playlist)
+      if (lines.any { it.startsWith("#EXT-X-") }) {
+        return M3UParseResult.Error("HLS stream playlist")
+      }
+      
       // Check if it's an extended M3U format
       lines.firstOrNull()?.startsWith("#EXTM3U") == true
       

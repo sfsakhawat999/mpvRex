@@ -15,6 +15,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import xyz.mpv.rex.R
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,7 +34,7 @@ fun RenameDialog(
   onDismiss: () -> Unit,
   onConfirm: (String) -> Unit,
   currentName: String,
-  itemType: String,
+  @androidx.annotation.StringRes itemTypeRes: Int,
   extension: String? = null,
 ) {
   if (!isOpen) return
@@ -47,16 +49,19 @@ fun RenameDialog(
     focusRequester.requestFocus()
   }
 
+  val emptyNameErr = stringResource(R.string.name_cannot_be_empty)
+  val invalidCharsErr = stringResource(R.string.name_cannot_contain_invalid_chars)
+
   fun validateAndConfirm() {
     when {
       baseName.value.isBlank() -> {
         isError.value = true
-        errorMessage.value = "Name cannot be empty"
+        errorMessage.value = emptyNameErr
       }
 
       baseName.value.contains("/") || baseName.value.contains("\\") -> {
         isError.value = true
-        errorMessage.value = "Name cannot contain / or \\"
+        errorMessage.value = invalidCharsErr
       }
 
       else -> {
@@ -70,7 +75,7 @@ fun RenameDialog(
     onDismissRequest = onDismiss,
     title = {
       Text(
-        text = "Rename $itemType",
+        text = stringResource(R.string.rename_item, stringResource(itemTypeRes)),
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
       )
@@ -92,7 +97,7 @@ fun RenameDialog(
               Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester),
-            label = { Text("New name", fontWeight = FontWeight.Medium) },
+            label = { Text(stringResource(R.string.new_name), fontWeight = FontWeight.Medium) },
             singleLine = false,
             maxLines = 5,
             isError = isError.value,
@@ -131,7 +136,7 @@ fun RenameDialog(
         shape = MaterialTheme.shapes.extraLarge,
       ) {
         Text(
-          text = "Rename",
+          text = stringResource(R.string.rename),
           fontWeight = FontWeight.Bold,
         )
       }
@@ -141,7 +146,7 @@ fun RenameDialog(
         onClick = onDismiss,
         shape = MaterialTheme.shapes.extraLarge,
       ) {
-        Text("Cancel", fontWeight = FontWeight.Medium)
+        Text(stringResource(R.string.generic_cancel), fontWeight = FontWeight.Medium)
       }
     },
     containerColor = MaterialTheme.colorScheme.surface,

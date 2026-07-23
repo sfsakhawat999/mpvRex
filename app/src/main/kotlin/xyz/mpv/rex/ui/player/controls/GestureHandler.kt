@@ -1,5 +1,10 @@
 package xyz.mpv.rex.ui.player.controls
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -11,14 +16,18 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -44,6 +53,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
@@ -53,11 +63,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import `is`.xyz.mpv.MPVLib
+import xyz.mpv.rex.preferences.AppearancePreferences
 import xyz.mpv.rex.preferences.AudioPreferences
 import xyz.mpv.rex.preferences.GesturePreferences
 import xyz.mpv.rex.preferences.PlayerPreferences
 import xyz.mpv.rex.preferences.SubtitlesPreferences
 import xyz.mpv.rex.preferences.preference.collectAsState
+import xyz.mpv.rex.ui.player.controls.components.glassSurface
 import xyz.mpv.rex.presentation.components.LeftSideOvalShape
 import xyz.mpv.rex.presentation.components.RightSideOvalShape
 import xyz.mpv.rex.ui.player.Panels
@@ -118,6 +130,7 @@ fun GestureHandler(
   val swapVolumeAndBrightness by playerPreferences.swapVolumeAndBrightness.collectAsState()
   val pinchToZoomGesture by playerPreferences.pinchToZoomGesture.collectAsState()
   val panAndZoomEnabled by playerPreferences.panAndZoomEnabled.collectAsState()
+  val advancedZoomEnabled by viewModel.advancedZoomEnabled.collectAsState()
   val horizontalSwipeToSeek by playerPreferences.horizontalSwipeToSeek.collectAsState()
   val swipeToSubtitleSeek by playerPreferences.swipeToSubtitleSeek.collectAsState()
   val moveSubtitleByDragging by playerPreferences.moveSubtitleByDragging.collectAsState()
@@ -801,45 +814,8 @@ fun GestureHandler(
           }
         }
       }
-      .pointerInput(pinchToZoomGesture, panAndZoomEnabled, areControlsLocked, isVerticalGestureActive) {
-        if (!pinchToZoomGesture || areControlsLocked || isVerticalGestureActive) return@pointerInput
-
-        // Helper: get video display dimensions at 1x (how mpv fits the video to screen)
-        fun videoDisplaySize(): Pair<Float, Float> {
-          val sw = size.width.toFloat()
-          val sh = size.height.toFloat()
-          val va = MPVLib.getPropertyDouble("video-params/aspect")?.toFloat() ?: (sw / sh)
-          val sa = sw / sh
-          return if (va >= sa) Pair(sw, sw / va) else Pair(sh * va, sh)
-        }
-
-        // Helper: apply pan with EMA smoothing and bounds clamping
-        fun applyPan(
-          dx: Float, dy: Float, scale: Float,
-          smoothState: FloatArray, // [smoothX, smoothY, initialized]
-          smoothFactor: Float = 0.5f,
-        ) {
-          val sw = size.width.toFloat()
-          val sh = size.height.toFloat()
-          if (sw <= 0 || sh <= 0) return
-          val (bw, bh) = videoDisplaySize()
-          // 1 finger pixel = 1 video pixel
-          val curX = MPVLib.getPropertyDouble("video-pan-x")?.toFloat() ?: 0f
-          val curY = MPVLib.getPropertyDouble("video-pan-y")?.toFloat() ?: 0f
-          val panSensitivity = 2.2f
-          val targetX = curX + (dx * panSensitivity) / (bw * scale)
-          val targetY = curY + (dy * panSensitivity) / (bh * scale)
-          // Initialize smoothing on first call
-          if (smoothState[2] == 0f) { smoothState[0] = targetX; smoothState[1] = targetY; smoothState[2] = 1f }
-          smoothState[0] += (targetX - smoothState[0]) * smoothFactor
-          smoothState[1] += (targetY - smoothState[1]) * smoothFactor
-          // Bounds: video edge can't go past screen edge
-          val maxPan = ((scale - 1f) / (2f * scale)).coerceAtLeast(0f)
-          viewModel.setVideoPan(
-            smoothState[0].coerceIn(-maxPan, maxPan),
-            smoothState[1].coerceIn(-maxPan, maxPan),
-          )
-        }
+      .pointerInput(pinchToZoomGesture, panAndZoomEnabled, areControlsLocked, isVerticalGestureActive, advancedZoomEnabled) {
+        if (!pinchToZoomGesture || areControlsLocked || isVerticalGestureActive || advancedZoomEnabled) return@pointerInput
 
         awaitEachGesture {
           var zoom = 0f
@@ -847,7 +823,12 @@ fun GestureHandler(
           var prevDist = 0f
           var prevMidX = 0f
           var prevMidY = 0f
-          val panSmooth = floatArrayOf(0f, 0f, 0f) // smoothX, smoothY, initialized
+          // Locally tracked pan; read from mpv once at gesture start, mutated here.
+          var localPanX = 0f
+          var localPanY = 0f
+          // Video display dims at 1x, cached once per gesture.
+          var bw = 0f
+          var bh = 0f
 
           awaitFirstDown(requireUnconsumed = false)
 
@@ -865,9 +846,16 @@ fun GestureHandler(
               val midY = (p1.y + p2.y) / 2f
 
               if (prevDist == 0f) {
-                // First frame — capture baseline
+                // First 2-finger frame — do the one-time JNI reads for the whole gesture.
                 prevDist = dist
                 zoom = MPVLib.getPropertyDouble("video-zoom")?.toFloat() ?: 0f
+                localPanX = MPVLib.getPropertyDouble("video-pan-x")?.toFloat() ?: 0f
+                localPanY = MPVLib.getPropertyDouble("video-pan-y")?.toFloat() ?: 0f
+                val sw = size.width.toFloat()
+                val sh = size.height.toFloat()
+                val va = MPVLib.getPropertyDouble("video-params/aspect")?.toFloat() ?: (sw / sh)
+                val sa = sw / sh
+                if (va >= sa) { bw = sw; bh = sw / va } else { bw = sh * va; bh = sh }
                 prevMidX = midX
                 prevMidY = midY
               } else {
@@ -883,9 +871,16 @@ fun GestureHandler(
                   zoom = (zoom + zoomDelta).coerceIn(-1f, 3f)
                   viewModel.setVideoZoom(zoom)
 
-                  // Simultaneous pan while pinching
-                  if (panAndZoomEnabled) {
-                    applyPan(midX - prevMidX, midY - prevMidY, 2f.pow(zoom), panSmooth)
+                  // Simultaneous pan while pinching, all math local — one write to mpv.
+                  if (panAndZoomEnabled && bw > 0f && bh > 0f) {
+                    val scale = 2f.pow(zoom)
+                    val panSensitivity = 2.2f
+                    localPanX += ((midX - prevMidX) * panSensitivity) / (bw * scale)
+                    localPanY += ((midY - prevMidY) * panSensitivity) / (bh * scale)
+                    val maxPan = ((scale - 1f) / (2f * scale)).coerceAtLeast(0f)
+                    localPanX = localPanX.coerceIn(-maxPan, maxPan)
+                    localPanY = localPanY.coerceIn(-maxPan, maxPan)
+                    viewModel.setVideoPan(localPanX, localPanY)
                   }
                 }
 
@@ -902,8 +897,8 @@ fun GestureHandler(
         }
       }
       // Single-finger pan (only when Pan & Zoom enabled and zoomed in)
-      .pointerInput(panAndZoomEnabled, pinchToZoomGesture, areControlsLocked, isVerticalGestureActive) {
-        if (!panAndZoomEnabled || !pinchToZoomGesture || areControlsLocked || isVerticalGestureActive) return@pointerInput
+      .pointerInput(panAndZoomEnabled, pinchToZoomGesture, areControlsLocked, isVerticalGestureActive, advancedZoomEnabled) {
+        if (!panAndZoomEnabled || !pinchToZoomGesture || areControlsLocked || isVerticalGestureActive || advancedZoomEnabled) return@pointerInput
 
         awaitEachGesture {
           val down = awaitFirstDown(requireUnconsumed = false)
@@ -912,25 +907,25 @@ fun GestureHandler(
           var prevY = down.position.y
           val startX = prevX
           val startY = prevY
-          val panSmooth = floatArrayOf(0f, 0f, 0f)
 
-          // Helper: get video display dimensions at 1x
-          fun videoDisplaySize(): Pair<Float, Float> {
-            val sw = size.width.toFloat()
-            val sh = size.height.toFloat()
-            val va = MPVLib.getPropertyDouble("video-params/aspect")?.toFloat() ?: (sw / sh)
-            val sa = sw / sh
-            return if (va >= sa) Pair(sw, sw / va) else Pair(sh * va, sh)
-          }
+          // Per-gesture cached state. zoom/localPan* seeded from mpv on activation.
+          var zoom = 0f
+          var localPanX = 0f
+          var localPanY = 0f
+          var bw = 0f
+          var bh = 0f
+          var stateReady = false
 
           do {
             val event = awaitPointerEvent()
-            val pressed = event.changes.filter { it.pressed }
+            val pressed = event.changes.filter { it.pressed && !it.isConsumed }
 
             if (pressed.size == 1) {
               val change = pressed[0]
-              val zoom = MPVLib.getPropertyDouble("video-zoom")?.toFloat() ?: 0f
-              if (zoom <= 0f) { continue }
+
+              if (viewModel.isVerticalGestureActive.value || viewModel.isGestureSeeking.value) {
+                continue
+              }
 
               // Ignore panning if long-pressing or speed adjustment is active
               if (isLongPressing || isDynamicSpeedControlActive) {
@@ -944,7 +939,7 @@ fun GestureHandler(
                 val dx = pos.x - startX
                 val dy = pos.y - startY
                 // If it's a horizontal seek gesture, let horizontal swipe-to-seek block handle it instead
-                val isHorizontalSeek = horizontalSwipeToSeek && (abs(dx) > abs(dy) * 2f) && (abs(dx) > 30f)
+                val isHorizontalSeek = horizontalSwipeToSeek && (abs(dx) > abs(dy) * 1.2f)
                 if (isHorizontalSeek) {
                   continue
                 }
@@ -954,28 +949,31 @@ fun GestureHandler(
               }
 
               if (panning) {
-                val sw = size.width.toFloat()
-                val sh = size.height.toFloat()
-                if (sw > 0 && sh > 0) {
-                  val scale = 2f.pow(zoom)
-                  val (bw, bh) = videoDisplaySize()
-                  val curX = MPVLib.getPropertyDouble("video-pan-x")?.toFloat() ?: 0f
-                  val curY = MPVLib.getPropertyDouble("video-pan-y")?.toFloat() ?: 0f
-                  val panSensitivity = 2.2f
-                  val targetX = curX + ((pos.x - prevX) * panSensitivity) / (bw * scale)
-                  val targetY = curY + ((pos.y - prevY) * panSensitivity) / (bh * scale)
-                  // Initialize smoothing on first pan frame
-                  if (panSmooth[2] == 0f) { panSmooth[0] = targetX; panSmooth[1] = targetY; panSmooth[2] = 1f }
-                  panSmooth[0] += (targetX - panSmooth[0]) * 0.5f
-                  panSmooth[1] += (targetY - panSmooth[1]) * 0.5f
-                  val maxPan = ((scale - 1f) / (2f * scale)).coerceAtLeast(0f)
-                  viewModel.setVideoPan(
-                    panSmooth[0].coerceIn(-maxPan, maxPan),
-                    panSmooth[1].coerceIn(-maxPan, maxPan),
-                  )
-                  prevX = pos.x
-                  prevY = pos.y
+                if (!stateReady) {
+                  // One-time JNI reads for the whole gesture.
+                  zoom = MPVLib.getPropertyDouble("video-zoom")?.toFloat() ?: 0f
+                  if (zoom <= 0f) { continue }
+                  localPanX = MPVLib.getPropertyDouble("video-pan-x")?.toFloat() ?: 0f
+                  localPanY = MPVLib.getPropertyDouble("video-pan-y")?.toFloat() ?: 0f
+                  val sw = size.width.toFloat()
+                  val sh = size.height.toFloat()
+                  if (sw <= 0f || sh <= 0f) { continue }
+                  val va = MPVLib.getPropertyDouble("video-params/aspect")?.toFloat() ?: (sw / sh)
+                  val sa = sw / sh
+                  if (va >= sa) { bw = sw; bh = sw / va } else { bw = sh * va; bh = sh }
+                  stateReady = true
                 }
+
+                val scale = 2f.pow(zoom)
+                val panSensitivity = 2.2f
+                localPanX += ((pos.x - prevX) * panSensitivity) / (bw * scale)
+                localPanY += ((pos.y - prevY) * panSensitivity) / (bh * scale)
+                val maxPan = ((scale - 1f) / (2f * scale)).coerceAtLeast(0f)
+                localPanX = localPanX.coerceIn(-maxPan, maxPan)
+                localPanY = localPanY.coerceIn(-maxPan, maxPan)
+                viewModel.setVideoPan(localPanX, localPanY)
+                prevX = pos.x
+                prevY = pos.y
                 change.consume()
               }
             } else if (pressed.size > 1) {
@@ -1134,80 +1132,217 @@ fun DoubleTapToSeekOvals(
   modifier: Modifier = Modifier,
 ) {
   val gesturePreferences = koinInject<GesturePreferences>()
+  val playerPreferences = koinInject<PlayerPreferences>()
+  val appearancePreferences = koinInject<AppearancePreferences>()
+  
   val doubleTapSeekAreaWidth by gesturePreferences.doubleTapSeekAreaWidth.collectAsState()
   val seekAreaFraction = doubleTapSeekAreaWidth / 100f
   
-  val alpha by animateFloatAsState(if (amount == 0) 0f else 0.2f, label = "double_tap_animation_alpha")
+  val showCircularDoubleTapSeek by playerPreferences.showCircularDoubleTapSeek.collectAsState()
+  val enableGlass by appearancePreferences.enableGlassPlayerControls.collectAsState()
 
-  // Scale animation for text
-  var scaleTarget by remember { mutableStateOf(1f) }
-  val scale by animateFloatAsState(
+  // Track the last direction/amount so we know where to slide/hide and show correct text even when amount becomes 0
+  var lastIsRight by remember { mutableStateOf(true) }
+  var lastNonNullAmount by remember { mutableStateOf(10) }
+  var animationTrigger by remember { mutableStateOf(0) }
+  LaunchedEffect(amount) {
+    if (amount > 0) {
+      lastIsRight = true
+      lastNonNullAmount = abs(amount)
+      animationTrigger = amount
+    } else if (amount < 0) {
+      lastIsRight = false
+      lastNonNullAmount = abs(amount)
+      animationTrigger = amount
+    }
+  }
+
+  val isRight = if (amount != 0) amount > 0 else lastIsRight
+  val seekDisplayAmount = if (amount != 0) abs(amount) else lastNonNullAmount
+  val isVisible = amount != 0
+
+  if (showCircularDoubleTapSeek) {
+    // ----------------------------------------------------
+    // New optional circular double tap seek overlay
+    // ----------------------------------------------------
+    // Scale animation for bounce effect on each double tap
+    var scaleTarget by remember { mutableStateOf(1f) }
+    val scale by animateFloatAsState(
       targetValue = scaleTarget,
       animationSpec = tween(durationMillis = 150),
-      label = "text_scale"
-  )
-  
-  LaunchedEffect(amount) {
+      label = "circular_double_tap_scale"
+    )
+
+    LaunchedEffect(amount) {
       if (amount != 0) {
-          scaleTarget = 1.2f
-          delay(100)
-          scaleTarget = 1f
+        scaleTarget = 1.15f
+        delay(100)
+        scaleTarget = 1f
       } else {
         scaleTarget = 1f
       }
-  }
+    }
 
-  Box(
-    modifier = modifier.fillMaxSize(),
-    contentAlignment = if (amount > 0) Alignment.CenterEnd else Alignment.CenterStart,
-  ) {
-    CompositionLocalProvider(
-      LocalRippleConfiguration provides playerRippleConfiguration,
-    ) {
-      if (amount != 0) {
+    val overlayAlpha by animateFloatAsState(
+      targetValue = if (isVisible) 1f else 0f,
+      animationSpec = tween(durationMillis = 150),
+      label = "circular_seek_alpha"
+    )
+    val overlayScale by animateFloatAsState(
+      targetValue = if (isVisible) 1f else 0.8f,
+      animationSpec = tween(durationMillis = 150),
+      label = "circular_seek_scale"
+    )
+
+    val circleShape = RoundedCornerShape(36.dp)
+
+    val glassModifier = if (enableGlass) {
+      Modifier.glassSurface(
+        shape = circleShape,
+        backgroundColor = Color.White.copy(alpha = 0.05f),
+        borderColor = Color.White.copy(alpha = 0.15f),
+        borderWidth = 1.dp,
+        outerShadowColor = Color.Black.copy(alpha = 0.00f),
+        outerShadowBlur = 0.dp,
+        outerShadowOffsetX = 0.dp,
+        outerShadowOffsetY = 0.dp,
+        innerHighlightColor = Color.White.copy(alpha = 0.35f),
+        innerHighlightBlur = 5.dp,
+        innerHighlightOffsetX = (-2).dp,
+        innerHighlightOffsetY = (-2).dp,
+        innerShadowColor = Color.Black.copy(alpha = 0.35f),
+        innerShadowBlur = 5.dp,
+        innerShadowOffsetX = 2.dp,
+        innerShadowOffsetY = 2.dp
+      )
+    } else {
+      Modifier.background(Color.Black.copy(alpha = 0.55f), shape = circleShape)
+    }
+
+    if (amount != 0 || overlayAlpha > 0.01f) {
+      Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = if (isRight) Alignment.CenterEnd else Alignment.CenterStart,
+      ) {
         Box(
           modifier = Modifier
             .fillMaxHeight()
             .fillMaxWidth(seekAreaFraction),
           contentAlignment = Alignment.Center,
         ) {
-          if (showOvals) {
+          Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+              .graphicsLayer {
+                alpha = overlayAlpha
+                scaleX = overlayScale * scale
+                scaleY = overlayScale * scale
+              }
+          ) {
+            // Rounded circle around the chevrons
             Box(
               modifier = Modifier
-                .fillMaxSize()
-                .clip(if (amount > 0) RightSideOvalShape else LeftSideOvalShape)
-                .background(Color.White.copy(alpha))
-                .indication(interactionSource, ripple()),
+                .size(72.dp)
+                .clip(circleShape)
+                .then(glassModifier),
+              contentAlignment = Alignment.Center
+            ) {
+              CombiningChevronsAnimation(
+                isRight = isRight,
+                trigger = animationTrigger
+              )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Seek time display right below the circle
+            Text(
+              text = if (isRight) "+${seekDisplayAmount}s" else "-${seekDisplayAmount}s",
+              fontSize = 18.sp,
+              fontWeight = FontWeight.ExtraBold,
+              color = Color.White
             )
           }
-          if (showSeekIcon || showSeekTime) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                if (amount < 0) {
-                    CombiningChevronsAnimation(isRight = false, trigger = amount)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "- ${abs(amount)}",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        color = Color.White,
-                        modifier = Modifier.scale(scale)
-                    )
-                } else {
-                    Text(
-                        text = "+ ${abs(amount)}",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        color = Color.White,
-                        modifier = Modifier.scale(scale)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    CombiningChevronsAnimation(isRight = true, trigger = amount)
-                }
+        }
+      }
+    }
+  } else {
+    // ----------------------------------------------------
+    // Original oval/ripple-based double tap seek overlay
+    // ----------------------------------------------------
+    val alpha by animateFloatAsState(if (amount == 0) 0f else 0.2f, label = "double_tap_animation_alpha")
+
+    // Scale animation for text
+    var scaleTarget by remember { mutableStateOf(1f) }
+    val scale by animateFloatAsState(
+        targetValue = scaleTarget,
+        animationSpec = tween(durationMillis = 150),
+        label = "text_scale"
+    )
+    
+    LaunchedEffect(amount) {
+        if (amount != 0) {
+            scaleTarget = 1.2f
+            delay(100)
+            scaleTarget = 1f
+        } else {
+          scaleTarget = 1f
+        }
+    }
+
+    Box(
+      modifier = modifier.fillMaxSize(),
+      contentAlignment = if (amount > 0) Alignment.CenterEnd else Alignment.CenterStart,
+    ) {
+      CompositionLocalProvider(
+        LocalRippleConfiguration provides playerRippleConfiguration,
+      ) {
+        if (amount != 0) {
+          Box(
+            modifier = Modifier
+              .fillMaxHeight()
+              .fillMaxWidth(seekAreaFraction),
+            contentAlignment = Alignment.Center,
+          ) {
+            if (showOvals) {
+              Box(
+                modifier = Modifier
+                  .fillMaxSize()
+                  .clip(if (amount > 0) RightSideOvalShape else LeftSideOvalShape)
+                  .background(Color.White.copy(alpha))
+                  .indication(interactionSource, ripple()),
+              )
+            }
+            if (showSeekIcon || showSeekTime) {
+              Row(
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.Center
+              ) {
+                  if (amount < 0) {
+                      CombiningChevronsAnimation(isRight = false, trigger = amount)
+                      Spacer(modifier = Modifier.width(8.dp))
+                      Text(
+                          text = "- ${abs(amount)}",
+                          fontSize = 22.sp,
+                          fontWeight = FontWeight.Bold,
+                          textAlign = TextAlign.Center,
+                          color = Color.White,
+                          modifier = Modifier.scale(scale)
+                      )
+                  } else {
+                      Text(
+                          text = "+ ${abs(amount)}",
+                          fontSize = 22.sp,
+                          fontWeight = FontWeight.Bold,
+                          textAlign = TextAlign.Center,
+                          color = Color.White,
+                          modifier = Modifier.scale(scale)
+                      )
+                      Spacer(modifier = Modifier.width(8.dp))
+                      CombiningChevronsAnimation(isRight = true, trigger = amount)
+                  }
+              }
             }
           }
         }

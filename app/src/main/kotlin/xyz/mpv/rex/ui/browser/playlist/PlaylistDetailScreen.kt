@@ -43,6 +43,8 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import xyz.mpv.rex.R
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -206,11 +208,11 @@ data class PlaylistDetailScreen(val playlistId: Int) : Screen {
                 onSearch = { },
                 expanded = false,
                 onExpandedChange = { },
-                placeholder = { Text("Search videos...") },
+                placeholder = { Text(stringResource(R.string.search_videos)) },
                 leadingIcon = {
                   Icon(
                     imageVector = Icons.Filled.Search,
-                    contentDescription = "Search",
+                    contentDescription = stringResource(R.string.search_empty_title),
                   )
                 },
                 trailingIcon = {
@@ -222,7 +224,7 @@ data class PlaylistDetailScreen(val playlistId: Int) : Screen {
                   ) {
                     Icon(
                       imageVector = Icons.Filled.Close,
-                      contentDescription = "Cancel",
+                      contentDescription = stringResource(R.string.generic_cancel),
                     )
                   }
                 },
@@ -301,7 +303,7 @@ data class PlaylistDetailScreen(val playlistId: Int) : Screen {
                   ) {
                     Icon(
                       imageVector = Icons.Filled.Check,
-                      contentDescription = "Done reordering",
+                      contentDescription = stringResource(R.string.done_reordering),
                       tint = MaterialTheme.colorScheme.primary,
                     )
                   }
@@ -317,7 +319,7 @@ data class PlaylistDetailScreen(val playlistId: Int) : Screen {
                     ) {
                       Icon(
                         imageVector = Icons.Filled.Search,
-                        contentDescription = "Search videos",
+                        contentDescription = stringResource(R.string.search_videos),
                         tint = MaterialTheme.colorScheme.onSurface,
                       )
                     }
@@ -330,7 +332,7 @@ data class PlaylistDetailScreen(val playlistId: Int) : Screen {
                       ) {
                         Icon(
                           imageVector = Icons.Outlined.SwapVert,
-                          contentDescription = "Reorder playlist",
+                          contentDescription = stringResource(R.string.reorder_playlist),
                           tint = MaterialTheme.colorScheme.onSurface,
                         )
                       }
@@ -532,9 +534,9 @@ data class PlaylistDetailScreen(val playlistId: Int) : Screen {
           onDismiss = { showUrlDialog = false },
           onCopy = {
             val clipboardManager = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-            val clip = android.content.ClipData.newPlainText("Stream URL", urlDialogContent)
+            val clip = android.content.ClipData.newPlainText(context.getString(R.string.stream_url), urlDialogContent)
             clipboardManager.setPrimaryClip(clip)
-            android.widget.Toast.makeText(context, "URL copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(context, R.string.copied_to_clipboard, android.widget.Toast.LENGTH_SHORT).show()
           }
         )
       }
@@ -572,8 +574,8 @@ private fun PlaylistVideoListContent(
     onLongClick = onVideoItemLongClick,
     onToggleSelection = { selectionManager.toggle(it) },
     modifier = modifier,
-    emptyTitle = "No videos in this playlist",
-    emptyMessage = "Add videos from the browser to build your playlist",
+    emptyTitle = stringResource(R.string.no_videos_in_playlist),
+    emptyMessage = stringResource(R.string.no_videos_in_playlist_desc),
     isInSelectionMode = selectionManager.isInSelectionMode,
     isReorderMode = isReorderMode,
     onReorder = onReorder,
@@ -589,7 +591,7 @@ private fun StreamUrlDialog(
 ) {
   androidx.compose.material3.AlertDialog(
     onDismissRequest = onDismiss,
-    title = { Text("Stream URL") },
+    title = { Text(stringResource(R.string.stream_url)) },
     text = {
       Text(
         text = url,
@@ -609,12 +611,12 @@ private fun StreamUrlDialog(
           contentDescription = null,
           modifier = Modifier.padding(end = 4.dp).size(18.dp)
         )
-        Text("Copy")
+        Text(stringResource(R.string.copy))
       }
     },
     dismissButton = {
       androidx.compose.material3.TextButton(onClick = onDismiss) {
-        Text("Close")
+        Text(stringResource(R.string.close))
       }
     },
   )
@@ -635,7 +637,7 @@ private fun RemoveFromPlaylistDialog(
     onDismissRequest = onDismiss,
     title = {
       Text(
-        text = "Remove $itemCount $itemText from playlist?",
+        text = stringResource(R.string.remove_from_playlist, itemCount, itemText),
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
       )
@@ -652,7 +654,11 @@ private fun RemoveFromPlaylistDialog(
           shape = MaterialTheme.shapes.extraLarge,
         ) {
           Text(
-            text = "The selected $itemText will be removed from this playlist. The original ${if (itemCount == 1) "file" else "files"} will not be deleted.",
+            text = stringResource(
+              R.string.remove_from_playlist_confirm,
+              itemText,
+              if (itemCount == 1) "file" else "files"
+            ),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -675,7 +681,7 @@ private fun RemoveFromPlaylistDialog(
         shape = MaterialTheme.shapes.extraLarge,
       ) {
         Text(
-          text = "Remove from Playlist",
+          text = stringResource(R.string.remove_from_playlist_action),
           fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
         )
       }
@@ -685,7 +691,7 @@ private fun RemoveFromPlaylistDialog(
         onClick = onDismiss,
         shape = MaterialTheme.shapes.extraLarge,
       ) {
-        Text("Cancel", fontWeight = androidx.compose.ui.text.font.FontWeight.Medium)
+        Text(stringResource(R.string.generic_cancel), fontWeight = androidx.compose.ui.text.font.FontWeight.Medium)
       }
     },
     containerColor = MaterialTheme.colorScheme.surface,

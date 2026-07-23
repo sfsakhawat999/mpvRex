@@ -34,6 +34,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.res.stringResource
+import xyz.mpv.rex.R
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -130,7 +132,7 @@ fun MediaInfoSheet(uri: Uri, onDismiss: () -> Unit) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Media Info",
+                    text = stringResource(R.string.media_info_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
@@ -147,16 +149,16 @@ fun MediaInfoSheet(uri: Uri, onDismiss: () -> Unit) {
                     FilledTonalIconButton(
                         onClick = {
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            val clip = ClipData.newPlainText("Media Info - $fileName", textContent!!)
+                            val clip = ClipData.newPlainText(context.getString(R.string.media_info_title) + " - $fileName", textContent!!)
                             clipboard.setPrimaryClip(clip)
-                            Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
                         },
                         colors = IconButtonDefaults.filledTonalIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         ),
                     ) {
-                        Icon(Icons.Filled.ContentCopy, contentDescription = "Copy")
+                        Icon(Icons.Filled.ContentCopy, contentDescription = stringResource(R.string.copy))
                     }
                     Spacer(modifier = Modifier.width(4.dp))
                     FilledTonalIconButton(
@@ -168,7 +170,7 @@ fun MediaInfoSheet(uri: Uri, onDismiss: () -> Unit) {
                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         ),
                     ) {
-                        Icon(Icons.Filled.Share, contentDescription = "Share")
+                        Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.generic_share))
                     }
                 }
             }

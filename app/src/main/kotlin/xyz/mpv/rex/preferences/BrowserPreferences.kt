@@ -58,13 +58,17 @@ class BrowserPreferences(
   // RexShorts preferences
   val enableShorts = preferenceStore.getBoolean("enable_shorts", true)
   val autoSwipeShorts = preferenceStore.getBoolean("shorts_auto_swipe", false)
+  val enableGlassShortsControls = preferenceStore.getBoolean("enable_glass_shorts_controls", false)
+  val showShortsBackButton = preferenceStore.getBoolean("show_shorts_back_button", true)
   val includeShortHorizontalVideos = preferenceStore.getBoolean("shorts_include_horizontal", false)
   val maxHorizontalVideoDurationMinutes = preferenceStore.getInt("shorts_max_horizontal_minutes", 1)
+  val shortsSourceFolders = preferenceStore.getStringSet("shorts_source_folders", emptySet())
 
   // Bottom navigation visibility preferences
   val enableTabRecents = preferenceStore.getBoolean("enable_tab_recents", true)
   val enableTabPlaylists = preferenceStore.getBoolean("enable_tab_playlists", true)
   val enableTabNetwork = preferenceStore.getBoolean("enable_tab_network", true)
+  val playedNetworkLinks = preferenceStore.getString("played_network_links", "")
 }
 
 /**

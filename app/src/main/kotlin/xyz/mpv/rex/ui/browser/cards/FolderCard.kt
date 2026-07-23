@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import xyz.mpv.rex.domain.media.model.VideoFolder
 import xyz.mpv.rex.utils.media.MediaFormatter
@@ -81,6 +82,7 @@ fun FolderCard(
     thumbnail = thumbnail,
     thumbnailAspectRatio = thumbnailAspectRatio,
     thumbnailSize = thumbnailSize,
+    titleTextAlign = if (isGridMode) TextAlign.Center else TextAlign.Start,
     thumbnailIcon = {
       Icon(
         customIcon ?: Icons.Filled.Folder,

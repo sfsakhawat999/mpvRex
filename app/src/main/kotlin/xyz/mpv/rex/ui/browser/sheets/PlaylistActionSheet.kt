@@ -32,6 +32,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.res.stringResource
+import xyz.mpv.rex.R
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -88,7 +90,7 @@ fun PlaylistActionSheet(
     ) {
       // Title
       Text(
-        text = "Playlist Options",
+        text = stringResource(R.string.playlist_options),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Medium,
         color = MaterialTheme.colorScheme.onSurface,
@@ -121,12 +123,12 @@ fun PlaylistActionSheet(
           )
           Column(modifier = Modifier.weight(1f)) {
             Text(
-              text = "Create Empty Playlist",
+              text = stringResource(R.string.create_empty_playlist),
               style = MaterialTheme.typography.bodyLarge,
               fontWeight = FontWeight.Medium,
             )
             Text(
-              text = "Create a new blank playlist",
+              text = stringResource(R.string.create_blank_playlist_desc),
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -158,12 +160,12 @@ fun PlaylistActionSheet(
           )
           Column(modifier = Modifier.weight(1f)) {
             Text(
-              text = "Add M3U Playlist from URL",
+              text = stringResource(R.string.add_m3u_playlist_from_url),
               style = MaterialTheme.typography.bodyLarge,
               fontWeight = FontWeight.Medium,
             )
             Text(
-              text = "Import a playlist from a web URL",
+              text = stringResource(R.string.import_playlist_url_desc),
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -191,14 +193,16 @@ fun PlaylistActionSheet(
           modifier = Modifier.padding(24.dp),
           verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+          val createdSuccessMsg = stringResource(R.string.playlist_created_successfully)
+          val createFailMsg = stringResource(R.string.failed_create_playlist)
           Text(
-            text = "Create Playlist",
+            text = stringResource(R.string.create_playlist),
             style = MaterialTheme.typography.headlineSmall,
           )
           OutlinedTextField(
             value = playlistName,
             onValueChange = { playlistName = it },
-            label = { Text("Playlist Name") },
+            label = { Text(stringResource(R.string.playlist_name)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
           )
@@ -210,7 +214,7 @@ fun PlaylistActionSheet(
               onClick = { showCreateDialog = false },
               shape = MaterialTheme.shapes.extraLarge,
             ) {
-              Text("Cancel")
+              Text(stringResource(R.string.generic_cancel))
             }
             Spacer(modifier = Modifier.width(8.dp))
             Button(
@@ -221,14 +225,14 @@ fun PlaylistActionSheet(
                       repository.createPlaylist(playlistName.trim())
                       android.widget.Toast.makeText(
                         context,
-                        "Playlist created successfully",
+                        createdSuccessMsg,
                         android.widget.Toast.LENGTH_SHORT
                       ).show()
                       showCreateDialog = false
                     } catch (e: Exception) {
                       android.widget.Toast.makeText(
                         context,
-                        "Failed to create playlist: ${e.message}",
+                        "$createFailMsg: ${e.message}",
                         android.widget.Toast.LENGTH_LONG
                       ).show()
                     }
@@ -238,7 +242,7 @@ fun PlaylistActionSheet(
               enabled = playlistName.isNotBlank(),
               shape = MaterialTheme.shapes.extraLarge,
             ) {
-              Text("Create")
+              Text(stringResource(R.string.create))
             }
           }
         }
@@ -263,13 +267,13 @@ fun PlaylistActionSheet(
           result.onSuccess {
             android.widget.Toast.makeText(
               context,
-              "M3U Playlist added successfully",
+              context.getString(R.string.m3u_playlist_added_successfully),
               android.widget.Toast.LENGTH_SHORT
             ).show()
           }.onFailure { error ->
             android.widget.Toast.makeText(
               context,
-              "Failed to add M3U playlist: ${error.message}",
+              context.getString(R.string.failed_add_m3u_playlist) + ": ${error.message}",
               android.widget.Toast.LENGTH_LONG
             ).show()
           }
@@ -291,7 +295,7 @@ fun PlaylistActionSheet(
           verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
           Text(
-            text = "Add M3U Playlist",
+            text = stringResource(R.string.add_m3u_playlist),
             style = MaterialTheme.typography.headlineSmall,
           )
 
@@ -299,7 +303,7 @@ fun PlaylistActionSheet(
             OutlinedTextField(
               value = playlistUrl,
               onValueChange = { playlistUrl = it },
-              label = { Text("Playlist URL") },
+              label = { Text(stringResource(R.string.playlist_url)) },
               singleLine = false,
               maxLines = 3,
               modifier = Modifier.fillMaxWidth(),
@@ -314,7 +318,7 @@ fun PlaylistActionSheet(
             ) {
               androidx.compose.material3.HorizontalDivider(modifier = Modifier.weight(1f))
               Text(
-                text = "OR",
+                text = stringResource(R.string.or),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
               )
@@ -335,7 +339,7 @@ fun PlaylistActionSheet(
                 modifier = Modifier.size(20.dp)
               )
               Spacer(modifier = Modifier.width(8.dp))
-              Text("Choose Local M3U File")
+              Text(stringResource(R.string.choose_local_m3u_file))
             }
 
             if (isLoading) {
@@ -350,6 +354,8 @@ fun PlaylistActionSheet(
             }
           }
 
+          val m3uSuccessMsg = stringResource(R.string.m3u_playlist_added_successfully)
+          val m3uFailMsg = stringResource(R.string.failed_add_m3u_playlist)
           Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
@@ -359,7 +365,7 @@ fun PlaylistActionSheet(
               enabled = !isLoading,
               shape = MaterialTheme.shapes.extraLarge,
             ) {
-              Text("Cancel")
+              Text(stringResource(R.string.generic_cancel))
             }
             Spacer(modifier = Modifier.width(8.dp))
             Button(
@@ -371,13 +377,13 @@ fun PlaylistActionSheet(
                     result.onSuccess {
                       android.widget.Toast.makeText(
                         context,
-                        "M3U Playlist added successfully",
+                        m3uSuccessMsg,
                         android.widget.Toast.LENGTH_SHORT
                       ).show()
                     }.onFailure { error ->
                       android.widget.Toast.makeText(
                         context,
-                        "Failed to add M3U playlist: ${error.message}",
+                        "$m3uFailMsg: ${error.message}",
                         android.widget.Toast.LENGTH_LONG
                       ).show()
                     }
@@ -389,7 +395,7 @@ fun PlaylistActionSheet(
               enabled = playlistUrl.isNotBlank() && !isLoading,
               shape = MaterialTheme.shapes.extraLarge,
             ) {
-              Text("Add from URL")
+              Text(stringResource(R.string.add_from_url))
             }
           }
         }

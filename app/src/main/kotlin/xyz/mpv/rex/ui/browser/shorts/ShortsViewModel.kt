@@ -12,6 +12,7 @@ import xyz.mpv.rex.database.repository.VideoMetadataCacheRepository
 import xyz.mpv.rex.domain.media.model.Video
 import xyz.mpv.rex.domain.thumbnail.ThumbnailRepository
 import xyz.mpv.rex.preferences.BrowserPreferences
+import xyz.mpv.rex.utils.media.MediaFormatter
 import xyz.mpv.rex.utils.media.ShortsDiscoveryOps
 import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +22,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.Dispatchers
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -62,18 +67,48 @@ class ShortsViewModel(
     private val seenPaths = mutableSetOf<String>()
 
     fun loadShorts(initialVideoPath: String? = null, blockedOnly: Boolean = false) {
+        _shorts.value = emptyList()
         viewModelScope.launch {
             _isLoading.value = true
             
             val finalShorts = if (blockedOnly) {
                 val blockedInDb = shortsMediaDao.getAllShortsMedia().filter { it.isBlocked }
+                val configuredFoldersSet = browserPreferences.shortsSourceFolders.get()
                 val flatFolders = xyz.mpv.rex.utils.storage.CoreMediaScanner.getFlatMediaFolders(getApplication())
-                val allVideos = flatFolders.flatMap { folder ->
+                val filteredFolders = if (configuredFoldersSet.isNotEmpty()) {
+                    flatFolders.filter { it.path in configuredFoldersSet }
+                } else {
+                    flatFolders
+                }
+                val allVideos = filteredFolders.flatMap { folder ->
                     xyz.mpv.rex.utils.storage.VideoScanUtils.getVideosInFolder(getApplication(), folder.path)
                 }.filter { !it.isAudio }
                 
                 val blockedPathsSet = blockedInDb.map { it.path }.toSet()
-                allVideos.filter { it.path in blockedPathsSet }
+                val blockedVideos = allVideos.filter { it.path in blockedPathsSet }
+                
+                val fileTriples = blockedVideos.mapNotNull { video ->
+                    val file = java.io.File(video.path)
+                    if (file.exists()) Triple(file, video.uri, video.displayName) else null
+                }
+                val metadataMap = metadataCache.getOrExtractMetadataBatch(fileTriples)
+                blockedVideos.map { video ->
+                    val metadata = metadataMap[video.path]
+                    if (metadata != null) {
+                        video.copy(
+                            duration = metadata.durationMs,
+                            durationFormatted = MediaFormatter.formatDuration(metadata.durationMs),
+                            width = metadata.width,
+                            height = metadata.height,
+                            fps = metadata.fps,
+                            resolution = MediaFormatter.formatResolutionWithFps(metadata.width, metadata.height, metadata.fps),
+                            hasEmbeddedSubtitles = metadata.hasEmbeddedSubtitles,
+                            subtitleCodec = metadata.subtitleCodec
+                        )
+                    } else {
+                        video
+                    }
+                }
             } else {
                 ShortsDiscoveryOps.discoverShorts(
                     getApplication(),
@@ -210,6 +245,24 @@ class ShortsViewModel(
             val newEntity = current?.copy(isBlocked = !isBlocked)
                 ?: ShortsMediaEntity(path = video.path, isBlocked = true, addedDate = System.currentTimeMillis())
             shortsMediaDao.upsert(newEntity)
+        }
+    }
+
+    fun deleteShort(video: Video) {
+        viewModelScope.launch {
+            val currentList = _shorts.value
+            val updatedList = currentList.filter { it.path != video.path }
+            _shorts.value = updatedList
+            _totalShortsCount.value = updatedList.size
+            shortsMediaDao.deleteByPath(video.path)
+
+            withContext(NonCancellable + Dispatchers.IO) {
+                delay(1000)
+                val file = java.io.File(video.path)
+                if (file.exists()) {
+                    file.delete()
+                }
+            }
         }
     }
 

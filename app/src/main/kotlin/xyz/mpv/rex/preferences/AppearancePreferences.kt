@@ -28,6 +28,8 @@ class AppearancePreferences(
   val useSystemFont = preferenceStore.getBoolean("use_system_font", false)
   val unlimitedNameLines = preferenceStore.getBoolean("unlimited_name_lines", false)
   val hidePlayerButtonsBackground = preferenceStore.getBoolean("hide_player_buttons_background", false)
+  val enableGlassPlayerControls = preferenceStore.getBoolean("enable_glass_player_controls", false)
+  val enableGlassSeekbarBackground = preferenceStore.getBoolean("enable_glass_seekbar_background", false)
   val enableBounceAnimation = preferenceStore.getBoolean("enable_bounce_animation", false)
   val showCommunityIcon = preferenceStore.getBoolean("show_community_icon", true)
 
@@ -35,7 +37,7 @@ class AppearancePreferences(
   val showUnplayedOldVideoLabel = preferenceStore.getBoolean("show_unplayed_old_video_label", true)
   val unplayedOldVideoDays = preferenceStore.getInt("unplayed_old_video_days", 7)
   val showNetworkThumbnails = preferenceStore.getBoolean("show_network_thumbnails", false)
-  val seekbarStyle = preferenceStore.getEnum("seekbar_style", SeekbarStyle.Wavy)
+  val seekbarStyle = preferenceStore.getEnum("seekbar_style", SeekbarStyle.Standard)
   val playerAlwaysDarkMode = preferenceStore.getBoolean("player_always_dark_mode", true)
 
   val thumbnailStrategy = preferenceStore.getEnum("thumbnail_strategy", ThumbnailStrategy.FirstFrame)
@@ -54,19 +56,19 @@ class AppearancePreferences(
   val topRightControls =
     preferenceStore.getString(
       "top_right_controls",
-      "CURRENT_CHAPTER,DECODER,AUDIO_TRACK,SUBTITLES,AMBIENT_MODE,MORE_OPTIONS",
+      "CURRENT_CHAPTER,DECODER,AUDIO_TRACK,SUBTITLES,MORE_OPTIONS",
     )
 
   val bottomRightControls =
     preferenceStore.getString(
       "bottom_right_controls",
-      "FRAME_NAVIGATION,VIDEO_ZOOM,PICTURE_IN_PICTURE,ASPECT_RATIO",
+      "PICTURE_IN_PICTURE,ASPECT_RATIO",
     )
 
   val bottomLeftControls =
     preferenceStore.getString(
       "bottom_left_controls",
-      "BACKGROUND_PLAYBACK,LOCK_CONTROLS,SCREEN_ROTATION,PLAYBACK_SPEED,REPEAT_MODE,SHUFFLE,AB_LOOP",
+      "LOCK_CONTROLS,BACKGROUND_PLAYBACK,SCREEN_ROTATION,PLAYBACK_SPEED,REPEAT_MODE,SHUFFLE,AB_LOOP",
     )
 
   val portraitBottomControls =
@@ -78,7 +80,7 @@ class AppearancePreferences(
   val moreSheetControls =
     preferenceStore.getString(
       "more_sheet_controls",
-      "SCREEN_ROTATION,DECODER,AUDIO_TRACK,SUBTITLES,PLAYBACK_SPEED,REPEAT_MODE,SHUFFLE,VIDEO_ZOOM,FRAME_NAVIGATION,ASPECT_RATIO,PICTURE_IN_PICTURE,LOCK_CONTROLS",
+      "SCREEN_ROTATION,DECODER,AUDIO_TRACK,SUBTITLES,PLAYBACK_SPEED,REPEAT_MODE,SHUFFLE,VIDEO_ZOOM,FRAME_NAVIGATION,ASPECT_RATIO,PICTURE_IN_PICTURE,LOCK_CONTROLS,SLEEP_TIMER",
     )
 
   fun parseButtons(

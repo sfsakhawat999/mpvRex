@@ -204,18 +204,53 @@ class HistoryManager(
     suspend fun markAs(filePath: String, fileName: String, duration: Long, state: MarkAsState) {
         when (state) {
             MarkAsState.New -> {
-                // Remove progress so the card appears unplayed. RecentlyPlayed entry is kept
-                // so the file remains in history but with no position indicator.
-                playbackStateRepository.deleteByTitle(fileName)
+                // Remove progress, clear watched state, delete from history, and force the NEW badge by setting timeRemaining = -1.
+                val existing = playbackStateRepository.getVideoDataByTitle(fileName)
+                playbackStateRepository.upsert(
+                    xyz.mpv.rex.database.entities.PlaybackStateEntity(
+                        mediaTitle = fileName,
+                        lastPosition = 0,
+                        playbackSpeed = existing?.playbackSpeed ?: 1.0,
+                        videoZoom = existing?.videoZoom ?: 0f,
+                        sid = existing?.sid ?: -1,
+                        secondarySid = existing?.secondarySid ?: -1,
+                        subDelay = existing?.subDelay ?: 0,
+                        subSpeed = existing?.subSpeed ?: 1.0,
+                        aid = existing?.aid ?: -1,
+                        audioDelay = existing?.audioDelay ?: 0,
+                        timeRemaining = -1,
+                        hasBeenWatched = false,
+                    )
+                )
+                recentlyPlayedRepository.deleteByFilePath(filePath)
             }
             MarkAsState.LastPlayed -> {
+                // Clear watched status and progress first when marking as last played
+                val durationSeconds = (duration / 1000).toInt().coerceAtLeast(0)
+                val existing = playbackStateRepository.getVideoDataByTitle(fileName)
+                playbackStateRepository.upsert(
+                    xyz.mpv.rex.database.entities.PlaybackStateEntity(
+                        mediaTitle = fileName,
+                        lastPosition = 0,
+                        playbackSpeed = existing?.playbackSpeed ?: 1.0,
+                        videoZoom = existing?.videoZoom ?: 0f,
+                        sid = existing?.sid ?: -1,
+                        secondarySid = existing?.secondarySid ?: -1,
+                        subDelay = existing?.subDelay ?: 0,
+                        subSpeed = existing?.subSpeed ?: 1.0,
+                        aid = existing?.aid ?: -1,
+                        audioDelay = existing?.audioDelay ?: 0,
+                        timeRemaining = durationSeconds,
+                        hasBeenWatched = false,
+                    )
+                )
                 // Upsert a RecentlyPlayed entry with timestamp = now so the file surfaces
                 // at the top of the Recently Played list.
                 recentlyPlayedRepository.addRecentlyPlayed(
                     filePath = filePath,
                     fileName = fileName,
                     duration = duration,
-                    launchSource = "mark_as",
+                    launchSource = "mark_as_last_played",
                 )
             }
             MarkAsState.Finished -> {
@@ -237,10 +272,35 @@ class HistoryManager(
                         hasBeenWatched = true,
                     )
                 )
+                // Also add/bump in recently played history
+                recentlyPlayedRepository.addRecentlyPlayed(
+                    filePath = filePath,
+                    fileName = fileName,
+                    duration = duration,
+                    launchSource = "mark_as",
+                )
             }
             MarkAsState.None -> {
-                // Wipe everything so the file is completely neutral — no badge, no progress.
-                playbackStateRepository.deleteByTitle(fileName)
+                // Suppress "NEW" badge and reset progress by inserting an inactive state.
+                val durationSeconds = (duration / 1000).toInt().coerceAtLeast(0)
+                val existing = playbackStateRepository.getVideoDataByTitle(fileName)
+                playbackStateRepository.upsert(
+                    xyz.mpv.rex.database.entities.PlaybackStateEntity(
+                        mediaTitle = fileName,
+                        lastPosition = 0,
+                        playbackSpeed = existing?.playbackSpeed ?: 1.0,
+                        videoZoom = existing?.videoZoom ?: 0f,
+                        sid = existing?.sid ?: -1,
+                        secondarySid = existing?.secondarySid ?: -1,
+                        subDelay = existing?.subDelay ?: 0,
+                        subSpeed = existing?.subSpeed ?: 1.0,
+                        aid = existing?.aid ?: -1,
+                        audioDelay = existing?.audioDelay ?: 0,
+                        timeRemaining = durationSeconds,
+                        hasBeenWatched = false,
+                    )
+                )
+                // Also clear from recently played history
                 recentlyPlayedRepository.deleteByFilePath(filePath)
             }
         }

@@ -17,8 +17,8 @@ android {
     applicationId = "xyz.mpv.rex"
     minSdk = 26
     targetSdk = 36
-    versionCode = 204
-    versionName = "4.1.0"
+    versionCode = 207
+    versionName = "4.3.0"
 
     vectorDrawables {
       useSupportLibrary = true
@@ -199,7 +199,7 @@ dependencies {
   implementation(libs.truetype.parser)
   implementation(libs.fsaf)
   implementation(libs.mediainfo.lib)
-  implementation(files("libs/mpv-android-lib-v0.0.1.aar"))
+  implementation(libs.mpv.lib)
 
   // Network protocol libraries
   implementation(libs.smbj)

@@ -202,6 +202,11 @@ class MPVView(
     return true
   }
 
+  // Any property consumed via `MPVLib.propX["..."]` must also be listed here.
+  // `MPVLib.Property.map` is a process-scoped cache and skips `observeProperty`
+  // on hits — so without an entry here the property is never re-registered on
+  // fresh native handles created after the previous one was destroyed while the
+  // JVM stayed alive (e.g. via MediaPlaybackService).
   private val observedProps =
     mapOf(
       "pause" to MPVLib.MpvFormat.MPV_FORMAT_FLAG,
@@ -210,6 +215,31 @@ class MPVView(
       "video-params/w" to MPVLib.MpvFormat.MPV_FORMAT_INT64,
       "video-params/h" to MPVLib.MpvFormat.MPV_FORMAT_INT64,
       "eof-reached" to MPVLib.MpvFormat.MPV_FORMAT_FLAG,
+      "time-pos" to MPVLib.MpvFormat.MPV_FORMAT_INT64,
+      "duration" to MPVLib.MpvFormat.MPV_FORMAT_INT64,
+      "volume-max" to MPVLib.MpvFormat.MPV_FORMAT_INT64,
+      "track-list" to MPVLib.MpvFormat.MPV_FORMAT_NODE,
+      "chapter-list" to MPVLib.MpvFormat.MPV_FORMAT_NODE,
+      "speed" to MPVLib.MpvFormat.MPV_FORMAT_DOUBLE,
+      "chapter" to MPVLib.MpvFormat.MPV_FORMAT_INT64,
+      "volume" to MPVLib.MpvFormat.MPV_FORMAT_INT64,
+      "hwdec-current" to MPVLib.MpvFormat.MPV_FORMAT_STRING,
+      "media-title" to MPVLib.MpvFormat.MPV_FORMAT_STRING,
+      "demuxer-cache-duration" to MPVLib.MpvFormat.MPV_FORMAT_DOUBLE,
+      "cache-buffering-state" to MPVLib.MpvFormat.MPV_FORMAT_INT64,
+      "audio-delay" to MPVLib.MpvFormat.MPV_FORMAT_DOUBLE,
+      "sub-delay" to MPVLib.MpvFormat.MPV_FORMAT_DOUBLE,
+      "sub-speed" to MPVLib.MpvFormat.MPV_FORMAT_DOUBLE,
+      "sub-scale" to MPVLib.MpvFormat.MPV_FORMAT_DOUBLE,
+      "sub-pos" to MPVLib.MpvFormat.MPV_FORMAT_INT64,
+      "sub-bold" to MPVLib.MpvFormat.MPV_FORMAT_FLAG,
+      "sub-italic" to MPVLib.MpvFormat.MPV_FORMAT_FLAG,
+      "sub-justify" to MPVLib.MpvFormat.MPV_FORMAT_STRING,
+      "sub-font" to MPVLib.MpvFormat.MPV_FORMAT_STRING,
+      "sub-font-size" to MPVLib.MpvFormat.MPV_FORMAT_INT64,
+      "sub-border-style" to MPVLib.MpvFormat.MPV_FORMAT_STRING,
+      "sub-outline-size" to MPVLib.MpvFormat.MPV_FORMAT_INT64,
+      "sub-shadow-offset" to MPVLib.MpvFormat.MPV_FORMAT_INT64,
       "user-data/mpvex/show_text" to MPVLib.MpvFormat.MPV_FORMAT_STRING,
       "user-data/mpvex/toggle_ui" to MPVLib.MpvFormat.MPV_FORMAT_STRING,
       "user-data/mpvex/show_panel" to MPVLib.MpvFormat.MPV_FORMAT_STRING,

@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
@@ -198,37 +199,6 @@ class PlayerViewModel(
   // Gesture state for vertical bouncing animation
   val isVerticalGestureActive = MutableStateFlow(false)
 
-  init {
-    // Poll precise position only when playing
-    viewModelScope.launch {
-      while (isActive) {
-        val time = MPVLib.getPropertyDouble("time-pos")
-        if (time != null) {
-          _precisePosition.value = time.toFloat()
-        }
-        delay(16) // ~60fps updates
-      }
-    }
-
-    // Update precise duration when the integer duration changes (avoid polling)
-    viewModelScope.launch {
-      MPVLib.propInt["duration"].collect { _ ->
-        val dur = MPVLib.getPropertyDouble("duration")
-        if (dur != null && dur > 0) {
-          _preciseDuration.value = dur.toFloat()
-
-          // --- AMBIENT FIX: Adapt shader to new file dimensions ---
-          ambientModeManager.resetAmbientMode()
-          viewModelScope.launch {
-            // Slight delay ensures MPV's video-params (w/h/crop) are fully populated
-            delay(250)
-            ambientModeManager.updateAmbientStretch()
-          }
-          // --------------------------------------------------------
-        }
-      }
-    }
-  }
   val maxVolume = host.audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
 
   val subtitleTracks: StateFlow<List<TrackNode>> =
@@ -450,6 +420,48 @@ class PlayerViewModel(
     }
 
     _customButtonManager.setup()
+
+    // Poll precise position only when playing and controls or seekbar is visible
+    viewModelScope.launch {
+      combine(
+        MPVLib.propBoolean["pause"],
+        controlsShown,
+        seekBarShown
+      ) { isPaused, controlsVisible, seekbarVisible ->
+        val pausedState = isPaused ?: true
+        val uiVisible = controlsVisible || seekbarVisible
+        !pausedState && uiVisible
+      }.collectLatest { shouldPoll ->
+        if (shouldPoll) {
+          while (isActive) {
+            val time = MPVLib.getPropertyDouble("time-pos")
+            if (time != null) {
+              _precisePosition.value = time.toFloat()
+            }
+            delay(16) // ~60fps updates
+          }
+        }
+      }
+    }
+
+    // Update precise duration when the integer duration changes (avoid polling)
+    viewModelScope.launch {
+      MPVLib.propInt["duration"].collect { _ ->
+        val dur = MPVLib.getPropertyDouble("duration")
+        if (dur != null && dur > 0) {
+          _preciseDuration.value = dur.toFloat()
+
+          // --- AMBIENT FIX: Adapt shader to new file dimensions ---
+          ambientModeManager.resetAmbientMode()
+          viewModelScope.launch {
+            // Slight delay ensures MPV's video-params (w/h/crop) are fully populated
+            delay(250)
+            ambientModeManager.updateAmbientStretch()
+          }
+          // --------------------------------------------------------
+        }
+      }
+    }
   }
 
   fun onMpvCoreInitialized() {
@@ -923,36 +935,73 @@ class PlayerViewModel(
 
   private var _cachedVideoRotation = 0
 
-  // Restores the user's preferred video aspect ratio and resets pan to center
+  // Restores the user's preferred video aspect ratio and restores pan/zoom settings
   fun resetVisualPreferences() {
 
     // Cache the video rotation once it's available (used by stretch mode)
     _cachedVideoRotation = MPVLib.getPropertyInt("video-params/rotate") ?: 0
     
-    // 1. Apply saved aspect ratio preference
+    // 1. Apply saved aspect ratio preference without overriding active zoom and pan
     val savedAspect = playerPreferences.defaultVideoAspect.get()
     val savedCustomRatio = playerPreferences.defaultCustomAspectRatio.get()
 
     if (savedCustomRatio > 0) {
-      setCustomAspectRatio(savedCustomRatio)
+      setCustomAspectRatio(savedCustomRatio, resetZoomAndPan = false)
     } else {
-      changeVideoAspect(savedAspect, showUpdate = false)
+      changeVideoAspect(savedAspect, showUpdate = false, resetZoomAndPan = false)
     }
-    // 2. Reset pan to neutral for the new file
-    if (_videoPanX.value != 0f || _videoPanY.value != 0f) {
-      _videoPanX.value = 0f
-      _videoPanY.value = 0f
-      runCatching {
-        MPVLib.setPropertyDouble("video-pan-x", 0.0)
-        MPVLib.setPropertyDouble("video-pan-y", 0.0)
-      }
+
+    // 2. Load zoom and pan preferences or sync from mpv.conf/engine defaults
+    val prefZoom = playerPreferences.defaultVideoZoom.get()
+    val prefPanX = playerPreferences.defaultVideoPanX.get()
+    val prefPanY = playerPreferences.defaultVideoPanY.get()
+
+    if (prefZoom != 0f) {
+      MPVLib.setPropertyDouble("video-zoom", prefZoom.toDouble())
+      _videoZoom.value = prefZoom
+    } else {
+      val mpvZoom = MPVLib.getPropertyDouble("video-zoom")?.toFloat() ?: 0f
+      _videoZoom.value = mpvZoom
+    }
+
+    if (prefPanX != 0f || prefPanY != 0f) {
+      MPVLib.setPropertyDouble("video-pan-x", prefPanX.toDouble())
+      MPVLib.setPropertyDouble("video-pan-y", prefPanY.toDouble())
+      _videoPanX.value = prefPanX
+      _videoPanY.value = prefPanY
+    } else {
+      val mpvPanX = MPVLib.getPropertyDouble("video-pan-x")?.toFloat() ?: 0f
+      val mpvPanY = MPVLib.getPropertyDouble("video-pan-y")?.toFloat() ?: 0f
+      _videoPanX.value = mpvPanX
+      _videoPanY.value = mpvPanY
+    }
+
+    val prefAdvancedZoomEnabled = playerPreferences.advancedZoomEnabled.get()
+    _advancedZoomEnabled.value = prefAdvancedZoomEnabled
+    if (prefAdvancedZoomEnabled) {
+      val prefScaleX = playerPreferences.defaultVideoScaleX.get()
+      val prefScaleY = playerPreferences.defaultVideoScaleY.get()
+      MPVLib.setPropertyDouble("video-scale-x", prefScaleX.toDouble())
+      MPVLib.setPropertyDouble("video-scale-y", prefScaleY.toDouble())
+      _videoScaleX.value = prefScaleX
+      _videoScaleY.value = prefScaleY
+    } else {
+      MPVLib.setPropertyDouble("video-scale-x", 1.0)
+      MPVLib.setPropertyDouble("video-scale-y", 1.0)
+      _videoScaleX.value = 1f
+      _videoScaleY.value = 1f
     }
   }
 
   fun changeVideoAspect(
     aspect: VideoAspect,
     showUpdate: Boolean = true,
+    resetZoomAndPan: Boolean = true,
   ) {
+    if (resetZoomAndPan) {
+      setVideoZoom(0f)
+      setVideoPan(0f, 0f)
+    }
     when (aspect) {
       VideoAspect.Fit -> {
         // To FIT: Reset both properties to their defaults.
@@ -1001,7 +1050,14 @@ class PlayerViewModel(
     }
   }
 
-  fun setCustomAspectRatio(ratio: Double) {
+  fun setCustomAspectRatio(
+    ratio: Double,
+    resetZoomAndPan: Boolean = true,
+  ) {
+    if (resetZoomAndPan) {
+      setVideoZoom(0f)
+      setVideoPan(0f, 0f)
+    }
     MPVLib.setPropertyDouble("panscan", 0.0)
     MPVLib.setPropertyDouble("video-aspect-override", ratio)
     _currentAspectRatio.value = ratio
@@ -1205,6 +1261,40 @@ class PlayerViewModel(
     setVideoZoom(0f)
   }
 
+  private val _advancedZoomEnabled = MutableStateFlow(false)
+  val advancedZoomEnabled: StateFlow<Boolean> = _advancedZoomEnabled.asStateFlow()
+
+  private val _videoScaleX = MutableStateFlow(1f)
+  val videoScaleX: StateFlow<Float> = _videoScaleX.asStateFlow()
+
+  private val _videoScaleY = MutableStateFlow(1f)
+  val videoScaleY: StateFlow<Float> = _videoScaleY.asStateFlow()
+
+  fun setAdvancedZoomEnabled(enabled: Boolean) {
+    _advancedZoomEnabled.value = enabled
+    if (enabled) {
+      setVideoZoom(0f)
+    } else {
+      setVideoScaleX(1f)
+      setVideoScaleY(1f)
+    }
+  }
+
+  fun setVideoScaleX(scale: Float) {
+    _videoScaleX.value = scale
+    MPVLib.setPropertyDouble("video-scale-x", scale.toDouble())
+  }
+
+  fun setVideoScaleY(scale: Float) {
+    _videoScaleY.value = scale
+    MPVLib.setPropertyDouble("video-scale-y", scale.toDouble())
+  }
+
+  fun resetAdvancedZoom() {
+    setVideoScaleX(1f)
+    setVideoScaleY(1f)
+  }
+
   // ==================== Frame Navigation ====================
 
   fun updateFrameInfo() {
@@ -1235,10 +1325,6 @@ class PlayerViewModel(
       }
       updateFrameInfo()
       showFrameInfoOverlay()
-      resetFrameNavigationTimer()
-    } else {
-      // Cancel timer when manually collapsing
-      frameNavigationCollapseJob?.cancel()
     }
   }
 
@@ -1257,8 +1343,6 @@ class PlayerViewModel(
       updateFrameInfo()
       withContext(Dispatchers.Main) {
         showFrameInfoOverlay()
-        // Reset the inactivity timer
-        resetFrameNavigationTimer()
       }
     }
   }
@@ -1274,20 +1358,6 @@ class PlayerViewModel(
       updateFrameInfo()
       withContext(Dispatchers.Main) {
         showFrameInfoOverlay()
-        // Reset the inactivity timer
-        resetFrameNavigationTimer()
-      }
-    }
-  }
-
-  private var frameNavigationCollapseJob: Job? = null
-
-  fun resetFrameNavigationTimer() {
-    frameNavigationCollapseJob?.cancel()
-    frameNavigationCollapseJob = viewModelScope.launch {
-      delay(10000) // 10 seconds
-      if (_isFrameNavigationExpanded.value) {
-        _isFrameNavigationExpanded.value = false
       }
     }
   }
@@ -1424,7 +1494,8 @@ class PlayerViewModel(
 
   fun hasPlaylistSupport(): Boolean {
     val playlistModeEnabled = playerPreferences.playlistMode.get()
-    return playlistModeEnabled && _playlistManager.playlist.value.isNotEmpty()
+    val isM3u = _playlistManager.isM3uPlaylist
+    return (playlistModeEnabled || isM3u) && _playlistManager.playlist.value.isNotEmpty()
   }
 
   fun getPlaylistInfo(): String? {
@@ -1455,7 +1526,7 @@ class PlayerViewModel(
     } else 0f
 
     return _playlistManager.playlist.value.mapIndexed { index, uri ->
-      val title = activity.getPlaylistItemTitle(uri)
+      val title = _playlistManager.getTitleAt(index) ?: activity.getPlaylistItemTitle(uri)
       // Path is not used for thumbnail loading - thumbnails are loaded directly from URI
       // Keep it for cache key compatibility
       val path = uri.toString()
@@ -1678,6 +1749,46 @@ class PlayerViewModel(
   fun playPlaylistItem(index: Int) {
     val activity = host as? PlayerActivity ?: return
     activity.playPlaylistItem(index)
+  }
+
+  fun reorderPlaylistItem(fromIndex: Int, toIndex: Int) {
+    _playlistManager.reorder(fromIndex, toIndex)
+    refreshPlaylistItems()
+  }
+
+  fun removePlaylistItem(index: Int) {
+    val wasPlaying = index == _playlistManager.currentIndex.value
+    _playlistManager.removeAt(index)
+    refreshPlaylistItems()
+    
+    if (wasPlaying) {
+      if (_playlistManager.playlist.value.isNotEmpty()) {
+        val nextIndex = _playlistManager.currentIndex.value
+        playPlaylistItem(nextIndex)
+      } else {
+        (host as? PlayerActivity)?.finish()
+      }
+    }
+  }
+
+  fun removePlaylistItems(indexes: List<Int>) {
+    val currentIdx = _playlistManager.currentIndex.value
+    val wasPlayingRemoved = indexes.contains(currentIdx)
+    
+    val sortedIndexes = indexes.sortedDescending()
+    sortedIndexes.forEach { index ->
+      _playlistManager.removeAt(index)
+    }
+    refreshPlaylistItems()
+    
+    if (wasPlayingRemoved) {
+      if (_playlistManager.playlist.value.isNotEmpty()) {
+        val nextIndex = _playlistManager.currentIndex.value.coerceIn(0, _playlistManager.playlist.value.size - 1)
+        playPlaylistItem(nextIndex)
+      } else {
+        (host as? PlayerActivity)?.finish()
+      }
+    }
   }
 
   /**

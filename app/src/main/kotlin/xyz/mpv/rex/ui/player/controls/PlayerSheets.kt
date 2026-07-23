@@ -18,6 +18,8 @@ import xyz.mpv.rex.ui.player.controls.components.sheets.AspectRatioSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.AudioTracksSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.ChaptersSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.CustomSkipDurationSheet
+import xyz.mpv.rex.ui.player.controls.components.sheets.SleepTimerSheet
+import xyz.mpv.rex.ui.player.controls.components.sheets.VideoZoomSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.DecodersSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.FrameNavigationSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.MoreSheet
@@ -25,7 +27,6 @@ import xyz.mpv.rex.ui.player.controls.components.sheets.PlaybackSpeedSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.PlaylistSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.SubtitlesSheet
 import xyz.mpv.rex.ui.player.controls.components.sheets.OnlineSubtitleSearchSheet
-import xyz.mpv.rex.ui.player.controls.components.sheets.VideoZoomSheet
 import xyz.mpv.rex.utils.media.MediaInfoParser
 import dev.vivvvek.seeker.Segment
 import kotlinx.collections.immutable.ImmutableList
@@ -104,7 +105,7 @@ fun PlayerSheets(
                   java.io.File(videoPath).parent
               } else null
 
-              videoDir ?: customFolder.takeIf { it.isNotBlank() } ?: savedPickerPath ?: android.os.Environment.getExternalStorageDirectory().absolutePath
+              videoDir ?: customFolder.takeIf { it.isNotBlank() } ?: savedPickerPath.takeIf { it.isNotBlank() } ?: android.os.Environment.getExternalStorageDirectory().absolutePath
           }
 
           xyz.mpv.rex.ui.browser.dialogs.FilePickerDialog(
@@ -217,10 +218,58 @@ fun PlayerSheets(
           if (it == null) return@rememberLauncherForActivityResult
           onAddAudio(it)
         }
+
+      val audioPreferences = koinInject<xyz.mpv.rex.preferences.AudioPreferences>()
+      val savedPickerPath = audioPreferences.pickerPath.get()
+      val openAtVideoLocation = audioPreferences.openPickerAtVideoLocation.get()
+
+      val currentMediaTitle = viewModel.currentMediaTitle
+      val matchToName = if (currentMediaTitle.isNotBlank()) {
+          // Remove extension if present to improve matching
+          currentMediaTitle.substringBeforeLast(".")
+      } else null
+
+      var showFilePicker by remember { mutableStateOf(false) }
+
+      if (showFilePicker) {
+          val initialPath = remember {
+              val videoPath = `is`.xyz.mpv.MPVLib.getPropertyString("path")
+              val videoDir = if (openAtVideoLocation && videoPath != null && videoPath.startsWith("/")) {
+                  java.io.File(videoPath).parent
+              } else null
+
+              videoDir ?: savedPickerPath.takeIf { it.isNotBlank() } ?: android.os.Environment.getExternalStorageDirectory().absolutePath
+          }
+
+          xyz.mpv.rex.ui.browser.dialogs.FilePickerDialog(
+              isOpen = true,
+              title = "Select Audio Track",
+              currentPath = initialPath,
+              onDismiss = { showFilePicker = false },
+              onPathChanged = { path ->
+                  if (path != null) {
+                      audioPreferences.pickerPath.set(path)
+                  }
+              },
+              onFileSelected = { path ->
+                  showFilePicker = false
+                  onAddAudio(Uri.parse("file://$path"))
+              },
+              onSystemPickerRequest = {
+                  showFilePicker = false
+                  audioPicker.launch(arrayOf("*/*"))
+              },
+              matchToName = matchToName,
+              allowedExtensions = listOf(
+                "mp3", "m4a", "ogg", "flac", "wav", "opus", "aac", "wma", "ac3", "eac3", "dts", "mka", "m4b", "ape"
+              )
+          )
+      }
+
       AudioTracksSheet(
         tracks = audioTracks,
         onSelect = onSelectAudio,
-        onAddAudioTrack = { audioPicker.launch(arrayOf("*/*")) },
+        onAddAudioTrack = { showFilePicker = true },
         onOpenDelayPanel = { onOpenPanel(Panels.AudioDelay) },
         onDismissRequest,
       )
@@ -283,6 +332,12 @@ fun PlayerSheets(
       val playerPreferences = koinInject<xyz.mpv.rex.preferences.PlayerPreferences>()
       val customRatiosSet by playerPreferences.customAspectRatios.collectAsState()
       val currentRatio by viewModel.currentAspectRatio.composeCollectAsState()
+      val videoZoom by viewModel.videoZoom.composeCollectAsState()
+      val videoPanX by viewModel.videoPanX.composeCollectAsState()
+      val videoPanY by viewModel.videoPanY.composeCollectAsState()
+      val advancedZoomEnabled by viewModel.advancedZoomEnabled.composeCollectAsState()
+      val videoScaleX by viewModel.videoScaleX.composeCollectAsState()
+      val videoScaleY by viewModel.videoScaleY.composeCollectAsState()
       val customRatios =
         customRatiosSet.mapNotNull { str ->
           val parts = str.split("|")
@@ -300,6 +355,45 @@ fun PlayerSheets(
       AspectRatioSheet(
         currentRatio = currentRatio,
         customRatios = customRatios,
+        videoZoom = videoZoom,
+        videoPanX = videoPanX,
+        videoPanY = videoPanY,
+        onZoomChange = { zoom ->
+          viewModel.setVideoZoom(zoom)
+          playerPreferences.defaultVideoZoom.set(zoom)
+        },
+        onPanXChange = { panX ->
+          viewModel.setVideoPan(panX, viewModel.videoPanY.value)
+          playerPreferences.defaultVideoPanX.set(panX)
+        },
+        onPanYChange = { panY ->
+          viewModel.setVideoPan(viewModel.videoPanX.value, panY)
+          playerPreferences.defaultVideoPanY.set(panY)
+        },
+        advancedZoomEnabled = advancedZoomEnabled,
+        videoScaleX = videoScaleX,
+        videoScaleY = videoScaleY,
+        onAdvancedZoomToggle = { enabled ->
+          viewModel.setAdvancedZoomEnabled(enabled)
+          playerPreferences.advancedZoomEnabled.set(enabled)
+          if (!enabled) {
+            playerPreferences.defaultVideoScaleX.set(1f)
+            playerPreferences.defaultVideoScaleY.set(1f)
+          }
+        },
+        onScaleXChange = { scale ->
+          viewModel.setVideoScaleX(scale)
+          playerPreferences.defaultVideoScaleX.set(scale)
+        },
+        onScaleYChange = { scale ->
+          viewModel.setVideoScaleY(scale)
+          playerPreferences.defaultVideoScaleY.set(scale)
+        },
+        onResetAdvancedZoom = {
+          viewModel.resetAdvancedZoom()
+          playerPreferences.defaultVideoScaleX.set(1f)
+          playerPreferences.defaultVideoScaleY.set(1f)
+        },
         onSelectRatio = { ratio ->
           if (ratio < 0) {
             // Default selected - apply Fit mode
@@ -361,6 +455,12 @@ fun PlayerSheets(
           onItemClick = { item ->
             viewModel.playPlaylistItem(item.index)
           },
+          onReorderItem = { from, to ->
+            viewModel.reorderPlaylistItem(from, to)
+          },
+          onRemoveItems = { indexes ->
+            viewModel.removePlaylistItems(indexes)
+          },
           totalCount = totalCount,
           isM3UPlaylist = isM3U,
           playerPreferences = playerPreferences,
@@ -375,6 +475,14 @@ fun PlayerSheets(
       CustomSkipDurationSheet(
         duration = customSkipDuration,
         onDurationChange = { playerPreferences.customSkipDuration.set(it) },
+        onDismissRequest = onDismissRequest,
+      )
+    }
+
+    Sheets.SleepTimer -> {
+      SleepTimerSheet(
+        remainingTime = sleepTimerTimeRemaining,
+        onStartTimer = onStartSleepTimer,
         onDismissRequest = onDismissRequest,
       )
     }

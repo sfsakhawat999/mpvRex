@@ -62,7 +62,7 @@ fun NetworkFolderCard(
           .background(
             if (isSelected) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f) else Color.Transparent,
           )
-          .padding(16.dp),
+          .padding(vertical = 4.dp, horizontal = 16.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Icon(

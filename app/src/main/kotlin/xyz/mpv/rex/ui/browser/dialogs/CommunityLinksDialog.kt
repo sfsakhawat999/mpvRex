@@ -114,14 +114,14 @@ fun CommunityLinksDialog(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "Community Hub",
+                                text = stringResource(R.string.community_hub),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
                             
                             Text(
-                                text = "Connect with us on social media",
+                                text = stringResource(R.string.connect_social_media),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.White.copy(alpha = 0.85f)
                             )
@@ -196,7 +196,7 @@ fun CommunityLinksDialog(
                             .height(48.dp)
                     ) {
                         Text(
-                            text = "Close",
+                            text = stringResource(R.string.close),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary

@@ -21,9 +21,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -41,6 +44,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -105,6 +110,9 @@ fun SeekbarWithTimers(
   // Read Toggle for Bounce Animation from Preferences
   val appearancePrefs = koinInject<AppearancePreferences>()
   val enableBounceAnimation by appearancePrefs.enableBounceAnimation.collectAsState()
+  val enableGlassPlayerControls by appearancePrefs.enableGlassPlayerControls.collectAsState()
+  val enableGlassSeekbar by appearancePrefs.enableGlassSeekbarBackground.collectAsState()
+  val isGlassActive = enableGlassPlayerControls && enableGlassSeekbar
 
   // Determine if the seekbar should be actively squeezed
   val shouldSqueeze = isUserInteracting || isGestureSeeking
@@ -139,18 +147,18 @@ fun SeekbarWithTimers(
 
   val squeezeScale = squeezeAnim.value
 
-  val currentPosVal = position()
   // Only animate position updates when user is not interacting
-  LaunchedEffect(currentPosVal) {
-    if (!isUserInteracting && currentPosVal != animatedPosition.value) {
-      // If we recently interacted (within 2s) and the position is significantly different from the seeked target (>10s),
-      // assume it's the old position and ignore it to prevent "back and forth" glitches.
-      val timeSinceInteraction = System.currentTimeMillis() - lastInteractionTime
-      if (timeSinceInteraction < 2000 && kotlin.math.abs(currentPosVal - userPosition) > 10f) {
-        return@LaunchedEffect
-      }
+  // Using snapshotFlow to avoid registering a state read in this composable's scope
+  LaunchedEffect(Unit) {
+    snapshotFlow { position() }.collect { currentPosVal ->
+      if (!isUserInteracting && currentPosVal != animatedPosition.value) {
+        // If we recently interacted (within 2s) and the position is significantly different from the seeked target (>10s),
+        // assume it's the old position and ignore it to prevent "back and forth" glitches.
+        val timeSinceInteraction = System.currentTimeMillis() - lastInteractionTime
+        if (timeSinceInteraction < 2000 && kotlin.math.abs(currentPosVal - userPosition) > 10f) {
+          return@collect
+        }
 
-      scope.launch {
         animatedPosition.animateTo(
           targetValue = currentPosVal,
           animationSpec =
@@ -163,19 +171,46 @@ fun SeekbarWithTimers(
     }
   }
 
+  val rowModifier = if (isGlassActive) {
+    modifier
+      .height(54.dp)
+      .padding(horizontal = 16.dp)
+      .glassSurface(
+        shape = RoundedCornerShape(27.dp),
+        backgroundColor = Color.White.copy(alpha = 0.05f),
+        borderColor = Color.White.copy(alpha = 0.15f),
+        borderWidth = 1.dp,
+        outerShadowColor = Color.Black.copy(alpha = 0.00f),
+        outerShadowBlur = 0.dp,
+        outerShadowOffsetX = 0.dp,
+        outerShadowOffsetY = 0.dp,
+        innerHighlightColor = Color.White.copy(alpha = 0.35f),
+        innerHighlightBlur = 5.dp,
+        innerHighlightOffsetX = (-2).dp,
+        innerHighlightOffsetY = (-2).dp,
+        innerShadowColor = Color.Black.copy(alpha = 0.35f),
+        innerShadowBlur = 5.dp,
+        innerShadowOffsetX = 2.dp,
+        innerShadowOffsetY = 2.dp
+      )
+      .padding(horizontal = 14.dp)
+  } else {
+    modifier.height(48.dp)
+  }
+
   Row(
-    modifier = modifier.height(48.dp),
+    modifier = rowModifier,
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
   ) {
     VideoTimer(
-      value = if (isUserInteracting) userPosition else position(),
+      value = { if (isUserInteracting) userPosition else position() },
       timersInverted.first,
       onClick = {
         clickEvent()
         positionTimerOnClick()
       },
-      modifier = Modifier.width(92.dp),
+      modifier = if (isGlassActive) Modifier.wrapContentWidth() else Modifier.width(92.dp),
     )
 
     // Seekbar
@@ -310,13 +345,13 @@ fun SeekbarWithTimers(
     }
 
     VideoTimer(
-      value = if (timersInverted.second) position() - duration else duration,
+      value = { if (timersInverted.second) position() - duration else duration },
       isInverted = timersInverted.second,
       onClick = {
         clickEvent()
         durationTimerOnCLick()
       },
-      modifier = Modifier.width(92.dp),
+      modifier = if (isGlassActive) Modifier.wrapContentWidth() else Modifier.width(92.dp),
     )
   }
 }
@@ -377,25 +412,23 @@ private fun SquigglySeekbar(
       return@LaunchedEffect
     }
 
-    scope.launch {
-      val shouldFlatten = isPaused || isScrubbing
-      val targetHeight = if (shouldFlatten) 0f else 1f
-      val duration = if (shouldFlatten) 550 else 800
-      val startDelay = if (shouldFlatten) 0L else 60L
+    val shouldFlatten = isPaused || isScrubbing
+    val targetHeight = if (shouldFlatten) 0f else 1f
+    val duration = if (shouldFlatten) 550 else 800
+    val startDelay = if (shouldFlatten) 0L else 60L
 
-      kotlinx.coroutines.delay(startDelay)
+    kotlinx.coroutines.delay(startDelay)
 
-      val animator = Animatable(heightFraction)
-      animator.animateTo(
-        targetValue = targetHeight,
-        animationSpec =
-          tween(
-            durationMillis = duration,
-            easing = LinearEasing,
-          ),
-      ) {
-        heightFraction = value
-      }
+    val animator = Animatable(heightFraction)
+    animator.animateTo(
+      targetValue = targetHeight,
+      animationSpec =
+        tween(
+          durationMillis = duration,
+          easing = LinearEasing,
+        ),
+    ) {
+      heightFraction = value
     }
   }
 
@@ -713,7 +746,7 @@ private fun SquigglySeekbar(
 
 @Composable
 fun VideoTimer(
-  value: Float,
+  value: () -> Float,
   isInverted: Boolean,
   modifier: Modifier = Modifier,
   onClick: () -> Unit = {},
@@ -721,6 +754,12 @@ fun VideoTimer(
   val interactionSource = remember { MutableInteractionSource() }
   val appearancePreferences = koinInject<AppearancePreferences>()
   val matchTheme by appearancePreferences.matchPlayerControlsToTheme.collectAsState()
+  
+  val timeText by remember(isInverted) {
+    derivedStateOf {
+      Utils.prettyTime(value().toInt(), isInverted)
+    }
+  }
   
   Text(
     modifier =
@@ -732,7 +771,7 @@ fun VideoTimer(
           onClick = onClick,
         )
         .wrapContentHeight(Alignment.CenterVertically),
-    text = Utils.prettyTime(value.toInt(), isInverted),
+    text = timeText,
     color = if (matchTheme) MaterialTheme.colorScheme.primary else Color.White,
     textAlign = TextAlign.Center,
   )
@@ -849,163 +888,182 @@ fun StandardSeekbar(
             val disabledAlpha = 0.3f
             val bufferAlpha = 0.5f
 
-            Canvas(
+            val appearancePreferences = koinInject<AppearancePreferences>()
+            val enableGlassPlayerControls by appearancePreferences.enableGlassPlayerControls.collectAsState()
+            val enableGlassSeekbar by appearancePreferences.enableGlassSeekbarBackground.collectAsState()
+            val isGlassActive = enableGlassPlayerControls && enableGlassSeekbar
+            val outerRadiusDp = trackHeightDp / 2
+
+            val trackModifier = if (isGlassActive) {
+                Modifier.background(Color.White.copy(alpha = 0.15f), RoundedCornerShape(outerRadiusDp))
+            } else {
+                Modifier
+            }
+
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(trackHeightDp),
+                    .height(trackHeightDp)
+                    .then(trackModifier)
             ) {
-                val min = sliderState.valueRange.start
-                val max = sliderState.valueRange.endInclusive
-                val range = (max - min).takeIf { it > 0f } ?: 1f
+                Canvas(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    val min = sliderState.valueRange.start
+                    val max = sliderState.valueRange.endInclusive
+                    val range = (max - min).takeIf { it > 0f } ?: 1f
 
-                val trackValue = if (isDragging) dragStartValue else sliderState.value
-                val playedFraction = ((trackValue - min) / range).coerceIn(0f, 1f)
-                val readAheadFraction = ((readAheadValue() - min) / range).coerceIn(0f, 1f)
+                    val trackValue = if (isDragging) dragStartValue else sliderState.value
+                    val playedFraction = ((trackValue - min) / range).coerceIn(0f, 1f)
+                    val readAheadFraction = ((readAheadValue() - min) / range).coerceIn(0f, 1f)
 
-                val playedPx = size.width * playedFraction
-                val readAheadPx = size.width * readAheadFraction
-                val trackHeight = size.height
-                
-                // Radius for the outer ends of the seekbar
-                val outerRadius = trackHeight / 2f
-                
-                // MODIFIED: For Thick style, inner corners now match the outer rounding
-                val innerRadius = if (isThick) outerRadius else 2.dp.toPx()
-                
-                val thumbTrackGapSize = 14.dp.toPx()
-                val gapHalf = thumbTrackGapSize / 2f
-                val chapterGapHalf = 1.dp.toPx()
-                
-                val thumbFraction = ((sliderState.value - min) / range).coerceIn(0f, 1f)
-                val thumbPx = size.width * thumbFraction
-                val thumbGapStart = (thumbPx - gapHalf).coerceIn(0f, size.width)
-                val thumbGapEnd = (thumbPx + gapHalf).coerceIn(0f, size.width)
-                
-                val chapterGaps = chapters
-                    .map { (it.start / duration).coerceIn(0f, 1f) * size.width }
-                    .filter { it > 0f && it < size.width }
-                    .map { x -> (x - chapterGapHalf) to (x + chapterGapHalf) }
-
-                val allGaps = (chapterGaps + (thumbGapStart to thumbGapEnd))
-                    .filter { it.first < it.second }
-                
-                fun drawSegment(startX: Float, endX: Float, color: Color) {
-                    if (endX - startX < 0.5f) return
+                    val playedPx = size.width * playedFraction
+                    val readAheadPx = size.width * readAheadFraction
+                    val trackHeight = size.height
                     
-                    val path = Path()
-                    val isOuterLeft = startX <= 0.5f
-                    val isInnerLeft = kotlin.math.abs(startX - thumbGapEnd) < 0.5f
+                    // Radius for the outer ends of the seekbar
+                    val outerRadius = trackHeight / 2f
                     
-                    val cornerRadiusLeft = when {
-                        isOuterLeft -> androidx.compose.ui.geometry.CornerRadius(outerRadius)
-                        isInnerLeft -> androidx.compose.ui.geometry.CornerRadius(innerRadius)
-                        else -> androidx.compose.ui.geometry.CornerRadius.Zero
-                    }
-
-                    val isOuterRight = endX >= size.width - 0.5f
-                    val isInnerRight = kotlin.math.abs(endX - thumbGapStart) < 0.5f
-                    val isBufferRight = kotlin.math.abs(endX - readAheadPx) < 0.5f && readAheadPx > playedPx
-
-                    val cornerRadiusRight = when {
-                        isOuterRight || isBufferRight -> androidx.compose.ui.geometry.CornerRadius(outerRadius)
-                        isInnerRight -> androidx.compose.ui.geometry.CornerRadius(innerRadius)
-                        else -> androidx.compose.ui.geometry.CornerRadius.Zero
-                    }
+                    // MODIFIED: For Thick style, inner corners now match the outer rounding
+                    val innerRadius = if (isThick) outerRadius else 2.dp.toPx()
                     
-                    path.addRoundRect(
-                        androidx.compose.ui.geometry.RoundRect(
-                            left = startX,
-                            top = 0f,
-                            right = endX,
-                            bottom = trackHeight,
-                            topLeftCornerRadius = cornerRadiusLeft,
-                            bottomLeftCornerRadius = cornerRadiusLeft,
-                            topRightCornerRadius = cornerRadiusRight,
-                            bottomRightCornerRadius = cornerRadiusRight
-                        )
-                     )
-                     drawPath(path, color)
-                 }
-                 
-                 fun drawRangeWithGaps(
-                     rangeStart: Float, 
-                     rangeEnd: Float, 
-                     gaps: List<Pair<Float, Float>>, 
-                     color: Color
-                 ) {
-                     if (rangeEnd <= rangeStart) return
-                     val relevantGaps = gaps
-                         .filter { (gStart, gEnd) -> gEnd > rangeStart && gStart < rangeEnd }
-                         .sortedBy { it.first }
-                     
-                     var currentPos = rangeStart
-                     for ((gStart, gEnd) in relevantGaps) {
-                         val segmentEnd = gStart.coerceAtMost(rangeEnd)
-                         if (segmentEnd > currentPos) {
-                             drawSegment(currentPos, segmentEnd, color)
-                         }
-                         currentPos = gEnd.coerceAtLeast(currentPos)
-                     }
-                     if (currentPos < rangeEnd) {
-                         drawSegment(currentPos, rangeEnd, color)
-                     }
-                 }
-                 
-                 // 1. Unplayed Background
-                 drawRangeWithGaps(playedPx, size.width, allGaps, primaryColor.copy(alpha = disabledAlpha))
-                 
-                 // 2. Buffer
-                 if (readAheadPx > playedPx) {
-                     drawRangeWithGaps(playedPx, readAheadPx, allGaps, primaryColor.copy(alpha = bufferAlpha))
-                 }
-                 
-                 // 3. Played
-                 if (playedPx > 0f) {
-                     drawRangeWithGaps(0f, playedPx, allGaps, primaryColor)
-                 }
-
-                // 3. A-B Loop Indicators
-                if (loopStart != null || loopEnd != null) {
-                    val loopColor = Color(0xFFFFB300) // Amber/Gold color for loop
-                    val markerWidth = 2.dp.toPx()
+                    val thumbTrackGapSize = 14.dp.toPx()
+                    val gapHalf = thumbTrackGapSize / 2f
+                    val chapterGapHalf = 1.dp.toPx()
                     
-                    // Draw loop start marker
-                    if (loopStart != null) {
-                        val startPx = (loopStart / duration).coerceIn(0f, 1f) * size.width
-                        drawLine(
-                            color = loopColor,
-                            start = Offset(startPx, 0f),
-                            end = Offset(startPx, size.height),
-                            strokeWidth = markerWidth
-                        )
-                    }
+                    val thumbFraction = ((sliderState.value - min) / range).coerceIn(0f, 1f)
+                    val thumbPx = size.width * thumbFraction
+                    val thumbGapStart = (thumbPx - gapHalf).coerceIn(0f, size.width)
+                    val thumbGapEnd = (thumbPx + gapHalf).coerceIn(0f, size.width)
+                    
+                    val chapterGaps = chapters
+                        .map { (it.start / duration).coerceIn(0f, 1f) * size.width }
+                        .filter { it > 0f && it < size.width }
+                        .map { x -> (x - chapterGapHalf) to (x + chapterGapHalf) }
 
-                    // Draw loop end marker
-                    if (loopEnd != null) {
-                        val endPx = (loopEnd / duration).coerceIn(0f, 1f) * size.width
-                        drawLine(
-                            color = loopColor,
-                            start = Offset(endPx, 0f),
-                            end = Offset(endPx, size.height),
-                            strokeWidth = markerWidth
-                        )
-                    }
-
-                    // Draw connected segment if both are set
-                    if (loopStart != null && loopEnd != null) {
-                        val minPx = (minOf(loopStart, loopEnd) / duration).coerceIn(0f, 1f) * size.width
-                        val maxPx = (maxOf(loopStart, loopEnd) / duration).coerceIn(0f, 1f) * size.width
+                    val allGaps = (chapterGaps + (thumbGapStart to thumbGapEnd))
+                        .filter { it.first < it.second }
+                    
+                    fun drawSegment(startX: Float, endX: Float, color: Color) {
+                        if (endX - startX < 0.5f) return
                         
-                        // Draw a semi-transparent overlay between A and B
-                        drawRect(
-                            color = loopColor.copy(alpha = 0.3f),
-                            topLeft = Offset(minPx, 0f),
-                            size = Size(maxPx - minPx, size.height)
-                        )
-                    }
-                }
-            }
-        },
+                        val path = Path()
+                        val isOuterLeft = startX <= 0.5f
+                        val isInnerLeft = kotlin.math.abs(startX - thumbGapEnd) < 0.5f
+                        
+                        val cornerRadiusLeft = when {
+                            isOuterLeft -> androidx.compose.ui.geometry.CornerRadius(outerRadius)
+                            isInnerLeft -> androidx.compose.ui.geometry.CornerRadius(innerRadius)
+                            else -> androidx.compose.ui.geometry.CornerRadius.Zero
+                        }
+
+                        val isOuterRight = endX >= size.width - 0.5f
+                        val isInnerRight = kotlin.math.abs(endX - thumbGapStart) < 0.5f
+                        val isBufferRight = kotlin.math.abs(endX - readAheadPx) < 0.5f && readAheadPx > playedPx
+
+                        val cornerRadiusRight = when {
+                            isOuterRight || isBufferRight -> androidx.compose.ui.geometry.CornerRadius(outerRadius)
+                            isInnerRight -> androidx.compose.ui.geometry.CornerRadius(innerRadius)
+                            else -> androidx.compose.ui.geometry.CornerRadius.Zero
+                        }
+                        
+                        path.addRoundRect(
+                            androidx.compose.ui.geometry.RoundRect(
+                                left = startX,
+                                top = 0f,
+                                right = endX,
+                                bottom = trackHeight,
+                                topLeftCornerRadius = cornerRadiusLeft,
+                                bottomLeftCornerRadius = cornerRadiusLeft,
+                                topRightCornerRadius = cornerRadiusRight,
+                                bottomRightCornerRadius = cornerRadiusRight
+                            )
+                         )
+                         drawPath(path, color)
+                     }
+                     
+                     fun drawRangeWithGaps(
+                         rangeStart: Float, 
+                         rangeEnd: Float, 
+                         gaps: List<Pair<Float, Float>>, 
+                         color: Color
+                     ) {
+                         if (rangeEnd <= rangeStart) return
+                         val relevantGaps = gaps
+                             .filter { (gStart, gEnd) -> gEnd > rangeStart && gStart < rangeEnd }
+                             .sortedBy { it.first }
+                         
+                         var currentPos = rangeStart
+                         for ((gStart, gEnd) in relevantGaps) {
+                             val segmentEnd = gStart.coerceAtMost(rangeEnd)
+                             if (segmentEnd > currentPos) {
+                                 drawSegment(currentPos, segmentEnd, color)
+                             }
+                             currentPos = gEnd.coerceAtLeast(currentPos)
+                         }
+                         if (currentPos < rangeEnd) {
+                             drawSegment(currentPos, rangeEnd, color)
+                         }
+                     }
+                     
+                     // 1. Unplayed Background
+                     if (!isGlassActive) {
+                         drawRangeWithGaps(playedPx, size.width, allGaps, primaryColor.copy(alpha = disabledAlpha))
+                     }
+                     
+                     // 2. Buffer
+                     if (readAheadPx > playedPx) {
+                         drawRangeWithGaps(playedPx, readAheadPx, allGaps, primaryColor.copy(alpha = bufferAlpha))
+                     }
+                     
+                     // 3. Played
+                     if (playedPx > 0f) {
+                         drawRangeWithGaps(0f, playedPx, allGaps, primaryColor)
+                     }
+ 
+                     // 3. A-B Loop Indicators
+                     if (loopStart != null || loopEnd != null) {
+                         val loopColor = Color(0xFFFFB300) // Amber/Gold color for loop
+                         val markerWidth = 2.dp.toPx()
+                         
+                         // Draw loop start marker
+                         if (loopStart != null) {
+                             val startPx = (loopStart / duration).coerceIn(0f, 1f) * size.width
+                             drawLine(
+                                 color = loopColor,
+                                 start = Offset(startPx, 0f),
+                                 end = Offset(startPx, size.height),
+                                 strokeWidth = markerWidth
+                             )
+                         }
+ 
+                         // Draw loop end marker
+                         if (loopEnd != null) {
+                             val endPx = (loopEnd / duration).coerceIn(0f, 1f) * size.width
+                             drawLine(
+                                 color = loopColor,
+                                 start = Offset(endPx, 0f),
+                                 end = Offset(endPx, size.height),
+                                 strokeWidth = markerWidth
+                             )
+                         }
+ 
+                         // Draw connected segment if both are set
+                         if (loopStart != null && loopEnd != null) {
+                             val minPx = (minOf(loopStart, loopEnd) / duration).coerceIn(0f, 1f) * size.width
+                             val maxPx = (maxOf(loopStart, loopEnd) / duration).coerceIn(0f, 1f) * size.width
+                             
+                             // Draw a semi-transparent overlay between A and B
+                             drawRect(
+                                 color = loopColor.copy(alpha = 0.3f),
+                                 topLeft = Offset(minPx, 0f),
+                                 size = Size(maxPx - minPx, size.height)
+                             )
+                         }
+                     }
+                 }
+             }
+         },
         thumb = {
             Box(
                 modifier = Modifier

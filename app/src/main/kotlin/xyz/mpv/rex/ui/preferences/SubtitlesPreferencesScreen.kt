@@ -761,6 +761,7 @@ fun MultiChoicePreference(
   hasAllOption: Boolean = false
 ) {
   var showDialog by remember { mutableStateOf(false) }
+  var tempSelection by remember(showDialog) { mutableStateOf(selectedValues) }
 
   Preference(
     title = title,
@@ -777,30 +778,29 @@ fun MultiChoicePreference(
           items(values.toList().size) { index ->
             val entry = values.toList()[index]
             val key = entry.first
-            val checked = if (hasAllOption && (selectedValues.isEmpty() || selectedValues.contains("all"))) {
-              key == "all"
+            val checked = if (hasAllOption && tempSelection.contains("all")) {
+              true
             } else {
-              selectedValues.contains(key)
+              tempSelection.contains(key)
             }
             
             Row(
               modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                  val newSet = selectedValues.toMutableSet()
+                  val newSet = tempSelection.toMutableSet()
                   if (hasAllOption) {
                     if (key == "all") {
-                      newSet.clear()
-                      newSet.add("all")
+                      if (checked) newSet.clear()
+                      else newSet.addAll(values.keys)
                     } else {
                       newSet.remove("all")
                       if (checked) newSet.remove(key) else newSet.add(key)
-                      if (newSet.isEmpty()) newSet.add("all")
                     }
                   } else {
                     if (checked) newSet.remove(key) else newSet.add(key)
                   }
-                  onValuesChange(newSet)
+                  tempSelection = newSet
                 }
                 .padding(vertical = 8.dp),
               verticalAlignment = Alignment.CenterVertically
@@ -816,7 +816,13 @@ fun MultiChoicePreference(
         }
       },
       confirmButton = {
-        TextButton(onClick = { showDialog = false }) {
+        TextButton(
+          enabled = !tempSelection.isEmpty(),
+          onClick = {
+            onValuesChange(tempSelection)
+            showDialog = false
+          }
+        ) {
           Text(stringResource(android.R.string.ok))
         }
       }

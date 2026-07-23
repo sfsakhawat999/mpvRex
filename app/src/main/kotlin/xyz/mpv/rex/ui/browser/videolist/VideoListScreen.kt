@@ -160,6 +160,8 @@ data class VideoListScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val uiSettings by viewModel.uiSettings.collectAsState()
     val recentlyPlayedFilePath by viewModel.recentlyPlayedFilePath.collectAsState()
+    val recentlyPlayedPaths by viewModel.recentlyPlayedPaths.collectAsState()
+    val recentlyPlayedFilePaths by viewModel.recentlyPlayedFilePaths.collectAsState()
     val lastPlayedInFolderPath by viewModel.lastPlayedInFolderPath.collectAsState()
     val playlistMode by playerPreferences.playlistMode.collectAsState()
     val videosWereDeletedOrMoved by viewModel.videosWereDeletedOrMoved.collectAsState()
@@ -248,10 +250,12 @@ data class VideoListScreen(
     val rememberedListOffset = rememberSaveable { mutableIntStateOf(0) }
     val rememberedGridIndex = rememberSaveable { mutableIntStateOf(0) }
     val rememberedGridOffset = rememberSaveable { mutableIntStateOf(0) }
+    val hasListAutoScrolled = rememberSaveable(inputs = arrayOf(lastPlayedInFolderPath ?: "")) { mutableStateOf(false) }
+    val hasGridAutoScrolled = rememberSaveable(inputs = arrayOf(lastPlayedInFolderPath ?: "")) { mutableStateOf(false) }
 
     val initialListIndex = if (rememberedListIndex.intValue > 0) {
       rememberedListIndex.intValue
-    } else if (autoScrollToLastPlayed && lastPlayedInFolderPath != null && sortedVideosWithInfo.isNotEmpty()) {
+    } else if (autoScrollToLastPlayed && !hasListAutoScrolled.value && lastPlayedInFolderPath != null && sortedVideosWithInfo.isNotEmpty()) {
       var foundIndex = 0
       for (i in sortedVideosWithInfo.indices) {
         if (sortedVideosWithInfo[i].video.path == lastPlayedInFolderPath) {
@@ -260,11 +264,13 @@ data class VideoListScreen(
         }
       }
       foundIndex
-    } else 0
+    } else {
+      rememberedListIndex.intValue
+    }
 
     val initialGridIndex = if (rememberedGridIndex.intValue > 0) {
       rememberedGridIndex.intValue
-    } else if (autoScrollToLastPlayed && lastPlayedInFolderPath != null && sortedVideosWithInfo.isNotEmpty()) {
+    } else if (autoScrollToLastPlayed && !hasGridAutoScrolled.value && lastPlayedInFolderPath != null && sortedVideosWithInfo.isNotEmpty()) {
       var foundIndex = 0
       for (i in sortedVideosWithInfo.indices) {
         if (sortedVideosWithInfo[i].video.path == lastPlayedInFolderPath) {
@@ -273,7 +279,9 @@ data class VideoListScreen(
         }
       }
       foundIndex
-    } else 0
+    } else {
+      rememberedGridIndex.intValue
+    }
 
     val listState = rememberLazyListState(
       initialFirstVisibleItemIndex = initialListIndex,
@@ -287,11 +295,13 @@ data class VideoListScreen(
     LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
       rememberedListIndex.intValue = listState.firstVisibleItemIndex
       rememberedListOffset.intValue = listState.firstVisibleItemScrollOffset
+      hasListAutoScrolled.value = true
     }
 
     LaunchedEffect(gridState.firstVisibleItemIndex, gridState.firstVisibleItemScrollOffset) {
       rememberedGridIndex.intValue = gridState.firstVisibleItemIndex
       rememberedGridOffset.intValue = gridState.firstVisibleItemScrollOffset
+      hasGridAutoScrolled.value = true
     }
 
     LaunchedEffect(Unit) {
@@ -389,7 +399,7 @@ data class VideoListScreen(
             add(
               SelectionOverflowAction(
                 icon = Icons.Filled.Share,
-                label = "Share",
+                label = stringResource(R.string.generic_share),
                 onClick = { selectionManager.shareSelected() },
               )
             )
@@ -419,7 +429,7 @@ data class VideoListScreen(
         if (sortedVideosWithInfo.isNotEmpty()) {
           TooltipBox(
             positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-            tooltip = { PlainTooltip { Text("Play recently played or first video") } },
+            tooltip = { PlainTooltip { Text(stringResource(R.string.play_recently_played_or_first)) } },
             state = rememberTooltipState(),
           ) {
             FloatingActionButton(
@@ -446,7 +456,7 @@ data class VideoListScreen(
                 }
               },
             ) {
-              Icon(Icons.Filled.PlayArrow, contentDescription = "Play recently played or first video")
+              Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.play_recently_played_or_first))
             }
           }
         }
@@ -462,6 +472,8 @@ data class VideoListScreen(
           uiSettings = uiSettings,
           isRefreshing = isRefreshing,
           recentlyPlayedFilePath = lastPlayedInFolderPath ?: recentlyPlayedFilePath,
+          recentlyPlayedFilePaths = recentlyPlayedFilePaths,
+          recentlyPlayedPaths = recentlyPlayedPaths,
           videosWereDeletedOrMoved = videosWereDeletedOrMoved,
           autoScrollToLastPlayed = autoScrollToLastPlayed,
           onRefresh = { viewModel.refresh() },
@@ -542,7 +554,7 @@ data class VideoListScreen(
         isOpen = deleteDialogOpen.value,
         onDismiss = { deleteDialogOpen.value = false },
         onConfirm = { selectionManager.deleteSelected() },
-        itemType = "video",
+        itemTypePluralRes = R.plurals.item_type_video_plural,
         itemCount = selectionManager.selectedCount,
         itemNames = selectionManager.getSelectedItems().map { it.displayName },
       )
@@ -558,7 +570,7 @@ data class VideoListScreen(
             onDismiss = { renameDialogOpen.value = false },
             onConfirm = { newName -> selectionManager.renameSelected(newName) },
             currentName = baseName,
-            itemType = "file",
+            itemTypeRes = R.string.item_type_file,
             extension = if (extension != ".") extension else null,
           )
         }
@@ -642,7 +654,7 @@ data class VideoListScreen(
       // Private Space Loading Dialog
       LoadingDialog(
         isOpen = movingToPrivateSpace.value,
-        message = "Moving to private space...",
+        message = stringResource(R.string.moving_to_private_space),
       )
 
       // Private Space Completion Dialog
@@ -651,15 +663,13 @@ data class VideoListScreen(
           onDismissRequest = { showPrivateSpaceCompletionDialog.value = false },
           title = {
             Text(
-              text = "Moved to Private Space",
+              text = stringResource(R.string.moved_to_private_space),
               style = MaterialTheme.typography.headlineSmall,
             )
           },
           text = {
             Text(
-              text =
-                "Successfully moved ${privateSpaceMovedCount.intValue} video(s) to private space.\n\n" +
-                  "To access private space, long press on the app name at the top of the main screen.",
+              text = stringResource(R.string.moved_to_private_space_desc, privateSpaceMovedCount.intValue),
               style = MaterialTheme.typography.bodyMedium,
             )
           },
@@ -667,7 +677,7 @@ data class VideoListScreen(
             androidx.compose.material3.Button(
               onClick = { showPrivateSpaceCompletionDialog.value = false },
             ) {
-              Text("Close")
+              Text(stringResource(R.string.close))
             }
           },
         )
@@ -702,6 +712,8 @@ fun VideoListContent(
   uiSettings: UiSettings,
   isRefreshing: androidx.compose.runtime.MutableState<Boolean>,
   recentlyPlayedFilePath: String?,
+  recentlyPlayedPaths: Set<String> = emptySet(),
+  recentlyPlayedFilePaths: Set<String> = emptySet(),
   videosWereDeletedOrMoved: Boolean,
   autoScrollToLastPlayed: Boolean,
   onRefresh: suspend () -> Unit,
@@ -750,18 +762,20 @@ fun VideoListContent(
     emptyTitle = if (searchQuery != null) {
       if (searchQuery.isBlank()) stringResource(R.string.search_empty_title) else stringResource(R.string.search_no_results_title)
     } else {
-      "No videos in this folder"
+      stringResource(R.string.no_videos_in_folder)
     },
     emptyMessage = if (searchQuery != null) {
       if (searchQuery.isBlank()) stringResource(R.string.search_empty_message) else stringResource(R.string.search_no_results_message)
     } else {
-      "Videos you add to this folder will appear here"
+      stringResource(R.string.no_videos_in_folder_desc)
     },
     emptyIcon = if (searchQuery != null) Icons.Filled.Search else Icons.Filled.VideoLibrary,
     isRefreshing = isRefreshing,
     onRefresh = onRefresh,
     isInSelectionMode = selectionManager.isInSelectionMode,
     recentlyPlayedFilePath = recentlyPlayedFilePath,
+    recentlyPlayedFilePaths = recentlyPlayedFilePaths,
+    recentlyPlayedPaths = recentlyPlayedPaths,
     autoScrollToLastPlayed = autoScrollToLastPlayed,
     scrollTriggerKey = "${sortType.name}:${sortOrder.name}",
     listState = listState,

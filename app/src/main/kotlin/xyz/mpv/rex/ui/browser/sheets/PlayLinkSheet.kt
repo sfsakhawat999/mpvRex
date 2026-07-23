@@ -26,6 +26,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.res.stringResource
+import xyz.mpv.rex.R
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -114,7 +116,7 @@ fun PlayLinkSheet(
     ) {
       // Title
       Text(
-        text = "Play Link",
+        text = stringResource(R.string.play_link),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Medium,
         color = MaterialTheme.colorScheme.onSurface,
@@ -131,7 +133,7 @@ fun PlayLinkSheet(
             isLinkInputUrlValid = newValue.isBlank() || MediaUtils.isURLValid(newValue)
           },
           modifier = Modifier.fillMaxWidth(),
-          label = { Text("Enter URL") },
+          label = { Text(stringResource(R.string.enter_url)) },
           placeholder = { Text("https://example.com/video.mp4") },
           singleLine = true,
           isError = linkInputUrl.isNotBlank() && !isLinkInputUrlValid,
@@ -144,7 +146,7 @@ fun PlayLinkSheet(
 
         if (linkInputUrl.isNotBlank() && !isLinkInputUrlValid) {
           Text(
-            text = "Invalid URL protocol",
+            text = stringResource(R.string.invalid_url_protocol),
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
@@ -159,7 +161,7 @@ fun PlayLinkSheet(
       ) {
         TextButton(onClick = handleDismiss) {
           Text(
-            text = "Cancel",
+            text = stringResource(R.string.generic_cancel),
             fontWeight = FontWeight.Medium,
           )
         }
@@ -173,7 +175,7 @@ fun PlayLinkSheet(
             ),
         ) {
           Text(
-            text = "Play",
+            text = stringResource(R.string.play),
             fontWeight = FontWeight.SemiBold,
           )
         }
@@ -189,13 +191,13 @@ private fun ValidationIcon(isValid: Boolean) {
   if (isValid) {
     Icon(
       Icons.Filled.CheckCircle,
-      contentDescription = "Valid URL",
+      contentDescription = stringResource(R.string.valid_url),
       tint = MaterialTheme.colorScheme.primary,
     )
   } else {
     Icon(
       Icons.Filled.Info,
-      contentDescription = "Invalid URL",
+      contentDescription = stringResource(R.string.invalid_url),
       tint = MaterialTheme.colorScheme.error,
     )
   }

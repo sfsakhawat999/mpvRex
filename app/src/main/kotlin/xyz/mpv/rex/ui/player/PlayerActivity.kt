@@ -47,12 +47,16 @@ import xyz.mpv.rex.preferences.BrowserPreferences
 import xyz.mpv.rex.preferences.GesturePreferences
 import xyz.mpv.rex.preferences.PlayerPreferences
 import xyz.mpv.rex.preferences.SubtitlesPreferences
+import xyz.mpv.rex.preferences.FolderSortType
+import xyz.mpv.rex.preferences.SortOrder
 import xyz.mpv.rex.database.repository.VideoMetadataCacheRepository
 import xyz.mpv.rex.ui.player.controls.PlayerControls
 import xyz.mpv.rex.ui.theme.MpvexPlayerTheme
 import xyz.mpv.rex.utils.history.RecentlyPlayedOps
 import xyz.mpv.rex.utils.media.HttpUtils
 import xyz.mpv.rex.utils.media.SubtitleOps
+import xyz.mpv.rex.utils.media.M3UParser
+import xyz.mpv.rex.utils.media.M3UParseResult
 import xyz.mpv.rex.utils.storage.FileTypeUtils
 import xyz.mpv.rex.utils.storage.FileFilterUtils
 import xyz.mpv.rex.ui.player.SingleActionGesture
@@ -350,10 +354,12 @@ class PlayerActivity :
     }
 
     if (playlistFromIntent.isNotEmpty() || playlistId != null) {
+      val titlesFromIntent = intent.getStringArrayListExtra("playlist_titles") ?: emptyList()
       viewModel.playlistManager.setPlaylist(
         items = playlistFromIntent,
         index = playlistIndex,
-        id = playlistId
+        id = playlistId,
+        titles = titlesFromIntent
       )
     }
 
@@ -368,7 +374,16 @@ class PlayerActivity :
           val isM3u = playlistEntity?.isM3uPlaylist ?: false
 
           // Load all items - LazyColumn will handle virtualization/pagination efficiently
-          val items = playlistRepository.getPlaylistItemsAsUris(pid)
+          val playlistItems = playlistRepository.getPlaylistItems(pid)
+          val items = playlistItems.map { item ->
+            if (item.filePath.startsWith("/") || item.filePath.startsWith("file://")) {
+              val path = if (item.filePath.startsWith("file://")) item.filePath.removePrefix("file://") else item.filePath
+              Uri.fromFile(File(path))
+            } else {
+              Uri.parse(item.filePath)
+            }
+          }
+          val titles = playlistItems.map { it.fileName }
           val totalCount = items.size
 
           withContext(Dispatchers.Main) {
@@ -377,7 +392,8 @@ class PlayerActivity :
               index = playlistIndex,
               id = pid,
               totalCount = totalCount,
-              isM3u = isM3u
+              isM3u = isM3u,
+              titles = titles
             )
             Log.d(TAG, "Loaded all $totalCount items from playlist $pid (isM3U: $isM3u)")
           }
@@ -410,7 +426,14 @@ class PlayerActivity :
     // Set HTTP headers (including referer) BEFORE playing the file
     setHttpHeadersFromExtras(intent.extras)
 
-    getPlayableUri(intent)?.let(player::playFile)
+    val playableUri = getPlayableUri(intent)
+    if (playableUri != null) {
+      if (isUriM3U(playableUri)) {
+        loadM3uPlaylistOrPlayDirectly(playableUri)
+      } else {
+        player.playFile(playableUri)
+      }
+    }
 
     // Set orientation early if we have metadata in intent or cache (avoids jumpy transition for Video/Smart modes)
     val orient = playerPreferences.orientation.get()
@@ -628,6 +651,13 @@ class PlayerActivity :
     // Enter PIP mode when user presses home button if auto PIP is enabled
     if (playerPreferences.autoPiPOnNavigation.get() && isReady && !isFinishing) {
       pipHelper.enterPipMode()
+    } else if (isReady && !isFinishing) {
+      val isEnding = isUserFinishing || isFinishing
+      val shouldAllowBackgroundPlayback = isManualBackgroundPlayback || 
+                                          (audioPreferences.automaticBackgroundPlayback.get() && !isEnding)
+      if (shouldAllowBackgroundPlayback) {
+        startBackgroundPlayback()
+      }
     }
   }
 
@@ -745,6 +775,7 @@ class PlayerActivity :
           viewModel.pause()
         } else {
           // Background playback is active - disable video decoding to save battery
+          startBackgroundPlayback()
           disableVideoForBackground()
         }
       }
@@ -835,9 +866,12 @@ class PlayerActivity :
           endBackgroundPlayback()
           finish()
         }
-      } else if (!isInBackgroundPlayback) {
-        // Ensure video is disabled when hidden, even if it wasn't handled in onPause (e.g. multi-window)
-        disableVideoForBackground()
+      } else {
+        startBackgroundPlayback()
+        if (!isInBackgroundPlayback) {
+          // Ensure video is disabled when hidden, even if it wasn't handled in onPause (e.g. multi-window)
+          disableVideoForBackground()
+        }
       }
     }.onFailure { e ->
       Log.e(TAG, "Error during onStop", e)
@@ -1493,6 +1527,9 @@ class PlayerActivity :
 
       safeSetPropertyString("http-header-fields", headersString)
       Log.d(TAG, "Set HTTP headers: $headersString")
+    } else {
+      safeSetPropertyString("http-header-fields", "")
+      Log.d(TAG, "Cleared HTTP headers")
     }
   }
   /**
@@ -1512,7 +1549,7 @@ class PlayerActivity :
       Log.d(TAG, "Auto-detected Referer for playlist item: $referer")
     }
 
-    // Set all headers in MPV
+    // Set all headers in MPV, or clear them if empty
     if (headerMap.isNotEmpty()) {
       val headersString = headerMap
         .map { "${it.key}: ${it.value.replace(",", "\\,")}" }
@@ -1520,6 +1557,9 @@ class PlayerActivity :
 
       safeSetPropertyString("http-header-fields", headersString)
       Log.d(TAG, "Set HTTP headers for playlist item: $headersString")
+    } else {
+      safeSetPropertyString("http-header-fields", "")
+      Log.d(TAG, "Cleared HTTP headers for playlist item")
     }
   }
 
@@ -1990,8 +2030,8 @@ class PlayerActivity :
       mediaIdentifier = getMediaIdentifier(intent, fileName)
     }
 
-    // Start media notification service (like YouTube - always show notification)
-    startBackgroundPlayback()
+    // Start media notification service only when going to background (like stock mpv-android)
+    // startBackgroundPlayback() is now deferred to backgrounding lifecycle events
 
     // If we are currently in background playback, disable video for the new file too
     if (isInBackgroundPlayback) {
@@ -2023,8 +2063,13 @@ class PlayerActivity :
       if (!hasState) {
         withContext(Dispatchers.Main) {
           val zoomPreference = playerPreferences.defaultVideoZoom.get()
-          MPVLib.setPropertyDouble("video-zoom", zoomPreference.toDouble())
-          viewModel.setVideoZoom(zoomPreference)
+          if (zoomPreference != 0f) {
+            MPVLib.setPropertyDouble("video-zoom", zoomPreference.toDouble())
+            viewModel.setVideoZoom(zoomPreference)
+          } else {
+            val currentZoom = MPVLib.getPropertyDouble("video-zoom")?.toFloat() ?: 0f
+            viewModel.setVideoZoom(currentZoom)
+          }
         }
       }
 
@@ -2118,13 +2163,22 @@ class PlayerActivity :
 
     applySubtitlePreferences()
 
-    // Don't force media-title for m3u/m3u8 streams - let MPV provide it
-    if (!isCurrentStreamM3U()) {
+    // Don't force media-title for standalone m3u/m3u8 streams - let MPV provide it
+    // But if we are playing from an M3U playlist with custom titles, we MUST set it
+    val isM3uPlaylist = viewModel.playlistManager.isM3uPlaylist
+    val hasCustomTitle = !viewModel.playlistManager.getTitleAt(viewModel.playlistManager.currentIndex.value).isNullOrBlank()
+    if (!isCurrentStreamM3U() || isM3uPlaylist || hasCustomTitle) {
       safeSetPropertyString("force-media-title", fileName)
+      viewModel.setMediaTitle(fileName)
+    } else {
       viewModel.setMediaTitle(fileName)
     }
 
     viewModel.unpause()
+
+    if (playerPreferences.showControlsOnPlay.get()) {
+      viewModel.showControls()
+    }
 
     if (subtitlesPreferences.autoloadMatchingSubtitles.get()) {
       lifecycleScope.launch {
@@ -2574,11 +2628,13 @@ class PlayerActivity :
     if (hasPlaylistExtras || playlistFromIntent.isNotEmpty()) {
       val newPlaylistId = intent.getIntExtra("playlist_id", -1).takeIf { it != -1 }
       val newPlaylistIndex = intent.getIntExtra("playlist_index", 0)
+      val titlesFromIntent = intent.getStringArrayListExtra("playlist_titles") ?: emptyList()
       
       viewModel.playlistManager.setPlaylist(
         items = playlistFromIntent,
         index = newPlaylistIndex,
-        id = newPlaylistId
+        id = newPlaylistId,
+        titles = titlesFromIntent
       )
     }
 
@@ -2587,14 +2643,24 @@ class PlayerActivity :
       lifecycleScope.launch(Dispatchers.IO) {
         val pid = viewModel.playlistManager.playlistId ?: return@launch
         try {
-          val totalCount = playlistRepository.getPlaylistItemCount(pid)
-          val items = playlistRepository.getPlaylistItemsAsUris(pid)
+          val playlistItems = playlistRepository.getPlaylistItems(pid)
+          val items = playlistItems.map { item ->
+            if (item.filePath.startsWith("/") || item.filePath.startsWith("file://")) {
+              val path = if (item.filePath.startsWith("file://")) item.filePath.removePrefix("file://") else item.filePath
+              Uri.fromFile(File(path))
+            } else {
+              Uri.parse(item.filePath)
+            }
+          }
+          val titles = playlistItems.map { it.fileName }
+          val totalCount = items.size
           withContext(Dispatchers.Main) {
             viewModel.playlistManager.setPlaylist(
               items = items,
               index = viewModel.playlistManager.currentIndex.value,
               id = pid,
-              totalCount = totalCount
+              totalCount = totalCount,
+              titles = titles
             )
             Log.d(TAG, "onNewIntent: Loaded ${items.size} items from playlist $pid")
           }
@@ -2629,9 +2695,13 @@ class PlayerActivity :
 
     // Load the new file
     getPlayableUri(intent)?.let { uri ->
-      // Avoid blocking UI thread while mpv opens network streams (e.g., HLS).
-      lifecycleScope.launch(Dispatchers.Default) {
-        MPVLib.command("loadfile", uri)
+      if (isUriM3U(uri)) {
+        loadM3uPlaylistOrPlayDirectly(uri)
+      } else {
+        // Avoid blocking UI thread while mpv opens network streams (e.g., HLS).
+        lifecycleScope.launch(Dispatchers.Default) {
+          MPVLib.command("loadfile", uri)
+        }
       }
     }
   }
@@ -3153,6 +3223,9 @@ class PlayerActivity :
     // Set flag to enable background playback (same logic as automatic)
     isManualBackgroundPlayback = true
     
+    // Start background playback service
+    startBackgroundPlayback()
+    
     // Restore system UI before going to background
     restoreSystemUI()
     
@@ -3286,7 +3359,8 @@ class PlayerActivity :
     viewModel.playlistManager.updateIndex(index)
 
     // Extract and set the new file name
-    fileName = getFileNameFromUri(uri)
+    val customTitle = viewModel.playlistManager.getTitleAt(index)
+    fileName = if (!customTitle.isNullOrBlank()) customTitle else getFileNameFromUri(uri)
     // Generate new media identifier for playback state
     mediaIdentifier = getMediaIdentifierFromUri(uri, fileName)
 
@@ -3332,10 +3406,15 @@ class PlayerActivity :
     }
 
     // Update media title (this will trigger UI update)
-    // Don't force media-title for m3u/m3u8 streams - let MPV provide it
-    val isM3U = uri.toString().lowercase().contains(".m3u8") || uri.toString().lowercase().contains(".m3u")
-    if (!isM3U) {
+    // Don't force media-title for standalone m3u/m3u8 streams - let MPV provide it
+    // But if we are playing from an M3U playlist with custom titles, we MUST set it
+    val isM3U = isUriM3U(uri)
+    val isM3uPlaylist = viewModel.playlistManager.isM3uPlaylist
+    val hasCustomTitle = !viewModel.playlistManager.getTitleAt(index).isNullOrBlank()
+    if (!isM3U || isM3uPlaylist || hasCustomTitle) {
       safeSetPropertyString("force-media-title", fileName)
+      viewModel.setMediaTitle(fileName)
+    } else {
       viewModel.setMediaTitle(fileName)
     }
 
@@ -3366,6 +3445,15 @@ class PlayerActivity :
    * For m3u/m3u8 streams, returns the raw media-title from MPV instead of parsing.
    */
   fun getTitleForControls(): String {
+    // 1. Check if we have a custom playlist title
+    val index = viewModel.playlistManager.currentIndex.value
+    if (viewModel.playlistManager.playlist.value.isNotEmpty() && index >= 0 && index < viewModel.playlistManager.playlist.value.size) {
+      val customTitle = viewModel.playlistManager.getTitleAt(index)
+      if (!customTitle.isNullOrBlank()) {
+        return customTitle
+      }
+    }
+
     // For m3u/m3u8 streams, use MPV's raw media-title directly
     if (isCurrentStreamM3U()) {
       val rawTitle = MPVLib.getPropertyString("media-title")
@@ -3398,12 +3486,69 @@ class PlayerActivity :
   }
 
   /**
+   * Check if a specific URI string is an m3u or m3u8 file/stream.
+   */
+  private fun isUriM3U(uriStr: String): Boolean {
+    val lowerUrl = uriStr.lowercase()
+    return lowerUrl.contains(".m3u8") || lowerUrl.contains(".m3u") ||
+      lowerUrl.endsWith(".m3u8") || lowerUrl.endsWith(".m3u")
+  }
+
+  /**
    * Check if a specific URI is an m3u or m3u8 file/stream.
    */
   private fun isUriM3U(uri: Uri): Boolean {
-    val lowerUrl = uri.toString().lowercase()
-    return lowerUrl.contains(".m3u8") || lowerUrl.contains(".m3u") ||
-      lowerUrl.endsWith(".m3u8") || lowerUrl.endsWith(".m3u")
+    return isUriM3U(uri.toString())
+  }
+
+  /**
+   * Intercepts an M3U/M3U8 file or stream, parses its channels/items,
+   * populates the playlist, and triggers playback of the first item.
+   * Falls back to direct playback if the parse fails (e.g. HLS streams).
+   */
+  private fun loadM3uPlaylistOrPlayDirectly(uriStr: String) {
+    val uri = Uri.parse(uriStr)
+    lifecycleScope.launch(Dispatchers.IO) {
+      val result = if (uri.scheme == "http" || uri.scheme == "https") {
+        M3UParser.parseFromUrl(uriStr)
+      } else {
+        M3UParser.parseFromUri(this@PlayerActivity, uri)
+      }
+
+      withContext(Dispatchers.Main) {
+        if (result is M3UParseResult.Success && result.items.isNotEmpty()) {
+          val items = result.items
+          val playlistUris = items.map { Uri.parse(it.url) }
+          val playlistTitles = items.map { it.title ?: it.url }
+
+          viewModel.playlistManager.setPlaylist(
+            items = playlistUris,
+            index = 0,
+            id = null,
+            isM3u = true,
+            titles = playlistTitles
+          )
+
+          // Play the first item
+          loadPlaylistItemInternal(0)
+
+          // Set media title in UI
+          val playlistName = result.playlistName
+          viewModel.setMediaTitle(playlistName)
+          Log.d(TAG, "Loaded M3U playlist '${playlistName}' with ${items.size} items")
+        } else {
+          // If parsing failed or HLS, play the URI directly in MPV
+          Log.d(TAG, "M3U parsing failed or HLS stream. Playing directly: $uriStr")
+          if (mpvInitialized) {
+            lifecycleScope.launch(Dispatchers.Default) {
+              MPVLib.command("loadfile", uriStr)
+            }
+          } else {
+            player.playFile(uriStr)
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -3530,6 +3675,19 @@ class PlayerActivity :
             )
           val sortedVideos = xyz.mpv.rex.utils.sort.SortUtils.sortVideos(videosInFolder, videoSortType, videoSortOrder)
           sortedVideos.mapNotNull { video -> files.find { it.absolutePath == video.path } }
+        } else if (launchSource == "tree_mode") {
+          val folderSortType = browserPreferences.folderSortType.get()
+          val folderSortOrder = browserPreferences.folderSortOrder.get()
+          val videosInFolder = xyz.mpv.rex.utils.storage.VideoScanUtils.getVideosInFolder(context, parentFolder.absolutePath)
+          val sortedVideos = when (folderSortType) {
+            FolderSortType.Title -> videosInFolder.sortedWith { t1, t2 -> xyz.mpv.rex.utils.sort.SortUtils.NaturalOrderComparator.DEFAULT.compare(t1.displayName, t2.displayName) }
+            FolderSortType.Duration -> videosInFolder.sortedBy { it.duration }
+            FolderSortType.Date -> videosInFolder.sortedBy { File(it.path).lastModified() }
+            FolderSortType.Size -> videosInFolder.sortedBy { it.size }
+            FolderSortType.VideoCount -> videosInFolder.sortedBy { it.duration }
+          }
+          val orderedVideos = if (folderSortOrder.isAscending) sortedVideos else sortedVideos.reversed()
+          orderedVideos.mapNotNull { video -> files.find { it.absolutePath == video.path } }
         } else {
           files.sortedWith { f1, f2 -> xyz.mpv.rex.utils.sort.SortUtils.NaturalOrderComparator.DEFAULT.compare(f1.name, f2.name) }
         }

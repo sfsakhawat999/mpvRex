@@ -1,0 +1,1146 @@
+<resources>
+
+    <string name="generic_reset">إعادة الضبط</string>
+    <string name="generic_share">مشاركة</string>
+    <string name="generic_confirm">تأكيد</string>
+    <string name="generic_cancel">إلغاء</string>
+    <string name="generic_ok">موافق</string>
+    <string name="generic_unit_ms">ms</string>
+    <string name="generic_disabled">معطَّل</string>
+
+    <string name="pref_preferences">التفضيلات</string>
+
+    <string name="pref_appearance_title">المظهر</string>
+    <string name="pref_appearance_category_bottom_nav">تبويبات شريط التنقل السفلي</string>
+    <string name="pref_appearance_tab_home_title">الرئيسية / الملفات</string>
+    <string name="pref_appearance_tab_home_summary">عرض المجلدات المحلية ومستعرض الملفات</string>
+    <string name="pref_appearance_tab_shorts_title">RexShorts</string>
+    <string name="pref_appearance_tab_shorts_summary">تبديل تدفقات الفيديو الرأسي السريعة</string>
+    <string name="pref_appearance_tab_recents_title">المشغَّل مؤخراً</string>
+    <string name="pref_appearance_tab_recents_summary">استئناف جلسات الفيديو السابقة بسرعة</string>
+    <string name="pref_appearance_tab_playlists_title">قوائم التشغيل</string>
+    <string name="pref_appearance_tab_playlists_summary">عرض قوائم تشغيل الفيديو المحلية المخصصة</string>
+    <string name="pref_appearance_tab_network_title">البث الشبكي</string>
+    <string name="pref_appearance_tab_network_summary">الوصول إلى محركات SMB وFTP وWebDAV</string>
+    <string name="pref_appearance_summary">الوضع الداكن، Material You</string>
+    <string name="pref_appearance_category_theme">السمة</string>
+    <string name="pref_appearance_darkmode_system">النظام</string>
+    <string name="pref_appearance_darkmode_light">فاتح</string>
+    <string name="pref_appearance_darkmode_dark">داكن</string>
+    <string name="pref_appearance_amoled_mode_title">وضع AMOLED الأسود</string>
+    <string name="pref_appearance_amoled_mode_summary">استخدام خلفية سوداء خالصة للسمات الداكنة</string>
+    <string name="pref_appearance_material_you_title">Material You</string>
+    <string name="pref_appearance_material_you_summary">تفعيل الألوان الديناميكية</string>
+    <string name="pref_appearance_material_you_summary_disabled">متاح فقط على Android 12 وما فوق</string>
+    <string name="pref_appearance_unlimited_name_lines_title">عرض الأسماء الكاملة</string>
+    <string name="pref_appearance_unlimited_name_lines_summary">عرض أسماء المجلدات والفيديوهات كاملةً دون اقتطاع</string>
+    <string name="pref_appearance_enable_bounce_animation_title">تفعيل الحركات المرنة</string>
+    <string name="pref_appearance_enable_bounce_animation_summary">يُحرَّك شريط التقديم ومنزلقا الصوت والسطوع بتأثير ارتداد</string>
+    <string name="pref_appearance_hide_player_buttons_background_title">إخفاء خلفية أزرار المشغِّل</string>
+    <string name="pref_appearance_hide_player_buttons_background_summary">إخفاء خلفية جميع أزرار التحكم في المشغِّل</string>
+    <string name="pref_appearance_match_player_controls_to_theme_title">مطابقة عناصر التحكم للسمة</string>
+    <string name="pref_appearance_match_player_controls_to_theme_summary">تلوين أزرار المشغِّل بألوان السمة الحالية</string>
+    <string name="pref_appearance_player_always_dark_mode_title">المشغِّل دائماً في الوضع الداكن</string>
+    <string name="pref_appearance_player_always_dark_mode_summary">الإبقاء على عناصر التحكم في الوضع الداكن بصرف النظر عن سمة التطبيق</string>
+    <string name="pref_appearance_use_system_font_title">استخدام خط النظام</string>
+    <string name="pref_appearance_use_system_font_summary">استخدام الخط الافتراضي للجهاز بدلاً من خط التطبيق</string>
+    <string name="pref_appearance_category_file_browser">مستعرض الملفات</string>
+    <string name="pref_appearance_show_hidden_files_title">إظهار الملفات المخفية</string>
+    <string name="pref_appearance_show_hidden_files_summary">إظهار المجلدات المخفية التي تبدأ بنقطة (.) بما في ذلك مجلدات android وdata وsystem وملفات .nomedia</string>
+    <string name="pref_appearance_show_unplayed_old_video_label_title">إظهار تسمية للفيديوهات الجديدة غير المشغَّلة</string>
+    <string name="pref_appearance_show_unplayed_old_video_label_summary">عرض تسمية \"جديد\" على الفيديوهات المضافة خلال الأيام المحددة والتي لم تُشغَّل قط</string>
+    <string name="pref_appearance_unplayed_old_video_days_title">عتبة الأيام لتسمية الفيديو الجديد</string>
+    <string name="pref_appearance_unplayed_old_video_days_summary">ستُوسَم الفيديوهات المضافة خلال آخر %d أيام دون سجل تشغيل بوصفها جديدة</string>
+    <string name="pref_appearance_category_thumbnails">الصورة المصغَّرة</string>
+    <string name="pref_appearance_show_network_thumbnails_title">عرض الصور المصغَّرة للشبكة (تجريبي)</string>
+    <string name="pref_appearance_show_network_thumbnails_summary">توليد صور مصغَّرة للبثوث الشبكية (قد يزيد استهلاك البيانات على الشبكات المحمولة)</string>
+    <string name="pref_appearance_thumbnail_strategy_title">استراتيجية توليد الصور المصغَّرة</string>
+    <string name="pref_appearance_thumbnail_strategy_summary">اختر كيفية استخراج الصور المصغَّرة من الفيديوهات</string>
+    <string name="pref_appearance_thumbnail_strategy_first_frame_title">الإطار الأول</string>
+    <string name="pref_appearance_thumbnail_strategy_first_frame_summary">أسرع استخراج. يستخدم علامة الثانية العاشرة من الفيديو.</string>
+    <string name="pref_appearance_thumbnail_strategy_position_title">إطار عند موضع محدد</string>
+    <string name="pref_appearance_thumbnail_strategy_position_summary">يتطلب معالجة أكبر. يستخرج إطاراً من موضع أبعد في الفيديو لتجنب بطاقات العنوان الفارغة.</string>
+    <string name="pref_appearance_thumbnail_position_title">موضع إطار الصورة المصغَّرة</string>
+    <string name="pref_appearance_thumbnail_position_summary">استخراج الصورة المصغَّرة عند %d%% من مدة الفيديو</string>
+    <string name="pref_appearance_thumbnail_position_reset">إعادة موضع الصورة المصغَّرة إلى الافتراضي</string>
+    <string name="pref_appearance_theme_picker_label">سمة التطبيق</string>
+    <string name="pref_appearance_auto_scroll_title">التمرير التلقائي إلى آخر مشغَّل</string>
+    <string name="pref_appearance_auto_scroll_summary">التمرير تلقائياً إلى آخر فيديو مشغَّل عند فتح قوائم الفيديو</string>
+    <string name="pref_appearance_watched_threshold_title">عتبة المشاهدة</string>
+    <string name="pref_appearance_watched_threshold_summary">وسم الفيديو بوصفه مشاهَداً عند بلوغ التشغيل %d%%</string>
+    <string name="video_label_new">جديد</string>
+
+    <!-- Theme names -->
+    <string name="theme_default">افتراضي</string>
+    <string name="theme_dynamic">ديناميكي</string>
+    <string name="theme_cloudflare">Cloudflare</string>
+    <string name="theme_cotton_candy">Cotton Candy</string>
+    <string name="theme_doom">Doom</string>
+    <string name="theme_green_apple">Green Apple</string>
+    <string name="theme_lavender">Lavender</string>
+    <string name="theme_midnight">Midnight</string>
+    <string name="theme_mocha">Mocha</string>
+    <string name="theme_strawberry">Strawberry</string>
+    <string name="theme_tidal">Tidal</string>
+    <string name="theme_nord">Nord</string>
+    <string name="theme_tako_green">Tako</string>
+    <string name="theme_yin_yang">Yin Yang</string>
+    <string name="theme_yotsuba">Yotsuba</string>
+    <string name="theme_sapphire">Sapphire</string>
+    <string name="theme_sunset">Sunset</string>
+    <string name="theme_ocean">Ocean</string>
+    <string name="theme_forest">Forest</string>
+    <string name="theme_rose_gold">Rose Gold</string>
+    <string name="theme_violet">Violet</string>
+    <string name="theme_amber">Amber</string>
+    <string name="theme_coral">Coral</string>
+    <string name="theme_slate">Slate</string>
+    <string name="theme_dracula">Dracula</string>
+    <string name="theme_monochrome">Monochrome</string>
+    <string name="theme_catppuccin">Catppuccin</string>
+    <string name="theme_gruvbox">Gruvbox</string>
+    <string name="theme_tokyo_night">Tokyo Night</string>
+    <string name="theme_kanagawa">Kanagawa</string>
+    <string name="theme_rose_pine">Rosé Pine</string>
+
+    <!-- Settings Search -->
+    <string name="settings_search_hint">البحث في الإعدادات…</string>
+    <string name="settings_search_no_results">لم يُعثر على إعدادات</string>
+    <string name="settings_search_title">بحث</string>
+
+    <!-- Player Preferences Hardcoded -->
+    <string name="pref_autoplay_title">تفعيل التنقل للأمام/للخلف</string>
+    <string name="pref_autoplay_summary">إظهار أزرار التالي/السابق لجميع الفيديوهات في المجلد</string>
+    <string name="pref_autoplay_next_video_title">التشغيل التلقائي للفيديو التالي</string>
+    <string name="pref_autoplay_next_video_summary">تشغيل الفيديو التالي تلقائياً عند انتهاء الحالي</string>
+    <string name="pref_auto_pip_title">صورة في صورة تلقائية</string>
+    <string name="pref_auto_pip_summary">الدخول تلقائياً إلى وضع PIP عند الضغط على الرئيسية أو الرجوع</string>
+    <string name="pref_player_resume_on_unlock_title">الاستئناف عند إلغاء القفل</string>
+    <string name="pref_player_resume_on_unlock_summary_on">استئناف الفيديو تلقائياً بعد إلغاء القفل إذا كان يُشغَّل قبل قفل الشاشة</string>
+    <string name="pref_player_resume_on_unlock_summary_off">إبقاء الفيديو موقوفاً بعد إلغاء قفل الشاشة</string>
+    <string name="pref_dynamic_speed_overlay_title">لوح السرعة الديناميكي</string>
+    <string name="pref_dynamic_speed_overlay_summary">إظهار لوح تحكم متقدم في السرعة أثناء الضغط المطوَّل والتمرير</string>
+    <string name="pref_show_navigation_bar_title">إظهار شريط التنقل مع عناصر التحكم</string>
+
+    <!-- Gesture Preferences Hardcoded -->
+    <string name="pref_double_tap_seek_area_width_title">عرض منطقة التقديم بالنقر المزدوج</string>
+    <string name="pref_double_tap_seek_area_width_summary">الحالي: %d%%</string>
+
+    <!-- Advanced Preferences Hardcoded -->
+    <string name="pref_export_settings_title">تصدير الإعدادات</string>
+    <string name="pref_export_settings_summary">تصدير الإعدادات إلى ملف XML</string>
+    <string name="pref_import_settings_title">استيراد الإعدادات</string>
+    <string name="pref_import_settings_summary">استيراد الإعدادات من ملف XML</string>
+    <string name="pref_enable_lua_scripts_title">تفعيل نصوص Lua</string>
+    <string name="pref_enable_lua_scripts_summary">تحميل نصوص Lua من مجلد الضبط</string>
+    <string name="pref_manage_lua_scripts_title">إدارة نصوص Lua</string>
+    <string name="pref_manage_lua_scripts_summary">إدارة نصوص Lua المُفعَّلة</string>
+    <string name="pref_clear_config_cache_title">مسح ذاكرة تخزين الضبط المؤقتة</string>
+    <string name="pref_clear_config_cache_summary">مسح إعدادات mpv.conf المخزَّنة مؤقتاً</string>
+    <string name="pref_clear_thumbnail_cache_title">مسح ذاكرة تخزين الصور المصغَّرة المؤقتة</string>
+    <string name="pref_clear_thumbnail_cache_summary">حذف جميع الصور المصغَّرة للفيديو المخزَّنة مؤقتاً (ستُعاد تلقائياً عند تصفح المجلدات)</string>
+    
+
+    <string name="pref_layout_title">تخطيط المشغِّل</string>
+    <string name="pref_layout_summary">تخصيص تخطيط أزرار المشغِّل</string>
+    <string name="pref_layout_reset_default">إعادة الضبط إلى الافتراضي</string>
+    <string name="pref_layout_top_right_controls">عناصر التحكم العلوية اليمنى</string>
+    <string name="pref_layout_bottom_right_controls">عناصر التحكم السفلية اليمنى</string>
+    <string name="pref_layout_bottom_left_controls">عناصر التحكم السفلية اليسرى</string>
+    <string name="pref_layout_portrait_bottom_controls">عناصر التحكم السفلية في الوضع العمودي</string>
+    <string name="pref_layout_preview">معاينة</string>
+    <string name="pref_layout_reset_title">إعادة ضبط التخطيط؟</string>
+    <string name="pref_layout_reset_summary">ستُعاد جميع تخطيطات التحكم المخصصة في المشغِّل إلى مواضعها الافتراضية</string>
+
+    <string name="pref_player">المشغِّل</string>
+    <string name="pref_player_summary">الاتجاه والإيماءات وعناصر التحكم</string>
+    <string name="pref_player_orientation">الاتجاه</string>
+    <string name="pref_player_orientation_free">حر</string>
+    <string name="pref_player_orientation_video">الفيديو</string>
+    <string name="pref_player_orientation_smart">ذكي</string>
+    <string name="pref_player_orientation_smart_summary">اتباع اتجاه الفيديو ما لم يُغيَّر يدوياً</string>
+    <string name="pref_player_orientation_portrait">عمودي</string>
+    <string name="pref_player_orientation_reverse_portrait">عمودي معكوس</string>
+    <string name="pref_player_orientation_sensor_portrait">عمودي بالاستشعار</string>
+    <string name="pref_player_orientation_landscape">أفقي</string>
+    <string name="pref_player_orientation_reverse_landscape">أفقي معكوس</string>
+    <string name="pref_player_orientation_sensor_landscape">أفقي بالاستشعار</string>
+    <string name="pref_player_save_position_on_quit">حفظ الموضع عند الخروج</string>
+    <string name="pref_player_double_tap_seek_duration">مدة التقديم بالنقر المزدوج</string>
+    <string name="pref_player_custom_skip_duration_title">مدة التخطي المخصصة</string>
+    <string name="pref_player_custom_skip_duration_summary">المدة للتقديم عند الضغط على زر التخطي المخصص</string>
+    <string name="pref_player_seeking_title">التقديم والإرجاع</string>
+    <string name="pref_player_close_after_eof">الإغلاق بعد انتهاء التشغيل</string>
+    <string name="pref_player_remember_brightness">تذكر سطوع الشاشة</string>
+
+    <string name="pref_player_gestures">الإيماءات</string>
+    <string name="pref_player_gestures_brightness">إيماءات السطوع</string>
+    <string name="pref_player_gestures_volume">إيماءات الصوت</string>
+    <string name="pref_player_gestures_pinch_to_zoom">قرص للتكبير</string>
+    <string name="pref_player_gestures_pan_and_zoom">التحريك والتكبير</string>
+    <string name="pref_player_gestures_pan_and_zoom_summary">السماح بتحريك الفيديو (السحب) إلى جانب التكبير</string>
+    <string name="pref_player_gestures_horizontal_swipe_to_seek">التمرير الأفقي للتقديم</string>
+    <string name="pref_player_gestures_horizontal_swipe_to_seek_summary">مرِّر يساراً أو يميناً على الشاشة للتقديم أو الإرجاع</string>
+    <string name="pref_player_gestures_swipe_to_subtitle_seek_title">التمرير للتقديم في الترجمة</string>
+    <string name="pref_player_gestures_swipe_to_subtitle_seek_summary">مرِّر يساراً أو يميناً في أعلى أو أسفل الشاشة للتقديم في الترجمة</string>
+    <string name="pref_player_gestures_move_subtitle_by_dragging_title">سحب الترجمة لإعادة تحديد موضعها</string>
+    <string name="pref_player_gestures_move_subtitle_by_dragging_summary">المس الترجمة واسحبها لأعلى أو لأسفل لتحريكها. تبقى إيماءات السطوع والصوت فعَّالة في بقية المناطق</string>
+    <string name="pref_player_gestures_horizontal_swipe_sensitivity">حساسية التمرير الأفقي</string>
+    <string name="pref_player_gestures_horizontal_swipe_sensitivity_summary">ضبط المسافة المقطوعة عند كل تمرير</string>
+    <string name="pref_player_gestures_hold_for_multiple_speed">الضغط المطوَّل لتشغيل بسرعة مضاعفة</string>
+
+    <string name="pref_player_controls">التحكم</string>
+    <string name="pref_player_controls_disable_media_buttons_title">تعطيل أزرار الوسائط</string>
+    <string name="pref_player_controls_disable_media_buttons_summary">تجاهل أوامر التشغيل من سماعات الرأس وأجهزة البلوتوث وغيرها</string>
+    <string name="pref_player_controls_allow_gestures_in_panels">السماح بالإيماءات في الألواح</string>
+    <string name="pref_player_controls_display_volume_as_percentage">عرض الصوت بالنسبة المئوية</string>
+    <string name="pref_player_controls_show_loading_circle">إظهار دائرة التحميل</string>
+    <string name="pref_player_display_show_status_bar">إظهار شريط حالة النظام مع عناصر التحكم</string>
+
+    <string name="pref_player_display">الشاشة</string>
+    <string name="pref_player_display_panel_opacity">شفافية اللوح</string>
+
+    <string name="pref_gesture">الإيماءات</string>
+    <string name="pref_gesture_summary">النقر المزدوج، عناصر التحكم في الوسائط</string>
+    <string name="pref_gesture_double_tap_title">نقر مزدوج</string>
+    <string name="pref_gesture_double_tap_none">لا شيء</string>
+    <string name="pref_gesture_double_tap_seek">تقديم/إرجاع</string>
+    <string name="pref_gesture_double_tap_subseek">تقديم/إرجاع الترجمة</string>
+    <string name="pref_gesture_reverse_double_tap_title">عكس إيماءات اليسار/اليمين</string>
+    <string name="pref_gesture_reverse_double_tap_summary">تبديل إيماءات النقر المزدوج/المفرد لليسار واليمين</string>
+    <string name="pref_gesture_double_tap_play">تشغيل/إيقاف مؤقت</string>
+    <string name="pref_gesture_double_tap_custom">مخصص</string>
+    <string name="pref_gesture_double_tap_left_title">نقر مزدوج (يسار)</string>
+    <string name="pref_gesture_double_tap_center_title">نقر مزدوج (وسط)</string>
+    <string name="pref_gesture_single_tap_center_title">نقر مفرد (وسط)</string>
+    <string name="pref_gesture_double_tap_right_title">نقر مزدوج (يمين)</string>
+    <string name="pref_gesture_single_tap_right_title">نقر مفرد (يمين)</string>
+    <string name="pref_gesture_single_tap_left_title">نقر مفرد (يسار)</string>
+    <string name="pref_gesture_use_single_tap_for_center_title">استخدام النقر المفرد لإيماءة الوسط</string>
+    <string name="pref_gesture_use_single_tap_for_center_summary">استخدام نقرة واحدة في المنتصف للإيماءات (كالتشغيل/الإيقاف المؤقت) بدلاً من النقر المزدوج.</string>
+    <string name="pref_gesture_use_single_tap_for_left_right_title">استخدام النقر المفرد لإيماءة اليسار/اليمين</string>
+    <string name="pref_gesture_use_single_tap_for_left_right_summary">استخدام نقرة واحدة في مناطق اليسار واليمين للإيماءات بدلاً من النقر المزدوج.</string>
+    <string name="pref_gesture_prevent_seekbar_tap_title">منع التقديم عند النقرات غير المقصودة</string>
+    <string name="pref_gesture_prevent_seekbar_tap_summary">يتم التقديم في الفيديو فقط بسحب شريط التقديم، لا بالنقر عليه.</string>
+    <string name="pref_gesture_use_relative_seeking_title">استخدام التقديم النسبي</string>
+    <string name="pref_gesture_use_relative_seeking_summary">التقديم بالنسبة لموضع بدء السحب بدلاً من الموضع المطلق للإصبع.</string>
+
+    <string name="pref_gesture_double_tap_custom_info">يمكنك ربط إجراءات مخصصة بهذه الإيماءات في input.conf باستخدام رموز المفاتيح التالية:\n\nيسار: MBTN_LEFT_DBL\nوسط: MBTN_MID_DBL\nيمين: MBTN_RIGHT_DBL</string>
+
+    <string name="pref_gesture_media_title">عناصر التحكم في الوسائط</string>
+    <string name="pref_gesture_media_previous">السابق</string>
+    <string name="pref_gesture_media_play">تشغيل/إيقاف مؤقت</string>
+    <string name="pref_gesture_media_next">التالي</string>
+    <string name="pref_gesture_media_custom_info">يمكنك ربط إجراءات مخصصة بعناصر التحكم في الوسائط في input.conf باستخدام رموز المفاتيح التالية:\n\nالسابق: PREV\nتشغيل/إيقاف مؤقت: PLAYPAUSE\nالتالي: NEXT</string>
+
+    <string name="pref_gesture_view_title">عرض</string>
+    <string name="pref_gesture_tap_thumbnail_to_select_title">نقر على الصورة المصغَّرة للتحديد</string>
+    <string name="pref_gesture_tap_thumbnail_to_select_summary">عند التفعيل، يدخل النقر على الصور المصغَّرة وضع التحديد. عند التعطيل، يشغِّل النقر الفيديو. لا تأثير في وضع الشبكة.</string>
+
+    <string name="pref_decoder">وحدة فك الترميز</string>
+    <string name="pref_decoder_summary">فك الترميز بالعتاد، تنسيق البكسل، إزالة التعرج اللوني</string>
+    <string name="pref_decoder_profile_title">ملف تعريف MPV</string>
+    <string name="pref_decoder_try_hw_dec_title">محاولة فك الترميز بالعتاد</string>
+    <string name="pref_decoder_gpu_next_title">استخدام gpu-next</string>
+    <string name="pref_decoder_gpu_next_summary">خلفية عرض جديدة</string>
+    <string name="pref_decoder_gpu_next_enable_title">تفعيل gpu-next؟</string>
+    <string name="pref_decoder_gpu_next_warning">قد يتسبب تفعيل gpu-next في ظهور شاشة بنفسجية أثناء التشغيل على بعض الأجهزة.</string>
+    <string name="pref_decoder_gpu_next_purple_screen_fix">إذا واجهت شاشات بنفسجية، حاول تعطيل opengl-pbo في الإعدادات المتقدمة (mpv.conf):</string>
+    <string name="pref_decoder_gpu_next_enable_anyway">التفعيل على أي حال</string>
+    <string name="pref_decoder_debanding_title">إزالة التعرج اللوني</string>
+    <string name="pref_decoder_yuv420p_title">استخدام تنسيق البكسل YUV420P</string>
+    <string name="pref_decoder_yuv420p_summary">قد يصلح الشاشات السوداء على بعض مُرمِّزات الفيديو، وقد يحسن الأداء على حساب الجودة</string>
+    <string name="pref_decoder_vulkan_title">استخدام Vulkan</string>
+    <string name="pref_decoder_vulkan_summary">تفعيل عرض Vulkan على الأجهزة الداعمة له (قد يحسن الأداء)</string>
+    <string name="pref_decoder_vulkan_not_supported">غير مدعوم (يتطلب Android 13+ مع Vulkan 1.3)</string>
+
+    <string name="pref_subtitles">الترجمات</string>
+    <string name="pref_subtitles_summary">اللغات المفضلة، الخطوط، والبحث</string>
+    <string name="pref_subtitle_search_title">البحث عن الترجمة عبر الإنترنت</string>
+    <string name="pref_subtitle_search_summary">البحث عن الترجمات وتنزيلها من مصادر إنترنتية</string>
+    <string name="pref_custom_lua_title">أزرار Lua المخصصة</string>
+    <string name="pref_custom_lua_summary">إدارة أزرار المشغِّل المخصصة باستخدام كود Lua</string>
+    <string name="pref_preferred_languages">اللغات المفضلة</string>
+    <string name="pref_subtitles_fonts_dir">مجلد الخطوط</string>
+    <string name="pref_subtitles_disable_by_default_title">تعطيل الترجمات بشكل افتراضي</string>
+    <string name="pref_subtitles_disable_by_default_summary">لن تظهر الترجمات ما لم تُفعِّلها يدوياً أثناء التشغيل.</string>
+    <string name="pref_subtitles_autoload_title">تحميل الترجمات تلقائياً</string>
+    <string name="pref_subtitles_autoload_summary">تحميل الترجمات الخارجية ذات الاسم المطابق تلقائياً.</string>
+    <string name="pref_subtitles_open_at_video_location_title">فتح في موقع الفيديو</string>
+    <string name="pref_subtitles_open_at_video_location_summary">فتح منتقي الملفات في المجلد ذاته للفيديو الحالي</string>
+    <string name="pref_subtitles_custom_picker_folder_title">مجلد التحديد الافتراضي</string>
+    <string name="pref_subtitles_custom_picker_folder_summary">المجلد المختار للفتح عند إضافة الترجمات يدوياً</string>
+    <string name="pref_subtitles_save_location">موقع حفظ الترجمات</string>
+    <string name="pref_subtitles_search_online">البحث عن الترجمة عبر الإنترنت…</string>
+    <string name="pref_subtitles_subdl_languages">لغات الترجمة</string>
+    <string name="all_languages">الكل (تصفية انتقائية)</string>
+    <string name="pref_subtitles_clear_downloads">مسح تنزيلات الترجمة</string>
+    <string name="pref_subtitles_clear_downloads_summary">حذف جميع الملفات في موقع الحفظ الحالي</string>
+    <string name="pref_subtitles_clear_downloads_confirmation">هل أنت متأكد من حذف جميع الترجمات المنزَّلة؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="toast_subtitles_cleared">تم مسح تنزيلات الترجمة</string>
+    <string name="pref_subtitles_searching">جارٍ البحث…</string>
+    <string name="pref_subtitles_found">تم العثور على %d ترجمة</string>
+    <string name="pref_subtitles_online_search_title">البحث عن الترجمة عبر الإنترنت</string>
+    <string name="pref_subtitles_wyzie_api_key_title">مفتاح Wyzie API</string>
+    <string name="pref_subtitles_wyzie_api_key_summary">مطلوب للبحث عن الترجمات. احصل على مفتاحك من sub.wyzie.io/redeem</string>
+    <string name="pref_subtitles_wyzie_api_key_hint">أدخل مفتاح API</string>
+    <string name="pref_subtitles_wyzie_api_key_not_set">غير مُعيَّن</string>
+    <string name="pref_subtitles_wyzie_api_key_masked">••••••••••••••••••••••</string>
+
+    <string name="pref_audio">الصوت</string>
+    <string name="pref_audio_summary">اللغات المفضلة، قنوات الصوت، تصحيح طبقة الصوت</string>
+    <string name="pref_audio_pitch_correction_title">تفعيل تصحيح طبقة الصوت</string>
+    <string name="pref_audio_pitch_correction_summary">يمنع ارتفاع طبقة الصوت عند السرعات الأعلى وانخفاضها عند السرعات الأبطأ</string>
+    <string name="pref_audio_volume_normalization_title">توحيد مستوى الصوت</string>
+    <string name="pref_audio_volume_normalization_summary">ضبط مستوى الصوت تلقائياً للحفاظ على مستوى ثابت</string>
+    <string name="pref_audio_channels">قنوات الصوت</string>
+    <string name="pref_audio_channels_auto">تلقائي</string>
+    <string name="pref_audio_channels_auto_safe">تلقائي آمن</string>
+    <string name="pref_audio_channels_mono">أحادي</string>
+    <string name="pref_audio_channels_stereo">ستيريو</string>
+    <string name="pref_audio_channels_stereo_reversed">ستيريو معكوس</string>
+    <string name="pref_audio_preferred_language">لغة (لغات) الصوت التي تُحدَّد افتراضياً على الفيديو ذي المسارات الصوتية المتعددة. تُقبَل رموز اللغات المكوَّنة من حرفين أو ثلاثة. يمكن الفصل بين قيم متعددة بفاصلة.</string>
+    <string name="pref_audio_volume_boost_cap">حد رفع مستوى الصوت</string>
+
+    <string name="pref_advanced">متقدم</string>
+    <string name="pref_advanced_summary">موقع الضبط، mpv.conf</string>
+    <string name="pref_advanced_mpv_conf_storage_location">اختيار موقع تخزين الضبط</string>
+    <string name="pref_advanced_mpv_conf">تعديل mpv.conf</string>
+    <string name="pref_advanced_input_conf">تعديل input.conf</string>
+    <string name="pref_advanced_dump_logs_title">تصدير السجلات</string>
+    <string name="pref_advanced_dump_logs_summary">يصدر السجلات وينسخها لمشاركتها مع المطوِّرين</string>
+    <string name="pref_advanced_verbose_logging_title">تسجيل مفصَّل</string>
+    <string name="pref_advanced_verbose_logging_summary">يساعد في تشخيص الأخطاء لكنه قد يؤثر على الأداء</string>
+    <string name="pref_advanced_clear_playback_history">مسح سجل التشغيل</string>
+    <string name="pref_advanced_clear_playback_history_confirm_title">هل أنت متأكد من مسح سجل التشغيل؟</string>
+    <string name="pref_advanced_clear_playback_history_confirm_subtitle">سيمسح هذا جميع مواضع تشغيل وسائطك السابقة والترجمات والمسارات الصوتية المحددة مع تأخيراتها وسرعاتها</string>
+    <string name="pref_advanced_cleared_playback_history">تم مسح سجل التشغيل</string>
+    <string name="pref_advanced_clear_fonts_cache">مسح الخطوط المخزَّنة مؤقتاً</string>
+    <string name="pref_advanced_cleared_fonts_cache">تم مسح الخطوط المخزَّنة مؤقتاً</string>
+    <string name="pref_advanced_enable_recently_played_title">المشغَّل مؤخراً</string>
+    <string name="pref_advanced_enable_recently_played_summary">تتبع وعرض الفيديوهات وقوائم التشغيل المشغَّلة مؤخراً</string>
+
+    <string name="pref_advanced_features_tooltip">Enable experimental or advanced features such as stats page and Anime4K upscaling</string>
+    <string name="pref_anime4k_title">Anime4K upscaling (Experimental)</string>
+    <string name="pref_anime4k_summary">Enable Anime4K upscaling filter</string>
+    <string name="pref_anime4k_incompatibility">Anime4K Incompatibility</string>
+    <string name="pref_anime4k_gpu_next_error">gpu-next is incompatible with Anime4K shaders. When Anime4K is enabled, the app will automatically use the legacy \'gpu\' backend for shader compatibility.</string>
+    <string name="pref_anime4k_cannot_use_with_gpu_next">Cannot use Anime4K when gpu-next is enabled</string>
+    <string name="anime4k_mode_title">Anime4K Presets</string>
+    <string name="anime4k_quality_title">Anime4K Variants</string>
+    <string name="anime4k_mode_toast">Anime4K: Preset %1$s</string>
+    <string name="anime4k_quality_toast">Anime4K Variant: %1$s</string>
+
+    <!-- Anime4K Modes (Renamed to Presets in UI) -->
+    <string name="anime4k_mode_off">Off</string>
+    <string name="anime4k_mode_a">A</string>
+    <string name="anime4k_mode_b">B</string>
+    <string name="anime4k_mode_c">C</string>
+    <string name="anime4k_mode_a_plus">A+</string>
+    <string name="anime4k_mode_b_plus">B+</string>
+    <string name="anime4k_mode_c_plus">C+</string>
+
+    <!-- Anime4K Qualities (Renamed to Mode in UI) -->
+    <string name="anime4k_quality_fast">Fast</string>
+    <string name="anime4k_quality_balanced">Balanced</string>
+    <string name="anime4k_quality_high">High</string>
+
+    <string name="pref_about_title">حول</string>
+    <string name="pref_about_summary">الشكر والتقدير، التراخيص</string>
+    <string name="pref_about_oss_libraries">المكتبات</string>
+    <string name="pref_about_donate_title">تبرع</string>
+    <string name="pref_about_donate_kofi">Ko-fi</string>
+    <string name="pref_about_donate_kofi_summary">ادعم المطوِّر على Ko-fi</string>
+    <string name="pref_about_donate_paypal">PayPal</string>
+    <string name="pref_about_donate_paypal_summary">ادعم المطوِّر على PayPal</string>
+    <string name="pref_about_donate_upi">UPI</string>
+
+    <string name="pref_about_telegram_title">تيليغرام</string>
+    <string name="pref_about_telegram_channel">قناة تيليغرام</string>
+    <string name="pref_about_telegram_channel_summary">انضم إلى قناتنا للتحديثات والأخبار</string>
+    <string name="pref_about_telegram_group">مجموعة دردشة تيليغرام</string>
+    <string name="pref_about_telegram_group_summary">ناقش وتحدث مع المجتمع</string>
+    <string name="pref_about_show_community_icon_title">اختصار المجتمع</string>
+    <string name="pref_about_show_community_icon_summary">إظهار اختصار روابط المجتمع في رأس الصفحة الرئيسية</string>
+
+    <string name="player_sheets_add_ext_sub">إضافة ترجمات خارجية</string>
+    <string name="player_sheets_add_ext_audio">إضافة مسارات صوتية خارجية</string>
+    <string name="player_sheets_tracks_off">إيقاف</string>
+    <string name="player_sheets_subtitles_settings_title">إعدادات الترجمات</string>
+    <string name="player_sheets_subtitles_color_text">نص</string>
+    <string name="player_sheets_subtitles_color_border">حدود</string>
+    <string name="player_sheets_subtitles_color_background">خلفية</string>
+    <string name="player_sheets_subtitles_border_style">نمط الحدود</string>
+    <string name="player_sheets_subtitles_border_style_outline_and_shadow">محيط وظل</string>
+    <string name="player_sheets_subtitles_border_style_opaque_box">صندوق معتم</string>
+    <string name="player_sheets_subtitles_shadow_offset">إزاحة الظل</string>
+    <string name="player_sheets_sub_color_red">أحمر</string>
+    <string name="player_sheets_sub_color_green">أخضر</string>
+    <string name="player_sheets_sub_color_blue">أزرق</string>
+    <string name="player_sheets_sub_color_alpha">ألفا</string>
+    <string name="player_sheets_sub_override_ass">تجاوز تنسيق ترجمات ASS/SSA</string>
+    <string name="player_sheets_sub_override_ass_subtitle">فرض تجاوز تنسيق ترجمات ASS/SSA</string>
+    <string name="player_sheets_sub_scale_by_window">تحجيم بحسب النافذة</string>
+    <string name="player_sheets_sub_scale_by_window_summary">تحجيم الترجمات بحسب حجم النافذة واستخدام هوامش الفيديو</string>
+    <string name="player_sheets_sub_scale">مقياس الحجم</string>
+    <string name="player_sheets_sub_position">الموضع</string>
+    <string name="player_sheets_sub_typography_card_title">الطباعة</string>
+    <string name="player_sheets_sub_typography_font">الخط</string>
+    <string name="player_sheets_sub_typography_font_size">حجم الخط</string>
+    <string name="player_sheets_sub_typography_border_size">حجم الحدود</string>
+    <string name="player_sheets_sub_colors_card_title">الألوان</string>
+    <string name="player_sheets_sub_misc_card_title">متفرقات</string>
+    <string name="player_sheets_sub_delay_card_title">تأخير الترجمة</string>
+    <string name="player_sheets_sub_delay_card_delay">تأخير</string>
+    <string name="player_sheets_sub_delay_card_speed">السرعة</string>
+    <string name="player_sheets_sub_delay_subtitle_type_primary">الترجمة الأساسية</string>
+    <string name="player_sheets_sub_delay_subtitle_type_secondary">الترجمة الثانوية</string>
+    <string name="player_sheets_sub_delay_subtitle_type_primary_and_secondary">كلتاهما</string>
+    <string name="player_sheets_sub_delay_subtitle_voice_heard">الصوت مسموع</string>
+    <string name="player_sheets_sub_delay_subtitle_text_seen">النص مرئي</string>
+    <string name="player_sheets_delay_set_as_default">تعيين كافتراضي</string>
+    <string name="player_sheets_audio_delay_card_title">تأخير الصوت</string>
+    <string name="player_sheets_sub_delay_audio_sound_heard">الصوت مسموع</string>
+    <string name="player_sheets_sub_delay_sound_sound_spotted">الصوت ملحوظ</string>
+
+    <string name="player_sheets_video_settings_title">إعدادات الفيديو</string>
+    <string name="player_sheets_deband_title">إزالة التعرج اللوني</string>
+    <string name="player_sheets_deband_none">لا شيء</string>
+    <string name="player_sheets_deband_cpu">المعالج</string>
+    <string name="player_sheets_deband_gpu">معالج الرسوميات</string>
+    <string name="player_sheets_deband_iterations">التكرارات</string>
+    <string name="player_sheets_deband_threshold">العتبة</string>
+    <string name="player_sheets_deband_range">النطاق</string>
+    <string name="player_sheets_deband_grain">الحبيبية</string>
+    <string name="player_sheets_filters_title">المرشحات</string>
+    <string name="player_sheets_filters_brightness">السطوع</string>
+    <string name="player_sheets_filters_contrast">التباين</string>
+    <string name="player_sheets_filters_gamma">غاما</string>
+    <string name="player_sheets_filters_Saturation">التشبع اللوني</string>
+    <string name="player_sheets_filters_hue">درجة اللون</string>
+    <string name="player_sheets_filters_sharpness">الحدة</string>
+    <string name="player_sheets_filters_warning">قد لا تعمل بعض المرشحات مع مشغِّل الفيديو الحالي</string>
+
+    <string name="player_sheets_speed_slider_label">السرعة</string>
+    <string name="player_sheets_speed_make_default">تعيين كسرعة افتراضية</string>
+
+    <string name="player_sheets_decoder_formatted" formatted="false">%s (%s)</string>
+
+    <string name="numeric_chooser_value_too_big">القيمة أكبر من الحد المسموح</string>
+    <string name="numeric_chooser_value_too_small">القيمة أصغر من الحد المسموح</string>
+
+    <string name="player_sheets_more_title">المزيد</string>
+    <string name="player_sheets_stats_page_title">صفحة الإحصائيات الافتراضية</string>
+    <string name="player_sheets_stats_page_chip">الصفحة %d</string>
+    <string name="player_sheets_stats_page_0_desc">معطَّل. لا إحصائيات معروضة.</string>
+    <string name="player_sheets_stats_page_1_desc">نظرة عامة. استخدام المعالج/معالج الرسوميات، المزامنة الصوتية/المرئية، الإطارات المفقودة، سرعة الساعة.</string>
+    <string name="player_sheets_stats_page_2_desc">توقيت الإطارات. أوقات فك الترميز والعرض، معلومات المقياس.</string>
+    <string name="player_sheets_stats_page_3_desc">حالة التخزين المؤقت. صحة المخزن المؤقت، ذاكرة مُفرِّق المسارات، النطاقات القابلة للتقديم.</string>
+    <string name="player_sheets_stats_page_4_desc">اختصارات لوحة المفاتيح الحالية. قائمة الاختصارات المعيَّنة.</string>
+    <string name="player_sheets_stats_page_5_desc">قائمة المسارات. تفاصيل مسارات الفيديو والصوت والترجمة.</string>
+
+    <string name="player_aspect_fit">ملاءمة الشاشة</string>
+    <string name="player_aspect_crop">اقتصاص</string>
+    <string name="player_aspect_stretch">تمديد</string>
+
+    <string name="crash_screen_title">عذراً</string>
+    <string name="crash_screen_subtitle">يبدو أن %s واجه خطأً غير متوقع. ننصحك بمشاركة سجلات العطل في مشكلة على GitHub.</string>
+    <string name="crash_screen_logs_title">سجلات العطل:</string>
+    <string name="crash_screen_share">مشاركة سجلات العطل</string>
+    <string name="crash_screen_restart">إعادة تشغيل التطبيق</string>
+    <string name="crash_screen_fix_crash">إصلاح العطل (حذف قاعدة البيانات)</string>
+    <string name="crash_screen_database_deleted">تم حذف قاعدة البيانات بنجاح. يرجى إعادة تشغيل التطبيق.</string>
+    <string name="crash_screen_database_hint">يبدو أن هذا العطل متعلق بقاعدة البيانات. جرِّب حذف قاعدة البيانات لإصلاحه.</string>
+
+    <string name="timer_picker_enter_timer">أدخل الوقت</string>
+    <string name="timer_picker_pick_time">اختر الوقت</string>
+    <string name="timer_title">مؤقت النوم</string>
+    <string name="timer_remaining">%s متبقية</string>
+
+    <string name="toast_sleep_timer_ended">انتهى مؤقت النوم</string>
+
+
+
+    <string name="swap_the_volume_and_brightness_slider">تبديل منزلق الصوت والسطوع</string>
+    <string name="pref_player_display_reduce_player_animation">تقليل حركات المشغِّل</string>
+    <string name="pref_player_display_hide_player_control_time">إخفاء وقت التحكم في المشغِّل</string>
+    <string name="show_splash_ovals_on_double_tap_to_seek">إظهار موجة عند التقديم بالنقر المزدوج</string>
+    <string name="show_time_on_double_tap_to_seek">إظهار وقت التقديم</string>
+
+    <string name="pref_audio_channels_auto_safe_desc">تحديد تلقائي آمن (افتراضي)</string>
+    <string name="pref_audio_channels_auto_desc">تحديد تلقائي</string>
+    <string name="pref_audio_channels_mono_desc">دمج القنوات أحادياً</string>
+    <string name="pref_audio_channels_stereo_desc">دمج القنوات ستيريو</string>
+    <string name="pref_audio_channels_reverse_stereo_desc">تبديل القناة اليسرى واليمنى</string>
+
+    <string name="player_sheets_frame_navigation_title">التنقل بين الإطارات</string>
+    <string name="player_sheets_frame_navigation_include_subtitles">تضمين الترجمات في لقطة الشاشة</string>
+
+    <string name="player_sheets_zoom_slider_label">تكبير الفيديو</string>
+
+    <plurals name="seconds">
+        <item quantity="one">%1$d ثانية</item>
+        <item quantity="other">%1$d ثانية</item>
+    </plurals>
+
+    <!-- Background Playback -->
+    <string name="background_playback_title">التشغيل في الخلفية</string>
+    <string name="deselect_all">إلغاء تحديد الكل</string>
+    <string name="select_all">تحديد الكل</string>
+    <string name="invert_selection">عكس التحديد</string>
+    <string name="selected_items">%1$d / %2$d محدد</string>
+    <string name="selection_options">خيارات التحديد</string>
+    <string name="back">رجوع</string>
+    <string name="sort">ترتيب</string>
+    <string name="settings">الإعدادات</string>
+    <string name="rename">إعادة التسمية</string>
+    <string name="info">معلومات</string>
+    <string name="delete">حذف</string>
+    <string name="got_it">حسناً، فهمت</string>
+    <string name="general">عام</string>
+    <string name="not_set_video_default">غير مُعيَّن (سيستخدم الافتراضي للفيديو)</string>
+    <string name="enter_language_codes">أدخل رموز اللغات مفصولةً بفاصلة (مثال: eng,jpn,spa)</string>
+    <string name="language_codes_placeholder">eng,jpn,spa</string>
+    <string name="not_set_system_fonts">غير مُعيَّن (يستخدم خطوط النظام)</string>
+    <string name="fonts_loaded">تم تحميل %1$d خط</string>
+    <string name="reload_fonts">إعادة تحميل الخطوط</string>
+    <string name="clear_font_directory">مسح مجلد الخطوط</string>
+    <string name="reset_to_default_font">إعادة الضبط إلى الخط الافتراضي</string>
+    <string name="set_as_default">تعيين كافتراضي</string>
+
+    <!-- Notification strings -->
+    <string name="notification_channel_name">تشغيل الوسائط</string>
+    <string name="notification_channel_description">عناصر التحكم في تشغيل الوسائط</string>
+    <string name="notification_playing">قيد التشغيل</string>
+
+    <!-- Media Info Activity -->
+
+    <string name="pref_player_use_precise_seeking">استخدام التقديم الدقيق</string>
+    <string name="pref_player_show_seekbar_when_seeking_title">إظهار شريط التقديم أثناء التقديم</string>
+    <string name="pref_player_show_seekbar_when_seeking_summary">عرض شريط تقدم الفيديو أثناء التقديم بالإيماءات</string>
+    <string name="pref_player_hide_osd_text_title">إخفاء نص OSD للمشغِّل</string>
+    <string name="pref_player_hide_osd_text_summary">إخفاء نص OSD الافتراضي لـ mpv أثناء التقديم أو تقديم الترجمة</string>
+    <string name="pref_player_keep_screen_on_when_paused_title">إبقاء الشاشة مضاءة عند الإيقاف المؤقت</string>
+    <string name="pref_player_keep_screen_on_when_paused_summary">يمنع انتهاء مهلة الشاشة أثناء الإيقاف المؤقت</string>
+    <string name="pref_player_save_position_on_quit_summary">تذكر موضع التوقف</string>
+    <string name="pref_player_interaction_header">تفاعل المشغِّل</string>
+
+    <!-- Folders Preferences -->
+    <string name="pref_folders_title">المجلدات</string>
+    <string name="pref_folders_summary">إدارة قائمة المجلدات المحجوبة</string>
+    <string name="pref_folders_empty_title">لا توجد مجلدات محجوبة</string>
+    <string name="pref_folders_empty_message">اضغط على الزر أدناه لإضافة المجلدات التي تريد إخفاءها من قائمة المجلدات</string>
+    <string name="pref_folders_add_folder">إضافة مجلد إلى القائمة المحجوبة</string>
+    <string name="pref_folders_select_folders">تحديد مجلد أو أكثر</string>
+    <string name="pref_folders_loading">جارٍ تحميل المجلدات…</string>
+    <string name="pref_folders_no_folders">لم يُعثر على مجلدات</string>
+    <string name="pref_folders_clear_all">مسح جميع المجلدات المحجوبة</string>
+    <string name="pref_folders_clear_all_confirm_title">مسح جميع المجلدات المحجوبة؟</string>
+    <string name="pref_folders_clear_all_confirm_message">سيؤدي هذا إلى إزالة جميع المجلدات من القائمة المحجوبة. يمكنك إعادة إضافتها لاحقاً.</string>
+    <string name="pref_folders_blacklist">القائمة المحجوبة</string>
+    <string name="pref_folders_blacklisted">تم إضافة المجلد (المجلدات) إلى القائمة المحجوبة</string>
+
+    <!-- M3U Playlist Strings -->
+    <string name="playlist_add_m3u_title">إضافة قائمة تشغيل M3U</string>
+    <string name="playlist_add_m3u_description">أدخل رابط ملف قائمة التشغيل M3U</string>
+    <string name="playlist_url_label">رابط قائمة التشغيل</string>
+    <string name="playlist_url_placeholder">https://example.com/playlist.m3u</string>
+    <string name="playlist_url_hint">يدعم صيغتَي .m3u و.m3u8</string>
+    <string name="playlist_add_success">تمت إضافة قائمة التشغيل M3U بنجاح</string>
+    <string name="playlist_add_error">فشل إضافة قائمة التشغيل M3U: %s</string>
+    <string name="playlist_create_empty">إنشاء قائمة تشغيل فارغة</string>
+    <string name="playlist_add_from_url">إضافة من رابط M3U/M3U8</string>
+    <string name="playlist_refresh_m3u">تحديث قائمة التشغيل M3U</string>
+    <string name="playlist_refresh_success">تم تحديث قائمة التشغيل بنجاح</string>
+    <string name="playlist_refresh_error">فشل تحديث قائمة التشغيل: %s</string>
+    <string name="playlist_m3u_badge">M3U</string>
+
+    <string name="open_file">فتح ملف</string>
+    <string name="recently_played">المشغَّل مؤخراً</string>
+    <string name="open_link">فتح رابط</string>
+    <string name="install">تثبيت</string>
+    <string name="download">تنزيل</string>
+    <string name="failed_load_audio_invalid_uri">فشل تحميل الملف الصوتي: URI غير صالح</string>
+    <string name="audio_track_added">تمت إضافة المسار الصوتي</string>
+    <string name="failed_load_audio">فشل تحميل الصوت: %s</string>
+    <string name="invalid_subtitle_format">تنسيق ملف الترجمة غير صالح</string>
+    <string name="subtitle_added">تمت إضافة %s</string>
+    <string name="failed_load_subtitle">فشل تحميل الترجمة</string>
+    <string name="remove_from_playlist">إزالة %1$d %2$s من قائمة التشغيل؟</string>
+    <string name="remove_playlist_items_confirm">سيُزال %2$s المحدد من قائمة التشغيل. لن يُحذف %3$s الأصلي.</string>
+    <string name="search_videos">البحث في الفيديوهات…</string>
+    <string name="search_folders_and_videos">البحث في المجلدات والفيديوهات…</string>
+    <string name="search_playlists">البحث في قوائم التشغيل…</string>
+    <string name="search_no_results_title">لم يُعثر على نتائج</string>
+    <string name="search_no_results_message">لا توجد ملفات أو مجلدات تطابق استعلام البحث</string>
+    <string name="search_empty_title">بحث</string>
+    <string name="search_empty_message">اكتب للبحث في الملفات والمجلدات</string>
+    <string name="play_recently_played_or_first">تشغيل الفيديو المشغَّل مؤخراً أو الأول</string>
+    <string name="toggle_menu">إظهار/إخفاء القائمة</string>
+    <string name="close">إغلاق</string>
+    <string name="copy">نسخ</string>
+    <string name="done">تم</string>
+    <string name="create">إنشاء</string>
+    <string name="select">تحديد</string>
+    <string name="browse">استعراض</string>
+    <string name="disconnect">قطع الاتصال</string>
+    <string name="connect">اتصال</string>
+    <string name="remove">إزالة</string>
+    <string name="add">إضافة</string>
+    <string name="ignore">تجاهل</string>
+    <string name="check_for_updates_now">التحقق من التحديثات الآن</string>
+    <string name="loading_detailed_information">جارٍ تحميل المعلومات التفصيلية…</string>
+    <string name="stream_url">رابط البث</string>
+    <string name="export_complete">اكتمل التصدير</string>
+    <string name="import_complete">اكتمل الاستيراد</string>
+    <string name="auto_picture_in_picture">صورة في صورة تلقائية</string>
+    <string name="dynamic_speed_overlay">لوح السرعة الديناميكي</string>
+    <string name="show_navigation_bar_with_controls">إظهار شريط التنقل مع عناصر التحكم</string>
+    <string name="enable_lua_scripts">تفعيل نصوص Lua</string>
+    <string name="manage_lua_scripts">إدارة نصوص Lua</string>
+    <string name="rename_playlist">إعادة تسمية قائمة التشغيل</string>
+    <string name="create_playlist">إنشاء قائمة تشغيل</string>
+    <string name="add_connection">إضافة اتصال</string>
+    <string name="playlist_name">اسم قائمة التشغيل</string>
+    <string name="playlist_url">رابط قائمة التشغيل</string>
+    <string name="enter_url">أدخل الرابط</string>
+    <string name="new_name">الاسم الجديد</string>
+    <string name="folder_name">اسم المجلد</string>
+    <string name="video_url">رابط الفيديو</string>
+    <string name="choose_local_m3u_file">اختر ملف M3U المحلي</string>
+    <string name="add_from_url">إضافة من رابط</string>
+    <string name="home">الرئيسية</string>
+    <string name="recents">الأخيرة</string>
+    <string name="playlists">قوائم التشغيل</string>
+    <string name="network">الشبكة</string>
+    <string name="unit_seconds">ثوانٍ</string>
+    <string name="milliseconds">ميلي ثانية</string>
+    <string name="name">الاسم</string>
+    <string name="protocol">البروتوكول</string>
+    <string name="host_ip_address">المضيف/عنوان IP</string>
+    <string name="port">المنفذ</string>
+    <string name="path">المسار</string>
+    <string name="anonymous_guest_access">وصول مجهول/ضيف</string>
+    <string name="use_https_secure_connection">استخدام HTTPS (اتصال آمن)</string>
+    <string name="username">اسم المستخدم</string>
+    <string name="password">كلمة المرور</string>
+    <string name="selected_long_press_to_reorder">محدد (اضغط مطولاً لإعادة الترتيب)</string>
+    <string name="available">متاح</string>
+    <string name="width">العرض</string>
+    <string name="height">الارتفاع</string>
+    <string name="filter_presets">إعدادات المرشحات المسبقة</string>
+    <string name="no_storage_devices_found">لم يُعثر على أجهزة تخزين</string>
+    <string name="no_folders_or_supported_files">لا توجد مجلدات أو ملفات مدعومة</string>
+    <string name="hello_world">مرحباً بالعالم</string>
+
+    <!-- Browser Preferences -->
+    <string name="pref_show_audio_files_title">إظهار الملفات الصوتية</string>
+    <string name="pref_show_audio_files_summary">إظهار الملفات الصوتية وفهرستها في المستعرض وقوائم التشغيل</string>
+    <string name="pref_show_tree_view_path_title">إظهار مسار التنقل التفصيلي</string>
+    <string name="pref_show_tree_view_path_summary">إظهار مسار المجلد التفصيلي في أعلى عرض الشجرة</string>
+
+    <string name="copy_path">نسخ المسار</string>
+    <string name="copy_video_path">نسخ مسار ملف الفيديو</string>
+    <string name="copy_folder_path">نسخ مسار المجلد</string>
+    <string name="copied_to_clipboard">تم النسخ إلى الحافظة</string>
+    <string name="player_sheets_aspect_ratio_title">نسبة العرض إلى الارتفاع</string>
+    <string name="player_sheets_aspect_ratio_presets">إعدادات مسبقة</string>
+    <string name="player_sheets_aspect_ratio_preset_default">افتراضي</string>
+    <string name="player_sheets_aspect_ratio_custom_toggle">مخصص...</string>
+    <string name="player_sheets_aspect_ratio_custom_section">مخصص</string>
+    <string name="player_sheets_aspect_ratio_manual_zoom_pan_title">تكبير وتحريك يدوي (إزاحة الكاميرا)</string>
+    <string name="player_sheets_aspect_ratio_zoom_value">التكبير: %1$.2fx</string>
+    <string name="player_sheets_aspect_ratio_reset_zoom">إعادة ضبط التكبير</string>
+    <string name="player_sheets_aspect_ratio_horizontal_offset_value">الإزاحة الأفقية: %1$.3f</string>
+    <string name="player_sheets_aspect_ratio_reset_pan">إعادة ضبط التحريك</string>
+    <string name="player_sheets_aspect_ratio_add_custom_title">إضافة نسبة مخصصة (مثال: 16:9)</string>
+    <string name="player_sheets_aspect_ratio_width">العرض</string>
+    <string name="player_sheets_aspect_ratio_height">الارتفاع</string>
+    <string name="player_sheets_aspect_ratio_invalid">غير صالح</string>
+    <string name="player_sheets_aspect_ratio_add">إضافة</string>
+    <string name="player_sheets_frame_navigation_frame_label">الإطار:\\u0020</string>
+    <string name="player_sheets_frame_navigation_timestamp_label">الطابع الزمني:\\u0020</string>
+    <string name="player_sheets_frame_navigation_screenshot_create_failed">فشل إنشاء لقطة الشاشة</string>
+    <string name="player_sheets_frame_navigation_mediastore_entry_failed">فشل إنشاء إدخال MediaStore</string>
+    <string name="player_sheets_frame_navigation_snapshot_dir_failed">فشل إنشاء مجلد mpvSnaps</string>
+    <string name="player_sheets_frame_navigation_snapshot_save_failed">فشل حفظ اللقطة: %1$s</string>
+    <string name="media_info_title">معلومات الوسائط</string>
+    <string name="media_info_back">رجوع</string>
+    <string name="media_info_copy">نسخ</string>
+    <string name="media_info_share">مشاركة</string>
+    <string name="media_info_no_file_provided">لم يتم توفير ملف وسائط</string>
+    <string name="media_info_unknown_file_name">غير معروف</string>
+    <string name="media_info_failed_to_load">فشل تحميل معلومات الوسائط</string>
+    <string name="media_info_unknown_error">خطأ غير معروف</string>
+    <string name="media_info_analyzing">جارٍ تحليل ملف الوسائط...</string>
+    <string name="media_info_error_prefix">خطأ: %1$s</string>
+    <string name="media_info_loading_details">جارٍ تحميل المعلومات التفصيلية...</string>
+    <string name="media_info_clipboard_label">معلومات الوسائط - %1$s</string>
+    <string name="media_info_share_subject">معلومات الوسائط - %1$s</string>
+    <string name="media_info_share_text">معلومات الوسائط لـ: %1$s</string>
+    <string name="media_info_share_chooser_title">مشاركة معلومات الوسائط</string>
+    <string name="media_info_share_failed">فشل المشاركة: %1$s</string>
+    <string name="media_info_default_file_name">ملف الوسائط</string>
+
+    <!-- Network Connection Card -->
+    <string name="network_connection_protocol_host">%1$s • %2$s:%3$s</string>
+    <string name="network_connection_edit">تعديل</string>
+    <string name="network_connection_delete">حذف</string>
+    <string name="network_connection_path_prefix">المسار: %1$s</string>
+    <string name="network_connection_user_prefix">المستخدم: %1$s</string>
+    <string name="network_connection_error_prefix">خطأ: %1$s</string>
+    <string name="network_connection_auto_connect">الاتصال تلقائياً عند تشغيل التطبيق</string>
+    <string name="network_connection_connecting">جارٍ الاتصال</string>
+    <string name="network_connection_browse">تصفح</string>
+    <string name="network_connection_disconnect">قطع الاتصال</string>
+    <string name="network_connection_connect">اتصال</string>
+
+            <string name="shorts">القصيرة</string>
+    <string name="no_playlists_found">لا يوجد أي قوائم تشغيل</string>
+    <string name="try_different_search_term">جرّب مصطلح بحث مختلف</string>
+    <string name="no_playlists_yet">لا قوائم تشغيل بعد</string>
+    <string name="no_playlists_yet_desc">أنشئ قائمة تشغيل أو أضف واحدة من رابط m3u</string>
+    <string name="empty_playlists_desc">أنشئ قائمة تشغيل لتظهر هنا</string>
+    <string name="recently_played_disabled_title">ميزة \"المُشغَّل مؤخراً\" معطّلة</string>
+    <string name="recently_played_disabled_message">فعّلها من الإعدادات المتقدمة لتتبّع سجل التشغيل</string>
+    <string name="no_recently_played_videos">لا توجد فيديوهات مُشغَّلة مؤخراً</string>
+    <string name="no_recently_played_videos_message">ستظهر هنا الفيديوهات التي تشغّلها</string>
+    <string name="no_recently_played_items">لا توجد عناصر مُشغَّلة مؤخراً</string>
+    <string name="no_recently_played_items_message">ستظهر هنا الفيديوهات وقوائم التشغيل التي شغّلتها مؤخراً</string>
+    <string name="remove_from_history_title">إزالة %1$d %2$s من السجل ؟</string>
+    <string name="remove_from_history_msg">سيؤدي هذا إلى إزالة %1$s المحدد من قائمة المُشغَّل مؤخراً. لن يتم حذف ملفات الفيديو الأصلية.</string>
+    <string name="delete_files_title">حذف %1$d %2$s ؟</string>
+    <string name="delete_files_msg">سيؤدي هذا إلى حذف ملف(ملفات) الفيديو الأصلية نهائياً من تخزين جهازك.\n\nلا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="also_delete_files">حذف الملف(الملفات) الأصلية أيضاً</string>
+    <string name="no_video_folders_found">لم يتم العثور على أي مجلد فيديو</string>
+    <string name="no_video_folders_found_desc">أضف فيديوهات إلى جهازك لتظهر المجلدات هنا</string>
+    <string name="search_in_all_storage_volumes">البحث في جميع وحدات التخزين...</string>
+    <string name="search_in_folder_placeholder">البحث في %1$s...</string>
+    <string name="search_default_folder_name">مجلد</string>
+    <string name="empty_folder_title">مجلد فارغ</string>
+    <string name="empty_folder_message">لا يحتوي هذا المجلد على فيديوهات أو مجلدات فرعية</string>
+    <string name="search_all_videos">البحث في جميع الفيديوهات...</string>
+    <string name="stream_link">رابط البث</string>
+    <string name="video_url_placeholder">https://example.com/video.mp4</string>
+    <string name="paste">لصق</string>
+    <string name="play">تشغيل</string>
+    <string name="no_videos_in_playlist">لا توجد فيديوهات في قائمة التشغيل هذه</string>
+    <string name="no_videos_in_playlist_desc">أضف فيديوهات من المستعرض لبناء قائمة التشغيل</string>
+    <string name="done_reordering">تم الانتهاء من إعادة الترتيب</string>
+    <string name="reorder_playlist">إعادة ترتيب قوائم التشغيل</string>
+    <string name="remove_from_playlist_confirm">ستتم إزالة %1$s المحددة من قائمة التشغيل هذه. لن يتم حذف %2$s الأصلية.</string>
+    <string name="remove_from_playlist_action">إزالة من قائمة التشغيل</string>
+    <string name="go_back">رجوع</string>
+    <string name="auto_swipe_to_next_short">التمرير التلقائي للمقطع القصير التالي</string>
+    <string name="auto_swipe_to_next_short_desc">التمرير تلقائياً عند انتهاء الفيديو</string>
+    <string name="long_press_speed">سرعة الضغط المطوّل</string>
+    <string name="video_information">معلومات الفيديو</string>
+    <string name="blocked_videos_manager">مدير الفيديوهات المحجوبة</string>
+    <string name="delete_short">حذف المقطع القصير</string>
+    <string name="delete_short_desc">حذف هذا الملف نهائياً من الجهاز</string>
+    <string name="long_press_speed_desc">اضغط مطوّلاً لتثبيت السرعة واضغط بشكل عادي للتغيير</string>
+    <string name="delete_short_confirm_message">هل أنت متأكد من رغبتك في حذف هذا المقطع القصير نهائياً؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="moving_to_private_space">جارٍ النقل إلى المساحة الخاصة...</string>
+    <string name="moved_to_private_space">تم النقل إلى المساحة الخاصة</string>
+    <string name="moved_to_private_space_desc">تم نقل %1$d من الفيديوهات بنجاح إلى المساحة الخاصة.\nللوصول إلى المساحة الخاصة، اضغط مطولاً على اسم التطبيق في أعلى الشاشة الرئيسية.</string>
+    <string name="save">حفظ</string>
+    <string name="add_network_connection">إضافة اتصال شبكي</string>
+    <string name="edit_network_connection">تعديل الاتصال الشبكي</string>
+    <string name="add_to_playlist">إضافة إلى قائمة التشغيل</string>
+    <string name="adding_one_video_to_playlist">جارٍ إضافة فيديو واحد إلى قائمة التشغيل</string>
+    <string name="adding_n_videos_to_playlist">جارٍ إضافة %1$d فيديو إلى قائمة التشغيل</string>
+    <string name="create_new_playlist">إنشاء قائمة تشغيل جديدة</string>
+    <string name="existing_playlists">قوائم التشغيل الموجودة</string>
+    <string name="video_added_to">تمت إضافة الفيديو إلى \"%1$s\"</string>
+    <string name="n_videos_added_to">تمت إضافة %1$d فيديو إلى \"%2$s</string>
+    <string name="playlist_videos_count">%1$d فيديو • %2$s</string>
+    <string name="create_first_playlist_above">أنشئ قائمة تشغيلك الأولى أعلاه</string>
+    <string name="copying_files">جارٍ نسخ الملفات</string>
+    <string name="moving_files">جارٍ نقل الملفات</string>
+    <string name="operation_completed_successfully">اكتملت العملية بنجاح!</string>
+    <string name="operation_cancelled">تم إلغاء العملية</string>
+    <string name="file_index_of_total">الملف %1$d من %2$d</string>
+    <string name="current_file">الملف الحالي</string>
+    <string name="overall_progress">التقدم الكلي</string>
+    <string name="file_bytes_progress">%1$s من %2$s</string>
+    <string name="files_processed">الملفات المعالَجة</string>
+    <string name="total_size">الحجم الإجمالي</string>
+    <string name="select_storage_location">اختر موقع التخزين</string>
+    <string name="go_to_internal_storage">الانتقال إلى التخزين الداخلي</string>
+    <string name="create_folder">إنشاء مجلد</string>
+    <string name="select_folder">اختيار مجلد</string>
+    <string name="cannot_select_same_folder">لا يمكن اختيار نفس المجلد</string>
+    <string name="create_new_folder">إنشاء مجلد جديد</string>
+    <string name="folder_name_empty">لا يمكن أن يكون اسم المجلد فارغاً</string>
+    <string name="folder_already_exists">المجلد موجود مسبقاً</string>
+    <string name="failed_create_folder">فشل إنشاء المجلد</string>
+    <string name="rename_item">إعادة تسمية %1$s</string>
+    <string name="name_cannot_be_empty">لا يمكن أن يكون الاسم فارغاً</string>
+    <string name="name_cannot_contain_invalid_chars">لا يمكن أن يحتوي الاسم على / أو \\</string>
+    <string name="play_link">تشغيل الرابط</string>
+    <string name="invalid_url_protocol">بروتوكول الرابط غير صالح</string>
+    <string name="valid_url">رابط صالح</string>
+    <string name="invalid_url">رابط غير صالح</string>
+    <string name="playlist_created_successfully">تم إنشاء قائمة التشغيل بنجاح</string>
+    <string name="failed_create_playlist">فشل إنشاء قائمة التشغيل</string>
+    <string name="m3u_playlist_added_successfully">تمت إضافة قائمة التشغيل M3U بنجاح</string>
+    <string name="failed_add_m3u_playlist">فشل إضافة قائمة التشغيل M3U</string>
+    <string name="add_m3u_playlist">إضافة قائمة تشغيل M3U</string>
+    <string name="or">أو</string>
+    <string name="playlist_options">خيارات قائمة التشغيل</string>
+    <string name="create_empty_playlist">إنشاء قائمة تشغيل فارغة</string>
+    <string name="create_blank_playlist_desc">إنشاء قائمة تشغيل فارغة جديدة</string>
+    <string name="add_m3u_playlist_from_url">إضافة قائمة تشغيل M3U من رابط</string>
+    <string name="import_playlist_url_desc">استيراد قائمة تشغيل من رابط ويب</string>
+    <string name="more_options">المزيد من الخيارات</string>
+    <string name="move">نقل</string>
+    <string name="mark_as">وسّم بـ</string>
+    <string name="mark_as_last_played">آخر تشغيل</string>
+    <string name="mark_as_last_played_desc">نقل إلى أعلى قائمة المشغَّلة مؤخراً</string>
+    <string name="mark_as_finished">منتهي</string>
+    <string name="mark_as_finished_desc">وسّم بوصفه مشاهَداً بالكامل</string>
+    <string name="mark_as_none">بلا وسم</string>
+    <string name="mark_as_none_desc">إزالة جميع الوسوم وسجل المشاهدة</string>
+    <string name="folders_count">المجلدات (%1$d)</string>
+    <string name="media_count">الوسائط (%1$d)</string>
+    <string name="drag_to_reorder">اسحب لإعادة الترتيب</string>
+    <string name="community_links">روابط المجتمع</string>
+    <string name="community_hub">مركز المجتمع</string>
+    <string name="connect_social_media">تواصل معنا على وسائل التواصل الاجتماعي</string>
+    <string name="sort_and_view_options">خيارات الفرز والعرض</string>
+    <string name="view_options">خيارات العرض</string>
+    <string name="pref_category_ui_appearance">الواجهة والمظهر</string>
+    <string name="pref_category_playback_controls">التشغيل والتحكم</string>
+    <string name="pref_category_file_management">إدارة الملفات</string>
+    <string name="pref_category_media_settings">إعدادات الوسائط</string>
+    <string name="pref_category_rexshorts">ريكس شورتس</string>
+    <string name="pref_category_rexshorts_settings">إعدادات RexShorts</string>
+    <string name="pref_category_rexshorts_settings_desc">إدارة التفعيل والتعطيل والتشغيل العشوائي والمحتوى المحجوب</string>
+    <string name="pref_category_advanced_about">المتقدمة وحول التطبيق</string>
+    <string name="pref_enable_rexshorts">تفعيل ريكس شورتس</string>
+    <string name="pref_enable_rexshorts_summary">إظهار تبويب المقاطع القصيرة في شريط التنقل السفلي</string>
+    <string name="pref_auto_swipe_shorts">التمرير التلقائي للمقطع القصير التالي</string>
+    <string name="pref_auto_swipe_shorts_summary">التمرير تلقائياً إلى المقطع القصير التالي عند انتهاء المقطع الحالي</string>
+    <string name="pref_category_discovery">الاستكشاف</string>
+    <string name="pref_include_short_horizontal_videos">تضمين الفيديوهات القصيرة العادية</string>
+    <string name="pref_include_short_horizontal_videos_summary">إظهار الفيديوهات الأفقية في التغذية إذا كانت قصيرة</string>
+    <string name="pref_max_horizontal_video_duration">الحد الأقصى لمدة الفيديوهات الأفقية</string>
+    <string name="pref_max_horizontal_video_duration_desc">تقييد الفيديوهات الأفقية إلى%1$d دقيقة%2$s</string>
+    <string name="pref_sourced_folders">المجلدات المصدرية</string>
+    <string name="pref_sourced_folders_all">مصدرها جميع المجلدات المفحوصة</string>
+    <string name="pref_sourced_folders_count">مصدرها %1$d مجلد(مجلدات)</string>
+    <string name="pref_sourced_folders_list">المصدر: %1$s</string>
+    <string name="pref_category_content_management">إدارة المحتوى</string>
+    <string name="pref_blocked_videos">الفيديوهات المحجوبة</string>
+    <string name="pref_blocked_videos_summary">عرض وإدارة المقاطع القصيرة المحجوبة</string>
+    <string name="pref_select_sourced_folders">اختيار المجلدات المصدر</string>
+    <string name="pref_select_sourced_folders_desc">اختر المجلدات التي يتم جلب المقاطع القصيرة منها. إذا لم يتم اختيار أي مجلد، سيتم جلبها من جميع المجلدات.</string>
+    <string name="pref_category_updates">التحديثات</string>
+    <string name="pref_about_auto_check_updates">التحقق التلقائي من التحديثات</string>
+    <string name="pref_about_auto_check_updates_summary">التحقق من الإصدارات الجديدة عند بدء التشغيل</string>
+    <string name="pref_about_check_updates">التحقق من وجود تحديثات</string>
+    <string name="pref_about_checking">جارٍ التحقق…</string>
+    <string name="pref_about_check_updates_summary">التحقق يدويًا من وجود إصدارات جديدة على GitHub</string>
+
+    <!-- Player Button Labels -->
+    <string name="btn_label_back">سهم الرجوع</string>
+    <string name="btn_label_title">عنوان الفيديو</string>
+    <string name="btn_label_bookmarks">الفصول / الإشارات المرجعية</string>
+    <string name="btn_label_speed">سرعة التشغيل</string>
+    <string name="btn_label_decoder">وحدة فك الترميز</string>
+    <string name="btn_label_rotation">تدوير الشاشة</string>
+    <string name="btn_label_frame_nav">التنقل بين الإطارات</string>
+    <string name="btn_label_zoom">تكبير الفيديو</string>
+    <string name="btn_label_pip">صورة داخل صورة</string>
+    <string name="btn_label_aspect">نسبة العرض إلى الارتفاع</string>
+    <string name="btn_label_lock">قفل عناصر التحكم</string>
+    <string name="btn_label_audio">المسار الصوتي</string>
+    <string name="btn_label_subtitles">الترجمة</string>
+    <string name="btn_label_more">المزيد من الخيارات</string>
+    <string name="btn_label_chapter">الفصل الحالي</string>
+    <string name="btn_label_repeat_mode">وضع التكرار</string>
+    <string name="btn_label_shuffle">تشغيل عشوائي</string>
+    <string name="btn_label_mirror">قلب أفقي</string>
+    <string name="btn_label_vertical_flip">قلب رأسي</string>
+    <string name="btn_label_ab_loop">تكرار A-B</string>
+    <string name="btn_label_custom_skip">تخطي مخصص</string>
+    <string name="btn_label_background_playback">التشغيل في الخلفية</string>
+    <string name="btn_label_ambient_mode">الوضع السينيمائي</string>
+    <string name="btn_label_sleep_timer">مؤقت النوم</string>
+    <string name="btn_label_none">لا شيء</string>
+
+
+    <string name="timer_start">بدء المؤقت</string>
+    <string name="slide_to_unlock">اسحب لفتح القفل</string>
+
+    <string name="player_sheets_tab_controls">التحكم</string>
+    <string name="player_sheets_tab_settings">الإعدادات</string>
+    <string name="player_sheets_tab_interaction">التفاعل</string>
+    <string name="anime4k_not_available_high_res">غير متوفر لفيديو 4K/8K</string>
+    <string name="player_sheets_extended_controls_title">أدوات تحكم إضافية</string>
+
+    <string name="storage_access_required">الوصول للتخزين مطلوب</string>
+    <string name="allow_access">السماح بالوصول</string>
+    <string name="why_do_i_see_this">لماذا أرى هذا؟</string>
+    <string name="why_this_permission_is_needed">لماذا هذا الإذن مطلوب</string>
+    <string name="permission_explanation_playstore_intro">يحتاج mpvRex إلى الوصول لملفات الفيديو الخاصة بك لتوفير وظيفته الأساسية كمشغل وسائط.</string>
+    <string name="permission_used_exclusively_for">يُستخدم هذا الإذن حصرياً من أجل:</string>
+    <string name="permission_usage_bullet_list">• اكتشاف وعرض ملفات الفيديو الخاصة بك\n• تشغيل المحتوى الإعلامي\n• تحميل ملفات الترجمة</string>
+    <string name="permission_explanation_standard_intro">يتطلب mpvRex دائماً إذن الوصول للتخزين لأنه ضروري لعثور التطبيق على جميع ملفات الوسائط والترجمة الموجودة على جهازك، بما فيها الملفات غير المدعومة من طرف النظام.</string>
+    <string name="permission_security_policy_change">مع ذلك، بسبب تغيير في سياسة الأمان، تتطلب التطبيقات المبنية لأندرويد 11 وما فوق الآن إذناً إضافياً لمواصلة الوصول لنفس الملفات.</string>
+    <string name="permission_privacy_assurance_standard">يرجى العلم أن هذا الإذن يُستخدم فقط للاكتشاف التلقائي لملفات الوسائط/الترجمة على جهازك، ولن يسمح لنا بالوصول لملفات البيانات الخاصة المخزنة من طرف تطبيقات أخرى بأي شكل من الأشكال.</string>
+    <string name="opensource_github_notice">mpvRex مشروع مفتوح المصدر. يمكنك مراجعة الكود المصدري والتحقق من كيفية استخدام الأذونات بزيارة مستودعنا على GitHub في:</string>
+    <string name="privacy_assurance_final">كن مطمئناً، خصوصيتك هي أولويتنا القصوى، ولا نصل لملفاتك لأغراض أخرى ولا ننقلها أو نخزنها في خوادمنا. تبقى آمنة على جهازك.</string>
+    
+    <string name="permission_required_photos_videos">يحتاج mpvRex إذن \"الصور والفيديوهات\" للوصول لملفات الفيديو المخزنة على جهازك وتشغيلها.</string>
+    <string name="permission_required_storage">يحتاج mpvRex إذن \"التخزين\" للوصول لملفات الوسائط المخزنة على جهازك وتشغيلها.</string>
+    <string name="permission_required_all_files">يحتاج mpvRex إذن \"الوصول لجميع الملفات\" لاكتشاف ملفات الوسائط والترجمة على جهازك بسبب تغيير في سياسة الأمان في أندرويد 11 والإصدارات الأحدث.</string>
+    <string name="permission_explanation_tiramisu_plus">في أندرويد 13 وما فوق، يسمح هذا الإذن للتطبيق بقراءة ملفات الفيديو من تخزين جهازك، بما في ذلك مجلدات التنزيلات والأفلام و DCIM.</string>
+    <string name="permission_explanation_pre_tiramisu">يسمح هذا الإذن للتطبيق بقراءة ملفات الوسائط من تخزين جهازك لتشغيل الفيديوهات والصوتيات.</string>
+
+        <!-- PlayerControlsShared -->
+    <string name="playlist_separator">• %1$s</string>
+    <string name="chapters">الفصول</string>
+    <string name="skip_seconds">تخطي %1$d ثانية</string>
+    <string name="playback_speed">سرعة التشغيل</string>
+    <string name="screen_rotation">التدوير</string>
+    <string name="frame_nav">تصفح الإطارات</string>
+    <string name="frame_navigation">التنقل بين الإطارات</string>
+    <string name="pip">صورة داخل صورة</string>
+    <string name="video_zoom">تقريب الفيديو</string>
+    <string name="lock">قفل</string>
+    <string name="audio">الصوت</string>
+    <string name="subtitles">الترجمة</string>
+    <string name="repeat_off">التكرار متوقف</string>
+    <string name="repeat_one">تكرار العنصر الواحد</string>
+    <string name="repeat_all">تكرار الكل</string>
+    <string name="shuffle_on">التشغيل العشوائي مفعّل</string>
+    <string name="shuffle_off">التشغيل العشوائي متوقف</string>
+    <string name="mirrored">معكوس أفقياً</string>
+    <string name="mirror">عكس أفقي</string>
+    <string name="flipped">معكوس عمودياً</string>
+    <string name="flip_vertical">عكس عمودي</string>
+    <string name="flip_vertical_desc">العكس العمودي</string>
+    <string name="ab_loop_short">AB</string>
+    <string name="loop">تكرار</string>
+    <string name="background_playback">التشغيل في الخلفية</string>
+    <string name="ambient">الوضع المحيطي</string>
+    <string name="ambience_mode">وضع الإضاءة المحيطية</string>
+    <string name="sleep_timer">مؤقت النوم</string>
+
+    
+         <!-- Preference section headers -->
+    <string name="pref_layout_landscape_controls_header">أدوات التحكم في وضع أفقي</string>
+    <string name="pref_layout_portrait_controls_header">أدوات التحكم في وضع عمودي</string>
+    <string name="pref_layout_more_sheet_controls_header">أدوات التحكم في القائمة الإضافية</string>
+    <string name="pref_layout_more_sheet_controls_title">الأزرار في تبويب أدوات التحكم</string>
+    <string name="pref_seekbar_style_header">شكل شريط التقدّم</string>
+    <string name="pref_controls_layout_header">تخطيط أدوات التحكم</string>
+    <string name="pref_player_appearance_header">المظهر</string>
+
+       <!-- Controls Layout: below/above seekbar -->
+    <string name="pref_controls_layout_below_seekbar_title">أدوات التحكم أسفل شريط التقدّم</string>
+    <string name="pref_controls_layout_below_seekbar_summary_true">تظهر أزرار التحكم أسفل شريط التقدّم</string>
+    <string name="pref_controls_layout_below_seekbar_summary_false">تظهر أزرار التحكم أعلى شريط التقدّم</string>
+
+        <!-- Appearance section -->
+    <string name="pref_appearance_show_controls_on_play_title">إظهار أدوات التحكم عند بدء التشغيل</string>
+    <string name="pref_appearance_show_controls_on_play_summary">إظهار طبقة أدوات التحكم عند بدء تشغيل الفيديو</string>
+    <string name="pref_appearance_player_gradient_opacity_title">شفافية التدرّج في أدوات التحكم</string>
+    <string name="pref_appearance_player_gradient_opacity_current">الحالي: %1$d%%</string>
+
+        <!-- Custom hide-time dialog -->
+    <string name="pref_player_display_custom_hide_time_dialog_message">أدخل زمن الإخفاء المخصّص بالميلي ثانية</string>
+    <string name="pref_player_display_time_ms_format">%1$d ms</string>
+    <string name="pref_player_display_custom_time_summary">مخصّص (%1$d ms)</string>
+    
+        <!-- Generic reusable strings -->
+    <string name="generic_none">بلا</string>
+    <string name="generic_custom">مخصّص</string>
+    <string name="generic_edit_content_description">تعديل %1$s</string>
+    
+    <string name="pref_appearance_enable_glass_player_controls_title">عناصر تحكّم المشغّل الزجاجية</string>
+    <string name="pref_appearance_enable_glass_player_controls_summary">طبّق نمط الزجاج Glass-morphism على أزرار تحكّم المشغّل</string>
+    <string name="pref_appearance_enable_glass_seekbar_title">خلفية شريط التحريك الزجاجية</string>
+    <string name="pref_appearance_enable_glass_seekbar_summary">طبّق نمط الزجاج Glass-morphism على مسار شريط تقدّم الفيديو</string>
+    <string name="pref_player_show_circular_double_tap_seek_title">إظهار مؤشّر التحريك الدائري عند النقر المزدوج</string>
+    <string name="pref_player_show_circular_double_tap_seek_summary">إظهار طبقة تحريك دائرية مع عرض الوقت أسفلها</string>
+
+            <!-- شاشة البث الشبكي — مفاتيح جديدة -->
+    <string name="network_recent_links">الروابط الأخيرة</string>
+    <string name="network_local_network">الشبكة المحلية</string>
+    <string name="network_empty_title">لا توجد اتصالات شبكية</string>
+    <string name="network_empty_description">أضف اتصالات SMB أو FTP أو WebDAV لتصفح ملفات الشبكة</string>
+    <string name="network_remove_link_action">حذف الرابط</string>
+
+           <!-- شاشة تفضيلات المظهر — مفاتيح جديدة -->
+    <string name="pref_appearance_network_thumbnails_dialog_title">تفعيل الصور المصغّرة للشبكة؟</string>
+    <string name="pref_appearance_network_thumbnails_dialog_message">توليد الصور المصغّرة لبثوث الشبكة (M3U/HTTP) قد يزيد بشكل ملحوظ من استهلاك البيانات في الخلفية وأوقات التحميل. هل تريد المتابعة؟</string>
+    <string name="pref_appearance_thumbnail_strategy_dialog_title">تغيير استراتيجية الصور المصغّرة؟</string>
+    <string name="pref_appearance_thumbnail_strategy_dialog_message">تغيير استراتيجية الاستخراج سيمسح ذاكرة التخزين المؤقت الحالية للصور المصغّرة. سيتم توليد صور جديدة تلقائياً أثناء التصفح.</string>
+    <string name="pref_appearance_thumbnail_position_dialog_title">تحديث موضع الصورة المصغّرة؟</string>
+    <string name="pref_appearance_thumbnail_position_reset_confirm">إعادة ضبط الصورة المصغّرة عند %1$d%% من مدة الفيديو.</string>
+    <string name="pref_appearance_thumbnail_position_dialog_message">تغيير موضع الاستخراج سيمسح ذاكرة التخزين المؤقت الحالية للصور المصغّرة. سيتم توليد صور جديدة تلقائياً أثناء التصفح.</string>
+
+           <!-- شاشة تعديل تخطيط أزرار التحكم — مفاتيح جديدة -->
+    <string name="control_layout_edit_title_top_right">تعديل الزاوية العلوية اليمنى</string>
+    <string name="control_layout_edit_title_bottom_right">تعديل الزاوية السفلية اليمنى</string>
+    <string name="control_layout_edit_title_bottom_left">تعديل الزاوية السفلية اليسرى</string>
+    <string name="control_layout_edit_title_portrait_bottom">تعديل الأسفل (الوضع الرأسي)</string>
+    <string name="control_layout_edit_title_more_sheet">تعديل أزرار قائمة \"المزيد\"</string>
+    <string name="control_layout_back">رجوع</string>
+    <string name="control_layout_reset_to_default">إعادة الضبط الافتراضي</string>
+    <string name="control_layout_reset_dialog_title">إعادة ضبط التخطيط</string>
+    <string name="control_layout_reset_dialog_message">هل أنت متأكد أنك تريد إعادة ضبط هذه المنطقة إلى الإعدادات الافتراضية؟</string>
+       <!-- ملاحظة: صياغة معاد كتابتها عمداً (بدل ترجمة حرفية لـ '-') لحل bidi bug ظاهر في اللقطة المرفقة -->
+    <string name="control_layout_reorder_hint">اضغط مطولاً لإعادة ترتيب العناصر. اضغط على علامة الناقص الحمراء لإزالتهم.</string>
+    <string name="control_layout_drop_zone_empty">منطقة الإفلات فارغة</string>
+    <string name="control_layout_drop_zone_hint">اضغط على الأزرار من \"اللوحة المتاحة\" أدناه</string>
+    <string name="control_layout_all_buttons_in_use">جميع الأزرار المتاحة قيد الاستخدام حالياً.</string>
+    <string name="control_layout_icons_legend_title">دليل الأيقونات</string>
+
+           <!-- شاشة تفضيلات الإيماءات — مفاتيح جديدة -->
+    <string name="pref_gesture_custom_value">مخصص</string>
+    <string name="pref_gesture_double_tap_seek_area_width_title">عرض منطقة التقديم بالنقر المزدوج</string>
+    <string name="pref_gesture_custom_seek_dialog_hint">أدخل مدة تقديم مخصصة بالثواني (1-120)</string>
+
+    <string name="player_sheets_aspect_ratio_vertical_offset_value">الإزاحة العمودية: %1$.3f</string>
+    <string name="player_sheets_aspect_ratio_advanced_zoom_toggle">التكبير المتقدم</string>
+    <string name="player_sheets_aspect_ratio_advanced_zoom_description">تمديد أو اقتصاص المحورين الأفقي والعمودي بشكل مستقل، مفيد لإزالة الأشرطة السوداء</string>
+    <string name="player_sheets_aspect_ratio_horizontal_zoom_value">التكبير الأفقي: %1$.2fx</string>
+    <string name="player_sheets_aspect_ratio_vertical_zoom_value">التكبير العمودي: %1$.2fx</string>
+    <string name="player_sheets_aspect_ratio_reset_horizontal_zoom">إعادة تعيين التكبير الأفقي</string>
+    <string name="player_sheets_aspect_ratio_reset_vertical_zoom">إعادة تعيين التكبير العمودي</string>
+    <string name="player_sheets_aspect_ratio_decrease_horizontal_zoom">تقليل التكبير الأفقي</string>
+    <string name="player_sheets_aspect_ratio_increase_horizontal_zoom">زيادة التكبير الأفقي</string>
+    <string name="player_sheets_aspect_ratio_decrease_vertical_zoom">تقليل التكبير العمودي</string>
+    <string name="player_sheets_aspect_ratio_increase_vertical_zoom">زيادة التكبير العمودي</string>
+    <string name="player_sheets_aspect_ratio_reset_advanced_zoom">إعادة تعيين التكبير المتقدم</string>
+    <string name="mark_as_new">جديد</string>
+    <string name="mark_as_new_desc">إزالة كل العلامات والتعليم كجديد</string>
+    <string name="pref_enable_glass_shorts_controls">عناصر التحكم زجاجية للمقاطع القصيرة</string>
+    <string name="pref_enable_glass_shorts_controls_summary">تطبيق نمط الزجاج Glass-morphism على أزرار التحكم في المقاطع القصيرة</string>
+    <string name="pref_show_shorts_back_button">إظهار زر الرجوع</string>
+    <string name="pref_show_shorts_back_button_summary">إظهار زر الرجوع في لوحة التحكم الجانبية للمقاطع القصيرة</string>
+
+    <string name="item_type_video">فيديو</string>
+    <string name="item_type_folder">مجلد</string>
+    <string name="item_type_file">ملف</string>
+    <string name="item_type_playlist">قائمة تشغيل</string>
+    <string name="item_type_item">عنصر</string>
+
+    <string name="no_videos_in_folder">لا توجد فيديوهات في هذا المجلد</string>
+    <string name="no_videos_in_folder_desc">الفيديوهات التي تضيفها لهذا المجلد ستظهر هنا</string>
+    <string name="tree_view">العرض الشجري</string>
+
+    <string name="pref_player_general">عام</string>
+    <string name="pref_player_autoplay_next_video">تشغيل الفيديو التالي تلقائياً</string>
+    <string name="pref_player_autoplay_next_video_summary_on">تشغيل الفيديو التالي تلقائياً عند انتهاء الحالي</string>
+    <string name="pref_player_autoplay_next_video_summary_off">البقاء على الفيديو الحالي عند انتهائه</string>
+    <string name="pref_player_playlist_mode_summary_on">إظهار أزرار التالي/السابق لكل فيديوهات المجلد</string>
+    <string name="pref_player_playlist_mode_summary_off">تشغيل الفيديوهات بشكل منفرد (اختر عدة فيديوهات لقائمة تشغيل)</string>
+    <string name="pref_player_keep_screen_on_when_paused_summary_on">تبقى الشاشة مضاءة أثناء إيقاف الفيديو مؤقتاً</string>
+    <string name="pref_player_keep_screen_on_when_paused_summary_off">يمكن للشاشة أن تُطفأ أثناء إيقاف الفيديو مؤقتاً</string>
+    <string name="pref_player_auto_pip">صورة داخل صورة تلقائية</string>
+    <string name="pref_player_auto_pip_summary">الدخول تلقائياً لوضع الصورة داخل الصورة عند الضغط على الرئيسية أو الرجوع</string>
+    <string name="pref_player_dynamic_speed_overlay">عرض السرعة الديناميكي</string>
+    <string name="pref_player_dynamic_speed_overlay_summary">إظهار قيمة السرعة متغيرة أثناء الضغط المطوّل والسحب</string>
+    <string name="pref_player_display_show_navigation_bar">إظهار شريط التنقل مع عناصر التحكم</string>
+
+    <plurals name="item_type_video_plural">
+        <item quantity="zero">فيديو</item>
+        <item quantity="one">فيديو</item>
+        <item quantity="two">فيديوهين</item>
+        <item quantity="few">فيديوهات</item>
+        <item quantity="many">فيديو</item>
+        <item quantity="other">فيديو</item>
+    </plurals>
+    <plurals name="item_type_folder_plural">
+        <item quantity="zero">مجلد</item>
+        <item quantity="one">مجلد</item>
+        <item quantity="two">مجلدين</item>
+        <item quantity="few">مجلدات</item>
+        <item quantity="many">مجلد</item>
+        <item quantity="other">مجلد</item>
+    </plurals>
+    <plurals name="item_type_file_plural">
+        <item quantity="zero">ملف</item>
+        <item quantity="one">ملف</item>
+        <item quantity="two">ملفين</item>
+        <item quantity="few">ملفات</item>
+        <item quantity="many">ملف</item>
+        <item quantity="other">ملف</item>
+    </plurals>
+    <plurals name="item_type_playlist_plural">
+        <item quantity="zero">قائمة تشغيل</item>
+        <item quantity="one">قائمة تشغيل</item>
+        <item quantity="two">قائمتي تشغيل</item>
+        <item quantity="few">قوائم تشغيل</item>
+        <item quantity="many">قائمة تشغيل</item>
+        <item quantity="other">قائمة تشغيل</item>
+    </plurals>
+    <plurals name="item_type_item_plural">
+        <item quantity="zero">عنصر</item>
+        <item quantity="one">عنصر</item>
+        <item quantity="two">عنصرين</item>
+        <item quantity="few">عناصر</item>
+        <item quantity="many">عنصر</item>
+        <item quantity="other">عنصر</item>
+    </plurals>
+    <string name="rename_failed">فشلت إعادة التسمية</string>
+
+    <plurals name="delete_items_warning">
+        <item quantity="zero">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
+        <item quantity="one">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر المحدد نهائياً.</item>
+        <item quantity="two">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصرين المحددين نهائياً.</item>
+        <item quantity="few">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
+        <item quantity="many">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
+        <item quantity="other">لا يمكن التراجع عن هذا الإجراء. سيتم حذف العناصر المحددة نهائياً.</item>
+    </plurals>
+
+    <string name="export_failed">فشل التصدير: %1$s</string>
+    <string name="import_failed">فشل الاستيراد: %1$s</string>
+    <string name="clear_failed">فشل المسح: %1$s</string>
+    <string name="export_complete_details">تم تصدير %1$d عنصراً بنجاح!\n\n</string>
+    <string name="import_complete_details">تم استيراد: %1$d\nفشل: %2$d\nالإصدار: %3$s\n\nيرجى إعادة تشغيل التطبيق لتطبيق كل التغييرات.</string>
+    <string name="pref_advanced_section_backup_restore">النسخ الاحتياطي والاستعادة</string>
+    <string name="pref_advanced_section_mpv_configuration">إعدادات MPV</string>
+    <string name="pref_advanced_section_scripts">السكربتات</string>
+    <string name="pref_advanced_section_history">السجل</string>
+    <string name="pref_advanced_section_cache">التخزين المؤقت</string>
+    <string name="pref_advanced_section_system_integration">تكامل النظام</string>
+    <string name="pref_advanced_section_logging">السجلات</string>
+    <string name="pref_advanced_tap_to_edit_configuration">اضغط لتحرير الإعدادات</string>
+    <string name="pref_advanced_mpv_directory_ready">مجلد MPV جاهز ✓</string>
+    <string name="pref_advanced_lua_set_storage_first">حدّد موقع التخزين وفعّل سكربتات Lua أولاً</string>
+    <string name="pref_advanced_no_scripts_enabled">لا توجد سكربتات مفعّلة</string>
+    <string name="pref_advanced_custom_lua_summary">إنشاء وإدارة أزرار Lua المخصصة</string>
+    <string name="pref_advanced_config_cache_cleared">تم مسح ذاكرة تخزين الإعدادات المؤقتة</string>
+    <string name="pref_advanced_delete_thumbnails_summary">حذف جميع الصور المصغّرة المخزّنة (ستُنشأ من جديد عند تصفّح المجلدات)</string>
+    <string name="pref_advanced_clear_thumbnail_cache_confirm_title">مسح ذاكرة تخزين الصور المصغّرة؟</string>
+    <string name="pref_advanced_clear_thumbnail_cache_confirm_subtitle">سيؤدي هذا إلى حذف جميع الصور المصغّرة المخزّنة (المحلية والشبكية) من التخزين والذاكرة.</string>
+    <string name="pref_advanced_thumbnail_cache_cleared">تم مسح ذاكرة تخزين الصور المصغّرة</string>
+    <string name="pref_advanced_remove_cached_fonts_summary">إزالة جميع خطوط الترجمة المخزّنة</string>
+    <string name="pref_advanced_enable_media_info_title">تفعيل نشاط معلومات الوسائط</string>
+    <string name="pref_advanced_enable_media_info_summary">إظهار "معلومات الوسائط" كخيار في قوائم "فتح باستخدام" على مستوى النظام</string>
+
+    <string name="blocked_shorts_empty_state">لا توجد فيديوهات محظورة</string>
+    <string name="blocked_shorts_unblock_button">محظور</string>
+
+    <string name="playlist_now_playing">قيد التشغيل الآن</string>
+    <string name="playlist_playing">قيد التشغيل</string>
+    <string name="playlist_reorder">إعادة ترتيب قائمة التشغيل</string>
+    <string name="playlist_search_placeholder">بحث...</string>
+    <string name="playlist_no_items">لم يتم العثور على عناصر</string>
+    <string name="playlist_items_count">%1$d من %2$d عنصر</string>
+    <string name="playlist_selected_count">%1$d محددة</string>
+
+    <string name="pref_about_up_to_date">أنت تستخدم آخر إصدار!</string>
+    <string name="pref_about_check_updates_failed">فشل التحقق من التحديثات</string>
+    <string name="pref_about_device_info">معلومات الجهاز</string>
+
+    <string name="config_editor_unsaved_changes">تغييرات غير محفوظة</string>
+    <string name="config_editor_no_storage_location">لم يتم تحديد موقع التخزين</string>
+    <string name="config_editor_create_failed">فشل إنشاء الملف</string>
+    
+</resources>

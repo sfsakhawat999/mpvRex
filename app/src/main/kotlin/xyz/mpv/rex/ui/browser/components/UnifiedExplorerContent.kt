@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -41,6 +42,14 @@ import xyz.mpv.rex.ui.browser.LocalNavigationBarHeight
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.ui.res.stringResource
+import xyz.mpv.rex.R
+import my.nanihadesuka.compose.LazyColumnScrollbar
+import my.nanihadesuka.compose.LazyVerticalGridScrollbar
+import my.nanihadesuka.compose.ScrollbarSettings
+
+val LocalLastPlayedVideoPathsInFolder = compositionLocalOf<Set<String>> { emptySet() }
+val LocalRecentlyPlayedFilePaths = compositionLocalOf<Set<String>> { emptySet() }
 
 @Composable
 fun <T> UnifiedExplorerContent(
@@ -60,9 +69,12 @@ fun <T> UnifiedExplorerContent(
   onRefresh: (suspend () -> Unit)? = null,
   isInSelectionMode: Boolean = false,
   recentlyPlayedFilePath: String? = null,
+  recentlyPlayedFilePaths: Set<String> = emptySet(),
+  recentlyPlayedPaths: Set<String> = emptySet(),
   playedFolderPaths: Set<String> = emptySet(),
   newVideoIds: Set<Long> = emptySet(),
   watchedVideoIds: Set<Long> = emptySet(),
+  videoPlaybackProgress: Map<Long, Float> = emptyMap(),
   autoScrollToLastPlayed: Boolean = false,
   scrollTriggerKey: Any? = null,
   gridColumns: Int? = null,
@@ -88,7 +100,9 @@ fun <T> UnifiedExplorerContent(
     val isFolder = remember(items) {
       items.firstOrNull()?.let {
         it is VideoFolder || 
-        it is FileSystemItem.Folder
+        it is FileSystemItem.Folder ||
+        it is PlaylistWithCount ||
+        it is RecentlyPlayedItem.PlaylistItem
       } ?: false
     }
     if (isFolder) {
@@ -129,6 +143,26 @@ fun <T> UnifiedExplorerContent(
     val listState = listState ?: rememberLazyListState()
     val gridState = gridState ?: rememberLazyGridState()
 
+    val lastPlayedVideoPathsInFolder = remember(items, recentlyPlayedPaths, recentlyPlayedFilePaths) {
+      val pathsInItems = items.mapNotNull { item ->
+        when (item) {
+          is Video -> item.path
+          is VideoWithPlaybackInfo -> item.video.path
+          is RecentlyPlayedItem.VideoItem -> item.video.path
+          is FileSystemItem.VideoFile -> item.video.path
+          is PlaylistVideoItem -> item.video.path
+          else -> null
+        }
+      }.toSet()
+      val overallLastPlayed = pathsInItems.filter { it in recentlyPlayedFilePaths }.toSet()
+      if (overallLastPlayed.isNotEmpty()) {
+        overallLastPlayed
+      } else {
+        val fallbackPath = recentlyPlayedPaths.firstOrNull { it in pathsInItems }
+        if (fallbackPath != null) setOf(fallbackPath) else emptySet()
+      }
+    }
+
     // Scroll to top whenever the caller changes the sort key, skipping the initial composition
     val isInitialTrigger = remember { mutableStateOf(true) }
     LaunchedEffect(scrollTriggerKey) {
@@ -168,51 +202,55 @@ fun <T> UnifiedExplorerContent(
         }
       }
       if (lastPlayedIndex != -1) {
+        val hasAutoScrolled = rememberSaveable(inputs = arrayOf(recentlyPlayedFilePath)) { mutableStateOf(false) }
         LaunchedEffect(recentlyPlayedFilePath) {
-          if (showSections) {
-            val matchedItem = items[lastPlayedIndex]
-            val isFolder = matchedItem is VideoFolder || matchedItem is FileSystemItem.Folder
-            val folderItems = items.filter { it is VideoFolder || it is FileSystemItem.Folder }
-            val videoItems = items.filter { it is Video || it is VideoWithPlaybackInfo || it is FileSystemItem.VideoFile || it is RecentlyPlayedItem.VideoItem }
+          if (!hasAutoScrolled.value) {
+            hasAutoScrolled.value = true
+            if (showSections) {
+              val matchedItem = items[lastPlayedIndex]
+              val isFolder = matchedItem is VideoFolder || matchedItem is FileSystemItem.Folder
+              val folderItems = items.filter { it is VideoFolder || it is FileSystemItem.Folder }
+              val videoItems = items.filter { it is Video || it is VideoWithPlaybackInfo || it is FileSystemItem.VideoFile || it is RecentlyPlayedItem.VideoItem }
 
-            val targetIndex = if (isFolder) {
-              val folderIndex = folderItems.indexOf(matchedItem)
-              if (folderIndex != -1) {
-                if (mediaLayoutMode == MediaLayoutMode.GRID) {
-                  val folderGridColumns = if (isLandscape) folderGridColumnsLandscape else folderGridColumnsPortrait
-                  1 + (folderIndex / folderGridColumns)
-                } else {
-                  1 + folderIndex
-                }
-              } else 0
-            } else {
-              val videoIndex = videoItems.indexOf(matchedItem)
-              if (videoIndex != -1) {
-                if (folderItems.isNotEmpty()) {
+              val targetIndex = if (isFolder) {
+                val folderIndex = folderItems.indexOf(matchedItem)
+                if (folderIndex != -1) {
                   if (mediaLayoutMode == MediaLayoutMode.GRID) {
                     val folderGridColumns = if (isLandscape) folderGridColumnsLandscape else folderGridColumnsPortrait
-                    val videoGridColumns = if (isLandscape) videoGridColumnsLandscape else videoGridColumnsPortrait
-                    val numFolderRows = (folderItems.size + folderGridColumns - 1) / folderGridColumns
-                    numFolderRows + 3 + (videoIndex / videoGridColumns)
+                    1 + (folderIndex / folderGridColumns)
                   } else {
-                    folderItems.size + 3 + videoIndex
+                    1 + folderIndex
                   }
-                } else {
-                  if (mediaLayoutMode == MediaLayoutMode.GRID) {
-                    val videoGridColumns = if (isLandscape) videoGridColumnsLandscape else videoGridColumnsPortrait
-                    1 + (videoIndex / videoGridColumns)
+                } else 0
+              } else {
+                val videoIndex = videoItems.indexOf(matchedItem)
+                if (videoIndex != -1) {
+                  if (folderItems.isNotEmpty()) {
+                    if (mediaLayoutMode == MediaLayoutMode.GRID) {
+                      val folderGridColumns = if (isLandscape) folderGridColumnsLandscape else folderGridColumnsPortrait
+                      val videoGridColumns = if (isLandscape) videoGridColumnsLandscape else videoGridColumnsPortrait
+                      val numFolderRows = (folderItems.size + folderGridColumns - 1) / folderGridColumns
+                      numFolderRows + 3 + (videoIndex / videoGridColumns)
+                    } else {
+                      folderItems.size + 3 + videoIndex
+                    }
                   } else {
-                    1 + videoIndex
+                    if (mediaLayoutMode == MediaLayoutMode.GRID) {
+                      val videoGridColumns = if (isLandscape) videoGridColumnsLandscape else videoGridColumnsPortrait
+                      1 + (videoIndex / videoGridColumns)
+                    } else {
+                      1 + videoIndex
+                    }
                   }
-                }
-              } else 0
-            }
-            listState.scrollToItem(targetIndex)
-          } else {
-            if (mediaLayoutMode == MediaLayoutMode.GRID) {
-              gridState.scrollToItem(lastPlayedIndex)
+                } else 0
+              }
+              listState.scrollToItem(targetIndex)
             } else {
-              listState.scrollToItem(lastPlayedIndex)
+              if (mediaLayoutMode == MediaLayoutMode.GRID) {
+                gridState.scrollToItem(lastPlayedIndex)
+              } else {
+                listState.scrollToItem(lastPlayedIndex)
+              }
             }
           }
         }
@@ -236,12 +274,12 @@ fun <T> UnifiedExplorerContent(
             top = 8.dp,
             bottom = navigationBarHeight + 8.dp
           ),
-          verticalArrangement = Arrangement.spacedBy(8.dp)
+          verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
           // --- FOLDERS SECTION ---
           if (folderItems.isNotEmpty()) {
             item(key = "folders_header") {
-              SectionHeader(title = "Folders (${folderItems.size})")
+              SectionHeader(title = stringResource(R.string.folders_count, folderItems.size))
             }
 
             if (mediaLayoutMode == MediaLayoutMode.GRID) {
@@ -252,7 +290,7 @@ fun <T> UnifiedExplorerContent(
               ) { rowItems ->
                 Row(
                   modifier = Modifier.fillMaxWidth(),
-                  horizontalArrangement = Arrangement.spacedBy(8.dp)
+                  horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                   for (item in rowItems) {
                     Box(modifier = Modifier.weight(1f)) {
@@ -282,9 +320,11 @@ fun <T> UnifiedExplorerContent(
                         onLongClick = { onLongClick(item) },
                         onThumbClick = effectiveOnThumbClick,
                         recentlyPlayedFilePath = recentlyPlayedFilePath,
+                        recentlyPlayedPaths = recentlyPlayedPaths,
                         playedFolderPaths = playedFolderPaths,
                         newVideoIds = newVideoIds,
                         watchedVideoIds = watchedVideoIds,
+                        videoPlaybackProgress = videoPlaybackProgress,
                         showSections = showSections
                       )
                     }
@@ -327,9 +367,11 @@ fun <T> UnifiedExplorerContent(
                   onLongClick = { onLongClick(item) },
                   onThumbClick = effectiveOnThumbClick,
                   recentlyPlayedFilePath = recentlyPlayedFilePath,
+                  recentlyPlayedPaths = recentlyPlayedPaths,
                   playedFolderPaths = playedFolderPaths,
                   newVideoIds = newVideoIds,
                   watchedVideoIds = watchedVideoIds,
+                  videoPlaybackProgress = videoPlaybackProgress,
                   showSections = showSections
                 )
               }
@@ -339,14 +381,14 @@ fun <T> UnifiedExplorerContent(
           // Section Spacer
           if (folderItems.isNotEmpty() && videoItems.isNotEmpty()) {
             item(key = "section_divider") {
-              Spacer(modifier = Modifier.height(8.dp))
+              Spacer(modifier = Modifier.height(4.dp))
             }
           }
 
           // --- MEDIA SECTION ---
           if (videoItems.isNotEmpty()) {
             item(key = "media_header") {
-              SectionHeader(title = "Media (${videoItems.size})")
+              SectionHeader(title = stringResource(R.string.media_count, videoItems.size))
             }
 
             if (mediaLayoutMode == MediaLayoutMode.GRID) {
@@ -357,7 +399,7 @@ fun <T> UnifiedExplorerContent(
               ) { rowItems ->
                 Row(
                   modifier = Modifier.fillMaxWidth(),
-                  horizontalArrangement = Arrangement.spacedBy(8.dp)
+                  horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                   for (item in rowItems) {
                     Box(modifier = Modifier.weight(1f)) {
@@ -387,9 +429,11 @@ fun <T> UnifiedExplorerContent(
                         onLongClick = { onLongClick(item) },
                         onThumbClick = effectiveOnThumbClick,
                         recentlyPlayedFilePath = recentlyPlayedFilePath,
+                        recentlyPlayedPaths = recentlyPlayedPaths,
                         playedFolderPaths = playedFolderPaths,
                         newVideoIds = newVideoIds,
                         watchedVideoIds = watchedVideoIds,
+                        videoPlaybackProgress = videoPlaybackProgress,
                         showSections = showSections
                       )
                     }
@@ -432,9 +476,11 @@ fun <T> UnifiedExplorerContent(
                   onLongClick = { onLongClick(item) },
                   onThumbClick = effectiveOnThumbClick,
                   recentlyPlayedFilePath = recentlyPlayedFilePath,
+                  recentlyPlayedPaths = recentlyPlayedPaths,
                   playedFolderPaths = playedFolderPaths,
                   newVideoIds = newVideoIds,
                   watchedVideoIds = watchedVideoIds,
+                  videoPlaybackProgress = videoPlaybackProgress,
                   showSections = showSections
                 )
               }
@@ -452,8 +498,8 @@ fun <T> UnifiedExplorerContent(
             top = 8.dp,
             bottom = navigationBarHeight + 8.dp
           ),
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          verticalArrangement = Arrangement.spacedBy(8.dp)
+          horizontalArrangement = Arrangement.spacedBy(4.dp),
+          verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
           items(
             items = items,
@@ -485,9 +531,11 @@ fun <T> UnifiedExplorerContent(
               onLongClick = { onLongClick(item) },
               onThumbClick = effectiveOnThumbClick,
               recentlyPlayedFilePath = recentlyPlayedFilePath,
+              recentlyPlayedPaths = recentlyPlayedPaths,
               playedFolderPaths = playedFolderPaths,
               newVideoIds = newVideoIds,
               watchedVideoIds = watchedVideoIds,
+              videoPlaybackProgress = videoPlaybackProgress,
               showSections = showSections
             )
           }
@@ -508,7 +556,7 @@ fun <T> UnifiedExplorerContent(
             top = 8.dp,
             bottom = navigationBarHeight + 8.dp
           ),
-          verticalArrangement = Arrangement.spacedBy(8.dp)
+          verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
           items(
             items = items,
@@ -547,9 +595,11 @@ fun <T> UnifiedExplorerContent(
                       onLongClick = { onLongClick(item) },
                       onThumbClick = effectiveOnThumbClick,
                       recentlyPlayedFilePath = recentlyPlayedFilePath,
+                      recentlyPlayedPaths = recentlyPlayedPaths,
                       playedFolderPaths = playedFolderPaths,
                       newVideoIds = newVideoIds,
                       watchedVideoIds = watchedVideoIds,
+                      videoPlaybackProgress = videoPlaybackProgress,
                       showSections = showSections
                     )
                   }
@@ -561,7 +611,7 @@ fun <T> UnifiedExplorerContent(
                   ) {
                     Icon(
                       imageVector = Icons.Filled.DragHandle,
-                      contentDescription = "Drag to reorder",
+                      contentDescription = stringResource(R.string.drag_to_reorder),
                       tint = MaterialTheme.colorScheme.primary,
                     )
                   }
@@ -579,28 +629,70 @@ fun <T> UnifiedExplorerContent(
                 onLongClick = { onLongClick(item) },
                 onThumbClick = effectiveOnThumbClick,
                 recentlyPlayedFilePath = recentlyPlayedFilePath,
+                recentlyPlayedPaths = recentlyPlayedPaths,
                 playedFolderPaths = playedFolderPaths,
                 newVideoIds = newVideoIds,
                 watchedVideoIds = watchedVideoIds,
+                videoPlaybackProgress = videoPlaybackProgress,
                 showSections = showSections
               )
             }
           }
         }
       }
+
+      // Scrollbar overlay with bottom padding to avoid overlap with navigation
+      if (items.size > 20) {
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = navigationBarHeight)
+        ) {
+          if (mediaLayoutMode == MediaLayoutMode.GRID && !showSections) {
+            LazyVerticalGridScrollbar(
+              state = gridState,
+              settings = ScrollbarSettings(
+                thumbUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                thumbSelectedColor = MaterialTheme.colorScheme.primary,
+                thumbMinLength = 0.08f,
+                thumbMaxLength = 0.08f,
+              ),
+            ) {
+              // Empty content - scrollbar only
+            }
+          } else {
+            LazyColumnScrollbar(
+              state = listState,
+              settings = ScrollbarSettings(
+                thumbUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                thumbSelectedColor = MaterialTheme.colorScheme.primary,
+                thumbMinLength = 0.08f,
+                thumbMaxLength = 0.08f,
+              ),
+            ) {
+              // Empty content - scrollbar only
+            }
+          }
+        }
+      }
     }
 
-    if (isRefreshing != null && onRefresh != null) {
-      PullRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = onRefresh,
-        modifier = modifier.fillMaxSize(),
-        listState = listState,
-        content = contentBlock
-      )
-    } else {
-      Box(modifier = modifier.fillMaxSize()) {
-        contentBlock()
+    CompositionLocalProvider(
+      LocalLastPlayedVideoPathsInFolder provides lastPlayedVideoPathsInFolder,
+      LocalRecentlyPlayedFilePaths provides recentlyPlayedFilePaths
+    ) {
+      if (isRefreshing != null && onRefresh != null) {
+        PullRefreshBox(
+          isRefreshing = isRefreshing,
+          onRefresh = onRefresh,
+          modifier = modifier.fillMaxSize(),
+          listState = listState,
+          content = contentBlock
+        )
+      } else {
+        Box(modifier = modifier.fillMaxSize()) {
+          contentBlock()
+        }
       }
     }
   }
@@ -633,20 +725,24 @@ private fun <T> ExplorerItemCard(
   onLongClick: () -> Unit,
   onThumbClick: (() -> Unit)? = null,
   recentlyPlayedFilePath: String? = null,
+  recentlyPlayedPaths: Set<String> = emptySet(),
   playedFolderPaths: Set<String> = emptySet(),
   newVideoIds: Set<Long> = emptySet(),
   watchedVideoIds: Set<Long> = emptySet(),
+  videoPlaybackProgress: Map<Long, Float> = emptyMap(),
   showSections: Boolean = false,
 ) {
+  val lastPlayedVideoPathsInFolder = LocalLastPlayedVideoPathsInFolder.current
+  val recentlyPlayedFilePaths = LocalRecentlyPlayedFilePaths.current
   when (item) {
     is VideoFolder -> {
-      val isRecentlyPlayed = recentlyPlayedFilePath?.let {
+      val isRecentlyPlayed = recentlyPlayedFilePaths.any { path ->
         if (showSections) {
-          it.startsWith(item.path + "/") || it == item.path || java.io.File(it).parent == item.path
+          path.startsWith(item.path + "/") || path == item.path || java.io.File(path).parent == item.path
         } else {
-          java.io.File(it).parent == item.path
+          java.io.File(path).parent == item.path
         }
-      } ?: false
+      }
       val isNeverPlayed = item.path !in playedFolderPaths
       val isWatched = (item.videoCount > 0 || item.audioCount > 0) && item.unwatchedVideoCount == 0
 
@@ -668,7 +764,7 @@ private fun <T> ExplorerItemCard(
     is Video -> {
       val isOldAndUnplayed = newVideoIds.contains(item.id)
       val isWatched = watchedVideoIds.contains(item.id)
-      val isRecentlyPlayed = recentlyPlayedFilePath == item.path
+      val isRecentlyPlayed = item.path in lastPlayedVideoPathsInFolder
 
       VideoCard(
         video = item,
@@ -686,7 +782,7 @@ private fun <T> ExplorerItemCard(
       )
     }
     is VideoWithPlaybackInfo -> {
-      val isRecentlyPlayed = recentlyPlayedFilePath == item.video.path
+      val isRecentlyPlayed = item.video.path in lastPlayedVideoPathsInFolder
 
       VideoCard(
         video = item.video,
@@ -719,7 +815,7 @@ private fun <T> ExplorerItemCard(
       )
     }
     is RecentlyPlayedItem.VideoItem -> {
-      val isRecentlyPlayed = recentlyPlayedFilePath == item.video.path
+      val isRecentlyPlayed = item.video.path in lastPlayedVideoPathsInFolder
 
       VideoCard(
         video = item.video,
@@ -762,13 +858,13 @@ private fun <T> ExplorerItemCard(
         newCount = item.newCount,
         unwatchedVideoCount = item.unwatchedVideoCount,
       )
-      val isRecentlyPlayed = recentlyPlayedFilePath?.let {
+      val isRecentlyPlayed = recentlyPlayedFilePaths.any { path ->
         if (showSections) {
-          it.startsWith(item.path + "/") || it == item.path || java.io.File(it).parent == item.path
+          path.startsWith(item.path + "/") || path == item.path || java.io.File(path).parent == item.path
         } else {
-          java.io.File(it).parent == item.path
+          java.io.File(path).parent == item.path
         }
-      } ?: false
+      }
       val isNeverPlayed = item.path !in playedFolderPaths
       val isWatched = (item.videoCount > 0 || item.audioCount > 0) && item.unwatchedVideoCount == 0
 
@@ -790,7 +886,7 @@ private fun <T> ExplorerItemCard(
     is FileSystemItem.VideoFile -> {
       val isOldAndUnplayed = newVideoIds.contains(item.video.id)
       val isWatched = watchedVideoIds.contains(item.video.id)
-      val isRecentlyPlayed = recentlyPlayedFilePath == item.video.path
+      val isRecentlyPlayed = item.video.path in lastPlayedVideoPathsInFolder
 
       VideoCard(
         video = item.video,
@@ -802,8 +898,10 @@ private fun <T> ExplorerItemCard(
         isGridMode = isGridMode,
         gridColumns = columns,
         showSubtitleIndicator = showSubtitleIndicator,
+        progressPercentage = videoPlaybackProgress[item.video.id],
         isOldAndUnplayed = isOldAndUnplayed,
         isWatched = isWatched,
+        isNeverPlayed = videoPlaybackProgress[item.video.id] == null,
         isRecentlyPlayed = isRecentlyPlayed
       )
     }

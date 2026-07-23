@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
-import androidx.compose.material.icons.filled.VideoLibrary
+import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Language
@@ -43,7 +43,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import xyz.mpv.rex.R
 import xyz.mpv.rex.preferences.BrowserPreferences
 import xyz.mpv.rex.preferences.preference.collectAsState
 import xyz.mpv.rex.presentation.Screen
@@ -157,37 +159,46 @@ object MainScreen : Screen {
     val enableTabPlaylists by browserPreferences.enableTabPlaylists.collectAsState()
     val enableTabNetwork by browserPreferences.enableTabNetwork.collectAsState()
 
-    val visibleTabs = remember(isShortsEnabled, enableTabRecents, enableTabPlaylists, enableTabNetwork) {
+    val homeLabel = stringResource(R.string.home)
+    val shortsLabel = stringResource(R.string.shorts)
+    val recentsLabel = stringResource(R.string.recents)
+    val playlistsLabel = stringResource(R.string.playlists)
+    val networkLabel = stringResource(R.string.network)
+
+    val visibleTabs = remember(
+      isShortsEnabled, enableTabRecents, enableTabPlaylists, enableTabNetwork,
+      homeLabel, shortsLabel, recentsLabel, playlistsLabel, networkLabel
+    ) {
       buildList {
         add(
-          VisibleTab("home", "Home", Icons.Filled.Home) {
+          VisibleTab("home", homeLabel, Icons.Filled.Home) {
             FolderListScreen.Content()
           }
         )
         if (isShortsEnabled) {
           add(
-            VisibleTab("shorts", "Shorts", Icons.Filled.VideoLibrary) {
+            VisibleTab("shorts", shortsLabel, Icons.Outlined.VideoLibrary) {
               ShortsScreen().Content()
             }
           )
         }
         if (enableTabRecents) {
           add(
-            VisibleTab("recents", "Recents", Icons.Filled.History) {
+            VisibleTab("recents", recentsLabel, Icons.Filled.History) {
               RecentlyPlayedScreen.Content()
             }
           )
         }
         if (enableTabPlaylists) {
           add(
-            VisibleTab("playlists", "Playlists", Icons.AutoMirrored.Filled.PlaylistPlay) {
+            VisibleTab("playlists", playlistsLabel, Icons.AutoMirrored.Filled.PlaylistPlay) {
               PlaylistScreen.Content()
             }
           )
         }
         if (enableTabNetwork) {
           add(
-            VisibleTab("network", "Network", Icons.Filled.Language) {
+            VisibleTab("network", networkLabel, Icons.Filled.Language) {
               NetworkStreamingScreen.Content()
             }
           )

@@ -41,8 +41,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import xyz.mpv.rex.R
 import xyz.mpv.rex.preferences.AppearancePreferences
 import xyz.mpv.rex.preferences.PlayerButton
 import xyz.mpv.rex.preferences.allPlayerButtons
@@ -148,17 +150,17 @@ data class ControlLayoutEditorScreen(
     }
 
     val title = when (region) {
-      ControlRegion.TOP_RIGHT -> "Edit Top Right"
-      ControlRegion.BOTTOM_RIGHT -> "Edit Bottom Right"
-      ControlRegion.BOTTOM_LEFT -> "Edit Bottom Left"
-      ControlRegion.PORTRAIT_BOTTOM -> "Edit Portrait Bottom"
-      ControlRegion.MORE_SHEET -> "Edit More Sheet Buttons"
+      ControlRegion.TOP_RIGHT -> stringResource(R.string.control_layout_edit_title_top_right)
+      ControlRegion.BOTTOM_RIGHT -> stringResource(R.string.control_layout_edit_title_bottom_right)
+      ControlRegion.BOTTOM_LEFT -> stringResource(R.string.control_layout_edit_title_bottom_left)
+      ControlRegion.PORTRAIT_BOTTOM -> stringResource(R.string.control_layout_edit_title_portrait_bottom)
+      ControlRegion.MORE_SHEET -> stringResource(R.string.control_layout_edit_title_more_sheet)
     }
 
     if (showResetDialog) {
       ConfirmDialog(
-        title = "Reset Layout",
-        subtitle = "Are you sure you want to reset this region to defaults?",
+        title = stringResource(R.string.control_layout_reset_dialog_title),
+        subtitle = stringResource(R.string.control_layout_reset_dialog_message),
         onConfirm = {
           isReset = true
           prefToEdit.deleteAndGet()
@@ -174,12 +176,12 @@ data class ControlLayoutEditorScreen(
           title = { Text(text = title) },
           navigationIcon = {
             IconButton(onClick = backstack::removeLastOrNull) {
-              Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
+              Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.control_layout_back))
             }
           },
           actions = {
             IconButton(onClick = { showResetDialog = true }) {
-              Icon(Icons.Outlined.Restore, contentDescription = "Reset to default")
+              Icon(Icons.Outlined.Restore, contentDescription = stringResource(R.string.control_layout_reset_to_default))
             }
           },
         )
@@ -212,7 +214,7 @@ data class ControlLayoutEditorScreen(
         ) {
           item(span = { GridItemSpan(maxLineSpan) }) {
             Text(
-              text = "Long press to reorder items. Tap the '-' icon to remove them.",
+              text = stringResource(R.string.control_layout_reorder_hint),
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
               modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
@@ -239,13 +241,13 @@ data class ControlLayoutEditorScreen(
                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                   )
                   Text(
-                    text = "Drop zone is empty",
+                    text = stringResource(R.string.control_layout_drop_zone_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                   )
                   Text(
-                    text = "Tap buttons from the 'Available Palette' below",
+                    text = stringResource(R.string.control_layout_drop_zone_hint),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                   )
@@ -316,7 +318,7 @@ data class ControlLayoutEditorScreen(
                 }
                 if (orphanedButtons.isEmpty()) {
                   Box(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
-                    Text(text = "All available buttons are in use.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = stringResource(R.string.control_layout_all_buttons_in_use), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                   }
                 }
               }
@@ -341,11 +343,12 @@ private fun IconsLegend() {
     colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
   ) {
     Column(modifier = Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-      Text(text = "Icons Legend", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+      Text(text = stringResource(R.string.control_layout_icons_legend_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
       FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         allPlayerButtons.forEach { button ->
           Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.wrapContentWidth()) {
             if (button == PlayerButton.AB_LOOP) {
+              // "AB" متروك عمداً بدون ترجمة — رمز بصري وظيفي (اختصار A-B loop) مو نص لغوي
               Box(modifier = Modifier.size(20.dp), contentAlignment = Alignment.Center) {
                 Text(text = "AB", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
               }

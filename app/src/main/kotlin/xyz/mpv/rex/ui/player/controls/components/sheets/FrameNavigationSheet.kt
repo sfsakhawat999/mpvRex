@@ -112,14 +112,15 @@ fun FrameNavigationSheet(
   val duration by MPVLib.propInt["duration"].collectAsState()
   val pos = position ?: 0
   val dur = duration ?: 0
+  val timestampFormat = stringResource(R.string.player_sheets_frame_navigation_timestamp_value)
 
   // Format timestamp based on current position
   val timestamp =
-    remember(pos) {
+    remember(pos, timestampFormat) {
       val hours = pos / 3600
       val minutes = (pos % 3600) / 60
       val seconds = pos % 60
-      String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
+      String.format(Locale.US, timestampFormat, hours, minutes, seconds)
     }
 
   // Pause playback when the sheet opens
@@ -418,16 +419,20 @@ private fun FrameInfoDisplay(
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Text(
-        text = "Frame: ",
+        text = stringResource(R.string.player_sheets_frame_navigation_frame_label),
         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.ExtraBold),
         color = MaterialTheme.colorScheme.tertiary,
       )
       Text(
         text =
           if (totalFrames > 0) {
-            "$currentFrame / $totalFrames"
+            stringResource(
+              R.string.player_sheets_frame_navigation_frame_count,
+              currentFrame,
+              totalFrames,
+            )
           } else {
-            "$currentFrame"
+            stringResource(R.string.player_sheets_frame_navigation_current_frame, currentFrame)
           },
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurface,
@@ -438,7 +443,7 @@ private fun FrameInfoDisplay(
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Text(
-        text = "Timestamp: ",
+        text = stringResource(R.string.player_sheets_frame_navigation_timestamp_label),
         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.ExtraBold),
         color = MaterialTheme.colorScheme.tertiary,
       )
@@ -633,7 +638,12 @@ private suspend fun takeSnapshot(
       // Check if file was created
       if (!tempFile.exists() || tempFile.length() == 0L) {
         withContext(Dispatchers.Main) {
-          Toast.makeText(context, "Failed to create screenshot", Toast.LENGTH_SHORT).show()
+          Toast
+            .makeText(
+              context,
+              context.getString(R.string.player_sheets_frame_navigation_screenshot_create_failed),
+              Toast.LENGTH_SHORT,
+            ).show()
         }
         return@withContext
       }
@@ -685,7 +695,9 @@ private suspend fun takeSnapshot(
               ).show()
           }
         } else {
-          throw Exception("Failed to create MediaStore entry")
+          throw Exception(
+            context.getString(R.string.player_sheets_frame_navigation_mediastore_entry_failed)
+          )
         }
       } else {
         // Android 9 and below - Use legacy external storage
@@ -699,7 +711,9 @@ private suspend fun takeSnapshot(
         if (!snapshotsDir.exists()) {
           val created = snapshotsDir.mkdirs()
           if (!created && !snapshotsDir.exists()) {
-            throw Exception("Failed to create mpvSnaps directory")
+            throw Exception(
+              context.getString(R.string.player_sheets_frame_navigation_snapshot_dir_failed)
+            )
           }
         }
 
@@ -726,7 +740,15 @@ private suspend fun takeSnapshot(
       }
     } catch (e: Exception) {
       withContext(Dispatchers.Main) {
-        Toast.makeText(context, "Failed to save snapshot: ${e.message}", Toast.LENGTH_LONG).show()
+        Toast
+          .makeText(
+            context,
+            context.getString(
+              R.string.player_sheets_frame_navigation_snapshot_save_failed,
+              e.message,
+            ),
+            Toast.LENGTH_LONG,
+          ).show()
       }
     }
   }

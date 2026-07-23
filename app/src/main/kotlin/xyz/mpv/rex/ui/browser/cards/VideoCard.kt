@@ -145,24 +145,20 @@ fun VideoCard(
     overlayContent = {
       // NEW Label
       if (uiSettings.showUnplayedOldVideoLabel && isOldAndUnplayed) {
-        val currentTime = System.currentTimeMillis()
-        val videoAge = currentTime - (video.dateModified * 1000)
-        val thresholdMillis = uiSettings.unplayedOldVideoDays * 24 * 60 * 60 * 1000L
-        if (videoAge <= thresholdMillis) {
-          Box(
-            modifier = Modifier
-              .align(Alignment.TopStart)
-              .padding(6.dp)
-              .clip(RoundedCornerShape(4.dp))
-              .background(Color(0xFFD32F2F))
-              .padding(horizontal = 8.dp, vertical = 3.dp),
-          ) {
-            Text(
-              text = stringResource(R.string.video_label_new),
-              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-              color = Color.White,
-            )
-          }
+        Box(
+          modifier = Modifier
+            .align(Alignment.TopStart)
+            .padding(6.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(Color(0xFFD32F2F))
+            .padding(horizontal = 8.dp, vertical = 3.dp),
+        ) {
+          Text(
+            text = stringResource(R.string.video_label_new),
+            color = Color.White,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+          )
         }
       }
       // Duration overlay

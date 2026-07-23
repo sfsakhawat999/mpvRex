@@ -9,6 +9,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Arrangement
@@ -24,21 +26,39 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.ViewList
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.res.stringResource
+import xyz.mpv.rex.R
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -231,6 +251,8 @@ fun PlaylistSheet(
   playlist: ImmutableList<PlaylistItem>,
   onDismissRequest: () -> Unit,
   onItemClick: (PlaylistItem) -> Unit,
+  onReorderItem: (Int, Int) -> Unit = { _, _ -> },
+  onRemoveItems: (List<Int>) -> Unit = {},
   totalCount: Int = playlist.size,
   isM3UPlaylist: Boolean = false,
   playerPreferences: xyz.mpv.rex.preferences.PlayerPreferences,
@@ -241,23 +263,25 @@ fun PlaylistSheet(
 
   val accentColor = MaterialTheme.colorScheme.primary
 
-  // Check portrait mode
-  val isPortrait = configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
+  // Search state
+  var isSearching by remember { mutableStateOf(false) }
+  var searchQuery by rememberSaveable { mutableStateOf("") }
 
-  // Portrait mode => list mode
-  val isListModePreference by playerPreferences.playlistViewMode.collectAsState()
-  var isListMode by remember { mutableStateOf(if (isPortrait) true else isListModePreference) }
+  // Reorder mode state
+  var isReorderMode by remember { mutableStateOf(false) }
 
-  LaunchedEffect(isPortrait) {
-    if (isPortrait && !isListMode) {
-      isListMode = true
-    }
-  }
+  // Selection mode state
+  var isInSelectionMode by remember { mutableStateOf(false) }
+  val selectedIndexes = remember { mutableStateListOf<Int>() }
 
-  // Update preference when view mode changes (only in landscape)
-  LaunchedEffect(isListMode) {
-    if (!isPortrait && isListMode != isListModePreference) {
-      playerPreferences.playlistViewMode.set(isListMode)
+  // Filtered playlist based on search query
+  val filteredPlaylist by remember(playlist, searchQuery) {
+    derivedStateOf {
+      if (searchQuery.isBlank()) {
+        playlist
+      } else {
+        playlist.filter { it.title.contains(searchQuery, ignoreCase = true) }
+      }
     }
   }
 
@@ -269,10 +293,10 @@ fun PlaylistSheet(
   // Scroll state for the playlist
   val lazyListState = rememberLazyListState()
 
-  // Find the currently playing item index - tracks changes in playlist items
-  val playingItemIndex by remember {
+  // Find the currently playing item index in the filtered list
+  val playingItemIndex by remember(filteredPlaylist) {
     derivedStateOf {
-      playlist.indexOfFirst { it.isPlaying }
+      filteredPlaylist.indexOfFirst { it.isPlaying }
     }
   }
 
@@ -283,25 +307,21 @@ fun PlaylistSheet(
     }
   }
 
-  val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-  val sheetWidth = if (isListMode) {
-    if (LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
-      640.dp
-    } else {
-      420.dp
-    }
-  } else {
-    screenWidth * 0.85f
+  // Setup reorderable state
+  val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+    onReorderItem(from.index, to.index)
   }
+
+  val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+  val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
   PlayerSheet(
     onDismissRequest = onDismissRequest,
-    modifier = Modifier.fillMaxWidth(),
-    customMaxWidth = sheetWidth,
-    customMaxHeight = if (isPortrait) LocalConfiguration.current.screenHeightDp.dp * 0.5f else null,
+    modifier = Modifier.fillMaxSize(),
+    customMaxHeight = screenHeight,
   ) {
     Surface(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier.fillMaxSize(),
       color = Color.Transparent,
       shape = RoundedCornerShape(
         topStart = 16.dp,
@@ -312,101 +332,275 @@ fun PlaylistSheet(
       tonalElevation = 0.dp,
     ) {
       Column(
-        modifier = modifier.padding(
-          vertical = MaterialTheme.spacing.smaller,
-          horizontal = if (!isListMode) MaterialTheme.spacing.medium else 0.dp
-        )
+        modifier = modifier
+          .fillMaxSize()
+          .padding(
+            top = 0.dp,
+            bottom = MaterialTheme.spacing.smaller,
+            start = 0.dp,
+            end = 0.dp
+          )
       ) {
-        // Header showing current playlist info with toggle button
+        // Header showing current playlist info with search and reorder options
         val currentItem = playlist.find { it.isPlaying }
         Row(
           modifier = Modifier
             .fillMaxWidth()
             .padding(
-              horizontal = if (isListMode) MaterialTheme.spacing.medium else 0.dp,
-              vertical = MaterialTheme.spacing.small,
+              horizontal = MaterialTheme.spacing.medium,
+              vertical = 0.dp,
             ),
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
-            modifier = Modifier.weight(1f)
-          ) {
-            if (currentItem != null) {
+          if (isInSelectionMode) {
+            // Selection Mode Header
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
+              modifier = Modifier.weight(1f)
+            ) {
+              IconButton(
+                onClick = {
+                  isInSelectionMode = false
+                  selectedIndexes.clear()
+                }
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Close,
+                  contentDescription = "Cancel Selection",
+                  tint = MaterialTheme.colorScheme.onSurface
+                )
+              }
               Text(
-                text = "Now Playing",
-                style = MaterialTheme.typography.titleSmall.copy(
+                text = stringResource(R.string.playlist_selected_count, selectedIndexes.size),
+                style = MaterialTheme.typography.titleMedium.copy(
+                  fontWeight = FontWeight.Bold,
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+              )
+            }
+
+            IconButton(
+              onClick = {
+                onRemoveItems(selectedIndexes.toList())
+                isInSelectionMode = false
+                selectedIndexes.clear()
+              },
+              enabled = selectedIndexes.isNotEmpty()
+            ) {
+              Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete Selected",
+                tint = if (selectedIndexes.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+              )
+            }
+          } else if (isReorderMode) {
+            // Reorder Mode Header
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
+              modifier = Modifier.weight(1f)
+            ) {
+              Text(
+                text = stringResource(R.string.playlist_reorder),
+                style = MaterialTheme.typography.titleMedium.copy(
                   fontWeight = FontWeight.Bold,
                   color = accentColor,
                 ),
               )
-              Text(
-                text = "•",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-              )
             }
-            Text(
-              text = "$totalCount items",
-              style = MaterialTheme.typography.bodyMedium,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
 
-          // Toggle button for list/grid view (only in landscape)
-          if (!isPortrait) {
             IconButton(
-              onClick = { isListMode = !isListMode }
+              onClick = { isReorderMode = false }
             ) {
               Icon(
-                imageVector = if (isListMode) Icons.Default.GridView else Icons.Default.ViewList,
-                contentDescription = if (isListMode) "Switch to Grid View" else "Switch to List View",
+                imageVector = Icons.Default.Check,
+                contentDescription = "Done",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
               )
+            }
+          } else if (isSearching) {
+            // Search Input taking place of Now Playing division
+            BasicTextField(
+              value = searchQuery,
+              onValueChange = { searchQuery = it },
+              modifier = Modifier
+                .weight(1f)
+                .padding(end = MaterialTheme.spacing.small),
+              singleLine = true,
+              textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+              decorationBox = { innerTextField ->
+                Box(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(16.dp))
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                  contentAlignment = Alignment.CenterStart
+                ) {
+                  if (searchQuery.isEmpty()) {
+                    Text(
+                      text = stringResource(R.string.playlist_search_placeholder),
+                      style = MaterialTheme.typography.bodyMedium,
+                      color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                    )
+                  }
+                  innerTextField()
+                }
+              }
+            )
+
+            IconButton(
+              onClick = {
+                searchQuery = ""
+                isSearching = false
+              }
+            ) {
+              Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Close Search",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+              )
+            }
+          } else {
+            // Original Now Playing / Total items layout
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
+              modifier = Modifier.weight(1f)
+            ) {
+              if (currentItem != null) {
+                val playingIndex = playlist.indexOfFirst { it.isPlaying }
+                val playingNumber = if (playingIndex != -1) playingIndex + 1 else 1
+                Text(
+                  text = stringResource(R.string.playlist_now_playing),
+                  style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = accentColor,
+                  ),
+                )
+                Text(
+                  text = "•",
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                  text = stringResource(R.string.playlist_items_count, playingNumber, totalCount),
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+              } else {
+                Text(
+                  text = stringResource(R.string.playlist_items_count, filteredPlaylist.size, totalCount),
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+              }
+            }
+
+            Row(
+              horizontalArrangement = Arrangement.spacedBy(4.dp),
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              IconButton(
+                onClick = { isSearching = true }
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Search,
+                  contentDescription = "Search",
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+              }
+
+              IconButton(
+                onClick = { isReorderMode = true }
+              ) {
+                Icon(
+                  imageVector = Icons.Outlined.SwapVert,
+                  contentDescription = "Reorder",
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+              }
             }
           }
         }
 
-        // Conditional rendering based on view mode
-        if (isListMode) {
-          // Vertical list mode (original implementation)
-          LazyColumn(
-            state = lazyListState,
-            modifier = Modifier.fillMaxWidth()
+        // Playlist/Track list
+        if (filteredPlaylist.isEmpty()) {
+          Box(
+            modifier = Modifier
+              .weight(1f)
+              .fillMaxWidth(),
+            contentAlignment = Alignment.Center
           ) {
-            items(playlist) { item ->
-              PlaylistTrackListItem(
-                item = item,
-                context = context,
-                thumbnailCache = thumbnailCache,
-                onClick = { onItemClick(item) },
-                skipThumbnail = isM3UPlaylist,
-                accentColor = accentColor
-              )
-            }
+            Text(
+              text = stringResource(R.string.playlist_no_items),
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
           }
         } else {
-          // Horizontal grid mode
-          LazyRow(
+          LazyColumn(
             state = lazyListState,
-            contentPadding = PaddingValues(
-              horizontal = if (isListMode) MaterialTheme.spacing.medium else 0.dp,
-              vertical = MaterialTheme.spacing.small
-            ),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+            modifier = Modifier
+              .weight(1f)
+              .fillMaxWidth()
           ) {
-            items(playlist) { item ->
-              PlaylistTrackGridItem(
-                item = item,
-                context = context,
-                thumbnailCache = thumbnailCache as LRUBitmapCache,
-                onClick = {
-                  onItemClick(item)
-                },
-                skipThumbnail = isM3UPlaylist,
-              )
+            items(filteredPlaylist, key = { it.uri.toString() }) { item ->
+              if (isReorderMode) {
+                ReorderableItem(reorderState, key = item.uri.toString()) {
+                  Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                      PlaylistTrackListItem(
+                        item = item,
+                        context = context,
+                        thumbnailCache = thumbnailCache,
+                        onClick = { onItemClick(item) },
+                        skipThumbnail = isM3UPlaylist,
+                        accentColor = accentColor
+                      )
+                    }
+                    IconButton(
+                      onClick = { },
+                      modifier = Modifier
+                        .size(48.dp)
+                        .draggableHandle(),
+                    ) {
+                      Icon(
+                        imageVector = Icons.Default.DragHandle,
+                        contentDescription = "Drag to reorder",
+                        tint = accentColor,
+                      )
+                    }
+                  }
+                }
+              } else {
+                val isSelected = selectedIndexes.contains(item.index)
+                PlaylistTrackListItem(
+                  item = item,
+                  context = context,
+                  thumbnailCache = thumbnailCache,
+                  onClick = { onItemClick(item) },
+                  isInSelectionMode = isInSelectionMode,
+                  isSelected = isSelected,
+                  onToggleSelection = {
+                    if (selectedIndexes.contains(item.index)) {
+                      selectedIndexes.remove(item.index)
+                      if (selectedIndexes.isEmpty()) {
+                        isInSelectionMode = false
+                      }
+                    } else {
+                      selectedIndexes.add(item.index)
+                      isInSelectionMode = true
+                    }
+                  },
+                  skipThumbnail = isM3UPlaylist,
+                  accentColor = accentColor
+                )
+              }
             }
           }
         }
@@ -415,12 +609,16 @@ fun PlaylistSheet(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlaylistTrackListItem(
   item: PlaylistItem,
   context: Context,
   thumbnailCache: LRUBitmapCache,
   onClick: () -> Unit,
+  isInSelectionMode: Boolean = false,
+  isSelected: Boolean = false,
+  onToggleSelection: () -> Unit = {},
   skipThumbnail: Boolean = false,
   accentColor: Color,
   modifier: Modifier = Modifier,
@@ -444,7 +642,13 @@ fun PlaylistTrackListItem(
     }
   }
 
-  val borderModifier = if (item.isPlaying) {
+  val borderModifier = if (isSelected) {
+    Modifier.border(
+      width = 2.dp,
+      color = Color.Red,
+      shape = RoundedCornerShape(12.dp),
+    )
+  } else if (item.isPlaying) {
     Modifier.border(
       width = 2.dp,
       brush = Brush.linearGradient(listOf(accentColor, accentSecondary)),
@@ -452,6 +656,15 @@ fun PlaylistTrackListItem(
     )
   } else {
     Modifier
+  }
+
+  val clickModifier = if (isInSelectionMode) {
+    Modifier.clickable(onClick = onToggleSelection)
+  } else {
+    Modifier.combinedClickable(
+      onClick = onClick,
+      onLongClick = onToggleSelection
+    )
   }
 
   Surface(
@@ -463,8 +676,10 @@ fun PlaylistTrackListItem(
       )
       .clip(RoundedCornerShape(12.dp))
       .then(borderModifier)
-      .clickable(onClick = onClick),
-    color = if (item.isPlaying) {
+      .then(clickModifier),
+    color = if (isSelected) {
+      Color.Red.copy(alpha = 0.2f)
+    } else if (item.isPlaying) {
       MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
     } else {
       Color.Transparent
@@ -600,7 +815,7 @@ fun PlaylistTrackListItem(
             shape = RoundedCornerShape(16.dp),
           ) {
             Text(
-              text = "Playing",
+              text = stringResource(R.string.playlist_playing),
               modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
               style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.SemiBold,
@@ -615,223 +830,7 @@ fun PlaylistTrackListItem(
   }
 }
 
-@Composable
-fun PlaylistTrackGridItem(
-  item: PlaylistItem,
-  context: Context,
-  thumbnailCache: LRUBitmapCache,
-  onClick: () -> Unit,
-  skipThumbnail: Boolean = false,
-  modifier: Modifier = Modifier,
-) {
-  // Use theme colors dynamically
-  val accentColor = MaterialTheme.colorScheme.primary
-  val accentSecondary = MaterialTheme.colorScheme.tertiary
 
-  // Thumbnail state - uses cache to persist across recompositions
-  val videoPath = item.path.ifBlank { item.uri.toString() }
-  var thumbnail by remember(videoPath) {
-    mutableStateOf(thumbnailCache[videoPath])
-  }
-
-  // Load thumbnail asynchronously
-  // Skip thumbnail loading for M3U playlists (network streams)
-  LaunchedEffect(videoPath) {
-    if (!skipThumbnail && !thumbnailCache.containsKey(videoPath)) {
-      val bmp = loadMediaStoreThumbnail(context, item.uri)
-      thumbnail = bmp
-      thumbnailCache[videoPath] = bmp
-    }
-  }
-
-  val borderModifier = if (item.isPlaying) {
-    Modifier.border(
-      width = 2.dp,
-      brush = Brush.linearGradient(listOf(accentColor, accentSecondary)),
-      shape = RoundedCornerShape(12.dp),
-    )
-  } else {
-    Modifier
-  }
-
-  // YouTube-style vertical card
-  Surface(
-    modifier = modifier
-      .width(200.dp)
-      .clip(RoundedCornerShape(12.dp))
-      .then(borderModifier)
-      .clickable(onClick = onClick),
-    color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
-    shape = RoundedCornerShape(12.dp),
-  ) {
-    Column(
-      modifier = Modifier.padding(MaterialTheme.spacing.smaller),
-      verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
-    ) {
-      // Thumbnail with 16:9 aspect ratio
-      Box(
-        modifier = Modifier
-          .fillMaxWidth()
-          .height(112.dp)
-          .clip(RoundedCornerShape(8.dp))
-          .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-        contentAlignment = Alignment.Center,
-      ) {
-        // Show actual thumbnail or fallback icon
-        thumbnail?.let { bmp ->
-          Image(
-            bitmap = bmp.asImageBitmap(),
-            contentDescription = "Thumbnail",
-            modifier = Modifier.matchParentSize(),
-            contentScale = ContentScale.Crop,
-          )
-        } ?: run {
-          // Movie icon as fallback placeholder
-          Icon(
-            imageVector = Icons.Outlined.Movie,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            modifier = Modifier.size(32.dp),
-          )
-        }
-
-        // Video number badge in top-left
-        Box(
-          modifier = Modifier
-            .align(Alignment.TopStart)
-            .padding(6.dp)
-            .background(
-              color = Color.Black.copy(alpha = 0.7f),
-              shape = RoundedCornerShape(6.dp),
-            )
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        ) {
-          Text(
-            text = "${item.index + 1}",
-            style = MaterialTheme.typography.labelMedium.copy(
-              fontWeight = FontWeight.Bold,
-              fontSize = 12.sp,
-            ),
-            color = Color.White,
-          )
-        }
-
-        // Duration badge in bottom-right
-        if (item.duration.isNotEmpty()) {
-          Box(
-            modifier = Modifier
-              .align(Alignment.BottomEnd)
-              .padding(6.dp)
-              .background(
-                color = Color.Black.copy(alpha = 0.8f),
-                shape = RoundedCornerShape(4.dp),
-              )
-              .padding(horizontal = 6.dp, vertical = 2.dp),
-          ) {
-            Text(
-              text = item.duration,
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-              ),
-              color = Color.White,
-            )
-          }
-        } else {
-          // Loading duration badge
-          Box(
-            modifier = Modifier
-              .align(Alignment.BottomEnd)
-              .padding(6.dp)
-          ) {
-            LoadingChip(width = 40.dp, height = 18.dp, isDark = true)
-          }
-        }
-
-        // Playing indicator overlay
-        if (item.isPlaying) {
-          Box(
-            modifier = Modifier
-              .matchParentSize()
-              .background(
-                brush = Brush.verticalGradient(
-                  colors = listOf(
-                    accentColor.copy(alpha = 0.3f),
-                    accentColor.copy(alpha = 0.1f),
-                  )
-                )
-              )
-          )
-        }
-      }
-
-      // Title and metadata
-      Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-      ) {
-        Text(
-          text = item.title,
-          modifier = Modifier.height(44.dp),
-          style = MaterialTheme.typography.bodyMedium.copy(
-            fontWeight = if (item.isPlaying) FontWeight.Bold else FontWeight.Medium,
-            fontSize = 14.sp,
-            color = if (item.isPlaying) {
-              accentColor
-            } else if (item.isWatched) {
-              MaterialTheme.colorScheme.onSurfaceVariant
-            } else {
-              MaterialTheme.colorScheme.onSurface
-            },
-          ),
-          maxLines = 2,
-          overflow = TextOverflow.Ellipsis,
-        )
-
-        // Resolution and status
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          // Resolution chip
-          if (item.resolution.isNotEmpty()) {
-            Surface(
-              color = if (item.isPlaying) accentColor.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
-              shape = RoundedCornerShape(4.dp),
-            ) {
-              Text(
-                text = item.resolution,
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 10.sp,
-                ),
-                color = if (item.isPlaying) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
-              )
-            }
-          } else {
-            LoadingChip(width = 60.dp)
-          }
-
-          if (item.isPlaying) {
-            Surface(
-              color = accentColor.copy(alpha = 0.15f),
-              shape = RoundedCornerShape(4.dp),
-            ) {
-              Text(
-                text = "Playing",
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 10.sp,
-                  fontWeight = FontWeight.SemiBold,
-                  color = accentColor,
-                ),
-              )
-            }
-          }
-        }
-      }
-    }
-  }
-}
 
 
 @Composable

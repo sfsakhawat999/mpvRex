@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">mpvRex</string>
-    <string name="author_name" translatable="false">Sakhawat</string>
 
     <string name="generic_reset">Restablecer</string>
     <string name="generic_share">Compartir</string>
@@ -199,7 +197,6 @@
 
     <string name="pref_player_display">Pantalla</string>
     <string name="pref_player_display_panel_opacity">Opacidad del panel</string>
-    <string name="pref_player_display_panel_transparency_summary" translatable="false">%d%%</string>
 
     <string name="pref_gesture">Gestos</string>
     <string name="pref_gesture_summary">Doble toque, controles multimedia</string>
@@ -360,12 +357,17 @@ Next: NEXT</string>
     <string name="pref_about_donate_title">Donar</string>
     <string name="pref_about_donate_kofi">Ko-fi</string>
     <string name="pref_about_donate_kofi_summary">Apoyar al desarrollador en Ko-fi</string>
-    <string name="pref_about_donate_kofi_url" translatable="false">https://ko-fi.com/adityanarvekar</string>
     <string name="pref_about_donate_paypal">PayPal</string>
     <string name="pref_about_donate_paypal_summary">Apoyar al desarrollador en PayPal</string>
-    <string name="pref_about_donate_paypal_url" translatable="false">https://paypal.me/aadinarvekar</string>
     <string name="pref_about_donate_upi">UPI</string>
-    <string name="pref_about_donate_upi_id" translatable="false">aadiinarvekar@upi</string>
+
+    <string name="pref_about_telegram_title">Telegram</string>
+    <string name="pref_about_telegram_channel">Canal de Telegram</string>
+    <string name="pref_about_telegram_channel_summary">Únete a nuestro canal para estar al tanto de actualizaciones y novedades</string>
+    <string name="pref_about_telegram_group">Grupo de chat de Telegram</string>
+    <string name="pref_about_telegram_group_summary">Interactúa y conversa con la comunidad</string>
+    <string name="pref_about_show_community_icon_title">Acceso rápido a la comunidad</string>
+    <string name="pref_about_show_community_icon_summary">Mostrar acceso rápido a los enlaces de la comunidad en la cabecera de inicio</string>
 
     <string name="pref_about_telegram_title">Telegram</string>
     <string name="pref_about_telegram_channel">Canal de Telegram</string>
@@ -380,11 +382,6 @@ Next: NEXT</string>
     <string name="player_sheets_add_ext_sub">Añadir subtítulos externos</string>
     <string name="player_sheets_add_ext_audio">Añadir pistas de audio externas</string>
     <string name="player_sheets_tracks_off">Desactivado</string>
-    <string name="player_sheets_track_title_w_lang" translatable="false">#%d: %s (%s)</string>
-    <string name="player_sheets_track_title_wo_lang" translatable="false">#%d: %s</string>
-    <string name="player_sheets_track_lang_wo_title" translatable="false">#%d: %s</string>
-    <string name="player_sheets_chapter_title_substitute_subtitle" translatable="false">Subtitle #%d</string>
-    <string name="player_sheets_chapter_title_substitute_audio" translatable="false">Audio #%d</string>
     <string name="player_sheets_subtitles_settings_title">Ajustes de subtítulos</string>
     <string name="player_sheets_subtitles_color_text">Texto</string>
     <string name="player_sheets_subtitles_color_border">Borde</string>
@@ -457,7 +454,6 @@ Next: NEXT</string>
     <string name="player_sheets_stats_page_3_desc">Estado de caché. Salud del búfer, caché del demuxer, rangos buscables.</string>
     <string name="player_sheets_stats_page_4_desc">Asignación de teclas actual. Lista de atajos de teclado asignados.</string>
     <string name="player_sheets_stats_page_5_desc">Lista de pistas. Detalles de las pistas de video, audio y subtítulos.</string>
-    <string name="player_speed" translatable="false">%.2fx</string>
 
     <string name="player_aspect_fit">Ajustar a la pantalla</string>
     <string name="player_aspect_crop">Recortar</string>
@@ -479,17 +475,13 @@ Next: NEXT</string>
 
     <string name="toast_sleep_timer_ended">El temporizador de apagado ha finalizado</string>
 
-    <string name="volume_slider_absolute_value" translatable="false">%d</string>
 
-    <string name="value_percentage_int" translatable="false">%d%%</string>
 
-    <string name="github_repo_url" translatable="false">https://github.com/sfsakhawat999/mpvRex</string>
     <string name="swap_the_volume_and_brightness_slider">Intercambiar deslizadores de volumen y brillo</string>
     <string name="pref_player_display_reduce_player_animation">Reducir animaciones del reproductor</string>
     <string name="pref_player_display_hide_player_control_time">Ocultar tiempo de los controles del reproductor</string>
     <string name="show_splash_ovals_on_double_tap_to_seek">Mostrar ondas al buscar con doble toque</string>
     <string name="show_time_on_double_tap_to_seek">Mostrar el tiempo de salto</string>
-    <string name="player_gesture_seek_indicator" translatable="false">[%1$s%2$s] (%3$s)</string>
 
     <string name="pref_audio_channels_auto_safe_desc">Predeterminado, selección automática segura</string>
     <string name="pref_audio_channels_auto_desc">Selección automática</string>
@@ -498,7 +490,6 @@ Next: NEXT</string>
     <string name="pref_audio_channels_reverse_stereo_desc">Intercambiar canales izquierdo y derecho</string>
 
     <string name="player_sheets_frame_navigation_title">Navegación por fotogramas</string>
-    <string name="player_sheets_frame_navigation_snapshot_saved" translatable="false">Saved to Pictures/mpvSnaps</string>
     <string name="player_sheets_frame_navigation_include_subtitles">Incluir subtítulos en la captura de pantalla</string>
 
     <string name="player_sheets_zoom_slider_label">Zoom de video</string>
@@ -638,7 +629,7 @@ Next: NEXT</string>
     <string name="recents">Recientes</string>
     <string name="playlists">Listas</string>
     <string name="network">Red</string>
-    <string name="seconds">Segundos</string>
+    <string name="unit_seconds">Segundos</string>
     <string name="milliseconds">Milisegundos</string>
     <string name="name">Nombre</string>
     <string name="protocol">Protocolo</string>

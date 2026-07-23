@@ -1177,5 +1177,9 @@
 
     <string name="blocked_shorts_empty_state">No blocked videos</string>
     <string name="blocked_shorts_unblock_button">Blocked</string>
+    
+    <string name="media_info_selection_title">Selection Info</string>
+    <string name="media_info_selected_label">Selected</string>
+    <string name="media_info_total_length">Total length</string>
 
 </resources>

@@ -1142,5 +1142,9 @@
     <string name="config_editor_unsaved_changes">تغييرات غير محفوظة</string>
     <string name="config_editor_no_storage_location">لم يتم تحديد موقع التخزين</string>
     <string name="config_editor_create_failed">فشل إنشاء الملف</string>
+
+    <string name="media_info_selection_title">معلومات التحديد</string>
+    <string name="media_info_selected_label">المحدد</string>
+    <string name="media_info_total_length">المدة الإجمالية</string>
     
 </resources>

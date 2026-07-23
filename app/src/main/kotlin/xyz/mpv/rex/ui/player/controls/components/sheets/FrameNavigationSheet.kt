@@ -112,15 +112,14 @@ fun FrameNavigationSheet(
   val duration by MPVLib.propInt["duration"].collectAsState()
   val pos = position ?: 0
   val dur = duration ?: 0
-  val timestampFormat = stringResource(R.string.player_sheets_frame_navigation_timestamp_value)
 
   // Format timestamp based on current position
   val timestamp =
-    remember(pos, timestampFormat) {
+    remember(pos) {
       val hours = pos / 3600
       val minutes = (pos % 3600) / 60
       val seconds = pos % 60
-      String.format(Locale.US, timestampFormat, hours, minutes, seconds)
+      String.format(Locale.US, "%1\$02d:%2\$02d:%3\$02d", hours, minutes, seconds)
     }
 
   // Pause playback when the sheet opens

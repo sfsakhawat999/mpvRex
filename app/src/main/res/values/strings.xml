@@ -505,13 +505,6 @@
     <string name="player_sheets_aspect_ratio_title">Aspect Ratio</string>
     <string name="player_sheets_aspect_ratio_presets">Presets</string>
     <string name="player_sheets_aspect_ratio_preset_default">Default</string>
-    <string name="player_sheets_aspect_ratio_preset_4_3" translatable="false">4:3</string>
-    <string name="player_sheets_aspect_ratio_preset_16_9" translatable="false">16:9</string>
-    <string name="player_sheets_aspect_ratio_preset_16_10" translatable="false">16:10</string>
-    <string name="player_sheets_aspect_ratio_preset_21_9" translatable="false">21:9</string>
-    <string name="player_sheets_aspect_ratio_preset_32_9" translatable="false">32:9</string>
-    <string name="player_sheets_aspect_ratio_preset_2_35_1" translatable="false">2.35:1</string>
-    <string name="player_sheets_aspect_ratio_preset_2_39_1" translatable="false">2.39:1</string>
     <string name="player_sheets_aspect_ratio_custom_toggle">Custom...</string>
     <string name="player_sheets_aspect_ratio_custom_section">Custom</string>
     <string name="player_sheets_aspect_ratio_manual_zoom_pan_title">Manual Zoom &amp; Pan (Camera Offset)</string>
@@ -522,7 +515,6 @@
     <string name="player_sheets_aspect_ratio_reset_pan">Reset Pan</string>
     <string name="player_sheets_aspect_ratio_add_custom_title">Add Custom Ratio (e.g. 16:9)</string>
     <string name="player_sheets_aspect_ratio_width">Width</string>
-    <string name="player_sheets_aspect_ratio_separator" translatable="false">:</string>
     <string name="player_sheets_aspect_ratio_height">Height</string>
     <string name="player_sheets_aspect_ratio_custom_ratio_label" translatable="false">%1$s:%2$s</string>
     <string name="player_sheets_aspect_ratio_invalid">Invalid</string>
@@ -540,7 +532,6 @@
     <string name="player_sheets_aspect_ratio_reset_advanced_zoom">Reset Advanced Zoom</string>
 
     <string name="player_sheets_frame_navigation_title">Frame Navigation</string>
-    <string name="player_sheets_frame_navigation_timestamp_value" formatted="false" translatable="false">%1$02d:%2$02d:%3$02d</string>
     <string name="player_sheets_frame_navigation_frame_label">Frame:\u0020</string>
     <string name="player_sheets_frame_navigation_frame_count" translatable="false">%1$d / %2$d</string>
     <string name="player_sheets_frame_navigation_current_frame" translatable="false">%1$d</string>

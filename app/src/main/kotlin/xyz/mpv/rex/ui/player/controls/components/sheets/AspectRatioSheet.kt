@@ -89,16 +89,13 @@ fun AspectRatioSheet(
   val presetRatios =
     listOf(
       AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_default), -1.0),
-      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_4_3), 4.0 / 3.0),
-      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_16_9), 16.0 / 9.0),
-      AspectRatio(
-        stringResource(R.string.player_sheets_aspect_ratio_preset_16_10),
-        16.0 / 10.0,
-      ),
-      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_21_9), 21.0 / 9.0),
-      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_32_9), 32.0 / 9.0),
-      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_2_35_1), 2.35),
-      AspectRatio(stringResource(R.string.player_sheets_aspect_ratio_preset_2_39_1), 2.39),
+      AspectRatio("4:3", 4.0 / 3.0),
+      AspectRatio("16:9", 16.0 / 9.0),
+      AspectRatio("16:10", 16.0 / 10.0),
+      AspectRatio("21:9", 21.0 / 9.0),
+      AspectRatio("32:9", 32.0 / 9.0),
+      AspectRatio("2.35:1", 2.35),
+      AspectRatio("2.39:1", 2.39),
     )
 
   PlayerSheet(onDismissRequest) {
@@ -472,7 +469,7 @@ private fun AddCustomRatioRow(
 
       // Colon separator
       Text(
-        text = stringResource(R.string.player_sheets_aspect_ratio_separator),
+        text = ":",
         style = MaterialTheme.typography.headlineMedium,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(horizontal = MaterialTheme.spacing.extraSmall),

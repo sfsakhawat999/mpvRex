@@ -1,0 +1,18 @@
+{
+  "generic_reset": {
+    "source_hash": "daee7606b339f3c339076fe2c9f372a3ff40c8ee896005d829c7481b64ca5303",
+    "translated_value": "रीसेट करें"
+  },
+  "generic_share": {
+    "source_hash": "29887a5ff9846ccc23327565a07e17fa6dcaea6211f1898ae825f84ae38f4223",
+    "translated_value": "साझा करें"
+  },
+  "generic_confirm": {
+    "source_hash": "eebdd24a77d9ad32222660c07777163bf5f6732df2b172351f3f8d5783e4f529",
+    "translated_value": "पक्का करें"
+  },
+  "generic_cancel": {
+    "source_hash": "19766ed6ccb2f4a32778eed80d1928d2c87a18d7c275ccb163ec6709d3eb2e27",
+    "translated_value": "रद्द करें"
+  }
+}

@@ -4,6 +4,7 @@ import android.util.Log
 import xyz.mpv.rex.domain.network.NetworkConnection
 import xyz.mpv.rex.ui.browser.networkstreaming.clients.NetworkClient
 import xyz.mpv.rex.ui.browser.networkstreaming.clients.NetworkClientFactory
+import xyz.mpv.rex.ui.browser.networkstreaming.clients.SmbClient
 import com.hierynomus.msdtyp.AccessMask
 import com.hierynomus.mssmb2.SMB2CreateDisposition
 import com.hierynomus.mssmb2.SMB2ShareAccess
@@ -703,32 +704,24 @@ class NetworkStreamingProxy private constructor() : NanoHTTPD("127.0.0.1", 0) {
 
   /**
    * Generates a seekable InputStream for SMB files.
-   * Maintains an open network socket for the duration of the stream.
-   * Teardown is delegated to the InputStream's close() method.
+   *
+   * Reuses the SmbClient's shared session so each new HTTP range request
+   * (i.e. every seek) no longer pays for a full connection setup (TCP +
+   * negotiate + NTLM auth + tree connect ≈ 6-8 RTTs, which dominated seek
+   * latency); only a fresh tree connection and file handle are opened per
+   * request, and the stream's close() tears those down.
    */
   private suspend fun getStreamWithOffsetSMB(
     streamInfo: StreamInfo,
     offset: Long,
     contentLength: Long,
   ): InputStream? {
-    var smbClient: SMBClient? = null
-    var connection: Connection? = null
-    var session: Session? = null
-    var diskShare: DiskShare? = null
-    var file: com.hierynomus.smbj.share.File? = null
+    val smbClient = streamInfo.client as? SmbClient ?: return null
 
     try {
       Log.d(TAG, "SMB getStreamWithOffset called, offset=$offset")
       Log.d(TAG, "  Connection path: ${streamInfo.connection.path}")
       Log.d(TAG, "  File path: ${streamInfo.filePath}")
-
-      // Extract the base share name, explicitly rejecting nested paths
-      val shareName = streamInfo.connection.path.trim('/')
-
-      if (shareName.isEmpty() || shareName.contains('/')) {
-        Log.e(TAG, "SMB: Invalid share name: $shareName")
-        return null
-      }
 
       // Isolate the relative file path within the share
       val relativePath = when {
@@ -749,61 +742,37 @@ class NetworkStreamingProxy private constructor() : NanoHTTPD("127.0.0.1", 0) {
 
       // Decode URL-encoded characters so SMBJ can resolve the literal disk path
       val decodedRelativePath = java.net.URLDecoder.decode(relativePath, "UTF-8")
-      Log.d(TAG, "  Final: share=$shareName, relativePath=$decodedRelativePath")
+      Log.d(TAG, "  Final: relativePath=$decodedRelativePath")
 
-      val smbConfig = SmbConfig.builder()
-        .withTimeout(120000, TimeUnit.MILLISECONDS) 
-        .withSoTimeout(120000, TimeUnit.MILLISECONDS)
-        .withReadTimeout(120000, TimeUnit.MILLISECONDS)
-        .withSigningRequired(false)
-        .withEncryptData(false)
-        .build()
-        
-      smbClient = SMBClient(smbConfig)
-      connection = smbClient.connect(streamInfo.connection.host, streamInfo.connection.port)
+      // Reuse the shared session (with auto-reconnect) instead of building a
+      // whole new SMB connection per range request.
+      return smbClient.withSharedSession { session, shareName ->
+        val diskShare = session.connectShare(shareName) as DiskShare
+        try {
+          val file = diskShare.openFile(
+            decodedRelativePath,
+            EnumSet.of(AccessMask.GENERIC_READ),
+            null,
+            EnumSet.of(SMB2ShareAccess.FILE_SHARE_READ),
+            SMB2CreateDisposition.FILE_OPEN,
+            null,
+          )
 
-      val authContext = if (streamInfo.connection.isAnonymous) {
-        AuthenticationContext.anonymous()
-      } else {
-        AuthenticationContext(
-          streamInfo.connection.username,
-          streamInfo.connection.password.toCharArray(),
-          null,
-        )
+          Log.d(TAG, "  Stream created successfully starting at offset $offset, contentLength=$contentLength")
+
+          PrefetchingSmbInputStream(
+            fileHandle = file,
+            diskShare = diskShare,
+            initialOffset = offset,
+            contentLength = contentLength,
+          )
+        } catch (e: Exception) {
+          runCatching { diskShare.close() }
+          throw e
+        }
       }
-
-      session = connection.authenticate(authContext)
-      diskShare = session.connectShare(shareName) as DiskShare
-
-      file = diskShare.openFile(
-        decodedRelativePath,
-        EnumSet.of(AccessMask.GENERIC_READ),
-        null,
-        EnumSet.of(SMB2ShareAccess.FILE_SHARE_READ),
-        SMB2CreateDisposition.FILE_OPEN,
-        null,
-      )
-
-      Log.d(TAG, "  Stream created successfully starting at offset $offset, contentLength=$contentLength")
-
-      return PrefetchingSmbInputStream(
-        fileHandle = file!!,
-        diskShare = diskShare,
-        session = session,
-        connection = connection,
-        smbClient = smbClient,
-        initialOffset = offset,
-        contentLength = contentLength,
-      )
-      
     } catch (e: Exception) {
       Log.e(TAG, "SMB getStreamWithOffset error: ${e.message}", e)
-      // Cleanup partial connections if setup failed before the stream was created
-      runCatching { file?.close() }
-      runCatching { diskShare?.close() }
-      runCatching { session?.close() }
-      runCatching { connection?.close() }
-      runCatching { smbClient?.close() }
       return null
     }
   }
@@ -855,13 +824,14 @@ class NetworkStreamingProxy private constructor() : NanoHTTPD("127.0.0.1", 0) {
    * The prefetch thread self-limits to [contentLength] bytes so an abandoned
    * connection (NanoHTTPD does not close the stream when the client drops
    * mid-response) does not keep pulling the whole 20 GiB file.
+   *
+   * Only the file handle and this stream's own tree connection are closed by
+   * [close]; the underlying session/connection are shared via
+   * [SmbClient.withSharedSession] and owned by the client.
    */
   private class PrefetchingSmbInputStream(
     private val fileHandle: com.hierynomus.smbj.share.File,
     private val diskShare: DiskShare,
-    private val session: Session,
-    private val connection: Connection,
-    private val smbClient: SMBClient,
     initialOffset: Long,
     private val contentLength: Long,
   ) : InputStream() {
@@ -981,13 +951,11 @@ class NetworkStreamingProxy private constructor() : NanoHTTPD("127.0.0.1", 0) {
         // Wake a consumer blocked in queue.take().
         queue.drainTo(ArrayList())
         queue.offer(EOF_MARKER)
-        // Closing the file makes an in-flight fileHandle.read() fail fast
-        // instead of blocking for the whole 120 s SoTimeout.
+        // Only the file handle and this stream's own tree connection are
+        // owned here; the shared session/connection belong to SmbClient and
+        // must not be closed from this stream.
         runCatching { fileHandle.close() }
         runCatching { diskShare.close() }
-        runCatching { session.close() }
-        runCatching { connection.close() }
-        runCatching { smbClient.close() }
       }
     }
   }

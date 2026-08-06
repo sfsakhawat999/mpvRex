@@ -196,6 +196,22 @@ class SmbClient(connection: NetworkConnection) : BaseNetworkClient(connection) {
         return Uri.parse(uriString)
     }
 
+    /**
+     * Runs [block] with this client's shared session, reconnecting
+     * automatically (with the usual single-retry + session-reference guard)
+     * if the session is dead.
+     *
+     * The session/connection are owned by this client and must NOT be closed
+     * by the caller. Callers should open their own tree connection
+     * (session.connectShare) and file handles inside [block], and close only
+     * those.
+     */
+    suspend fun <T> withSharedSession(block: suspend (session: Session, share: String) -> T): T =
+        executeWithRetry {
+            val current = session ?: throw java.net.SocketException("Session is null on execute")
+            block(current, shareName)
+        }
+
     override suspend fun performGetFileSize(path: String): Long {
         return executeWithRetry {
             val diskShare = session?.connectShare(shareName) as? DiskShare ?: throw java.net.SocketException("Session is null or share failed")

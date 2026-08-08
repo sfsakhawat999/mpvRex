@@ -1288,4 +1288,9 @@
     <string name="codec_info_stats_title">ملخص تراميز النظام</string>
     <string name="codec_info_stats_summary">%1$d مرمّز (%2$d عتادي, %3$d برمجي)</string>
     <string name="codec_info_max_res">الحد الأقصى: %s</string>
+    <string name="open_with_mini_player">فتح بالمُشغّل المصغّر</string>
+    <string name="pref_player_section_mini_player">المُشغّل المصغّر</string>
+    <string name="pref_player_play_in_mini_player">تشغيل الصوت في المُشغّل المصغّر</string>
+    <string name="pref_player_play_in_mini_player_summary_on">عند النقر على ملف صوتي، يبدأ التشغيل مباشرة في شريط المُشغّل المصغّر السفلي</string>
+    <string name="pref_player_play_in_mini_player_summary_off">عند النقر على ملف صوتي، يُفتح المُشغّل بملء الشاشة</string>
 </resources>

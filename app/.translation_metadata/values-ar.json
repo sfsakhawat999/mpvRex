@@ -4466,5 +4466,25 @@
   "codec_info_max_res": {
     "source_hash": "e958f655480bc1d27d6206524f03d5ae9414d9770ae2a82f47988ce5a47ea0ab",
     "translated_value": "الحد الأقصى: %s"
+  },
+  "open_with_mini_player": {
+    "source_hash": "84f3c6b3e068e3286640c7d03ac3fd9e8dee4083cc43a70dc74d9c75d534cf23",
+    "translated_value": "فتح بالمُشغّل المصغّر"
+  },
+  "pref_player_section_mini_player": {
+    "source_hash": "2113289ad08a45a1abb862209124013539ec3be064da742b091486a0883f5ff6",
+    "translated_value": "المُشغّل المصغّر"
+  },
+  "pref_player_play_in_mini_player": {
+    "source_hash": "d61f08d5fd33f074485c77a0cdc3b4055bf5ccedc8440bd85aad56ae0c5ae629",
+    "translated_value": "تشغيل الصوت في المُشغّل المصغّر"
+  },
+  "pref_player_play_in_mini_player_summary_on": {
+    "source_hash": "04659693cbab529635701a72cff2331ddd3f27f41f627d91c16890be2624324e",
+    "translated_value": "عند النقر على ملف صوتي، يبدأ التشغيل مباشرة في شريط المُشغّل المصغّر السفلي"
+  },
+  "pref_player_play_in_mini_player_summary_off": {
+    "source_hash": "005a5e05767ac3b40fe16ba60a5b089cad3615f3b230ee11faa1ec02a45b111f",
+    "translated_value": "عند النقر على ملف صوتي، يُفتح المُشغّل بملء الشاشة"
   }
 }

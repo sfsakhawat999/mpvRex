@@ -995,6 +995,7 @@ fun GestureHandler(
           var hasStartedSeeking = false
           var hasTriggeredSubSeek = false
           var initialVideoPosition = 0f
+          var lastSeekPosition = -1f
           // Use the sensitivity preference instead of hardcoded value
           val seekSensitivity = horizontalSwipeSensitivity
           
@@ -1052,9 +1053,13 @@ fun GestureHandler(
                     val maxDuration = if (preciseDuration > 0f) preciseDuration else duration?.toFloat() ?: 0f
                     val clampedPosition = targetPosition.coerceAtMost(maxDuration)
                     
-                    // Use the same seeking mechanism as seekbar scrubbing
-                    // This will update the seekbar position and provide live preview
-                    viewModel.seekTo(clampedPosition.toInt())
+                    // Use the same seeking mechanism as seekbar scrubbing.
+                    // Live preview only when the preference is enabled;
+                    // otherwise the final position is applied on release.
+                    lastSeekPosition = clampedPosition
+                    if (playerPreferences.seekWhileDragging.get()) {
+                      viewModel.seekTo(clampedPosition.toInt())
+                    }
                     
                     // Format and display time position updates
                     val currentPos = clampedPosition.toInt()
@@ -1097,6 +1102,7 @@ fun GestureHandler(
               // Multi-finger detected, cancel horizontal seek
               if (hasStartedSeeking) {
                 hasStartedSeeking = false
+                lastSeekPosition = -1f
                 viewModel.setGestureSeeking(false)
                 // Clean up seeking state without showing controls
                 viewModel.playerUpdate.update { PlayerUpdates.None }
@@ -1108,6 +1114,10 @@ fun GestureHandler(
 
           // Apply the final seek when gesture ends
           if (hasStartedSeeking) {
+            // Seek-on-release: jump to the final swipe position now.
+            if (!playerPreferences.seekWhileDragging.get() && lastSeekPosition >= 0f) {
+              viewModel.seekTo(lastSeekPosition.toInt())
+            }
             // Clear the horizontal seek update and hide seekbar after a short delay
             coroutineScope.launch {
               delay(300)

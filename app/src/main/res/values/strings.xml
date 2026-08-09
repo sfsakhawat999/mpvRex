@@ -603,6 +603,8 @@
 
     <!-- Media Info Activity -->
     <string name="pref_player_use_precise_seeking">Use precise seeking</string>
+    <string name="pref_player_seek_while_dragging_title">Seek while dragging</string>
+    <string name="pref_player_seek_while_dragging_summary">Preview frames continuously while dragging the progress bar. Turn off to jump only when you release</string>
     <string name="pref_player_show_seekbar_when_seeking_title">Show seekbar when seeking</string>
     <string name="pref_player_show_seekbar_when_seeking_summary">Display the video progress bar during gesture seeking</string>
     <string name="pref_player_white_seekbar_title">White video progress bar</string>

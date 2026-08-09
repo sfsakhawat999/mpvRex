@@ -207,6 +207,7 @@ fun PlayerControls(
   var dragStartValue by remember { mutableStateOf(-1f) }
   var isCloseToStart by remember { mutableStateOf(false) }
   var changeCount by remember { mutableStateOf(0) }
+  var lastDragValue by remember { mutableStateOf(0f) }
   var resetControlsTimestamp by remember { mutableStateOf(0L) }
   val seekText by viewModel.seekText.collectAsState()
   val currentChapter by MPVLib.propInt["chapter"].collectAsState()
@@ -1258,13 +1259,19 @@ fun PlayerControls(
                   viewModel.playerUpdate.value = PlayerUpdates.None
                 }
               }
-              viewModel.seekTo(newValue.toInt())
+              lastDragValue = newValue
+              if (playerPreferences.seekWhileDragging.get()) {
+                viewModel.seekTo(newValue.toInt())
+              }
               viewModel.autoHideControls()
             },
             onValueChangeFinished = {
               if (isCloseToStart) {
                 viewModel.seekTo(dragStartValue.toInt())
                 viewModel.playerUpdate.value = PlayerUpdates.None
+              } else if (!playerPreferences.seekWhileDragging.get()) {
+                // Seek only on release: jump to the final drag position.
+                viewModel.seekTo(lastDragValue.toInt())
               }
               isSeeking = false
               dragStartValue = -1f

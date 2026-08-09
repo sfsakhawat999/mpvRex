@@ -299,6 +299,16 @@ object PlayerPreferencesScreen : Screen {
 
               PreferenceDivider()
 
+              val seekWhileDragging by preferences.seekWhileDragging.collectAsState()
+              SwitchPreference(
+                value = seekWhileDragging,
+                onValueChange = preferences.seekWhileDragging::set,
+                title = { Text(stringResource(R.string.pref_player_seek_while_dragging_title)) },
+                summary = { Text(stringResource(R.string.pref_player_seek_while_dragging_summary)) },
+              )
+
+              PreferenceDivider()
+
               val showSeekBarWhenSeeking by preferences.showSeekBarWhenSeeking.collectAsState()
               SwitchPreference(
                 value = showSeekBarWhenSeeking,

@@ -21,6 +21,7 @@ class PlayerPreferences(
   val showCircularDoubleTapSeek = preferenceStore.getBoolean("show_circular_double_tap_seek", true)
   val showSeekTimeWhileSeeking = preferenceStore.getBoolean("show_seek_time_while_seeking", true)
   val usePreciseSeeking = preferenceStore.getBoolean("use_precise_seeking", false)
+  val seekWhileDragging = preferenceStore.getBoolean("seek_while_dragging", true)
 
   val brightnessGesture = preferenceStore.getBoolean("gestures_brightness", true)
   val volumeGesture = preferenceStore.getBoolean("volume_brightness", true)

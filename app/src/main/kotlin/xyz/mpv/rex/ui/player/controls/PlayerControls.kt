@@ -207,7 +207,7 @@ fun PlayerControls(
   var dragStartValue by remember { mutableStateOf(-1f) }
   var isCloseToStart by remember { mutableStateOf(false) }
   var changeCount by remember { mutableStateOf(0) }
-  var lastDragValue by remember { mutableStateOf(0f) }
+  var lastDragValue by remember { mutableStateOf(-1f) }
   var resetControlsTimestamp by remember { mutableStateOf(0L) }
   val seekText by viewModel.seekText.collectAsState()
   val currentChapter by MPVLib.propInt["chapter"].collectAsState()
@@ -1269,14 +1269,18 @@ fun PlayerControls(
               if (isCloseToStart) {
                 viewModel.seekTo(dragStartValue.toInt())
                 viewModel.playerUpdate.value = PlayerUpdates.None
-              } else if (!playerPreferences.seekWhileDragging.get()) {
+              } else if (!playerPreferences.seekWhileDragging.get() && lastDragValue >= 0f) {
                 // Seek only on release: jump to the final drag position.
+                // Guard against cancel-drag (onDragCancel never fires onSeek),
+                // where lastDragValue would still be -1f and seeking to it
+                // would rewind to the start.
                 viewModel.seekTo(lastDragValue.toInt())
               }
               isSeeking = false
               dragStartValue = -1f
               isCloseToStart = false
               changeCount = 0
+              lastDragValue = -1f
               resetControlsTimestamp = System.currentTimeMillis()
               viewModel.showControls()
             },

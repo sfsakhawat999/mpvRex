@@ -35,10 +35,6 @@ class NetworkBrowserViewModel(
   private val _error = MutableStateFlow<String?>(null)
   val error: StateFlow<String?> = _error.asStateFlow()
 
-  init {
-    loadData()
-  }
-
   /**
    * Load files in the current directory
    */

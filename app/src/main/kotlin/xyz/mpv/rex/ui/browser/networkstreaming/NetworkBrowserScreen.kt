@@ -207,7 +207,7 @@ private fun NetworkBrowserContent(
     else -> {
       val folders = files.filter { it.isDirectory }
       val videos = files.filter { !it.isDirectory && it.mimeType?.startsWith("video/") == true }
-      val networkListState = LazyListState()
+      val networkListState = remember { LazyListState() }
 
       // Check if at top of list to hide scrollbar during pull-to-refresh
       val isAtTop by remember {

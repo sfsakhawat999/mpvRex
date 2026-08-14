@@ -102,7 +102,7 @@ object NetworkStreamingScreen : Screen {
     val navigationBarHeight = xyz.mpv.rex.ui.browser.LocalNavigationBarHeight.current
 
     // LazyList state for scroll tracking
-    val listState = LazyListState()
+    val listState = remember { LazyListState() }
 
     // Track scroll direction to show/hide FAB
     var previousFirstVisibleItemIndex by remember { mutableIntStateOf(0) }

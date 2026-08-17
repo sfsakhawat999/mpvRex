@@ -1293,4 +1293,26 @@
     <string name="pref_player_play_in_mini_player">تشغيل الصوت في المُشغّل المصغّر</string>
     <string name="pref_player_play_in_mini_player_summary_on">عند النقر على ملف صوتي، يبدأ التشغيل مباشرة في شريط المُشغّل المصغّر السفلي</string>
     <string name="pref_player_play_in_mini_player_summary_off">عند النقر على ملف صوتي، يُفتح المُشغّل بملء الشاشة</string>
+    <string name="pref_include_no_media_content_title">تضمين محتوى .nomedia</string>
+    <string name="pref_include_no_media_content_summary">إظهار الوسائط من المجلدات المستبعدة من مكتبة وسائط أندرويد. قد يستغرق فحص هذه المجلدات وقتاً أطول.</string>
+    <string name="pref_add_library_root">إضافة مجلد إلى المكتبة</string>
+    <string name="pref_clear_library_roots">إزالة مجلدات المكتبة المحددة</string>
+    <string name="pref_library_root_count">المجلدات المحددة في المكتبة: %1$d</string>
+    <string name="pref_library_roots_title">مجلدات فحص المكتبة</string>
+    <string name="pref_library_roots_summary">مجلدات مخصصة وجذور SAF مُصرَّح بها صراحةً لفهرسة المكتبة</string>
+    <string name="pref_library_roots_empty_title">لم تتم إضافة أي مجلدات إلى المكتبة</string>
+    <string name="pref_library_roots_empty_message">أضف مسارات مجلدات مخصصة أو أدلة تخزين خارجي لفهرستها في مكتبتك.</string>
+    <string name="pref_library_roots_clear_all_confirm_title">إزالة جميع مجلدات المكتبة؟</string>
+    <string name="pref_library_roots_clear_all_confirm_message">هل أنت متأكد من رغبتك في إزالة جميع جذور فحص المكتبة المضافة؟ سيتم التخلي عن الأذونات الدائمة الممنوحة لها.</string>
+    <string name="pref_media_library_title">الوسائط والمكتبة</string>
+    <string name="pref_media_library_summary">إدارة جذور الفحص وملفات .nomedia والمجلدات المحظورة والفهرسة</string>
+    <string name="pref_category_content_discovery">المحتوى والاكتشاف</string>
+    <string name="pref_category_storage_exclusions">التخزين والاستثناءات</string>
+    <string name="pref_category_library_maintenance">صيانة المكتبة</string>
+    <string name="pref_rescan_library_title">فرض إعادة فحص المكتبة</string>
+    <string name="pref_rescan_library_summary">إعادة فهرسة التخزين المشترك الداخلي والجذور المخصصة لاكتشاف الوسائط</string>
+    <string name="pref_clear_metadata_cache_title">مسح ذاكرة التخزين المؤقت للبيانات الوصفية</string>
+    <string name="pref_clear_metadata_cache_summary">حذف البيانات الوصفية المخزنة مؤقتاً للفيديو، وأبعاد الإطارات، وذاكرة التخزين المؤقت للصور المصغرة</string>
+    <string name="pref_rescan_started_toast">بدأ إعادة فحص مكتبة الوسائط</string>
+    <string name="pref_cache_cleared_toast">تم مسح ذاكرة التخزين المؤقت للبيانات الوصفية</string>
 </resources>

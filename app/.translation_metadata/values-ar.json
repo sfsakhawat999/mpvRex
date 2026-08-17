@@ -4486,5 +4486,93 @@
   "pref_player_play_in_mini_player_summary_off": {
     "source_hash": "005a5e05767ac3b40fe16ba60a5b089cad3615f3b230ee11faa1ec02a45b111f",
     "translated_value": "عند النقر على ملف صوتي، يُفتح المُشغّل بملء الشاشة"
+  },
+  "pref_include_no_media_content_title": {
+    "source_hash": "9e21cf77ffa88f31e8f8bf68c5e043f0cda538d5d71bc47e98dfc29f174307bc",
+    "translated_value": "تضمين محتوى .nomedia"
+  },
+  "pref_include_no_media_content_summary": {
+    "source_hash": "354fed8e3a8123ea40f8c0d63c442f1540f1f0f28728e8e04fc62831fdaf6170",
+    "translated_value": "إظهار الوسائط من المجلدات المستبعدة من مكتبة وسائط أندرويد. قد يستغرق فحص هذه المجلدات وقتاً أطول."
+  },
+  "pref_add_library_root": {
+    "source_hash": "82b5438745c48d29ecc17cf127d1b7417a37d5d1a9e1129d5b1a1df63812cc88",
+    "translated_value": "إضافة مجلد إلى المكتبة"
+  },
+  "pref_clear_library_roots": {
+    "source_hash": "0a0a92e4e587e34b48262799feff56a5048658befbc0c952608e5549f54294dc",
+    "translated_value": "إزالة مجلدات المكتبة المحددة"
+  },
+  "pref_library_root_count": {
+    "source_hash": "56037758a5b4aecad14a51d05336621d4a4f578198bfad48a6e2def89845dd2c",
+    "translated_value": "المجلدات المحددة في المكتبة: %1$d"
+  },
+  "pref_library_roots_title": {
+    "source_hash": "b8b8255c88730e62b1dd6572b811079cc6650f1749253c02263486d8ff8e00db",
+    "translated_value": "مجلدات فحص المكتبة"
+  },
+  "pref_library_roots_summary": {
+    "source_hash": "511d592cc2c64a5c770fa37c243294d937f3e4634f28263eb746ec93b790bc8c",
+    "translated_value": "مجلدات مخصصة وجذور SAF مُصرَّح بها صراحةً لفهرسة المكتبة"
+  },
+  "pref_library_roots_empty_title": {
+    "source_hash": "80240065dd49cad0556bd390ba0bacbddadadb119d904b34e1ea9e2baa0d500e",
+    "translated_value": "لم تتم إضافة أي مجلدات إلى المكتبة"
+  },
+  "pref_library_roots_empty_message": {
+    "source_hash": "a1222427300615cc15f2644694dd6ff70930be35a6bf9818c2114a371ec2a8bb",
+    "translated_value": "أضف مسارات مجلدات مخصصة أو أدلة تخزين خارجي لفهرستها في مكتبتك."
+  },
+  "pref_library_roots_clear_all_confirm_title": {
+    "source_hash": "afabb5f19c661db0b7b132a72ae4f18d1d4858b67197ccad6d33ed75cef57b33",
+    "translated_value": "إزالة جميع مجلدات المكتبة؟"
+  },
+  "pref_library_roots_clear_all_confirm_message": {
+    "source_hash": "a06872879fbd8d4198e3a535d54e6914c8797fa398656791c4bd9214f71daa5e",
+    "translated_value": "هل أنت متأكد من رغبتك في إزالة جميع جذور فحص المكتبة المضافة؟ سيتم التخلي عن الأذونات الدائمة الممنوحة لها."
+  },
+  "pref_media_library_title": {
+    "source_hash": "1beb470bcc494ea941b4512485c2d5f7e43346ae5f64086c63670ca294f78ab4",
+    "translated_value": "الوسائط والمكتبة"
+  },
+  "pref_media_library_summary": {
+    "source_hash": "1b1d170a91e428a094fb3726a3b540a7f6f288c0d766f0115d99d529dd4bd2b5",
+    "translated_value": "إدارة جذور الفحص وملفات .nomedia والمجلدات المحظورة والفهرسة"
+  },
+  "pref_category_content_discovery": {
+    "source_hash": "2f920c60a70134cb06bdba00bdc9656293268e9266953e468316f90b0957fbbe",
+    "translated_value": "المحتوى والاكتشاف"
+  },
+  "pref_category_storage_exclusions": {
+    "source_hash": "1fbe77f3e142f0afcfc10fc6b1eff4b93917ae1563fb5ee3f4131cad1cfa6956",
+    "translated_value": "التخزين والاستثناءات"
+  },
+  "pref_category_library_maintenance": {
+    "source_hash": "5cbe78f9ee15b1d85033483e65a67a4414390e946d0791d71cb4b5cdc3065257",
+    "translated_value": "صيانة المكتبة"
+  },
+  "pref_rescan_library_title": {
+    "source_hash": "c5ac5b41824488cd5663bf625db6a883713d790e84e6f5844341aa02b151eef0",
+    "translated_value": "فرض إعادة فحص المكتبة"
+  },
+  "pref_rescan_library_summary": {
+    "source_hash": "126875d1e1c5bbb8736f1bb321ddfb6ca66cf400e619ff572b0ab0c0a713b41d",
+    "translated_value": "إعادة فهرسة التخزين المشترك الداخلي والجذور المخصصة لاكتشاف الوسائط"
+  },
+  "pref_clear_metadata_cache_title": {
+    "source_hash": "98928bac09661c44a9f739deb8404dc2b4ee20713411e7ff1539b23570f0f547",
+    "translated_value": "مسح ذاكرة التخزين المؤقت للبيانات الوصفية"
+  },
+  "pref_clear_metadata_cache_summary": {
+    "source_hash": "e341085154d6bc76f047b511f7347759c46cacce3d89d86ccade9db566060882",
+    "translated_value": "حذف البيانات الوصفية المخزنة مؤقتاً للفيديو، وأبعاد الإطارات، وذاكرة التخزين المؤقت للصور المصغرة"
+  },
+  "pref_rescan_started_toast": {
+    "source_hash": "5b11c335879a9c2e50362e5a019e2403a0069636022b839ca0a3fdc022655723",
+    "translated_value": "بدأ إعادة فحص مكتبة الوسائط"
+  },
+  "pref_cache_cleared_toast": {
+    "source_hash": "c4c4d13d542efce4b542175770501073714590e3c5b4b780478a7478e2b8f53e",
+    "translated_value": "تم مسح ذاكرة التخزين المؤقت للبيانات الوصفية"
   }
 }

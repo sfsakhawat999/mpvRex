@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="generic_reset">रीसेट करें</string>
+    <string name="generic_share">साझा करें</string>
+    <string name="generic_confirm">पक्का करें</string>
+    <string name="generic_cancel">रद्द करें</string>
+</resources>

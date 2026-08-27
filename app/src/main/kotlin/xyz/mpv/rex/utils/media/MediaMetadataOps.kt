@@ -10,7 +10,6 @@ import xyz.mpv.rex.database.repository.HybridMediaIndexRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.context.GlobalContext
-import java.io.File
 
 /**
  * Operations for mapping media files to high-level domain models like [VideoFolder].
@@ -46,26 +45,9 @@ object MediaMetadataOps {
                         (isAudioEnabled || folder.videoCount > 0) && folder.path !in blacklistedFolders
                     }
                     .map { folder ->
-                        // The folder badge means "NEW/unopened", not strictly "watched".
-                        // A video can leave the NEW state as soon as it gets a playback state,
-                        // long before it reaches the watched threshold. Count persisted playback
-                        // states that can be matched to this folder and remove those from the
-                        // scanner-derived NEW count.
-                        val openedInFolder = playbackStates.count { state ->
-                            val title = state.mediaTitle.trim()
-                            if (title.isEmpty()) return@count false
-
-                            val folderPath = folder.path.trimEnd(File.separatorChar)
-                            val file = File(title)
-                            val parent = file.parent?.trimEnd(File.separatorChar)
-                            val fileName = file.name
-                            val normalizedTitle = title.trimEnd(File.separatorChar)
-
-                            parent == folderPath ||
-                                normalizedTitle.startsWith("$folderPath${File.separator}") ||
-                                File(folderPath, fileName).isFile
-                        }
-
+                        // newCount is already calculated by HybridMediaIndexRepository using the
+                        // same recent-video rules as mpvRex. Do not subtract playback states here:
+                        // that double-adjustment can reduce a folder with many recent videos to 1.
                         VideoFolder(
                             bucketId = folder.id,
                             name = folder.name,
@@ -75,7 +57,7 @@ object MediaMetadataOps {
                             totalSize = folder.totalSize,
                             totalDuration = folder.totalDuration,
                             lastModified = folder.lastModified,
-                            newCount = (folder.newCount - openedInFolder).coerceAtLeast(0),
+                            newCount = folder.newCount,
                             unwatchedVideoCount = folder.unwatchedVideoCount
                         )
                     }

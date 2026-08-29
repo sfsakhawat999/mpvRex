@@ -2,6 +2,7 @@ package xyz.mpv.rex.jellyfin.remote
 
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
+import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -283,7 +284,7 @@ class JellyfinRemoteClient(
       when (command) {
         "Stop" -> {
           // Report Stopped before finishing so dashboard clears
-          val posSec = runCatching { `is`.xyz.mpv.MPVLib.getPropertyDouble("time-pos") ?: 0.0 }.getOrDefault(0.0)
+          val posSec = runCatching { MPVLib.getPropertyDouble("time-pos") ?: 0.0 }.getOrDefault(0.0)
           val ticks = (posSec * 10_000_000L).toLong()
           currentRemoteItemId?.let { itemId ->
             val server = prefs.serverUrl?.trimEnd('/') ?: return@runOnUiThread
@@ -294,24 +295,24 @@ class JellyfinRemoteClient(
           activity.finish()
         }
         "Pause" -> {
-          runCatching { `is`.xyz.mpv.MPVLib.setPropertyBoolean("pause", true) }
+          runCatching { MPVLib.setPropertyBoolean("pause", true) }
           reportRemoteProgress(isPaused = true)
         }
         "Unpause", "Play", "Resume" -> {
-          runCatching { `is`.xyz.mpv.MPVLib.setPropertyBoolean("pause", false) }
+          runCatching { MPVLib.setPropertyBoolean("pause", false) }
           reportRemoteProgress(isPaused = false)
         }
         "PlayPause" -> runCatching {
-          val paused = `is`.xyz.mpv.MPVLib.getPropertyBoolean("pause") ?: false
-          `is`.xyz.mpv.MPVLib.setPropertyBoolean("pause", !paused)
+          val paused = MPVLib.getPropertyBoolean("pause") ?: false
+          MPVLib.setPropertyBoolean("pause", !paused)
           reportRemoteProgress(isPaused = !paused)
         }
         "Seek", "SeekTo" -> {
           seekTicks?.let { t ->
             val sec = (t / 10_000_000L).toInt()
             Log.d(TAG, "Seek to $sec sec ($t ticks)")
-            runCatching { `is`.xyz.mpv.MPVLib.setPropertyInt("time-pos", sec) }
-            runCatching { `is`.xyz.mpv.MPVLib.command("seek", sec.toString(), "absolute") }
+            runCatching { MPVLib.setPropertyInt("time-pos", sec) }
+            runCatching { MPVLib.command("seek", sec.toString(), "absolute") }
             // Report new position immediately
             scope.launch {
               val server = prefs.serverUrl?.trimEnd('/') ?: return@launch
@@ -343,7 +344,7 @@ class JellyfinRemoteClient(
     val token = prefs.accessToken ?: return
     val deviceId = prefs.deviceId
     val itemId = currentRemoteItemId ?: return
-    val posSec = runCatching { `is`.xyz.mpv.MPVLib.getPropertyDouble("time-pos") ?: 0.0 }.getOrDefault(0.0)
+    val posSec = runCatching { MPVLib.getPropertyDouble("time-pos") ?: 0.0 }.getOrDefault(0.0)
     val ticks = (posSec * 10_000_000L).toLong()
     scope.launch { reportProgress(server, token, deviceId, itemId, currentRemoteMediaSourceId, ticks, isPaused) }
   }
@@ -353,7 +354,7 @@ class JellyfinRemoteClient(
     val server = prefs.serverUrl?.trimEnd('/') ?: return
     val token = prefs.accessToken ?: return
     val deviceId = prefs.deviceId
-    val posSec = runCatching { `is`.xyz.mpv.MPVLib.getPropertyDouble("time-pos") ?: 0.0 }.getOrDefault(0.0)
+    val posSec = runCatching { MPVLib.getPropertyDouble("time-pos") ?: 0.0 }.getOrDefault(0.0)
     val ticks = (posSec * 10_000_000L).toLong()
     Log.d(TAG, "Player finished, reporting Stopped ticks=$ticks")
     scope.launch { reportStopped(server, token, deviceId, itemId, currentRemoteMediaSourceId, ticks) }
@@ -368,12 +369,12 @@ class JellyfinRemoteClient(
     when (name) {
       "SetVolume" -> {
         val vol = obj["Arguments"]?.jsonObject?.get("Volume")?.jsonPrimitive?.content?.toIntOrNull() ?: return
-        activity?.runOnUiThread { runCatching { `is`.xyz.mpv.MPVLib.setPropertyInt("volume", vol) } }
+        activity?.runOnUiThread { runCatching { MPVLib.setPropertyInt("volume", vol) } }
       }
       "Mute", "ToggleMute" -> {
-        activity?.runOnUiThread { runCatching { `is`.xyz.mpv.MPVLib.command("cycle", "mute") } }
+        activity?.runOnUiThread { runCatching { MPVLib.command("cycle", "mute") } }
       }
-      "Unmute" -> activity?.runOnUiThread { runCatching { `is`.xyz.mpv.MPVLib.setPropertyBoolean("mute", false) } }
+      "Unmute" -> activity?.runOnUiThread { runCatching { MPVLib.setPropertyBoolean("mute", false) } }
       "SetAudioStreamIndex" -> {
         val idx = obj["Arguments"]?.jsonObject?.get("Index")?.jsonPrimitive?.content?.toIntOrNull() ?: return
         activity?.runOnUiThread { runCatching { activity.player.aid = idx } }
@@ -484,9 +485,9 @@ class JellyfinRemoteClient(
     remoteProgressJob = scope.launch {
       while (true) {
         delay(10_000)
-        val posSec = runCatching { `is`.xyz.mpv.MPVLib.getPropertyDouble("time-pos") ?: 0.0 }.getOrDefault(0.0)
+        val posSec = runCatching { MPVLib.getPropertyDouble("time-pos") ?: 0.0 }.getOrDefault(0.0)
         val ticks = (posSec * 10_000_000L).toLong()
-        val paused = runCatching { `is`.xyz.mpv.MPVLib.getPropertyBoolean("pause") ?: false }.getOrDefault(false)
+        val paused = runCatching { MPVLib.getPropertyBoolean("pause") ?: false }.getOrDefault(false)
         val ok = reportProgress(server, token, deviceId, itemId, mediaSourceId, ticks, paused)
         Log.d(TAG, "Remote Progress ticks=$ticks paused=$paused ${if (ok) "OK" else "failed"}")
         if (!ok) {

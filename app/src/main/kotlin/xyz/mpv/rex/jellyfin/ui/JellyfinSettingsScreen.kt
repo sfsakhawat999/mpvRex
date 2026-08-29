@@ -196,7 +196,6 @@ object JellyfinSettingsScreen : Screen {
               Switch(
                 checked = enableRemote,
                 onCheckedChange = {
-                  enableRemote = it
                   prefs.enableRemote = it
                   if (it) {
                     val intent = Intent(context, JellyfinRemoteService::class.java).apply { action = JellyfinRemoteService.ACTION_START }

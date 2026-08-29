@@ -133,6 +133,10 @@ object JellyfinSettingsScreen : Screen {
                     status = "Server URL and username required"
                     return@Button
                   }
+                  if (serverUrl.lowercase().startsWith("http://")) {
+                    status = "Warning: Using insecure HTTP — credentials transmitted in plaintext. Consider using HTTPS."
+                    return@Button
+                  }
                   loading = true
                   status = null
                   scope.launch {
@@ -193,7 +197,7 @@ object JellyfinSettingsScreen : Screen {
                 checked = enableRemote,
                 onCheckedChange = {
                   enableRemote = it
-                    prefs.enableRemote = it
+                  prefs.enableRemote = it
                   if (it) {
                     val intent = Intent(context, JellyfinRemoteService::class.java).apply { action = JellyfinRemoteService.ACTION_START }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context.startForegroundService(intent) else context.startService(intent)
@@ -245,7 +249,7 @@ object JellyfinSettingsScreen : Screen {
         }
 
         Text(
-          "When Jellyfin launches mpvRex via external player, the item is identified from /Videos/{id}/stream. No filename matching is used. Progress is reported every ~10s and immediately on pause/stop/exit; reaching the watched threshold marks the item played.",
+          "When Jellyfin launches mpvRex via external player, the item is identified from /Videos/{id}/stream. No filename matching is used. Progress is reported every ~10s and immediately on pause/stop/exit.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.outline,
         )

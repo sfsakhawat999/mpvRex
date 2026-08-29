@@ -38,9 +38,9 @@ class JellyfinRemoteClient(
     val subtitleStreamIndex: Int?,
   )
   private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-  private var ws: WebSocket? = null
-  private var wsJob: Job? = null
-  private var capabilitiesJob: Job? = null
+  @Volatile private var ws: WebSocket? = null
+  @Volatile private var wsJob: Job? = null
+  @Volatile private var capabilitiesJob: Job? = null
 
   companion object {
     private const val TAG = "JellyfinRemote"
@@ -143,7 +143,7 @@ class JellyfinRemoteClient(
     lastDeviceName = prefs.deviceName
     val wsScheme = if (server.startsWith("https")) "wss" else "ws"
     val hostPart = server.removePrefix("https://").removePrefix("http://").trimEnd('/')
-    val url = "$wsScheme://$hostPart/socket?api_key=$token"
+    val url = "$wsScheme://$hostPart/socket"
     val auth = buildAuth(token, deviceId)
     val req = Request.Builder()
       .url(url)
@@ -193,12 +193,16 @@ class JellyfinRemoteClient(
   private fun scheduleReconnect(server: String, token: String, deviceId: String) {
     // ws already nulled in onClosed/onFailure, just schedule
     scope.launch {
-      delay(5_000)
+      delay(reconnectDelayMs.toLong())
       if (!isManuallyDisconnected && prefs.enableRemote && prefs.isConfigured() && ws == null) {
-        Log.d(TAG, "WS reconnect")
+        Log.d(TAG, "WS reconnect after ${reconnectDelayMs}ms")
         connectWebSocket(server, token, deviceId)
+        // Successful connect attempt — reset backoff
+        reconnectDelayMs = 5_000L
       } else {
         Log.d(TAG, "WS reconnect skipped isManuallyDisconnected=$isManuallyDisconnected wsExists=${ws != null}")
+        // Failed attempt — increase backoff, capped at 60s
+        reconnectDelayMs = Math.min(reconnectDelayMs * 2, 60_000L)
       }
     }
   }
@@ -386,11 +390,6 @@ class JellyfinRemoteClient(
     }
   }
 
-  private fun handleMessage(text: String) {
-    val cur = ws ?: return
-    handleMessage(cur, text)
-  }
-
   private fun handleRemotePlayAuto(playData: PlayData) {
     val ctx = appContext ?: run {
       Log.w(TAG, "No appContext for auto Play")
@@ -419,7 +418,7 @@ class JellyfinRemoteClient(
         if (!mediaSourceId.isNullOrBlank()) append("&mediaSourceId=$mediaSourceId")
         append("&api_key=$token")
       }
-      Log.d(TAG, "Auto Play launch itemId=${itemId.take(8)} ticks=$ticks ms=$ms title=$title url=${url.take(80)}...")
+      Log.d(TAG, "Auto Play launch itemId=${itemId.take(8)} ticks=$ticks ms=$ms title=$title")
       try {
         val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
           setDataAndType(android.net.Uri.parse(url), "video/*")
@@ -474,8 +473,9 @@ class JellyfinRemoteClient(
   }
 
   private var remoteProgressJob: Job? = null
-  private var currentRemoteItemId: String? = null
-  private var currentRemoteMediaSourceId: String? = null
+  @Volatile private var currentRemoteItemId: String? = null
+  @Volatile private var currentRemoteMediaSourceId: String? = null
+  private var reconnectDelayMs: Long = 5_000L
 
   private fun startRemoteProgress(server: String, token: String, deviceId: String, itemId: String, mediaSourceId: String?) {
     currentRemoteItemId = itemId

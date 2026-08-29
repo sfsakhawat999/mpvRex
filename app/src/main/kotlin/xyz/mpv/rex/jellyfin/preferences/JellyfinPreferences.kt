@@ -2,6 +2,7 @@ package xyz.mpv.rex.jellyfin.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import kotlinx.coroutines.channels.awaitClose
@@ -26,6 +27,7 @@ class JellyfinPreferences(context: Context) {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
       )
     } catch (_: Exception) {
+      Log.w("JellyfinPreferences", "EncryptedSharedPreferences failed, falling back to plaintext prefs")
       // Fallback to regular prefs if device doesn't support EncryptedSharedPreferences
       appContext.getSharedPreferences("jellyfin_encrypted_prefs_fallback", Context.MODE_PRIVATE)
     }

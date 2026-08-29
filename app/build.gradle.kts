@@ -206,6 +206,7 @@ dependencies {
   implementation(libs.fsaf)
   implementation(libs.mediainfo.lib)
   implementation(libs.mpv.lib)
+  implementation(libs.androidx.security.crypto)
 
   // Network protocol libraries
   implementation(libs.smbj)

@@ -288,6 +288,12 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name=".jellyfin.remote.JellyfinRemoteService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
         <receiver
             android:name="androidx.media.session.MediaButtonReceiver"
             android:exported="true">

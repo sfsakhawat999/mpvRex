@@ -26,6 +26,8 @@ val domainModule = module {
     single { PlaybackManager(get()) }
     single { MiniPlayerStateManager() }
     single { HeadlessPlaybackController(androidContext()) }
+    single { xyz.mpv.rex.jellyfin.api.JellyfinApi(get(), get(), get()) }
+    single { xyz.mpv.rex.jellyfin.remote.JellyfinRemoteClient(get(), get(), get(), androidContext()) }
 }
 
 

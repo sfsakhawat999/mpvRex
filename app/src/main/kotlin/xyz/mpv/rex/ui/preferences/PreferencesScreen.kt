@@ -335,6 +335,32 @@ object PreferencesScreen : Screen {
             }
           }
           
+          // Integrations Section
+          item {
+            PreferenceSectionHeader(title = "Integrations")
+          }
+          item {
+            PreferenceCard {
+              Preference(
+                title = { Text(text = "Jellyfin") },
+                summary = {
+                  Text(
+                    text = "External player sync",
+                    color = MaterialTheme.colorScheme.outline
+                  )
+                },
+                icon = {
+                  Icon(
+                    Icons.Outlined.VideoLibrary,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                  )
+                },
+                onClick = { backstack.add(xyz.mpv.rex.jellyfin.ui.JellyfinSettingsScreen) },
+              )
+            }
+          }
+
           // Advanced & About Section
           item {
             PreferenceSectionHeader(title = stringResource(R.string.pref_category_advanced_about))

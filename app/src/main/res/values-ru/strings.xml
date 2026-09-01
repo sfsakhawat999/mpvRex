@@ -784,7 +784,7 @@
 	<string name="no_video_folders_found_desc">Добавьте видео на ваше устройство, чтобы увидеть здесь папки</string>
 
 	<!-- File System Browser Screen Strings -->
-	<string name="search_in_all_storage_volumes">Поиск по всем накопителям…</string>
+	<string name="search_in_all_storage_volumes">Поиск во всех накопителях</string>
 	<string name="search_in_folder_placeholder">Поиск в %1$s…</string>
 	<string name="search_default_folder_name">папка</string>
 	<string name="empty_folder_title">Пустая папка</string>
@@ -1308,4 +1308,40 @@
 	<string name="filter_preset_neon_pop_desc">Яркие неоновые цвета с резким контуром</string>
 	<string name="filter_preset_deep_black">Глубокий чёрный</string>
 	<string name="filter_preset_deep_black_desc">Улучшенный чёрный цвет для OLED-дисплеев</string>
+    <string name="pref_player_resume_playback_title">Возобновить воспроизведение</string>
+    <string name="welcome_title">Добро пожаловать в mpvRex</string>
+    <string name="welcome_subtitle">Ваш современный, мощный и настраиваемый медиаплеер.</string>
+    <string name="welcome_language_section_title">Предпочитаемый язык</string>
+    <string name="welcome_language_section_desc">Выберите отображаемый язык</string>
+    <string name="welcome_grant_permission">Предоставить разрешение</string>
+    <string name="welcome_get_started">Начать</string>
+    <string name="welcome_skip_permission">Продолжить без доступа к хранилищу</string>
+    <string name="storage_access_granted">Доступ к хранилищу предоставлен</string>
+    <string name="storage_access_granted_desc">Разрешение предоставлено. mpvRex готов обнаруживать и воспроизводить ваши медиафайлы.</string>
+    <string name="community_already_joined">Уже присоединился</string>
+    <string name="community_never_show_again">Больше не показывать</string>
+    <string name="community_not_now">Не сейчас</string>
+    <string name="community_already_joined_message">Ссылки сообщества также можно найти в разделе «Настройки» → «О приложении».</string>
+    <string name="player_resume_prompt_title">Возобновить воспроизведение?</string>
+    <string name="pref_player_resume_playback_summary">Выберите, как открываются ранее просмотренные видео</string>
+    <string name="pref_player_resume_mode_always">Всегда возобновлять</string>
+    <string name="pref_player_resume_mode_always_summary">Автоматическое возобновление с последней сохраненной позиции</string>
+    <string name="pref_player_resume_mode_ask">Спрашивай каждый раз</string>
+    <string name="pref_player_resume_mode_ask_summary">Предложить возобновить или начать заново</string>
+    <string name="pref_player_resume_mode_never">Всегда начинать заново</string>
+    <string name="pref_player_resume_mode_never_summary">Всегда начинать воспроизведение с 00:00</string>
+    <string name="player_resume_prompt_message">Ранее вы просмотрели до %1$s.</string>
+    <string name="player_resume_prompt_message_with_duration">Ранее вы просмотрели до %1$s из %2$s.</string>
+    <string name="player_resume_action_resume">Возобновить</string>
+    <string name="player_resume_action_start_over">Начать заново</string>
+    <string name="player_resumed_from_pill">Возобновлено с %1$s</string>
+    <string name="player_restart_action">Перезапустить</string>
+    <string name="pref_player_remember_long_press_speed_title">Запоминать настроенную скорость</string>
+    <string name="pref_player_remember_long_press_speed_summary">Использовать последнюю выбранную свайпом скорость для последующих длительных нажатий</string>
+    <string name="pref_subtitles_force_ltr_title">Принудительно использовать направление слева направо</string>
+    <string name="pref_subtitles_force_ltr_summary">Принудительно использовать направление слева направо для субтитров с направлением справа налево</string>
+    <string name="generic_off">Выкл.</string>
+    <string name="system_default">Системный язык</string>
+    <string name="pref_appearance_language_title">Язык приложения</string>
+    <string name="pref_appearance_language_summary">Изменить язык интерфейса приложения</string>
 </resources>

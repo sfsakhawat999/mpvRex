@@ -2852,8 +2852,9 @@
     "translated_value": "Добавьте видео на ваше устройство, чтобы увидеть здесь папки"
   },
   "search_in_all_storage_volumes": {
-    "source_hash": "338363568aa6e0f9fef16b0ba5eea8e2edf705d0296426dd284ad3b6a13942a7",
-    "translated_value": "Поиск по всем накопителям…"
+    "source_hash": "0a0bc8dfde3d2a544222b2e5a764ad79045551864238924f8438e97f10ba3d25",
+    "translated_value": "Поиск во всех накопителях",
+    "ignore_warnings": false
   },
   "search_in_folder_placeholder": {
     "source_hash": "88c080604340610100483fcfb1023e3b5c2715bcc14d7619c874f002527deb9b",
@@ -4566,5 +4567,185 @@
   "filter_preset_deep_black_desc": {
     "source_hash": "dbac9195f155e6e2e319e6ce93148a1db93926ce48cb546eb99f2cfca33fd24e",
     "translated_value": "Улучшенный чёрный цвет для OLED-дисплеев"
+  },
+  "pref_player_resume_playback_title": {
+    "source_hash": "b19825c20fabcd3c8789b24591e91b76fc2e1a2b9d947a806dd06e8581fe7531",
+    "translated_value": "Возобновить воспроизведение",
+    "ignore_warnings": false
+  },
+  "welcome_title": {
+    "source_hash": "aa2d6198377acdf724084a9772d1d17fe5da03abe2714bfb3fad052614d08f7c",
+    "translated_value": "Добро пожаловать в mpvRex",
+    "ignore_warnings": false
+  },
+  "welcome_subtitle": {
+    "source_hash": "b7adf909929fb5db446486aaecb29969f0ceca395533d186b8c53a97be550df0",
+    "translated_value": "Ваш современный, мощный и настраиваемый медиаплеер.",
+    "ignore_warnings": false
+  },
+  "welcome_language_section_title": {
+    "source_hash": "864313e9304389938163bc3b37d8b1b267c5ef0f412ec8db3b17d1665a08db43",
+    "translated_value": "Предпочитаемый язык",
+    "ignore_warnings": false
+  },
+  "welcome_language_section_desc": {
+    "source_hash": "fdc934aa646226cde15e2462b5ebf2057092bf5a2518fb36c4590f0a61194b1b",
+    "translated_value": "Выберите отображаемый язык",
+    "ignore_warnings": false
+  },
+  "welcome_grant_permission": {
+    "source_hash": "e402e05f0e4cfb26b583ac50c9243d5d88093d421adec9836650227633605ff9",
+    "translated_value": "Предоставить разрешение",
+    "ignore_warnings": false
+  },
+  "welcome_get_started": {
+    "source_hash": "983f311018642b0ae60c71253b5735579906d43d260ea926ebe5e815b1c97abb",
+    "translated_value": "Начать",
+    "ignore_warnings": false
+  },
+  "welcome_skip_permission": {
+    "source_hash": "cd2e4e1e58dfa64ce37a7c6c59efaaa1436842ec9b8da53137d56e34e463ebfd",
+    "translated_value": "Продолжить без доступа к хранилищу",
+    "ignore_warnings": false
+  },
+  "storage_access_granted": {
+    "source_hash": "27a6b7c15d87472b3e1755008ee50823a96cacb5a8dd4e9a8ffb0c79d8e2b647",
+    "translated_value": "Доступ к хранилищу предоставлен",
+    "ignore_warnings": false
+  },
+  "storage_access_granted_desc": {
+    "source_hash": "f79315de73e666ea34e15ece13a6cf5997c6cb1e2085db1630e1a499aa97f288",
+    "translated_value": "Разрешение предоставлено. mpvRex готов обнаруживать и воспроизводить ваши медиафайлы.",
+    "ignore_warnings": false
+  },
+  "community_already_joined": {
+    "source_hash": "8fdecf3bd747f49d5f20a7375cf9dcc48ce0dd3b625b4d0e4c04022b190e72e7",
+    "translated_value": "Уже присоединился",
+    "ignore_warnings": false
+  },
+  "community_never_show_again": {
+    "source_hash": "f2d1044281dce5ac4a57ae691fced59a896549a616b006a56744d9cf90fcedd1",
+    "translated_value": "Больше не показывать",
+    "ignore_warnings": false
+  },
+  "community_not_now": {
+    "source_hash": "a0e63d7c7125d29af84d6919af5550529be77c327324940c98c4b2cb13a99c8c",
+    "translated_value": "Не сейчас",
+    "ignore_warnings": false
+  },
+  "community_already_joined_message": {
+    "source_hash": "731c09e3ba3ea9e345670f8d57d0831eac5ea216d9b0e0ac5a7a81de9bcf21c9",
+    "translated_value": "Ссылки сообщества также можно найти в разделе «Настройки» → «О приложении».",
+    "ignore_warnings": false
+  },
+  "player_resume_prompt_title": {
+    "source_hash": "c8cdf903a7d7903dd79938a343c55bf3906a5cb1a7ac9dd443d7ea431b5c94ad",
+    "translated_value": "Возобновить воспроизведение?",
+    "ignore_warnings": false
+  },
+  "pref_player_resume_playback_summary": {
+    "source_hash": "5b9d41b1b46feafa4f6cd1125f8716f5b56999768e29f1da71d64d77f3d7f0ed",
+    "translated_value": "Выберите, как открываются ранее просмотренные видео",
+    "ignore_warnings": false
+  },
+  "pref_player_resume_mode_always": {
+    "source_hash": "2f1fc268a4f35b1de0ff76acfafab95e99d5ba949c315dcb9087e0ee6a21e764",
+    "translated_value": "Всегда возобновлять",
+    "ignore_warnings": false
+  },
+  "pref_player_resume_mode_always_summary": {
+    "source_hash": "1ef17835e31af5c7a1ddce78ed0ece619f27ebd9334f543cc45f585e3c2e1291",
+    "translated_value": "Автоматическое возобновление с последней сохраненной позиции",
+    "ignore_warnings": false
+  },
+  "pref_player_resume_mode_ask": {
+    "source_hash": "91da6bc629e0a3283107d5d84072d03044ec6818d41c65cb2726e3a89f67da17",
+    "translated_value": "Спрашивай каждый раз",
+    "ignore_warnings": false
+  },
+  "pref_player_resume_mode_ask_summary": {
+    "source_hash": "15b6fc8713a23c9dc79d4d5798924ca96ea9e9be01a618e9085cc281ce7a9d83",
+    "translated_value": "Предложить возобновить или начать заново",
+    "ignore_warnings": false
+  },
+  "pref_player_resume_mode_never": {
+    "source_hash": "dfd6ac91c0301255351c05449f7dbc8e156287cca8b342a2326b06f51ff66e75",
+    "translated_value": "Всегда начинать заново",
+    "ignore_warnings": false
+  },
+  "pref_player_resume_mode_never_summary": {
+    "source_hash": "77a3b3dc38a06be1572d27ae161e660fa1ca6f6844d94b77a16e0394d1f1ecce",
+    "translated_value": "Всегда начинать воспроизведение с 00:00",
+    "ignore_warnings": false
+  },
+  "player_resume_prompt_message": {
+    "source_hash": "3d99cb250872c088272d9d537f5667c4c4dac79ca813986e6165214ca254abab",
+    "translated_value": "Ранее вы просмотрели до %1$s.",
+    "ignore_warnings": false
+  },
+  "player_resume_prompt_message_with_duration": {
+    "source_hash": "972fc0f899a90e352f726d18b66bd4dbdc068ca1a8b8c4886384f2e0386efc49",
+    "translated_value": "Ранее вы просмотрели до %1$s из %2$s.",
+    "ignore_warnings": false
+  },
+  "player_resume_action_resume": {
+    "source_hash": "d640c7421da066618a39daf4266da5f61f66a9b1afcd626481b831a17064965d",
+    "translated_value": "Возобновить",
+    "ignore_warnings": false
+  },
+  "player_resume_action_start_over": {
+    "source_hash": "b0045b84fe47c0bb4e403bebd0e11af5e895b6799e462440f5c73588fefd418b",
+    "translated_value": "Начать заново",
+    "ignore_warnings": false
+  },
+  "player_resumed_from_pill": {
+    "source_hash": "859eaa481fe757edaf1ef45133fd8c9c9a3b95b299647c62f839c31483de7e8e",
+    "translated_value": "Возобновлено с %1$s",
+    "ignore_warnings": false
+  },
+  "player_restart_action": {
+    "source_hash": "6b983a81e5e8099e4e23a368e72636e31f029f2e691e5be714106b8cf59d70a7",
+    "translated_value": "Перезапустить",
+    "ignore_warnings": false
+  },
+  "pref_player_remember_long_press_speed_title": {
+    "source_hash": "85272ee685dbbf73aeacd10cab9f58fbfcdb5951364af1bb10719a6706710f6e",
+    "translated_value": "Запоминать настроенную скорость",
+    "ignore_warnings": false
+  },
+  "pref_player_remember_long_press_speed_summary": {
+    "source_hash": "68f06eadb95c4a04a72b3dbe9228219cc7b6d402fd11ac31a3d9a50d6788fe3d",
+    "translated_value": "Использовать последнюю выбранную свайпом скорость для последующих длительных нажатий",
+    "ignore_warnings": false
+  },
+  "pref_subtitles_force_ltr_title": {
+    "source_hash": "fb45f337d881507d8dc130fd6ed0fbe54629f0b90cbab8e0b4219a049a7ae09b",
+    "translated_value": "Принудительно использовать направление слева направо",
+    "ignore_warnings": false
+  },
+  "pref_subtitles_force_ltr_summary": {
+    "source_hash": "fe329c788bfa244d3662b2364554f5e8112b3f1babccad2dd1eab7d3ab0644a1",
+    "translated_value": "Принудительно использовать направление слева направо для субтитров с направлением справа налево",
+    "ignore_warnings": false
+  },
+  "generic_off": {
+    "source_hash": "ca7981b46ecf2c1787b6d76d81d9fd7fa0ca95842e2fcc2a452869891a9334d1",
+    "translated_value": "Выкл.",
+    "ignore_warnings": false
+  },
+  "system_default": {
+    "source_hash": "d8081c667c73359f755864913dd9e6be70e785e8b864d7715b5c41c2b143245b",
+    "translated_value": "Системный язык",
+    "ignore_warnings": false
+  },
+  "pref_appearance_language_title": {
+    "source_hash": "f5b8f8e081be7cc907a6b2060283050df6763bcd194460a45ae5ef701cc073f3",
+    "translated_value": "Язык приложения",
+    "ignore_warnings": false
+  },
+  "pref_appearance_language_summary": {
+    "source_hash": "804612730cf2f722e87ebf6949f7b64140ac66bd5b2e177ce1985f7d8f80ce22",
+    "translated_value": "Изменить язык интерфейса приложения",
+    "ignore_warnings": false
   }
 }

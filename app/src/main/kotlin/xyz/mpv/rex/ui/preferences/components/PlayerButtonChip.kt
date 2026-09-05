@@ -1,7 +1,6 @@
 package xyz.mpv.rex.ui.preferences.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -23,6 +22,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import xyz.mpv.rex.R
 import xyz.mpv.rex.preferences.PlayerButton
 import xyz.mpv.rex.preferences.getPlayerButtonLabel
 
@@ -77,7 +80,7 @@ fun PlayerButtonChip(
         when (button) {
           PlayerButton.VIDEO_TITLE -> {
             Text(
-              text = "Video Title", // TODO: strings
+              text = label,
               fontSize = 15.sp, // Increased font size
               textAlign = TextAlign.Center,
               lineHeight = 14.sp,
@@ -85,17 +88,18 @@ fun PlayerButtonChip(
           }
           PlayerButton.CURRENT_CHAPTER -> {
             Row(
+              modifier = Modifier.clearAndSetSemantics { contentDescription = label },
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.Center,
             ) {
               Icon(
                 imageVector = button.icon,
-                contentDescription = label,
-                modifier = Modifier.size(24.dp), 
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
               )
               Text(
-                text = "1:06 • Chapter 1", // TODO: strings
-                fontSize = 15.sp, 
+                text = stringResource(R.string.preview_chapter_chip),
+                fontSize = 15.sp,
                 textAlign = TextAlign.Center,
                 lineHeight = 14.sp,
                 maxLines = 1,
@@ -107,6 +111,7 @@ fun PlayerButtonChip(
           PlayerButton.AB_LOOP -> {
             Text(
               text = "AB",
+              modifier = Modifier.clearAndSetSemantics { contentDescription = label },
               fontSize = 15.sp,
               textAlign = TextAlign.Center,
               fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,

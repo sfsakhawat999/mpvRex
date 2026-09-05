@@ -1,5 +1,7 @@
 package xyz.mpv.rex.preferences
 
+import androidx.annotation.StringRes
+import xyz.mpv.rex.R
 import xyz.mpv.rex.preferences.preference.PreferenceStore
 import xyz.mpv.rex.preferences.preference.getEnum
 
@@ -39,7 +41,7 @@ class BrowserPreferences(
   val showFramerateInResolution = preferenceStore.getBoolean("show_framerate_in_resolution", false)
   val showSubtitleIndicator = preferenceStore.getBoolean("show_subtitle_indicator", false)
   val showProgressBar = preferenceStore.getBoolean("show_progress_bar", true)
-  val mediaLayoutMode = preferenceStore.getEnum("media_layout_mode", MediaLayoutMode. LIST)
+  val mediaLayoutMode = preferenceStore.getEnum("media_layout_mode", MediaLayoutMode.LIST)
 
   // Visibility preferences for folder card chips
   val showTotalVideosChip = preferenceStore.getBoolean("show_total_videos_chip", true)
@@ -80,9 +82,11 @@ class BrowserPreferences(
 /**
  * Sort order options
  */
-enum class SortOrder {
-  Ascending,
-  Descending,
+enum class SortOrder(
+  @StringRes val stringRes: Int,
+) {
+  Ascending(R.string.sort_order_ascending),
+  Descending(R.string.sort_order_descending),
   ;
 
   val isAscending: Boolean
@@ -92,12 +96,14 @@ enum class SortOrder {
 /**
  * Folder sorting options
  */
-enum class FolderSortType {
-  Title,
-  Duration,
-  Date,
-  Size,
-  VideoCount,
+enum class FolderSortType(
+  @StringRes val stringRes: Int,
+) {
+  Title(R.string.sort_type_title),
+  Duration(R.string.sort_type_duration),
+  Date(R.string.sort_type_date),
+  Size(R.string.sort_type_size),
+  VideoCount(R.string.sort_type_count),
   ;
 
   val displayName: String
@@ -114,11 +120,13 @@ enum class FolderSortType {
 /**
  * Video sorting options
  */
-enum class VideoSortType {
-  Title,
-  Duration,
-  Date,
-  Size,
+enum class VideoSortType(
+  @StringRes val stringRes: Int,
+) {
+  Title(R.string.sort_type_title),
+  Duration(R.string.sort_type_duration),
+  Date(R.string.sort_type_date),
+  Size(R.string.sort_type_size),
   ;
 
   val displayName: String
@@ -134,29 +142,19 @@ enum class VideoSortType {
 /**
  * Folder view mode options
  */
-enum class FolderViewMode {
-  AlbumView,
-  FileManager,
-  MediaLibrary,
+enum class FolderViewMode(
+  @StringRes val stringRes: Int,
+) {
+  AlbumView(R.string.view_mode_folder),
+  FileManager(R.string.view_mode_tree),
+  MediaLibrary(R.string.view_mode_library),
   ;
-
-  val displayName: String
-    get() =
-      when (this) {
-        AlbumView -> "Folder View"
-        FileManager -> "Tree View"
-        MediaLibrary -> "Media Library"
-      }
 }
 
-enum class MediaLayoutMode {
-  LIST,
-  GRID,
+enum class MediaLayoutMode(
+  @StringRes val stringRes: Int,
+) {
+  LIST(R.string.layout_mode_list),
+  GRID(R.string.layout_mode_grid),
   ;
-
-  val displayName:  String
-    get() = when (this) {
-      LIST -> "List"
-      GRID -> "Grid"
-    }
 }
